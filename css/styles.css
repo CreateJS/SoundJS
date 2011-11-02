@@ -1,0 +1,73 @@
+body {
+	font-family: "Times New Roman", Times, serif;
+	font-size: 14px;
+	background:url(../img/bg.gif) fixed;
+	background-repeat: repeat;
+	text-align: center;
+}
+.content {
+	background-color: #FFF;
+	border: 12px solid #000;
+	margin-top: 50px;
+	width: 600px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 50px;
+	-webkit-box-shadow: 0px 3px 16px #333;
+	-moz-box-shadow: 0px 2px 16px #333;
+	box-shadow: 0px 2px 16px #333;
+	padding: 50px;
+}
+.callout {
+	background-image: url(../img/callout_bg.gif);
+	background-repeat: repeat;
+	padding: 6px;
+	color: #000;
+}
+a {
+	color: #568;
+}
+a:hover {
+	color: #000;
+}
+p, ul {
+	color: #333;
+	text-align: justify;
+	line-height: 1.15;
+}
+ul {
+	padding-left: 25px;
+}
+h1 {
+	font-size: 24px;
+	font-weight: normal;
+	margin-top: 10px;
+}
+h3 {
+	text-align: left;
+	margin-bottom: -1em;
+	font-size: 14px;
+	color: #000;
+}
+footer p {
+	text-align:center;
+	margin-bottom:0px;
+	font-size: 11px;
+	color: #777;
+	font-family: Arial, Helvetica, sans-serif;
+}
+p.active{
+	font-weight:bold;
+}
+.demoWrap{
+	background:url(../img/callout_bg.gif);
+	border:1px solid #fff;
+	border:1px solid #cccccc;
+	width: auto;
+	height: auto;
+	padding: 10px;
+	position:relative;
+	font-family:Tahoma, Geneva, sans-serif;
+	font-size:12px; line-height:14px;
+	z-index:100;
+}

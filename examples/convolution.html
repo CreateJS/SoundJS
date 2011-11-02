@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=9" /> <!-- req for IE 9 else audio tag won't work -->
+
+<title>SoundJS: Example - Convolution</title>
+<link href="../css/styles.css" rel="stylesheet" type="text/css" />
+
+
+<script type="text/javascript" src="../soundjs/SoundJS.js"></script>
+
+<script type="text/javascript" >
+var filetype, agent;
+
+function onLoadComplete(){
+	
+	agent = navigator.userAgent.toLowerCase();
+	document.body.innerHTML += agent;
+	
+	if(agent.indexOf("chrome") > -1){
+		filetype = ".mp3";
+	} else if(agent.indexOf("opera") > -1) {
+		filetype = ".ogg";
+	} else if(agent.indexOf("firefox") > -1) {
+		filetype = ".ogg";
+	} else if(agent.indexOf("safari") > -1) {
+		filetype = ".mp3";
+	} else if(agent.indexOf("msie") > -1) {
+		filetype = ".mp3";
+	}
+	
+	SoundJS.onLoadQueueComplete = onSoundsDone;
+	
+	SoundJS.addBatch([
+		{name:"dong", src:"../assets/ToneWobble" + filetype, instances:1},
+		{name:"rat", src:"../assets/R-Damage" + filetype, instances:2},
+		{name:"gull", src:"../assets/S-Damage" + filetype, instances:1},
+		{name:"dong", src:"FAKE-URL", instances:2}]);
+}
+
+
+function onSoundsDone(){
+	document.getElementById("demoStarter").disabled = "";
+}
+	
+function begin(){
+	document.getElementById("demoStarter").disabled = "disabled";
+	
+	document.getElementById("p11").className = "";
+	var i = SoundJS.play("dong", SoundJS.INTERUPT_NONE, 0.4, true);
+	SoundJS.play("gull", SoundJS.INTERUPT_NONE);
+	document.getElementById("p00").className = "active";
+	document.getElementById("p01").className = "active";
+	
+	SoundJS.play("gull", SoundJS.INTERUPT_ANY, null, null, 150);
+	setTimeout(function(){
+		document.getElementById("p00").className = "";
+		document.getElementById("p01").className = "";
+		document.getElementById("p02").className = "active";
+	}, 150);
+	
+	SoundJS.play("rat", SoundJS.INTERUPT_NONE, null, null, 1000);
+	setTimeout(function(){
+		document.getElementById("p02").className = "";
+		document.getElementById("p03").className = "active";
+	}, 1000);
+	
+	setTimeout(function(){
+		document.getElementById("p03").className = "";
+		SoundJS.play("rat", SoundJS.INTERUPT_ANY, null, null);
+		document.getElementById("p04").className = "active";
+	}, 1050);
+	
+	setTimeout(function(){
+		document.getElementById("p04").className = "";
+		SoundJS.play("dong", SoundJS.INTERUPT_NONE, 1, false);
+		document.getElementById("p05").className = "active";
+	}, 2500);
+	
+	setTimeout(function(){
+		document.getElementById("p05").className = "";
+		SoundJS.play("dong", SoundJS.INTERUPT_NONE, 1, false);
+		document.getElementById("p06").className = "active";
+	}, 3500);
+	
+	setTimeout(function(){
+		document.getElementById("p06").className = "";
+		SoundJS.pause("dong");
+		document.getElementById("p07").className = "active";
+	}, 4000);
+	
+	setTimeout(function(){
+		document.getElementById("p07").className = "";
+		SoundJS.play("dong", SoundJS.INTERUPT_NONE, 1, false);
+		document.getElementById("p08").className = "active";
+	}, 4500);
+	
+	setTimeout(function(){
+		document.getElementById("p08").className = "";
+		SoundJS.resume();
+		document.getElementById("p09").className = "active";
+	}, 8000);
+	
+	setTimeout(function(){
+		document.getElementById("p09").className = "";
+		SoundJS.play("dong", SoundJS.INTERUPT_NONE, 1, false);
+		document.getElementById("p10").className = "active";
+	}, 9000);
+	
+	setTimeout(function(){
+		document.getElementById("p10").className = "";
+		SoundJS.stop("dong", i);
+		document.getElementById("p11").className = "active";
+	}, 10000);
+	
+	setTimeout(function(){
+		document.getElementById("demoStarter").disabled = "";
+	}, 11000);
+}
+</script>
+
+
+</head>
+<body align="center" onLoad="onLoadComplete()">
+	<div class="content">
+		<header>
+		<a href="http://github.com/gskinner/EaselJS"><img style="position: fixed; top: 0; left: 0; border: 0; z-index:200;" src="https://assets0.github.com/img/6429057dfef9e98189338d22e7f6646c6694f032?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_left_orange_ff7600.png&path=" alt="Fork me on GitHub"></a> 
+		<a href="../" title="SoundJS - A Javascript lIbrary for working with html5 audio"><img src="../img/logo.gif" width="240" height="120" style="margin-top:-5px;" alt="A javascript library for working with html5 audio"/></a>
+		<h1>Example: Convolution Test</h1>
+		<img src="../img/flourish.gif"  style="margin-bottom:10px;"/>
+		</header>
+		<!-- DEMO -->
+		<p>Click "Run Demo" to see how SoundJS handles a variety of common sound playing situations.</p>
+        <div class="demoWrap">
+			
+			<input id="demoStarter" type="button" onclick="begin()" value="Run Demo" />
+            <p id="p00">0ms - Quiet note, repeating</p>
+            <p id="p01">0ms - Gull</p>
+            <p id="p02">150ms - Gull interrupting previous gull</p>
+            <p id="p03">1000ms - Rat</p>
+            <p id="p04">1050ms - Rat overlapping prev rat</p>
+            <p id="p05">2500ms - Note single</p>
+            <p id="p06">3500ms - Note single overlapping</p>
+            <p id="p07">4000ms - Pause mid notes</p>
+            <p id="p08">4500ms - Note, (fails: instances used up)</p>
+            <p id="p09">8000ms - Resume</p>
+            <p id="p10">9000ms - Note single</p>
+            <p id="p11">10000ms - Stop repeating note, letting previous note fade out</p>
+
+        </div>
+		<!-- END DEMO -->
+		<p class="callout"><strong>examples:</strong> 
+			<a href="../examples/convolution.html">Convolution</a>, 
+			<a href="../examples/interrupt.html">Interrupt</a>, 
+			<a href="../examples/dynamicInstance.html">Dynamic Instances</a>, 
+			<a href="../examples/masterVolume.html">Master Volume</a>, 
+			<a href="../examples/game/game.html">A Game</a>, 
+			<a href="../examples/TestSuite.html">Test Suite</a> 
+        </p>
+		<footer>
+		<img src="../img/flourish2.gif" style="margin: 5px;"/>
+		<p>
+  		<script>
+			document.write("&copy;" + new Date().getFullYear()); 
+		 </script>
+ 			<a href="http://gskinner.com/">gskinner.com, inc.</a> | proudly hosted by <a href="http://mediatemple.com/">Media Temple</a></p>
+		</footer>
+	</div>
+</body>
+</html>

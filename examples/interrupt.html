@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=9" /> <!-- req for IE 9 else audio tag won't work -->
+
+<title>SoundJS: Example - Audio Spike</title>
+<link href="../css/styles.css" rel="stylesheet" type="text/css" />
+
+
+<style TYPE="text/css">
+#ticker {
+	width: auto;
+	height: auto;
+	padding: 40px 10px 10px 10px;
+	position:relative;
+}
+#ticker {
+	background:url(../img/callout_bg.gif);
+	border: 1px solid #000;
+}
+#ticker.test0 {
+	border:1px solid #000;
+}
+#ticker.test1 {
+	border:1px dashed #fff;
+}
+.bar {
+	height:40px;
+	width: auto;
+	margin:0 0 10px 0; padding:0;
+	font-size:16px;
+	line-height:40px;
+	font-family:Tahoma, Geneva, sans-serif;
+	color:#000;
+	
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	border-radius:10px;
+}
+#bar1{
+	background: #FA9E0D;
+	}
+#bar2 {
+	background: #00abff;
+}
+#texty {
+	height: 14px;
+	overflow: hidden;
+	font-size:12px;
+	line-height:14px;
+	font-family:Tahoma, Geneva, sans-serif;
+	color:#000;
+	margin:0; padding:0;
+}
+.code {
+	display:block;
+	margin:10px 20px;
+	font-family:'Courier New', Courier, monospace;
+	color:#666;	
+}
+</style>
+
+<script type="text/javascript" src="../soundjs/SoundJS.js"></script>
+
+<script type="text/javascript" >
+var filetype, agent;
+var counter = 0;
+var interrupt = SoundJS.INTERRUPT_NONE;
+
+function onLoadComplete(){
+	agent = navigator.userAgent.toLowerCase();
+	//document.body.innerHTML += agent;
+	
+	if(agent.indexOf("chrome") > -1){
+		filetype = ".mp3";
+	} else if(agent.indexOf("opera") > -1) {
+		filetype = ".ogg";
+	} else if(agent.indexOf("firefox") > -1) {
+		filetype = ".ogg";
+	} else if(agent.indexOf("safari") > -1) {
+		filetype = ".mp3";
+	} else if(agent.indexOf("msie") > -1) {
+		filetype = ".mp3";
+	}
+	
+	SoundJS.onLoadQueueComplete = onSoundsDone;
+	
+	SoundJS.add("music", "../assets/M-GameBG" + filetype, 2);
+}
+
+function adjust(obj){
+	interrupt = obj[obj.selectedIndex].value;
+}
+
+function onSoundsDone(){
+	setInterval(interrupting, 2500);
+	setInterval(ticking, 50);
+}
+
+function interrupting(){
+	// toggle box to show ticks
+	counter++;
+	document.getElementById("ticker").setAttribute("class", "test" + (counter % 2));
+	
+	// show which instance played
+	document.getElementById("texty").innerHTML = "Return value from .play(): " + SoundJS.play("music", interrupt);
+}
+
+function ticking(){
+	var a1 = SoundJS.getInstance("music", 0);
+	var a2 = SoundJS.getInstance("music", 1);
+	
+	document.getElementById("bar1").style.width = (450 * a1.currentTime / a1.duration)+"px";
+	document.getElementById("bar2").style.width = (450 * a2.currentTime / a2.duration)+"px";
+}
+</script>
+
+
+</head>
+<body align="center" onLoad="onLoadComplete()">
+	<div class="content">
+		<header>
+		<a href="http://github.com/gskinner/EaselJS"><img style="position: fixed; top: 0; left: 0; border: 0; z-index:200;" src="https://assets0.github.com/img/6429057dfef9e98189338d22e7f6646c6694f032?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_left_orange_ff7600.png&path=" alt="Fork me on GitHub"></a> 
+		<a href="../" title="SoundJS - A Javascript lIbrary for working with html5 audio"><img src="../img/logo.gif" width="240" height="120" style="margin-top:-5px;" alt="A javascript library for working with html5 audio"/></a>
+		<h1>Example: Interruption</h1>
+		<img src="../img/flourish.gif"  style="margin-bottom:10px;"/>
+		</header>
+		<!-- DEMO -->
+		<p>This a test designed to illustrate exactly how interrupt modes function. </p>
+		<p>Browsers limit the total number of instances available for sound. If all the available instances are in use, SoundJS provides an interrupt mechanism to determine which playing sound to interrupt. Every Time the border changes, the following code is run using the interrupt value from the dropdown: <span class="code">SoundJS.play("music", interrupt);</span> Specific details on the interrupt modes and the play() function can be found in the documentation. The return value from each play() command will indicate the instance used.</p>
+        <div id="ticker">
+        <form style="position:absolute; top:10px; left:10px;">
+            <select id="myList" onchange='adjust(this)'>
+                <option value="4">INTERRUPT_NONE, don't interrupt</option>
+                <option value="3">INTERRUPT_LATE, interrupt latest</option>
+                <option value="2">INTERRUPT_EARLY, interrupt earliest</option>  
+                <option value="1">INTERRUPT_ANY, interrupt first instance</option>
+            </select>
+        </form>
+            <div id="bar1" class="bar">0</div>
+            <div id="bar2" class="bar">1</div>
+            <p id="texty"></p>
+        </div>
+        <!-- END DEMO -->
+		<p class="callout"><strong>examples:</strong> 
+			<a href="../examples/convolution.html">Convolution</a>, 
+			<a href="../examples/interrupt.html">Interrupt</a>, 
+			<a href="../examples/dynamicInstance.html">Dynamic Instances</a>, 
+			<a href="../examples/masterVolume.html">Master Volume</a>, 
+			<a href="../examples/game/game.html">A Game</a>, 
+			<a href="../examples/TestSuite.html">Test Suite</a>  
+        </p>
+        
+		<footer>
+		<img src="../img/flourish2.gif" style="margin: 5px;"/>
+		<p>
+  		<script>
+			document.write("&copy;" + new Date().getFullYear()); 
+		 </script>
+ 			<a href="http://gskinner.com/">gskinner.com, inc.</a> | proudly hosted by <a href="http://mediatemple.com/">Media Temple</a></p>
+		</footer>
+	</div>
+</body>
+</html>

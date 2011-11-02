@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=9" /> <!-- req for IE 9 else audio tag won't work -->
+
+<title>SoundJS: Example - Dynamic Instances</title>
+<link href="../css/styles.css" rel="stylesheet" type="text/css" />
+
+
+<style TYPE="text/css">
+button{
+	font-family:Tahoma, Geneva, sans-serif;
+}
+
+#volume{
+	font-family:Tahoma, Geneva, sans-serif;
+	font-size:12px;
+	line-height:14px;
+	display:inline-block;
+	background:#FA9E0D;
+	width: 300px;
+	height: 140px;
+	padding: 25px;
+	margin-right:10px;
+	vertical-align:top;
+}
+div#menu{
+	display:inline-block;
+	width:200px;
+	}
+.adjust{
+	display:inline-block;
+	width:150px;
+	height:28px;
+	text-align:left;
+}
+.whatwhat{
+	font-family:Tahoma, Geneva, sans-serif;
+	font-size:12px;
+	line-height:14px;
+}
+</style>
+
+<script type="text/javascript" src="../soundjs/SoundJS.js"></script>
+
+<script type="text/javascript" >
+var filetype, agent, Pluck, Lightning, Cabin, Tone, Rats, Gulls, Music;
+var counter = 0;
+var interupt = SoundJS.INTERUPT_NONE;
+
+function onLoadComplete(){
+	agent = navigator.userAgent.toLowerCase();
+	//document.body.innerHTML += agent;
+	
+	if(agent.indexOf("chrome") > -1){
+		filetype = ".mp3";
+	} else if(agent.indexOf("opera") > -1) {
+		filetype = ".ogg";
+	} else if(agent.indexOf("firefox") > -1) {
+		filetype = ".ogg";
+	} else if(agent.indexOf("safari") > -1) {
+		filetype = ".mp3";
+	} else if(agent.indexOf("msie") > -1) {
+		filetype = ".mp3";
+	}
+	
+	SoundJS.onLoadQueueComplete = onSoundsDone;
+
+	Pluck = {name:"Pluck", src:"../assets/GU-StealDaisy" + filetype, instances:1};
+	Lightning = {name:"Lightning", src:"../assets/Thunder1" + filetype, instances:1};
+	Cabin = {name:"Cabin", src:"../assets/U-CabinBoy3" + filetype, instances:1};
+	Tone = {name:"Tone", src:"../assets/ToneWobble" + filetype, instances:1};
+	Rats = {name:"Rats", src:"../assets/R-Damage" + filetype, instances:1};
+	Gulls = {name:"Gulls", src:"../assets/S-Damage" + filetype, instances:1};
+	Music = {name:"Music", src:"../assets/M-GameBG" + filetype, instances:1};
+	
+	SoundJS.addBatch([Pluck, Lightning, Cabin, Tone, Rats, Gulls, Music]);
+}
+
+function onSoundsDone(){
+	SoundJS.onSoundLoadComplete = soundDone;
+	SoundJS.onLoadQueueComplete = function(){};
+	
+	// All possible sounds have been loaded, now remove them. This should do a local cache of the sound meaning isntantant playback w/o using instances if you wish to assign instance counts dynamically, load normally if not dynamically assigning all instance counts.
+	setTimeout(function(){SoundJS.remove(); document.getElementById("menu").style.visibility = "visible";}, 100);
+}
+
+function mouseDown(){
+	SoundJS.pause();
+}
+
+function mouseUp(){
+	SoundJS.resume();
+}
+
+function newSnd(formObj, sound){
+	document.getElementById("menu").style.visibility = "hidden";
+	var o;
+	
+	switch(sound){
+		case "Pluck" : o = Pluck; break;
+		case "Lightning" : o = Lightning; break;
+		case "Cabin" : o = Cabin; break;
+		case "Tone" : o = Tone; break;
+		case "Rats" : o = Rats; break;
+		case "Gulls" : o = Gulls; break;
+		case "Music" : o = Music; break;
+	}
+	
+	SoundJS.add(o.name, o.src, o.instances);
+}
+
+function rmvSnd(formObj, sound){
+	if(SoundJS.remove(sound, 1)){
+		document.getElementById("count").innerHTML = Number(document.getElementById("count").innerHTML) - 1;
+	}
+}
+
+function soundDone(soundObj, name){
+	document.getElementById("count").innerHTML = Number(document.getElementById("count").innerHTML) + 1;
+	document.getElementById("menu").style.visibility = "visible";
+	setTimeout(function(){ SoundJS.play(name, null, 0.6, true); }, 10);
+}
+</script>
+
+</head>
+<body align="center" onLoad="onLoadComplete()">
+	<div class="content">
+		<header>
+		<a href="http://github.com/gskinner/EaselJS"><img style="position: fixed; top: 0; left: 0; border: 0; z-index:200;" src="https://assets0.github.com/img/6429057dfef9e98189338d22e7f6646c6694f032?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_left_orange_ff7600.png&path=" alt="Fork me on GitHub"></a> 
+		<a href="../" title="SoundJS - A Javascript lIbrary for working with html5 audio"><img src="../img/logo.gif" width="240" height="120" style="margin-top:-5px;" alt="A javascript library for working with html5 audio"/></a>
+		<h1>Example: Dynamic Instances</h1>
+		<img src="../img/flourish.gif"  style="margin-bottom:10px;"/>
+		</header>
+		<!-- DEMO -->
+		<p>This a test board where you can play multiple looping sounds. The code is an example of how a game would divvy up instances using an on-demand approach rather than set numbers. Additionally it can be used to test audio fidelity and the capabilities of target devices.</p>
+        <div class="demoWrap">
+        <div id="volume" onMouseDown="mouseDown()" onMouseUp="mouseUp()">
+            <div>Click and hold to pause, Active instances:</div>
+            <div id="count">0</div>
+        </div>
+        <div id="menu">
+            <div class="adjust">
+                <input type="button" value="++" onClick="newSnd(this, 'Pluck')" />
+                <input type="button" value="--" onClick="rmvSnd(this, 'Pluck')" />
+                <span class="whatwhat">Pluck</span>
+            </div>
+            <div class="adjust">
+                <input type="button" value="++" onClick="newSnd(this, 'Lightning')" />
+                <input type="button" value="--" onClick="rmvSnd(this, 'Lightning')" />
+                <span class="whatwhat">Lightning</span>
+            </div>
+            <div class="adjust">
+                <input type="button" value="++" onClick="newSnd(this, 'Cabin')" />
+                <input type="button" value="--" onClick="rmvSnd(this, 'Cabin')" />
+                <span class="whatwhat">Cabin</span>
+            </div>
+            <div class="adjust">
+                <input type="button" value="++" onClick="newSnd(this, 'Tone')" />
+                <input type="button" value="--" onClick="rmvSnd(this, 'Tone')" />
+                <span class="whatwhat">Tone</span>
+            </div>
+            <div class="adjust">
+                <input type="button" value="++" onClick="newSnd(this, 'Rats')" />
+                <input type="button" value="--" onClick="rmvSnd(this, 'Rats')" />
+                <span class="whatwhat">Rats</span>
+            </div>
+            <div class="adjust">
+                <input type="button" value="++" onClick="newSnd(this, 'Gulls')" />
+                <input type="button" value="--" onClick="rmvSnd(this, 'Gulls')" />
+                <span class="whatwhat">Gulls</span>
+            </div>
+            <div class="adjust">
+                <input type="button" value="++" onClick="newSnd(this, 'Music')" />
+                <input type="button" value="--" onClick="rmvSnd(this, 'Music')" />
+                <span class="whatwhat">Music</span>
+            </div>
+        </div>
+        </div>
+		<!-- END DEMO -->
+		<p class="callout"><strong>examples:</strong> 
+			<a href="../examples/convolution.html">Convolution</a>, 
+			<a href="../examples/interrupt.html">Interrupt</a>, 
+			<a href="../examples/dynamicInstance.html">Dynamic Instances</a>, 
+			<a href="../examples/masterVolume.html">Master Volume</a>, 
+			<a href="../examples/game/game.html">A Game</a>, 
+			<a href="../examples/TestSuite.html">Test Suite</a> 
+        </p>
+		<footer>
+		<img src="../img/flourish2.gif" style="margin: 5px;"/>
+		<p>
+  		<script>
+			document.write("&copy;" + new Date().getFullYear()); 
+		 </script>
+ 			<a href="http://gskinner.com/">gskinner.com, inc.</a> | proudly hosted by <a href="http://mediatemple.com/">Media Temple</a></p>
+		</footer>
+	</div>
+</body>
+</html>
