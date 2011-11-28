@@ -189,7 +189,6 @@
 	 */
 	SoundJS.instanceCount = 0;
 	
-	
 	/**
 	 * The assumed maximum number of sounds, based on some of the browser limits we have encountered. Currently, this can not be determined via code or APIs.
 	 * 
@@ -867,11 +866,18 @@
 		// find correct instance
 		var i, result, target, examine;
 		var shouldReplace = false;
-		var l = SoundJS.soundHash[name].length;
+		var instances = SoundJS.soundHash[name];
+		
+		// TODO: Determine if the audio is not loaded, or IO errors.
+		if (!instances[0].loaded) {
+			throw(new Error("Audio is not loaded. The source(s) are either not found, or the correct audio formats are not provided."));
+		}
+		
+		var l = instances.length;
 		
 		for(i = 0; i < l; i++) {
 			// init
-			examine = SoundJS.soundHash[name][i];
+			examine = instances[i];
 			if (target == null && interrupt != SoundJS.INTERRUPT_ANY && interrupt != SoundJS.INTERRUPT_NONE) {
 				target = examine;
 				result = i;
@@ -900,9 +906,11 @@
 		
 		// if nothing is found replace the first one in the list
 		if (interrupt == SoundJS.INTERRUPT_ANY && !target){
-			target = SoundJS.soundHash[name][0];
+			target = instances[0];
 			result = 0;
 		}
+		
+		
 		
 		if (target) {
 			// play sound instance
@@ -927,20 +935,19 @@
 	 * 
 	 */
 	SoundJS.loadNext = function() {
-		// validate
 		if (SoundJS.loadQueue.length <= 0) {
 			if (SoundJS.onLoadQueueComplete) { SoundJS.onLoadQueueComplete(); }
 			return;
 		}
 		
-		// take data from next item
+		// load next item in the queue.
 		var o = SoundJS.loadQueue.shift();
 		var instances = o.instances || 1;
 		var name = o.name;
 		var src = o.src;
 		
 		// build hash, and extend already existing names
-		var hash = SoundJS.soundHash[name]
+		var hash = SoundJS.soundHash[name];
 		if (hash == null) { hash = SoundJS.soundHash[name] = []; }
 		else if (hash.length) { src = hash[0].src; }
 		var init = hash.length;
@@ -954,9 +961,14 @@
 				audio.addEventListener(SoundJS.AUDIO_PROGRESS, SoundJS.handleProgress, false);
 				audio.addEventListener(SoundJS.AUDIO_STALLED, SoundJS.handleAudioStall, false); // Occasionally we get a stalled event instead of complete - but it still works.
 				audio.addEventListener(SoundJS.AUDIO_ERROR, SoundJS.handleAudioError, false);
-				// TODO: Retry?
+								
+				//var mediaEvents = ["abort", "canplay", "canplaythrough", "duratichange", "emptied", "ended", "error", "loadeddata", "loadedmetadata", "loadstart", "pause", "play", "playing", "progress", "ratechange", "seeked", "seeking", "stalled", "suspend", "timeupdate", "volumechange", "waiting"];
+				
+				// TODO: Retry.
 				audio.loaded = false;
 			}
+			
+			//TODO: Consider only making additional channels once the audio loads.
 			
 			audio.addEventListener(SoundJS.AUDIO_ENDED, SoundJS.handleEnded, false);
 			
@@ -1030,10 +1042,11 @@
 	SoundJS.handleAudioTimeout = function(audio) {
 		// audio object that timed out
 		if (SoundJS.onSoundTimeout) { 
-			var parts = audio.split("_");
+			var parts = audio.id.split("_");
 			SoundJS.onSoundTimeout(audio, parts[0], parts[1]);
-			SoundJS.loadNext();
 		}
+		//TODO: Indicate to the audio that it is done, but timed out. Maybe remove event listeners.
+		SoundJS.loadNext();
 	};
 	
 	
@@ -1063,7 +1076,6 @@
 	 * 
 	 */
 	SoundJS.handleAudioError = function(event) {
-		// clean up refiring
 		clearTimeout(this.timeoutId);
 		
 		// do something about the error
@@ -1072,6 +1084,8 @@
 			SoundJS.onSoundLoadError(this, parts[0], parts[1]);
 		}
 		SoundJS.loadNext();
+		
+		//TODO: Indicate that the sound failed.
 	};
 	
 	/**
@@ -1096,10 +1110,67 @@
 		SoundJS.loadNext();
 	};
 	
+	
+	/**
+	 * Recognizes a stall; however, delays it in case of event duplication with a load&stall firing
+	 * Do not call directly as this is an event listener.
+	 * 
+	 * @private
+	 * 
+	 */
 	SoundJS.handleAudioStall = function(event) {
-		console.log("STALL", this.id);	
+		setTimeout(function(){testAudioStall(event)}, 0);
+	}
+	
+	
+	/**
+	 * Checks if callback exists and calls it with the name of sound stalling.
+	 * Do not call directly as this is an event listener.
+	 * 
+	 * @private
+	 * 
+	 */
+	SoundJS.testAudioStall = function(event) {
+		var parts = this.id.split("_");
+		
+		if(SoundJS.soundHash[parts[0]][parts[1]].loaded){
+			return;
+		}
+		
+		if (SoundJS.onStall) { 
+			SoundJS.onStall(this, parts[0], parts[1]);
+		}
+		
+		SoundJS.loadNext();
 	}
 
 window.SoundJS = SoundJS;
+
+	function SoundJSElement(name, src) {
+		this.instances = [];	
+		this.name = name;
+		this.src = src;
+		this.canPlay = false;
+		this.loaded = false;
+		this.length = 0;
+	}
+	var p = SoundJSElement.prototype;
+	p.add = function(instance) {
+		this.instances.push(instance);	
+		this.length = this.instances.length;
+		
+		if (this.instances.length == 1) {
+			instance.addEventListener("canplaythrough", function(target) { instance.canplaythrough(); });
+		}
+	}
+	p.remove = function(instance) {
+		this.instances.splice(instance, 1);
+		this.length = this.instances.length;
+	}
+	p.canplaythrough = function() {
+		this.loaded = true;	
+	}
+	
+window.SoundJSElement = SoundJSElement;
 
 }(window));
