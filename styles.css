@@ -79,3 +79,11 @@ strong {
 	color: #000;
 	font-size: 115%;
 }
+
+pre {
+	padding: 6px;
+	border: solid 1px #FFF0EE;
+	text-align: left;
+	background-color: #FFFAEA;
+	color: #000;
+}
