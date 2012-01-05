@@ -1119,7 +1119,7 @@
 	 * 
 	 */
 	SoundJS.handleAudioStall = function(event) {
-		setTimeout(function(){testAudioStall(event)}, 0);
+		setTimeout(function(){ SoundJS.testAudioStall(event) }, 0);
 	}
 	
 	
@@ -1146,6 +1146,7 @@
 
 window.SoundJS = SoundJS;
 
+/* //TODO: Change structure to use pattern like this.
 	function SoundJSElement(name, src) {
 		this.instances = [];	
 		this.name = name;
@@ -1171,6 +1172,6 @@ window.SoundJS = SoundJS;
 		this.loaded = true;	
 	}
 	
-window.SoundJSElement = SoundJSElement;
+window.SoundJSElement = SoundJSElement;*/
 
 }(window));
