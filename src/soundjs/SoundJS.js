@@ -1119,26 +1119,31 @@
 	 * 
 	 */
 	SoundJS.handleAudioStall = function(event) {
-		setTimeout(function(){ SoundJS.testAudioStall(event) }, 0);
+		var element = this;
+		setTimeout(function(){ SoundJS.testAudioStall(element, event) }, 0);
 	}
 	
 	
 	/**
 	 * Checks if callback exists and calls it with the name of sound stalling.
-	 * Do not call directly as this is an event listener.
+	 * Do not call directly as this is handled similar to an event listener.
+	 *
+	 * Note that this is called on a delay by the above method, and as such
+	 * has be descoped to belong to SoundJS instead of the audio window which
+	 * why it requires a target element to be passed in.
 	 * 
 	 * @private
 	 * 
 	 */
-	SoundJS.testAudioStall = function(event) {
-		var parts = this.id.split("_");
+	SoundJS.testAudioStall = function(target, event) {
+		var parts = target.id.split("_");
 		
 		if(SoundJS.soundHash[parts[0]][parts[1]].loaded){
 			return;
 		}
 		
 		if (SoundJS.onStall) { 
-			SoundJS.onStall(this, parts[0], parts[1]);
+			SoundJS.onStall(target, parts[0], parts[1]);
 		}
 		
 		SoundJS.loadNext();
