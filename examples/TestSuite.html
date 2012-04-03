@@ -2,301 +2,453 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>SoundJS: Test Suite</title>
+
+<script src="http://code.createjs.com/preloadjs-0.1.0.min.js"></script>
+<script src="http://code.createjs.com/soundjs-0.2.0.min.js"></script>
+<script src="assets/soundjs.flashplugin-0.2.0.min.js"></script>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-<script language="javascript" src="../src/soundjs/SoundJS.js"></script>
-<script language="javascript">
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>
+<link type="text/css" href="assets/css/jquery-ui-1.8.18.custom.css" rel="stylesheet" />
 
-/* Setup */
-function init() {
-	startLoad();
-	enableSet("sound", false);
-	enableSet("instance", false);
-}
+<style type="text/css">
+    /* define a width for the sliders by styling the wrapping div */
+    .panSlider,
+    .volumeSlider,
+    .offsetSlider,
+    .delaySlider,
+    .masterVolumeSlider,
+    .loopSlider { width:200px; }
+</style>
+<script>
 
-/* Preload sounds. Will not work on iOS
-	All Sounds are pre-populated into the library list with the (waiting) label
-*/
-function startLoad() {
-	enableSet("load", false);
-	var list = [
-		{name:"Steal", src:["../assets/GU-StealDaisy.ogg","../assets/GU-StealDaisy.mp3"], instances:4},
-		{name:"Humm (MP3)", src:"../assets/Humm.mp3"}, // NOTE: mp3-only
-		{name:"Humm (OGG)", src:"../assets/Humm.ogg"}, // NOTE: ogg-only
-		{name:"Damage1", src:["../assets/R-Damage.mp3","../assets/R-Damage.ogg"], instances:4},
-		{name:"Damage2", src:["../assets/S-Damage.mp3","../assets/S-Damage.ogg"], instances:4},
-		{name:"Thunder", src:["../assets/Thunder1.mp3","../assets/Thunder1.ogg"], instances:2},
-		{name:"ToneWobble", src:["../assets/ToneWobble.mp3","../assets/ToneWobble.ogg"], instances:2},
-		{name:"CabinBoy", src:["../assets/U-CabinBoy3.mp3","../assets/U-CabinBoy3.ogg"], instances:2},
-		{name:"GameBG", src:["../assets/M-GameBG.mp3","../assets/M-GameBG.ogg"], instances:2},
-		{name:"Machinae Supremacy", src:["../assets/18-machinae_supremacy-lord_krutors_dominion.mp3","../assets/18-machinae_supremacy-lord_krutors_dominion.ogg"], instances:2}
-	];
-	
-	/* 
-	// For later. iOS will not preload audio, so we must pre-populate the list so audio can be played
-	var form = $("#playControls").get(0);
-	form.library.remove(0);
-	for (var i=0, l=list.length; i<l; i++) {
-		form.library.options.add(new Option(list[i].name + " (waiting)", list[i].name));	
+	// Read the URL Params
+	var params = {};
+	var pieces = window.location.search.slice(1).split("&");
+	for (var i=0, l=pieces.length; i<l; i++) {
+	    var parts = pieces[i].split("=");
+	    params[parts[0]] = parts[1];
 	}
-	form.library.disabled = false;*/
-	
-	SoundJS.addBatch(list);
-	
-	SoundJS.onSoundLoadComplete = handleComplete;
-	//SoundJS.onProgress = handleProgress;
-	SoundJS.onLoadQueueComplete = handleAllComplete;
-	SoundJS.onSoundEnded = handleSoundEnded;
-}
 
-/* Display the progress of the load */
-function handleProgress(progress) {
-	var progress = Math.round(1/progress*100) + "%"
-}
-
-/* When each sound completes, it is replaced in the list with an entry that shows the available instances */
-function handleComplete(sound, name) {
-	var form = $("#playControls").get(0);
-	var library = form.library;
-	
-	if (library.options[0].value == "-1") {
-		library.remove(0);
-	}
-	
-	for (var i=0, l=library.options.length; i<l; i++) {
-		var item = library.options[i];
-		if (item.value == name) {
-			form.library.remove(i);
-			break;
+	function init() {
+		if (window.top == window) {
+			start();
+			document.getElementById("header").style.display = "block";
 		}
 	}
-	form.library.options.add(new Option(name + " ("+SoundJS.getNumInstances(name)+")", name));
-	if (library.disabled) { library.disabled = false; }
-}
 
-function handleAllComplete() {}
+	var preload;
 
-/* A reference to the selected item */
-var selectedItem;
+	function start() {
+	    enableSet("sound", false);
+	    enableSet("instance", false);
 
-/* When a library item is selected, the UI is enabled to play it */
-function selectItem(select) {
-	// Enable UI!
-	var item = select.options[select.selectedIndex];
-	if (item == null) {
-		enableSet("sound", false);
-		selectedItem = null;
-	} else {
-		enableSet("sound", true);
-		selectedItem = item.value;
+	    SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
+	    if (params.type == "flash") {
+	        SoundJS.registerPlugins([SoundJS.FlashPlugin]);
+	    } else {
+	        SoundJS.registerPlugins([SoundJS.HTMLAudioPlugin, SoundJS.FlashPlugin]);
+	    }
+
+	    $(".panSlider").slider({value: 0,
+	        min: -1,
+	        max: 1,
+	        disabled:true,
+	        change:handleSliderChange
+	    });
+
+	    $(".volumeSlider").slider({value: 100,
+	        min: 0,
+	        max: 100,
+	        disabled:true,
+	        change:handleSliderChange
+	    });
+
+	    $(".offsetSlider").slider({value: 0,
+	        min: 0,
+	        max: 10,
+	        disabled:true,
+	        change:handleSliderChange
+	    });
+
+	    $(".delaySlider").slider({value: 0,
+	        min: 0,
+	        max: 10,
+	        disabled:true,
+	        change:handleSliderChange
+	    });
+
+	    $(".masterVolumeSlider").slider({value: 100,
+	        min: 0,
+	        max: 100,
+	        disabled:false,
+	        change:handleSliderChange
+	    });
+
+	    $(".loopSlider").slider({value: 0,
+	        min: -1,
+	        max: 5,
+	        disabled:true,
+	        change:handleSliderChange
+	    });
+
+	    preload = new PreloadJS();
+	    preload.installPlugin(SoundJS);
+	    preload.onFileLoad = handleFileLoad;
+	    preload.onProgress = handleProgress;
+	    preload.onComplete = handleComplete;
+
+	    var assetsPath = "./assets/";
+	    var manifest = [
+	        //basePath + "music.mp3",
+	        {id:"Music", src:assetsPath + "M-GameBG.mp3", data:2},
+	        {id:"Humm (mp3)", src:assetsPath + "Humm.mp3"},
+	        {id:"Humm (ogg)", src:assetsPath + "Humm.ogg"},
+	        {id:"Thunder", src:assetsPath + "Thunder1.mp3|"+assetsPath + "Thunder1.ogg", data:3},
+	        {id:"Tone wobble", src:assetsPath + "ToneWobble.mp3|"+assetsPath + "ToneWobble.ogg", type:"sound"},
+	        {id:"Rat Damage", src:assetsPath + "R-Damage.mp3", type:"sound"},
+	        {id:"Seagull Damage", src:assetsPath + "S-Damage.mp3", type:"sound", id:"Damage"},
+	        {id:"Cabin Boy", src:assetsPath + "U-CabinBoy3.mp3", type:"sound", id:"CabinBoy", data:1}
+	    ];
+	    preload.loadManifest(manifest);
+
+	    // Library Controls
+	    $("#library").change(selectItem);
+	    $("#playSoundBtn").click(playSound);
+	    $("#stopAllSoundsBtn").click(function(event) {
+	        SoundJS.stop();
+	        removeSound("all");
+	    });
+
+	    $(".masterVolumeSlider").slider().bind('slide',function(event){
+	        var value = $(this).slider("option", "value");
+		    console.log(value);
+	        SoundJS.setVolume(value/100);
+	    });
+
+	    // Instance Controls
+	    $("#nowPlaying").change(selectInstance);
+	    $("#stopBtn").click(function(event){
+	        var instance = getInstance()
+	        if (instance == null) { return; }
+	        instance.stop();
+	        removeSound(instance);
+	    });
+	    $("#pauseBtn").click(function(event){
+	        var instance = getInstance();
+	        if (instance == null) { return; }
+	        instance.paused ? instance.resume() : instance.pause();
+	        $("#pauseBtn").attr("value", instance.paused ? "Resume" : "Pause");
+	    });
+
+	    $(".volumeSlider").slider().bind('slide',function(event){
+	        var instance = getInstance();
+	        if (instance == null) { return; }
+	        var value = $(this).slider("option", "value");
+	        instance.setVolume(value/100);
+	    });
+
+	    $(".panSlider").slider().bind('slide',function(event){
+	        var instance = getInstance();
+	        var value = $(this).slider("option", "value");
+	        instance.setPan(value/100);
+	    });
 	}
-}
 
-/* Plays a sound using SoundJS.
-	The sound is added to the "nowPlaying" list while it is playing */
-function playSound() {
-	var form = $("#playControls").get(0);
-	var field = form.interrupt;
-	var interrupt = field.options[field.selectedIndex];
-	
-	var result = SoundJS.play(selectedItem, field.value, 1, form.loop.checked);
-	
-	if (result >= 0) {
-		// Remove Default
-		form = $("#instanceControls").get(0);
-		if (form.nowPlaying.options[0].value == "-1") {
-			form.nowPlaying.remove(0);	
-		}
-		
-		var id = selectedItem+"_"+result;
-		removeSound(id, true);
-		
-		// Add latest. To add at beginning like I want we have to put in an IE hack, so forget that.
-		form.nowPlaying.options.add(new Option(selectedItem + " ("+result+")", id));
-		form.nowPlaying.disabled = false;
-	}
-}
-
-/* Remove a sound from the "nowPlaying" list. */
-function removeSound(id, resetItems) {
-	var form = $("#instanceControls").get(0);
-	// Remove existing if this is an override
-	for (var i=0, l=form.nowPlaying.options.length; i<l; i++) {
-		if (form.nowPlaying.options[i].value == id) { 
-			form.nowPlaying.remove(i); 
-			break;
-		}
-	}
-		
-	if (resetItems != true && form.nowPlaying.options.length == 0) {
-		form.nowPlaying.options.add(new Option("-- No Audio Playing --","-1"));
-		form.nowPlaying.disabled = true;
+	function stop() {
+		if (preload != null) { preload.close(); }
+		SoundJS.stop();
 	}
 
-}
-
-/* An instance of a playing sound has been selected.
-	The instance controls are enabled */
-function selectInstance(select) {
-	var form = $("#instanceControls").get(0);
-	if (form.nowPlaying.selectedIndex > -1) {
-		var item = form.nowPlaying.options[form.nowPlaying.selectedIndex];
-		var parts = item.value.split("_");
-		form.volume.value = SoundJS.getVolume(parts[0], parts[1]) * 100;
-		enableSet("instance", true);
-	} else {
-		enableSet("instance", false);
+	function handleSliderChange() {
+		var units = this.dataset.units;
+		var value = $(this).slider("option", "value");
+		$("#"+this.id+"Value").text(value + (units ? " " + units + (value==1?"":"s"):""));
 	}
-}
 
-/* Stop all sounds, and clear the "nowPlaying" list. */
-function stopAllSounds() {
-	SoundJS.stop();
-	
-	// Update UI
-	var form = $("#instanceControls").get(0);
-	while (form.nowPlaying.options.length) { form.nowPlaying.remove(0); }
-	form.nowPlaying.options.add(new Option("-- No Audio Playing --", "-1"));
-	form.nowPlaying.disabled = true;
-}
-
-/* Stop playing a specific sound instance. */
-function stopSound() {
-	// Pull selected info, and stop it.
-	var form = $("#instanceControls").get(0);
-	if (form.nowPlaying.disabled) { return; }
-	if (form.nowPlaying.selectedIndex == -1) { return; }
-	var id = form.nowPlaying.options[form.nowPlaying.selectedIndex].value;
-	var parts = id.split("_");
-	
-	SoundJS.stop(parts[0], parts[1]);
-	removeSound(id);
-	
-	enableSet("instance", false);
-}
-
-/* A sound has completed. Remove it from the "nowPlaying" list */
-function handleSoundEnded(sound, name, index) {
-	removeSound(name + "_" + index);
-}
-
-/* Change the volume of a sound instance */
-function changeVolume(slider) {
-	var form = $("#instanceControls").get(0);
-	var item = form.nowPlaying.options[form.nowPlaying.selectedIndex];
-	if (item == null) { return; }
-	var parts = item.value.split("_");
-	SoundJS.setVolume(slider.value/100, parts[0], parts[1]);
-}
-
-/* Change the master volume of SoundJS */
-function changeMasterVolume(slider) {
-	SoundJS.setMasterVolume(slider.value/100);
-}
-
-/* Toggle the enabled property of a named set of components in a specific form */
-function enableSet(name, enabled) {
-	switch (name) {
-		case "load":
-			enableItems("loadForm", enabled, ["startLoad"]);
-			break;
-		case "sound":
-			enableItems("playControls", enabled, ["playPause", "interrupt", "loop"]);
-			break;
-		case "instance":
-			enableItems("instanceControls", enabled, ["volume", "stop"]);
-			break;
+	function handleFileLoad(event) {
+	    var list = $("#library").get(0);
+	    var item = event.result;
+	    list.options.add(new Option((event.id || event.src) + " ("+(event.data||0)+")", event.id));
 	}
-}
 
-/* Toggle the enabled property of a number of named elements in a form */
-function enableItems(formName, value, items) {
-	var form = $("#" + formName).get(0);
-	if (form == null) { return; }
-	for (var i=0, l=items.length; i<l; i++) {
-		var item = form[items[i]];
-		if (item == null) { continue; }
-		item.disabled = !value;	
+	function handleProgress(event) {}
+
+	function handleComplete(event) {}
+
+	function playSound(event) {
+	    var list = $("#library").get(0);
+	    if (list.selectedIndex == -1) { return; }
+
+	    //LM: Consider merging the two for loops
+	    var indices = [];
+	    for (var i=0, l=list.options.length; i<l; i++) {
+	        if (list.options[i].selected) { indices.push(i); }
+	    }
+
+	    // Options
+	    var interrupt = $("#interrupt").get(0);
+	    var interruptValue = interrupt.options[interrupt.selectedIndex].value;
+	    var loop = $(".loopSlider").slider("option", "value");
+	    var delay = $(".delaySlider").slider("option", "value") *1000;
+	    var offset = $(".offsetSlider").slider("option", "value")*1000;
+	    var nowPlaying = $("#nowPlaying").get(0);
+
+	    for (var i=0, l=indices.length; i<l; i++) {
+	        var index = indices[i]; //list.selectedIndex;
+	        if (index == null) { continue; }
+	        var item = list.options[index];
+
+	        // Play Sound
+	        var instance = SoundJS.play(item.value, interruptValue, delay, offset, loop, 1, 0);
+	        if (instance == null) { continue; }
+	        instance.onPlayFailed = handlePlayFailed;
+	        instance.onComplete = handleSoundComplete;
+	        instance.onPlayInterrupted = handlePlayFailed;
+
+		    // Put in the nowPlaying list. (Remember to remove first temp item)
+	        if (nowPlaying.options[0].value == "-1") {
+	            nowPlaying.remove(0);
+	            nowPlaying.disabled = false;
+	        } else {
+	            for (var j=nowPlaying.options.length-1; j>=0; j--) {
+	                if (nowPlaying.options[j].value == instance.uniqueId) {
+	                    if (nowPlaying.options.remove) {
+	                        nowPlaying.options.remove(j);
+	                    } else if (nowPlaying.remove) {
+	                        nowPlaying.remove(j);
+	                    }
+	                }
+	            }
+	        }
+
+	        nowPlaying.options.add(new Option(instance.src + "("+instance.uniqueId + ")", instance.uniqueId));
+	    }
 	}
-}
-		
+
+	// Sound finished. Remove it from the list.
+	function handleSoundComplete(instance) {
+	    removeSound(instance);
+	}
+
+	// Playback failed (usually interrupt failed)
+	function handlePlayFailed(instance) {
+	    removeSound(instance);
+	}
+
+	// Remove the sound from the list.
+	function removeSound(instance) {
+	    var list = $("#nowPlaying").get(0);
+	    for (var i=list.options.length-1; i>=0; i--) {
+	        if (instance == "all" || list.options[i].value == instance.uniqueId) {
+	            if (list.selectedIndex == i) {
+	                enableSet("instance", false);
+	            }
+	            if (list.options.remove) { list.options.remove(i); }
+	            else if (list.remove) { list.remove(i); }
+	            if (instance != "all") { break; }
+	        }
+	    }
+	    if (list.options.length == 0) {
+	        list.options.add(new Option("-- No Audio Playing --", -1));
+	        list.disabled = true;
+	        enableSet("instance", false);
+	    } else if (list.selectedIndex > -1) {
+	        var item = list.options[list.selectedIndex];
+	    }
+
+	}
+
+	// Get the currently selected sound from nowPlaying
+	function getInstance() {
+	    var list = $("#nowPlaying").get(0);
+	    var item = list.options[list.selectedIndex];
+
+	    var instance = SoundJS.getInstanceById(item.value);
+	    if (instance == null) { return null; }
+	    return instance;
+	}
+
+	// A library item was selected
+	function selectItem(event) {
+	    var list = $("#library").get(0);
+	    if (list.selectedIndex != -1) {
+	        enableSet("sound", true)
+	    } else {
+	        enableSet("sound", false)
+	    }
+	}
+
+	// A playing instance was selected
+	function selectInstance(event) {
+	    var list = $("#nowPlaying").get(0);
+	    if (list.selectedIndex > -1) {
+	        enableSet("instance", true);
+	        var instance = getInstance();
+	        $("#pauseBtn").attr("value", instance.paused ? "Resume" : "Pause");
+	        $("#volume").val(instance.getVolume()*100|0);
+	        $("#volumeValue").text(instance.getVolume()*100|0);
+	        $("#pan").val(instance.getPan()*100|0);
+	        $("#panValue").text(instance.getPan()*100|0);
+	    } else {
+	        enableSet("instance", false);
+	    }
+	}
+
+	// Toggle the enabled property of a named set of components in a specific form
+	function enableSet(name, enabled) {
+	    switch (name) {
+	        case "sound":
+	            enableItems("playControls", enabled, ["playSoundBtn", "interrupt", "loop", "delay", "offset"]);
+	            break;
+	        case "instance":
+	            enableItems("instanceControls", enabled, ["pause", "volume", "stop", "pan"]);
+	            break;
+	    }
+	}
+
+	// Toggle the enabled property of a number of named elements in a form
+	function enableItems(formName, value, items) {
+	    var form = $("#" + formName);
+	    var element = form.get(0);
+	    if (element == null) { return; }
+	    value ? form.removeClass("disabled") : form.addClass("disabled");
+	    for (var i=0, l=items.length; i<l; i++) {
+	        var item = element[items[i]];
+
+	        if ($('.'+items[i]+'Slider')) {
+	            $('.'+items[i]+'Slider').slider('option', 'disabled', !value);
+	        }
+
+	        if (item == null) { continue; }
+	        item.disabled = !value;
+	    }
+	}
 
 </script>
-<title>SoundJS Test Suit</title>
-<style>
-FORM {
-	margin: 10px;
-	text-align:left;
-}
-.select {
-	width: 150px;
-	height: 120px;
-}
-</style>
-<link href="styles.css" rel="stylesheet" type="text/css" />
-<link href="../styles.css" rel="stylesheet" type="text/css" />
-</head>
-<body align="center" onload="init()">
-	<div class="content">
-	
-		<header>
-		<a href="http://github.com/gskinner/SoundJS"><img style="position: fixed; top: 0; left: 0; border: 0; z-index:200;" src="https://assets0.github.com/img/6429057dfef9e98189338d22e7f6646c6694f032?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_left_orange_ff7600.png&path=" alt="Fork me on GitHub"></a> 
-		<a href="../" title="SoundJS - A Javascript lIbrary for working with html5 audio"><img src="../img/logo.gif" width="240" height="120" style="margin-top:-5px;" alt="A javascript library for working with html5 audio"/></a>
-		<h1>Test Suite</h1>
-		<img src="../img/flourish.gif" style="margin-bottom:10px;"/>
-		</header>
-<p>This test suite loads and plays a number of sounds, defined in the source. Playing sounds can be controlled, stopped, etc</p>
 
-<form id="playControls" onsubmit="return false;" class="demoWrap">
-	<p>Select a sound to play it. Each sound shows how many instances it can play at once.</p>
-	<select id="library" multiple="multiple" disabled="disabled" onchange="selectItem(this)" class="select">
-		<option value="-1">-- No Audio Loaded --</option>
-	</select><br />
-	
-	<input id="playPause" name="playPause" type="button" value="Play" onclick="playSound()" />
-	<label for="interrupt">Interrupt</label>
-	<select id="interrupt">
-		<option selected="selected" value="1">
-		Any</option>
-		<option value="4">None</option>
-		<option value="2">Early</option>
-		<option value="3">Late</option>
-	</select>
-	<input type="checkbox" id="loop" />
-	<label for="loop">Loop</label><br />
-	
-	<label for="masterVolume">Master Volume</label>
-	<input id="masterVolume" type="range" min="0" max="100" onchange="changeMasterVolume(this)" value="100" /><br />
-	<input name="stopAll" type="button" value="Stop All Sounds" onclick="stopAllSounds()" /><br />
-</form>
-	
-<form id="instanceControls" onsubmit="return false;" class="demoWrap">
-	<p>Select a playing sound to stop it, or control its volume. When a sound completes, it is removed from this list.</p>
-	<select id="nowPlaying" multiple="multiple" disabled="disabled" onchange="selectInstance(this)" class="select">
-		<option value="-1">-- No Audio Playing --</option>
-	</select>
-	<br />
-	<label for="volume">Instance Volume</label>
-	<input id="volume" type="range" min="0" max="100" onchange="changeVolume(this)" value="100" />
-	<br />
-	<input id="stop" name="stop" type="button" value="Stop" onclick="stopSound()" />
-	<br />
-</form>
-		<p class="callout"><strong>examples:</strong> 
-			<a href="../examples/convolution.html">Convolution</a>, 
-			<a href="../examples/interrupt.html">Interrupt</a>, 
-			<a href="../examples/dynamicInstance.html">Dynamic Instances</a>, 
-			<a href="../examples/masterVolume.html">Master Volume</a>, 
-			<a href="../examples/game/game.html">A Game</a> , 
-			<a href="../examples/TestSuite.html">Test Suite</a>
-		</p>
-		<footer>
-		<img src="../img/flourish2.gif" style="margin: 5px;"/>
-		<p>
-		<script>
-			document.write("&copy;" + new Date().getFullYear()); 
-		 </script>
-			<a href="http://gskinner.com/">gskinner.com, inc.</a> | proudly hosted by <a href="http://mediatemple.com/">Media Temple</a></p>
-		</footer>
-	</div>
+	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css"/>
+	<style>
+	    FORM {
+	        text-align:left;
+		    width: 450px;
+		    padding: 5px;
+		    float:left;
+	    }
+	    FORM P {
+		    margin: 0 0 10px 0;
+	    }
+	    #instanceControls {
+		    border: 1px solid #999;
+		    border-width: 0 0 0 1px;
+		    padding-left: 20px;
+	    }
+	    .select {
+	        width: 200px;
+	        height: 80px;
+	    }
+	    .disabled {
+	        color: #999;
+	        font-style: italic;
+	    }
+	    .disabled p, .disabled .nodisable {
+	        color: #000;
+	        font-style: normal;
+	    }
+	</style>
+
+</head>
+<body onload="init()">
+
+<div class="content">
+    <header id="header">
+	    <h1><span>SoundJS</span> Test Suite</h1>
+        <p>This test suite loads and plays a number of sounds, defined in the source. Playing sounds can be controlled, stopped, etc</p>
+    </header>
+
+    <div>
+        <a href="?type=normal">HTML with Flash Fallback</a> | <a href="?type=flash">Flash Only</a>
+    </div>
+
+    <form id="playControls">
+        <p>Select a sound to play it. <br/>Each sound shows how many instances it can play at once.</p>
+        <select id="library" multiple="multiple" class="select"></select><br />
+
+        <input type="button" id="playSoundBtn" value="Play" />
+
+        <label for="interrupt">Interrupt</label>
+        <select id="interrupt">
+            <option selected="selected" value="any">
+                Any</option>
+            <option value="none">None</option>
+            <option value="early">Early</option>
+            <option value="late">Late</option>
+        </select>
+
+        <br />
+        <br />
+
+        <table border="0" width="400" cellpadding="5" cellspacing="5">
+            <tr>
+                <td><label for="loop">Loop</label></td>
+                <td><div class="loopSlider" id="loop"></div></td>
+                <td><label for="loop" id="loopValue">0</label></td>
+            </tr>
+            <tr>
+                <td> <label for="delay">Delay</label></td>
+                <td><div class="delaySlider" id="delay" data-units="second"></div></td>
+                <td><label for="delay" id="delayValue">0 seconds</label></td>
+            </tr>
+            <tr>
+                <td><label for="offset">Offset</label></td>
+                <td><div class="offsetSlider" id="offset" data-units="second"></div></td>
+                <td><label for="offset" id="offsetValue">0 seconds</label></td>
+            </tr>
+            <tr>
+                <td><label for="masterVolume" class="nodisable">Master Volume</label></td>
+                <td> <div class="masterVolumeSlider" id="masterVolume"></div></td>
+                <td><label for="masterVolume" id="masterVolumeValue">100</label></td>
+            </tr>
+            <tr>
+                <td></label></td>
+                <td></td>
+                <td><br /></td>
+            </tr>
+        </table>
+        <input id="stopAllSoundsBtn" name="stopAll" type="button" value="Stop All Sounds" />
+    </form>
+
+    <form id="instanceControls">
+        <p>Select a playing sound to stop it, or control its volume. <br/>When a sound completes, it is removed from this list.</p>
+        <select id="nowPlaying" multiple="multiple" disabled="disabled" class="select">
+            <option value="-1">-- No Audio Playing --</option>
+        </select>
+
+        <br/>
+        <br/>
+        <table border="0" width="400" cellpadding="5" cellspacing="5">
+            <tr>
+                <td><label for="volume">Instance Volume</label></td>
+                <td><div id="volume" class="volumeSlider"></div></td>
+                <td><label for="volume" id="volumeValue">100</label></td>
+            </tr>
+            <tr>
+                <td><label for="pan">Pan</label></td>
+                <td><div class="panSlider" id="pan"></div></td>
+                <td><label for="pan" id="panValue">0</label></td>
+            </tr>
+            <tr>
+                <td></td>
+
+
+            </tr>
+        </table>
+        <input id="pauseBtn" name="pause" type="button" value="Pause" />
+        <input id="stopBtn" name="stop" type="button" value="Stop" />
+    </form>
+
+</div>
+
 </body>
 </html>

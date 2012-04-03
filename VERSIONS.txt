@@ -1,0 +1,11 @@
+Version 0.2.0
+****************************************************************************************************
+Second release, corresponding with the release of the CreateJS suite of tools (createjs.com).
+This version includes a target plugin model that abstracts audio playback to various plugins, which
+can be prioritized. Other updates include controllable sound instances, which are returned when a
+sound is played, providing a much easier way to control audio once it has started playback.
+
+
+Version 0.1.0
+****************************************************************************************************
+Initial release.

@@ -1,173 +1,186 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=9" /> <!-- req for IE 9 else audio tag won't work -->
 
-<title>SoundJS: Example - Convolution</title>
-<link href="styles.css" rel="stylesheet" type="text/css" />
-<link href="styles.css" rel="stylesheet" type="text/css" />
-<link href="../styles.css" rel="stylesheet" type="text/css" />
+<title>SoundJS: Convolution Example</title>
 
-
-<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
+<script type="text/javascript" src="http://code.createjs.com/soundjs-0.2.0.min.js"></script>
+<script type="text/javascript" src="http://code.createjs.com/preloadjs-0.1.0.min.js"></script>
+<script type="text/javascript" src="assets/soundjs.flashplugin-0.2.0.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 
 <script type="text/javascript" >
-var filetype, agent;
-
-function onLoadComplete(){
-	
-	agent = navigator.userAgent.toLowerCase();
-	document.body.innerHTML += agent;
-	
-	if(agent.indexOf("chrome") > -1){
-		filetype = ".mp3";
-	} else if(agent.indexOf("opera") > -1) {
-		filetype = ".ogg";
-	} else if(agent.indexOf("firefox") > -1) {
-		filetype = ".ogg";
-	} else if(agent.indexOf("safari") > -1) {
-		filetype = ".mp3";
-	} else if(agent.indexOf("msie") > -1) {
-		filetype = ".mp3";
+	var preload;
+	function init() {
+		if (window.top == window) { start(); }
 	}
-	
-	SoundJS.onLoadQueueComplete = onSoundsDone;
-	
-	SoundJS.addBatch([
-		{name:"dong", src:"../assets/ToneWobble" + filetype, instances:1},
-		{name:"rat", src:"../assets/R-Damage" + filetype, instances:2},
-		{name:"gull", src:"../assets/S-Damage" + filetype, instances:1},
-		{name:"dong", src:"FAKE-URL", instances:2}]);
-}
 
+	function start() {
+		// Preload a set of sounds.
+		var assetPath = "assets/";
+		var manifest = [
+			{id:"dong", src:assetPath+"ToneWobble.mp3|"+assetPath+"ToneWobble.ogg", data:3},
+			{id:"rat", src:assetPath+"R-Damage.mp3|"+assetPath+"R-Damage.ogg", data:2},
+			{id:"gull", src:assetPath+"S-Damage.mp3|"+assetPath+"S-Damage.ogg", data:1}
+		];
 
-function onSoundsDone(){
-	document.getElementById("demoStarter").disabled = "";
-}
-	
-function begin(){
-	document.getElementById("demoStarter").disabled = "disabled";
-	
-	document.getElementById("p11").className = "";
-	var i = SoundJS.play("dong", SoundJS.INTERUPT_NONE, 0.4, true);
-	SoundJS.play("gull", SoundJS.INTERUPT_NONE);
-	document.getElementById("p00").className = "active";
-	document.getElementById("p01").className = "active";
-	
-	SoundJS.play("gull", SoundJS.INTERUPT_ANY, null, null, 150);
-	setTimeout(function(){
-		document.getElementById("p00").className = "";
-		document.getElementById("p01").className = "";
-		document.getElementById("p02").className = "active";
-	}, 150);
-	
-	SoundJS.play("rat", SoundJS.INTERUPT_NONE, null, null, 1000);
-	setTimeout(function(){
-		document.getElementById("p02").className = "";
-		document.getElementById("p03").className = "active";
-	}, 1000);
-	
-	setTimeout(function(){
-		document.getElementById("p03").className = "";
-		SoundJS.play("rat", SoundJS.INTERUPT_ANY, null, null);
-		document.getElementById("p04").className = "active";
-	}, 1050);
-	
-	setTimeout(function(){
-		document.getElementById("p04").className = "";
-		SoundJS.play("dong", SoundJS.INTERUPT_NONE, 1, false);
-		document.getElementById("p05").className = "active";
-	}, 2500);
-	
-	setTimeout(function(){
-		document.getElementById("p05").className = "";
-		SoundJS.play("dong", SoundJS.INTERUPT_NONE, 1, false);
-		document.getElementById("p06").className = "active";
-	}, 3500);
-	
-	setTimeout(function(){
-		document.getElementById("p06").className = "";
-		SoundJS.pause("dong");
-		document.getElementById("p07").className = "active";
-	}, 4000);
-	
-	setTimeout(function(){
-		document.getElementById("p07").className = "";
-		SoundJS.play("dong", SoundJS.INTERUPT_NONE, 1, false);
-		document.getElementById("p08").className = "active";
-	}, 4500);
-	
-	setTimeout(function(){
-		document.getElementById("p08").className = "";
-		SoundJS.resume();
-		document.getElementById("p09").className = "active";
-	}, 8000);
-	
-	setTimeout(function(){
-		document.getElementById("p09").className = "";
-		SoundJS.play("dong", SoundJS.INTERUPT_NONE, 1, false);
-		document.getElementById("p10").className = "active";
-	}, 9000);
-	
-	setTimeout(function(){
-		document.getElementById("p10").className = "";
-		SoundJS.stop("dong", i);
-		document.getElementById("p11").className = "active";
-	}, 10000);
-	
-	setTimeout(function(){
-		document.getElementById("demoStarter").disabled = "";
-	}, 11000);
-}
+		SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
+
+		preload = new PreloadJS();
+		preload.onComplete = handleLoadComplete;
+		preload.installPlugin(SoundJS);
+		preload.loadManifest(manifest);
+	}
+
+	function stop() {
+		if (preload != null) { preload.close(); }
+		SoundJS.stop();
+	}
+
+	function handleLoadComplete() {
+		// Enable the UI
+		$("#demoStarter").attr("disabled", false);
+	}
+
+	var instance; // Controllable instance
+	function begin(){
+
+		/*
+			In this demo, we play sounds at specific times, and show
+			that the rules follow the instructions laid out.
+
+			Please report issues to create@createjs.com
+		*/
+
+		// Disable and reset the UI
+		$("#demoStarter").attr("disabled", true);
+		$("#p11").removeClass("active"); // Reset UI
+
+		// Play "dong" immediately
+		instance = SoundJS.play("dong", SoundJS.INTERRUPT_NONE, 0, 400, -1);
+		$("#p01").addClass("active");
+
+		// Play "gull" immediately
+		SoundJS.play("gull", SoundJS.INTERRUPT_NONE);
+		$("#p00").addClass("active");
+
+		// Play "gull" after 150 ms. Interrupts first gull sound
+		SoundJS.play("gull", SoundJS.INTERRUPT_ANY, 150);
+		setTimeout(function(){
+			$("#p00").removeClass("active")
+			$("#p01").removeClass("active")
+			$("#p02").addClass("active");
+		}, 150);
+
+		// Play "rat" after 1 second
+		SoundJS.play("rat", SoundJS.INTERRUPT_NONE, 1000);
+		setTimeout(function(){
+			$("#p02").removeClass("active")
+			$("#p03").addClass("active");
+		}, 1000);
+
+		// Play "rat" immediately after previous. Interrupts previous rat sound.
+		setTimeout(function(){
+			$("#p03").removeClass("active")
+			SoundJS.play("rat", SoundJS.INTERRUPT_ANY);
+			$("#p04").addClass("active");
+		}, 1050);
+
+		// Play "dong" after another second. Should start a new channel.
+		setTimeout(function(){
+			$("#p04").removeClass("active")
+			SoundJS.play("dong", SoundJS.INTERRUPT_NONE, 0, 1000);
+			$("#p05").addClass("active");
+		}, 2500);
+
+		// Play "dong" after another second. Should start a new channel.
+		setTimeout(function(){
+			$("#p05").removeClass("active")
+			SoundJS.play("dong", SoundJS.INTERRUPT_NONE, 0, 1000);
+			$("#p06").addClass("active");
+		}, 3500);
+
+		// Wait half a second, then pause all "dong" sounds.
+		setTimeout(function(){
+			$("#p06").removeClass("active")
+			SoundJS.pause("dong");
+			$("#p07").addClass("active");
+		}, 4000);
+
+		// Play another "dong" sound. instances are used up, so it should fail.
+		setTimeout(function(){
+			$("#p07").removeClass("active")
+			SoundJS.play("dong", SoundJS.INTERRUPT_NONE, 0, 1000);
+			$("#p08").addClass("active");
+		}, 4500);
+
+		// Wait 3 seconds, then resume all paused sounds.
+		setTimeout(function(){
+			$("#p08").removeClass("active")
+			SoundJS.resume();
+			$("#p09").addClass("active");
+		}, 8000);
+
+		// Wait another second, and play "dong" sound. Previous instance should be complete, so it will work.
+		setTimeout(function(){
+			$("#p09").removeClass("active")
+			SoundJS.play("dong", SoundJS.INTERRUPT_NONE, 0, 1000);
+			$("#p10").addClass("active");
+		}, 9000);
+
+		// Wait one second, and stop specific "dong" sounds.
+		setTimeout(function(){
+			$("#p10").removeClass("active")
+			instance.stop();
+			$("#p11").addClass("active");
+		}, 10000);
+
+		setTimeout(function(){
+			$("#demoStarter").attr("disabled", false);
+		}, 11000);
+	}
 </script>
-
-
+	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css"/>
+	<style>
+		p {
+			padding: 10px;
+		}
+		p.item {
+			border-bottom: 1px solid #EEE;
+			padding: 5px;
+			margin: 0;
+		}
+		p.item SPAN {
+			font-weight: bold;
+			color: #333;
+		}
+		p.active {
+			font-weight:bold;
+			background-color: #ffC;
+			border-width: 1 0 1 0;
+			border: 1px solid #ccc;
+		}
+	</style>
 </head>
-<body align="center" onLoad="onLoadComplete()">
-	<div class="content">
-		<header>
-		<a href="http://github.com/gskinner/SoundJS"><img style="position: fixed; top: 0; left: 0; border: 0; z-index:200;" src="https://assets0.github.com/img/6429057dfef9e98189338d22e7f6646c6694f032?repo=&url=http%3A%2F%2Fs3.amazonaws.com%2Fgithub%2Fribbons%2Fforkme_left_orange_ff7600.png&path=" alt="Fork me on GitHub"></a> 
-		<a href="../" title="SoundJS - A Javascript lIbrary for working with html5 audio"><img src="../img/logo.gif" width="240" height="120" style="margin-top:-5px;" alt="A javascript library for working with html5 audio"/></a>
-		<h1>Example: Convolution Test</h1>
-		<img src="../img/flourish.gif"  style="margin-bottom:10px;"/>
-		</header>
-		<!-- DEMO -->
-		<p>Click "Run Demo" to see how SoundJS handles a variety of common sound playing situations.</p>
-        <div class="demoWrap">
-			
-			<input id="demoStarter" type="button" onclick="begin()" value="Run Demo" />
-            <p id="p00">0ms - Quiet note, repeating</p>
-            <p id="p01">0ms - Gull</p>
-            <p id="p02">150ms - Gull interrupting previous gull</p>
-            <p id="p03">1000ms - Rat</p>
-            <p id="p04">1050ms - Rat overlapping prev rat</p>
-            <p id="p05">2500ms - Note single</p>
-            <p id="p06">3500ms - Note single overlapping</p>
-            <p id="p07">4000ms - Pause mid notes</p>
-            <p id="p08">4500ms - Note, (fails: instances used up)</p>
-            <p id="p09">8000ms - Resume</p>
-            <p id="p10">9000ms - Note single</p>
-            <p id="p11">10000ms - Stop repeating note, letting previous note fade out</p>
 
-        </div>
-		<!-- END DEMO -->
-		<p class="callout"><strong>examples:</strong> 
-			<a href="../examples/convolution.html">Convolution</a>, 
-			<a href="../examples/interrupt.html">Interrupt</a>, 
-			<a href="../examples/dynamicInstance.html">Dynamic Instances</a>, 
-			<a href="../examples/masterVolume.html">Master Volume</a>, 
-			<a href="../examples/game/game.html">A Game</a>, 
-			<a href="../examples/TestSuite.html">Test Suite</a> 
-        </p>
-		<footer>
-		<img src="../img/flourish2.gif" style="margin: 5px;"/>
-		<p>
-  		<script>
-			document.write("&copy;" + new Date().getFullYear()); 
-		 </script>
- 			<a href="http://gskinner.com/">gskinner.com, inc.</a> | proudly hosted by <a href="http://mediatemple.com/">Media Temple</a></p>
-		</footer>
+<body align="center" onLoad="init()">
+	<div class="content">
+		<p>Click "Run Demo" to see how SoundJS handles a variety of common sound playing situations.</p>
+		<input id="demoStarter" type="button" onclick="begin()" value="Run Demo" />
+		<p id="p00" class="item"><span>0ms</span> - Quiet note, repeating</p>
+		<p id="p01" class="item"><span>0ms</span> - Gull</p>
+		<p id="p02" class="item"><span>150ms</span> - Gull interrupting previous gull</p>
+		<p id="p03" class="item"><span>1000ms</span> - Rat</p>
+		<p id="p04" class="item"><span>1050ms</span> - Rat overlapping prev rat</p>
+		<p id="p05" class="item"><span>2500ms</span> - Note single</p>
+		<p id="p06" class="item"><span>3500ms</span> - Note single overlapping</p>
+		<p id="p07" class="item"><span>4000ms</span> - Pause mid notes</p>
+		<p id="p08" class="item"><span>4500ms</span> - Note, (fails: instances used up)</p>
+		<p id="p09" class="item"><span>8000ms</span> - Resume</p>
+		<p id="p10" class="item"><span>9000ms</span> - Note single</p>
+		<p id="p11" class="item"><span>10000ms</span> - Stop repeating note, letting previous note fade out</p>
 	</div>
 </body>
 </html>

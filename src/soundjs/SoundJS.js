@@ -1,1182 +1,778 @@
-/*
-* SoundJS by Grant Skinner. May 25, 2011
-* Visit http://www.gskinner.com/ for documentation, updates and examples.
-*
-*
-* Copyright (c) 2011 Grant Skinner
-* 
-* Permission is hereby granted, free of charge, to any person
-* obtaining a copy of this software and associated documentation
-* files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use,
-* copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following
-* conditions:
-* 
-* The above copyright notice and this permission notice shall be
-* included in all copies or substantial portions of the Software.
-* 
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-* OTHER DEALINGS IN THE SOFTWARE.
-*/
-
+/* Copyright */
 /**
-* SoundJS is a utility for managing HTML5 audio elements.
-* The SoundJS class uses a static API and can't be instantiated directly.
-* @module SoundJS
-* 
-*/
+ * The SoundJS library manages the playback of audio in HTML, via plugins which
+ * abstract the actual implementation, and allow multiple playback modes depending
+ * on the environment.
+ *
+ * For example, a developer could specify:
+ *   [WebAudioPlugin, HTML5AudioPlugin, FlashAudioPlugin]
+ * In the latest browsers with webaudio support, a WebAudio plugin would be used,
+ * other modern browsers could use HTML5 audio, and older browsers with no HTML5
+ * audio support would use the Flash Plugin.
+ *
+ * Note that there is not currently a supported WebAudio plugin.
+ *
+ * @module SoundJS
+ */
 (function(window) {
-	
+
+	//TODO: Interface to validate plugins and throw warnings
+	//TODO: Determine if methods exist on a plugin before calling
+	//TODO: Interface to validate instances and throw warnings
+	//TODO: Surface errors on audio from all plugins
+
+	//TODO: Timeouts
+	//TODO: Put Plugins on SoundJS.lib?
+
+	//TODO: Track number of booked channels. Needs discussion. We could do pre-booked channels
+		// TODO: Or available NOW channels. LM: Recommend former.
+
 	/**
+	 * The public API for creating sounds, and controlling the overall sound levels,
+	 * and affecting multiple sounds at once. All SoundJS APIs are static.
+	 *
+	 * SoundJS can also be used as a PreloadJS plugin to help preload audio properly.
 	 * @class SoundJS
-	 * @static
+	 * @constructor
 	 */
 	function SoundJS() {
-		throw "SoundJS cannot be instantiated"; 
+		throw "SoundJS cannot be instantiated";
 	}
-	
+
 	/**
-	 * The duration in milliseconds to wait before declaring a timeout when loading a sound.
-	 * 
+	 * Determine how audio is split, when multiple paths are specified in a source.
+	 * @property DELIMITER
+	 * @type String
+	 * @default |
+	 * @static
+	 */
+	SoundJS.DELIMITER = "|";
+
+	/**
+	 * The duration in milliseconds to determine a timeout.
 	 * @property AUDIO_TIMEOUT
-	 *  
 	 * @static
+	 * @type Number
 	 * @default 8000
-	 * @type Number
 	 */
-	SoundJS.AUDIO_TIMEOUT = 8000;
-	
+	SoundJS.AUDIO_TIMEOUT = 8000; //TODO: Not implemented
+
 	/**
-	 * The interrupt mode to use when all instances are in use. Interrupt the the first instance.
-	 * 
+	 * The interrupt value to use to interrupt any currently playing instance with the same source.
 	 * @property INTERRUPT_ANY
-	 * 
+	 * @type String
+	 * @default any
 	 * @static
-	 * @default 1
-	 * @type Number
-	 * 
 	 */
-	SoundJS.INTERRUPT_ANY = 1;
-	
+	SoundJS.INTERRUPT_ANY = "any";
+
 	/**
-	 * The interrupt mode to use when all instances are in use. Interrupt the sound that is at the earliest position.
-	 * 
+	 * The interrupt value to use to interrupt the earliest currently playing instance with the same source.
 	 * @property INTERRUPT_EARLY
-	 *
+	 * @type String
+	 * @default early
 	 * @static
-	 * @default 2
-	 * @type Number
 	 */
-	SoundJS.INTERRUPT_EARLY = 2;
-	
+	SoundJS.INTERRUPT_EARLY = "early";
+
 	/**
-	 * The interrupt mode to use when all instances are in use. Interrupt the sound that is at the latest position.
-	 *  
+	 * The interrupt value to use to interrupt the latest currently playing instance with the same source.
 	 * @property INTERRUPT_LATE
-	 * 
+	 * @type String
+	 * @default late
 	 * @static
-	 * @default 3
-	 * @type Number
-	 * 
 	 */
-	SoundJS.INTERRUPT_LATE = 3;
-	
+	SoundJS.INTERRUPT_LATE = "late";
+
 	/**
-	 * The interrupt mode to use when all instances are in use. Do not interrupt any sounds.
-	 * 
+	 * The interrupt value to use to interrupt no currently playing instances with the same source.
 	 * @property INTERRUPT_NONE
-	 * 
+	 * @type String
+	 * @default none
 	 * @static
-	 * @default 4
-	 * @type Number
 	 */
-	SoundJS.INTERRUPT_NONE = 4;
-	
+	SoundJS.INTERRUPT_NONE = "none";
+
+	// Important, implement playState in plugins with these values.
+
 	/**
-	 * The function to call whenever progress changes.
-	 * 
+	 * Defines the playState of an instance that is still initializing.
+	 * @property PLAY_INITED
+	 * @type String
+	 * @default playInited
 	 * @static
-	 * @type Function
 	 */
-	SoundJS.onProgress = null;
-	
+	SoundJS.PLAY_INITED = "playInited";
+
 	/**
-	 * The function to call when a loading sound times out. The timeout duration is determined by the AUDIO_TIMEOUT parameter.
-	 * 
-	 * @static 
-	 * @type Function
-	 */
-	SoundJS.onSoundTimeout = null;
-	
-	/**
-	 * The function to call when an error occurs loading a sound file.
-	 * 
+	 * Defines the playState of an instance that is currently playing or paused.
+	 * @property PLAY_SUCCEEDED
+	 * @type String
+	 * @default playSucceeded
 	 * @static
-	 * @type Function
 	 */
-	SoundJS.onSoundLoadError = null;
-	
+	SoundJS.PLAY_SUCCEEDED = "playSucceeded";
+
 	/**
-	 * The function to call when a sound has finished loading.
-	 * 
+	 * Defines the playState of an instance that was interrupted by another instance.
+	 * @property PLAY_INTERRUPTED
+	 * @type String
+	 * @default playInterrupted
 	 * @static
-	 * @type Function
 	 */
-	SoundJS.onSoundLoadComplete = null;
-	
+	SoundJS.PLAY_INTERRUPTED = "playInterrupted";
+
 	/**
-	 * The function to call when all sounds in the preload queue have finished loading.
-	 * 
+	 * Defines the playState of an instance that completed playback.
+	 * @property PLAY_FINISHED
+	 * @type String
+	 * @default playFinished
 	 * @static
-	 * @type Function
 	 */
-	SoundJS.onLoadQueueComplete = null;
-	
+	SoundJS.PLAY_FINISHED = "playFinished";
+
 	/**
-	 * The function to call when a sound finishes playing.
-	 *
+	 * Defines the playState of an instance that failed to play. This is usually caused by a lack of available channels
+	 * when the interrupt mode was "INTERRUPT_NONE", the playback stalled, or the sound could not be found.
+	 * @property PLAY_FAILED
+	 * @type String
+	 * @default playFailed
 	 * @static
-	 * @type Function
 	 */
-	SoundJS.onSoundComplete = null;
-	
-	
+	SoundJS.PLAY_FAILED = "playFailed";
+
 	/**
-	 * An array containing all of the sound objects created by this manager.
-	 * 
-	 * @property soundHash
-	 * @type Array
-	 * @protected
-	 *
+	 * The currently active plugin. If this is null, then no plugin could be initialized.
+	 * If no plugin was specified, only the HTMLAudioPlugin is tested.
+	 * @property activePlugin
+	 * @type Object
+	 * @default null
+	 * @static
 	 */
-	SoundJS.soundHash = [];
-	
+	SoundJS.activePlugin = null;
+
+// Private
+	SoundJS.pluginsRegistered = false;
+	SoundJS.masterVolume = 1;
+	SoundJS.muted = false;
+	SoundJS.instances = [];
+	SoundJS.instanceHash = {};
+	SoundJS.idHash = null;
+
 	/**
-	 * An array containing all of the sounds waiting to be loaded.
-	 * 
-	 * @property loadQueue
-	 * @type Array
-	 * @protected
-	 * 
-	 */
-	SoundJS.loadQueue = [];
-	
-	/**
-	 * The number of items left in loading queue.
-	 * 
-	 * @property itemsToLoad
-	 * @type Number
+	 * Get the preload rules to be used by PreloadJS. This function should not be called, except by PreloadJS.
+	 * @return {Object} The callback, file types, and file extensions to use for preloading.
+	 * @static
 	 * @private
-	 * 
 	 */
-	SoundJS.itemsToLoad = 0;
-	
-	/**
-	 * The number of currently playing instances.
-	 * 
-	 * @property instanceCount
-	 * @type Number
-	 * @private
-	 * 
-	 */
-	SoundJS.instanceCount = 0;
-	
-	/**
-	 * The assumed maximum number of sounds, based on some of the browser limits we have encountered. Currently, this can not be determined via code or APIs.
-	 * 
-	 * @private
-	 * @static
-	 * 
-	 */
-	SoundJS.INST_MAX = 35;
-	
-	/**
-	 * Float error tolerance.
-	 * 
-	 * @private
-	 * 
-	 */
-	SoundJS.FT = 0.001;
-	
-	/**
-	 * The name of the JavaScript event dispatched by an audio tag when an error occurs.
-	 * 
-	 * @private
-	 * 
-	 */
-	SoundJS.AUDIO_ERROR = "error";
-	
-	/**
-	 * The name of the JavaScript event dispatched by an audio tag when loading progress changes.
-	 * 
-	 * @private
-	 * 
-	 */
-	SoundJS.AUDIO_PROGRESS = "progress";
-	
-	/**
-	 * The name of the JavaScript event dispatched by an audio tag when an a sound has finished loading.
-	 * 
-	 * @private
-	 * 
-	 */
-	SoundJS.AUDIO_COMPLETE = "canplaythrough";
-	
-	/**
-	 * The name of the JavaScript event dispatched by an audio tag when an a sound has finished playing.
-	 * 
-	 * @private
-	 * 
-	 */
-	SoundJS.AUDIO_ENDED = "ended";
-	
-	/**
-	 * The name of the JavaScript event dispatched by an audio tag when an a sound has stalled
-	 * 
-	 * @private
-	 * 
-	 */
-	SoundJS.AUDIO_STALLED = "stalled";
-	
-	/**
-	 * Master volume value.
-	 * 
-	 * @private
-	 * 
-	 */
-	SoundJS._master = 1;
-	
-	/**
-	 * Current Load progress.
-	 * 
-	 * @private
-	 * 
-	 */
-	SoundJS._currentLoad = 0;
-	
-	/**
-	 * Manage, load, and perform DOM injection of a sound. If the load queue is empty, it will trigger an immediate load,
-	 * otherwise it will be added to the end of the loading queue and loaded in sequence. If instances of a sound by that 
-	 * name already exist, the number of instances is increased and the element 'src' is ignored.
-	 * 
-	 * @method add
-	 * 
-	 * @param {String} name : The reference to this sound effect
-	 * @param {String} src : The filepath to load from
-	 * @param {Number} instances : The number of simultaneous versions of this sound you wish to play (max sounds limited by Browser and Computer).
-	 * 
-	 */
-	SoundJS.add = function(name, src, instances) {
-		SoundJS.loadQueue.push({name:name, src:src, instances:instances});
-		
-		// start loading if the queue is empty
-		if (SoundJS.loadQueue.length == 1) {
-			SoundJS.itemsToLoad = 1;
-			SoundJS.loadNext();
-		} else {
-			SoundJS.itemsToLoad++;
-		}
-	};
-	
-	/**
-	 * Manage, load, and perform DOM injections of a sound, or set of sounds.
-	 * This method is identical to the SoundJS.add() method, except:
-	 * 	1) An array of objects representing the parameters for each add call is required.
-	 * 	   [{name:'soundName', src:'sound.mp3', instances:1}, {name:'soundName', src:'sound.ogg', instances:4}]
-	 * 
-	 *  2) It waits until all items are added to the queue before beginning the load operation, which can 
-	 *	   even out erroneous finished loading calls in high speed environments such as local environments 
-	 *	   or with cached sounds.
-	 * 
-	 * @method addBatch
-	 * 
-	 * @param {Array} params : Array of 'name:, src:, instances:' objects.
-	 * 
-	 * @static
-	 * 
-	 */
-	SoundJS.addBatch = function(params) {
-		var l = params.length;
-		while(params.length) {
-			SoundJS.loadQueue.push(params.shift());
-		}
-		
-		// start loading the queue is empty
-		if (SoundJS.loadQueue.length == l) {
-			SoundJS.loadNext();
-			SoundJS.itemsToLoad = l;
-		} else {
-			SoundJS.itemsToLoad++;
-		}
-	};
-	
-	/**
-	 * Play the a sound file with the defined properties.
-	 *
-	 * The function returns one of three things; 
-	 *	1) The instance number played if sound was played successfully
-	 *	2) 'NaN' if an erroneous parameter is passed, or the interrupt method forbids playing the sound
-	 * 	3) -1 on a delayed call, as the instance being played cannot be determined till the delay is over
-	 *
-	 * If the instance is needed on a delayed call, the best practice is to delay the call like so:
-	 * 	e.g. setTimeout(function(){ myVar = SoundJS.play("sound")}, 3000);
-	 * 	Note: this closure is needed for full functionality cross browsers.
-	 * 
-	 * @method play
-	 * 
-	 * @param {String} name : Specifies the url to the sound file to play (as defined in the add functions).
-	 * @param {Number} interrupt = SoundJS.INTERRUPT_NONE: (optional) Defines the interrupt behavior if all instances are currently used.
-	 * @param {Number} volume = 1: (optional) Specifies to volume at which to play that sound instance.
-	 * @param {Boolean} loop = false: (optional) Sets the loop parameter on the sound instance.
-	 * @param {Number} delay = 0: (optional) Specifies how long to wait before looking for a sound instance to play the sound.
-	 * 
-	 * @return {Number} The index of the sound played, NaN, or -1.
-	 * 
-	 * @static
-	 * 
-	 */
-	SoundJS.play = function(name, interrupt, volume, loop, delay) {
-		// deal with illegal input		
-		if (name == null || SoundJS.soundHash[name] == null || SoundJS.soundHash[name].length == 0 ||
-			(interrupt != SoundJS.INTERRUPT_ANY && interrupt != SoundJS.INTERRUPT_EARLY && interrupt != SoundJS.INTERRUPT_LATE
-			&& interrupt != SoundJS.INTERRUPT_NONE && interrupt != null)) { return NaN; }
-		
-		// assign default values if null and correct inputs
-		if (interrupt == null) { interrupt = SoundJS.INTERRUPT_NONE; }
-		if (loop == null) { loop = false; }
-		if (!delay) { delay = 0; }
-		if (volume == null || volume > 1) { volume = 1; }
-		else if (volume < 0) { volume = 0; }
-		
-		// move onto playing
-		if (delay > 0) {
-			setTimeout(function(){SoundJS.beginPlaying(name, interrupt, volume, loop);}, delay); // closure to fix issues in IE9
-		} else {
-			return SoundJS.beginPlaying(name, interrupt, volume, loop);
-		}
-		
-		return -1;
-	};
-	
-	/**
-	 * Get the current master volume level
-	 * 
-	 * @method getMasterVolume
-	 * 
-	 * @static
-	 * 
-	 */
-	SoundJS.getMasterVolume = function() { return SoundJS._master; }
-	
-	
-	/**
-	 * Change the master volume level
-	 * 
-	 * @method setMasterVolume
-	 * 
-	 * @param {Number} value = null: (optional) New master volume.
-	 * 
-	 * @static
-	 * 
-	 */
-	SoundJS.setMasterVolume = function(value) {
-		// don't deal with no volume
-		if (Number(value) == null) { return; }
-		
-		// fix out of range
-		if (value < 0) { value = 0; }
-		else if (value > 1) { value = 1; }
-		
-		var i, l, o, old, sound;
-		
-		old = SoundJS._master;
-		SoundJS._master = value;
-		
-		if (SoundJS._master != old) {
-			// adjust all
-			for(sound in SoundJS.soundHash) {
-				o = SoundJS.soundHash[sound];
-				l = o.length;
-				for(i = 0; i < l; i++) {
-					o[i].volume = o[i].storedVolume * SoundJS._master;
-				}
-			}
-		}
-	};
-	
-	/**
-	 * Remove the specified number of sound instances from the DOM. WARNING: remove ignores interrupt 
-	 * modes and current actions, and will remove the last instances regardless of their status.
-	 * 
-	 * @method remove
-	 * 
-	 * @param {String} name = null: (optional) Note that the function removes all sounds if it is null.
-	 * @param {Number} count = null: (optional) Note that the function removes all instances if it is null.
-	 * 
-	 * @return {Boolean} Success of operation.
-	 * 
-	 * @static
-	 * 
-	 */
-	SoundJS.remove = function(name, count) {
-		var i, l, o, sound;
-		
-		// global remove
-		if (name == null){
-			for(sound in SoundJS.soundHash) {
-				o = SoundJS.soundHash[sound];
-				l = o.length;
-				do {
-					SoundJS.stop(sound, l-1);
-					o[l-1].currentSrc = "";
-					document.body.removeChild(o[l-1]);
-					o.pop();
-					l = o.length;
-					SoundJS.instanceCount--;
-				} while(l);
-			}
-		} else {
-			o = SoundJS.soundHash[name];
-			if (o == null) { return false; }
-			l = o.length;
-			
-			// sound remove
-			if (count == null) {
-				do {
-					SoundJS.stop(name, l-1);
-					o[l-1].currentSrc = "";
-					document.body.removeChild(o[l-1]);
-					o.pop();
-					l = o.length;
-					SoundJS.instanceCount--;
-				} while(l);
-			// count remove
-			} else {
-				if (count <= 0 || l <= 0) { return false; }
-				l--;
-				
-				for(i = 0; i <= l && i < count; i++) {
-					SoundJS.stop(name, l-i);
-					o[l-i].currentSrc = "";
-					document.body.removeChild(o[l-i]);
-					o.pop();
-					SoundJS.instanceCount--;
-				}
-			}
-		}
-		
-		return true;
-	};
-	
-	/**
-	 * Adjust the volume of specified instance(s) of this sound.
-	 * 
-	 * @method setVolume
-	 * 
-	 * @param {String} value : The volume to set the target to.
-	 * @param {String} name = null: (optional) If null the function adjusts all sounds.
-	 * @param {Number} instance = null: (optional) If null the function adjusts all instances.
-	 * 
-	 * @return {Boolean} Success of operation.
-	 * 
-	 * @static
-	 * 
-	 */
-	SoundJS.setVolume = function(value, name, instance) {
-		var i, l, o, sound, stored;
-		
-		// don't deal with no volume
-		if (value == null) { return false; }
-		stored = value;
-		value = value * SoundJS._master;
-		
-		// global volume adjust
-		if (name == null){
-			for(sound in SoundJS.soundHash) {
-				o = SoundJS.soundHash[sound];
-				l = o.length;
-				for(i = 0; i < l; i++) {
-					o[i].storedVolume = value;
-					o[i].volume = value;
-				}
-			}
-		} else {
-			o = SoundJS.soundHash[name];
-			if (o == null) { return false; }
-			l = o.length;
-				
-			// sound volume adjust
-			if (instance == null) {
-				for(i = 0; i < l; i++) {
-					o[i].storedVolume = value;
-					o[i].volume = value;
-				}
-			// instance volume adjust
-			} else {
-				if (l <= instance) { return false; }
-				o[instance].storedVolume = value;
-				o[instance].volume = value;
-			}
-		}
-		
-		return true;
-	};
-	
-	/**
-	 * Get the volume of a sound instance. If no instance is provided the volume of the first instance will be returned.
-	 *
-	 * @method getVolume
-	 *
-	 * @param {String} name = null: (optional) If null the function adjusts all sounds.
-	 * @param {Number} instance = null: (optional) If null the function gets the first instance.
-	 *
-	 * @return {Number} the volume of the specified instance or -1 if the instance does not exist.
-	 *
-	 * @static
-	 */
-	SoundJS.getVolume = function(name, instance) {
-		var o = SoundJS.soundHash[name];
-		if (o == null || o.length == 0) { return -1; }
-		if (instance == null) {
-			return o[1].storedVolume;
-		} else {
-			if (o.length < instance) { return -1; }
-			return o[instance].storedVolume;
+	SoundJS.getPreloadHandlers = function() {
+		return {
+			callback: SoundJS.proxy(SoundJS.initLoad, SoundJS),
+			types: ["sound"],
+			extensions: ["mp3", "ogg", "wav"]
 		}
 	}
-	
+
 	/**
-	 * Specify the mute value of specified instance(s) of this sound.
-	 * 
-	 * @method setMute
-	 * 
-	 * @param {String} isMuted : Whether or not the target is muted.
-	 * @param {String} name = null: (optional) Note: The function adjusts all sounds if the value is null.
-	 * @param {Array} instance = null: (optional) Note: The function adjusts all instances if the value is null.
-	 * 
-	 * @return {Boolean} Success of operation.
-	 * 
+	 * Register a list of plugins, in order of precedence.
+	 * @method registerPlugins
+	 * @param {Array} plugins An array of plugins to install.
+	 * @return {Boolean} Whether a plugin was successfully initialized.
 	 * @static
-	 * 
 	 */
-	SoundJS.setMute = function(isMuted, name, instance) {
-		var i, l, o, sound;
-		
-		// don't deal with no volume
-		if (isMuted == null) { return false; }
-		
-		// global volume adjust
-		if (name == null){
-			for(sound in SoundJS.soundHash) {
-				o = SoundJS.soundHash[sound];
-				l = o.length;
-				for(i = 0; i < l; i++) {
-					o[i].muted = isMuted;
-				}
-			}
-		} else {
-			o = SoundJS.soundHash[name];
-			if (o == null) { return false; }
-			l = o.length;
-				
-			// sound volume adjust
-			if (instance == null) {
-				for (i = 0; i < l; i++) {
-					o[i].muted = isMuted;
-				}
-			// instance volume adjust
-			} else {
-				if (l <= instance) { return false; }
-				o[instance].muted = isMuted;
+	SoundJS.registerPlugins = function(plugins) {
+		SoundJS.pluginsRegistered = true;
+		for (var i=0, l=plugins.length; i<l; i++) {
+			var plugin = plugins[i];
+			if (plugin == null) { continue; } // In case a plugin is not defined.
+			// Note: Each plugin is passed in as a class reference, but we store the activePlugin as an instances
+			if (plugin.isSupported()) {
+				SoundJS.activePlugin = new plugin();
+				//TODO: Check error on initialization?
+				return true;
 			}
 		}
-		
-		return true;
-	};
-	
+		return false;
+	}
+
 	/**
-	 * Pause specified instance(s) of this sound.
-	 * 
-	 * @method pause
-	 * 
-	 * @param {String} name = null: (optional) If null the function adjusts all sounds.
-	 * @param {Number} instance = null: (optional) If null the function adjusts all instances.
-	 * 
-	 * @return {Boolean} Success of operation.
-	 * 
+	 * Register a SoundJS plugin. Plugins handle the actual playing
+	 * of audio. By default the HTMLAudio plugin will be installed if
+	 * no other plugins are present when the user starts playback.
+	 * @method registerPlugin
+	 * @param {Object} plugin The plugin class to install.
+	 * @return {Boolean} Whether the plugin was successfully initialized.
 	 * @static
-	 * 
 	 */
-	SoundJS.pause = function(name, instance) {
-		var i, l, o, sound;
-		
-		// global pause
-		if (name == null){
-			for(sound in SoundJS.soundHash) {
-				o = SoundJS.soundHash[sound];
-				l = o.length;
-				for(i = 0; i < l; i++) {
-					o[i].pause();
-				}
-			}
-		} else {
-			o = SoundJS.soundHash[name];
-			if (o == null) { return false; }
-			l = o.length;
-			
-			// sound pause
-			if (instance == null) {
-				for(i = 0; i < l; i++) {
-					o[i].pause();
-				}
-			// instance pause
-			} else {
-				if (l <= instance) { return false; }
-				o[instance].pause();
-			}
+	SoundJS.registerPlugin = function(plugin) {
+		SoundJS.pluginsRegistered = true;
+		if (plugin.isSupported()) {
+			SoundJS.activePlugin = new plugin();
+			SoundJS.log("initialize " + SoundJS.activePlugin.toString());
+			return true;
 		}
-		
-		return true;
-	};
-	
+		return false;
+	}
+
 	/**
-	 * Resume specified instance(s) of this sound.
-	 * 
-	 * @method resume
-	 * 
-	 * @param {String} name = null: (optional) If null the function adjusts all sounds.
-	 * @param {String} instance = null: (optional) If null the function adjusts all instances.
-	 * 
-	 * @return {Boolean} Success of operation.
-	 * 
+	 * Determines if SoundJS has been initialized, and a plugin has been activated.
+	 * @method isReady
+	 * @return {Boolean} If SoundJS has initialized a plugin.
 	 * @static
-	 * 
 	 */
-	SoundJS.resume = function(name, instance) {
-		var i, l, o, sound;
-		
-		// global resume
-		if (name == null){
-			for(sound in SoundJS.soundHash) {
-				l = SoundJS.soundHash[sound].length;
-				for(i = 0; i < l; i++) {
-					o = SoundJS.soundHash[sound][i];
-					if (o.loop || (o.currentTime != o.duration && o.currentTime != 0)){
-						o.play();
-					}
-				}
-			}
-		} else {
-			if (SoundJS.soundHash[name] == null) { return false; }
-			l = SoundJS.soundHash[name].length;
-			
-			// sound resume
-			if (instance == null) {
-				for(i = 0; i < l; i++) {
-					o = SoundJS.soundHash[name][i];
-					if (o.loop || (o.currentTime != o.duration && o.currentTime != 0)){
-						o.play();
-					}
-				}
-			// instance resume
-			} else {
-				if (l <= instance) { return false; }
-				o = SoundJS.soundHash[name][instance];
-				if (o.loop || (o.currentTime != o.duration && o.currentTime != 0)){
-					o.play();
-				}
-			}
-		}
-		
-		return true;
-	};
-	
+	SoundJS.isReady = function() {
+		return (SoundJS.activePlugin != null);
+	}
+
 	/**
-	 * Stop specified instance(s) of this sound.
-	 * 
-	 * @method stop
-	 * 
-	 * @param {String} name = null: (optional) If null the function adjusts all sounds.
-	 * @param {String} instance = null: (optional) If null the function adjusts all instances.
-	 * 
-	 * @return {Boolean} Success of operation.
-	 * 
+	 * Get the active plugin's capabilities.
+	 * @method getCapabilities
+	 * @return {Object} An object containing the capabilities of the active plugin.
 	 * @static
-	 * 
 	 */
-	SoundJS.stop = function(name, instance) {
-		var i, l, o, sound;
-		
-		// global stop
-		if (name == null){
-			for(sound in SoundJS.soundHash) {
-				l = SoundJS.soundHash[sound].length;
-				for(i = 0; i < l; i++) {
-					o = SoundJS.soundHash[sound][i];
-					try { o.currentTime = 0; } catch(e) {} // Firefox chokes on this for stopped sounds.
-					o.pause();
-				}
-			}
-		} else {
-			if (SoundJS.soundHash[name] == null) { return false; }
-			l = SoundJS.soundHash[name].length;
-			
-			// sound stop
-			if (instance == null) {
-				for(i = 0; i < l; i++) {
-					o = SoundJS.soundHash[name][i];
-					o.currentTime = 0;
-					o.pause();
-				}
-			// instance stop
-			} else {
-				if (l <= instance) { return false; }
-				o = SoundJS.soundHash[name][instance];
-				o.currentTime = 0;
-				o.pause();
-			}
-		}
-		
-		return true;
-	};
-	
+	SoundJS.getCapabilities = function() {
+		return SoundJS.activePlugin ? SoundJS.activePlugin.capabilities : null;
+	}
+
 	/**
-	 * Check to see if specified sound is loaded/valid.
-	 * If the value of the name is null, check all sounds are loaded.
-	 *
-	 * @method isLoaded
-	 *
-	 * @param {String} name = null: (optional) The sound to check.
-	 * 
-	 * @return {Boolean} Indicating if the specified sound is valid & loaded 
-	 * 
+	 * Get a specific capability of the active plugin
+	 * @method getCapability
+	 * @param {String} key The capability to retrieve
+	 * @return {String | Number | Boolean} The capability value.
 	 * @static
-	 * 
 	 */
-	SoundJS.isLoaded = function(name) {
-		var result = true;
-		var sound;
-			
-		if (name == null) {
-			// global isLoaded
-			for(sound in SoundJS.soundHash) {
-				result = result && SoundJS.soundHash[sound] && SoundJS.soundHash[sound][0] && SoundJS.soundHash[sound][0].loaded;
-				if (!result) { return result; }
-			}
-		} else {
-			// sound isLoaded
-			return SoundJS.soundHash[name] && SoundJS.soundHash[name][0] && SoundJS.soundHash[name][0].loaded;
-		}
-		
-		return result;
-	};
-	
+	SoundJS.getCapability = function(key) {
+		if (SoundJS.activePlugin == null) { return null; }
+		return SoundJS.activePlugin.capabilities[key];
+	}
+
 	/**
-	 * List the number of instances used by a specific sound. 
-	 * If the value of the name is null, check the entire system
-	 *
-	 * @method getNumInstances
-	 * 
-	 * @param {String} name = null: (optional) Name of the sound to lookup.
-	 * 
-	 * @return {Number} The number of instances currently instantiated or -1 if an invalid name is passed in.
-	 * 
-	 * @static
-	 * 
-	 */
-	SoundJS.getNumInstances = function(name) {
-		var sound;
-		
-		if (name == null) {
-			return instanceCount;
-		} else if (SoundJS.soundHash[name]){
-			return SoundJS.soundHash[name].length;
-		} else {
-			return -1;
-		}
-	};
-	
-	/**
-	 * Get the maximum number of instances the browser can run.
-	 *
-	 * @method getMaxInstances
-	 * 
-	 * @return {Number} Assumption of maximum instances the browser can run,
-	 * the actual number varies from browser to browser and machine to machine, and
-	 * is largely based on the sound card.
-	 * 
-	 * @static
-	 * 
-	 */
-	SoundJS.getMaxInstances = function() {
-		return SoundJS.INST_MAX;
-	};
-	
-	/**
-	 * Get the current load progress for the sound queue.
-	 *
-	 * @method getCurrentLoadProgress
-	 * 
-	 * @return {Number} A number 0-1 indicating percentage loaded of the current loading queue.
-	 * 
-	 * @static
-	 * 
-	 */
-	SoundJS.getCurrentLoadProgress = function() {
-		//return (SoundJS.itemsToLoad - SoundJS.loadQueue.length - SoundJS._currentLoad) / SoundJS.itemsToLoad;
-		//TD: Fix
-		return (SoundJS.itemsToLoad - SoundJS.loadQueue.length - (1 - SoundJS._currentLoad)) / SoundJS.itemsToLoad; 
-	};
-	
-	/**
-	 * Get a reference to the DOM sound object by name and instance.
-	 *
-	 * @method getInstance
-	 *
-	 * @param {String} name : The sound name to find the instance in.
-	 * @param {String} instance : The specific instance to grab.
-	 * 
-	 * @return {Sound object} The Sound Element specified by name and instance or null.
-	 * 
-	 * @static
-	 * 
-	 */
-	SoundJS.getInstance = function(name, instance) {
-		if (name == null || instance < 0 || !SoundJS.soundHash[name] || !SoundJS.soundHash[name][instance]) { return null; }
-		
-		return SoundJS.soundHash[name][instance];
-	};
-	
-	/**
-	 * Internal function to actual begin playing a sound.
-	 * Use .play() instead for type checking and default paramters, calling this directly may crash.
-	 *
+	 * Process manifest items from PreloadJS.
+	 * @method initLoad
+	 * @param {String | Object} value The src or object to load
+	 * @param {String} type The optional type of object. Will likely be "sound".
+	 * @param {String} id An optional id
+	 * @param {Number | String | Boolean | Object} data Optional data associated with the item
+	 * @return {Object} An object with the modified values that were passed in.
 	 * @private
-	 * 
 	 */
-	SoundJS.beginPlaying = function(name, interrupt, volume, loop) {
-		// find correct instance
-		var i, result, target, examine;
-		var shouldReplace = false;
-		var instances = SoundJS.soundHash[name];
-		
-		// TODO: Determine if the audio is not loaded, or IO errors.
-		if (!instances[0].loaded) {
-			throw(new Error("Audio is not loaded. The source(s) are either not found, or the correct audio formats are not provided."));
+	SoundJS.initLoad = function(src, type, id, data) {
+		if (!SoundJS.checkPlugin(true)) { return false; }
+
+		var details = SoundJS.parsePath(src, type, id, data);
+		if (details == null) { return false; }
+
+		if (id != null) {
+			if (SoundJS.idHash == null) { SoundJS.idHash = {}; }
+			SoundJS.idHash[id] = details.src;
 		}
-		
-		var l = instances.length;
-		
-		for(i = 0; i < l; i++) {
-			// init
-			examine = instances[i];
-			if (target == null && interrupt != SoundJS.INTERRUPT_ANY && interrupt != SoundJS.INTERRUPT_NONE) {
-				target = examine;
-				result = i;
-			}
-			
-			// check interrupt types
-			if ((examine.currentTime >= (examine.duration - SoundJS.FT) && !examine.loop) ||
-				(examine.currentTime == 0 && examine.paused)) {
-				// unused
-				shouldReplace = true;
-				l = i;
-			} else {
-				// compare
-				if ((interrupt == SoundJS.INTERRUPT_EARLY && examine.currentTime < target.currentTime) ||
-					(interrupt == SoundJS.INTERRUPT_LATE && examine.currentTime > target.currentTime)){
-					shouldReplace = true;
-				}
-			}
-			
-			// use marked item instead
-			if (shouldReplace) {
-				target = examine;
-				result = i;
-			}
+
+		var ok = SoundChannel.create(details.src, data);
+		var instance = SoundJS.activePlugin.register(details.src, data);
+		if (instance != null) {
+			// If the instance returns a tag, return it instead for preloading.
+			if (instance.tag != null) { details.tag = instance.tag; }
+			else if (instance.src) { details.src = instance.src; }
+			// If the instance returns a complete handler, pass it on to the prelaoder.
+			if (instance.completeHandler != null) { details.handler = instance.completeHandler; }
 		}
-		
-		// if nothing is found replace the first one in the list
-		if (interrupt == SoundJS.INTERRUPT_ANY && !target){
-			target = instances[0];
-			result = 0;
-		}
-		
-		
-		
-		if (target) {
-			// play sound instance
-			target.loop = loop;
-			target.storedVolume = volume;
-			target.volume = volume * SoundJS._master;
-			target.currentTime = 0;
-			if (target.paused){ target.play(); }
-			
-			return result;
-		}
-		
-		// indicate no available instance
-		return -1;
-	};
-	
-	/** 
-	 * Advances the loading queue. Do not call manually, as it assumes the previous item has loaded succesfully
-	 * and may corrupt the loading procedure. Call .add() or .addBatch() instead.
-	 *
-	 * @private
-	 * 
-	 */
-	SoundJS.loadNext = function() {
-		if (SoundJS.loadQueue.length <= 0) {
-			if (SoundJS.onLoadQueueComplete) { SoundJS.onLoadQueueComplete(); }
-			return;
-		}
-		
-		// load next item in the queue.
-		var o = SoundJS.loadQueue.shift();
-		var instances = o.instances || 1;
-		var name = o.name;
-		var src = o.src;
-		
-		// build hash, and extend already existing names
-		var hash = SoundJS.soundHash[name];
-		if (hash == null) { hash = SoundJS.soundHash[name] = []; }
-		else if (hash.length) { src = hash[0].src; }
-		var init = hash.length;
-		
-		for(var i=init, l=init+instances; i<l; i++){
-			var audio = document.createElement("audio");
-			// only fire events on the first instance of a sound.
-			if (i == init) {
-				audio.timeoutId = setTimeout(function(){ SoundJS.handleAudioTimeout(audio);}, SoundJS.AUDIO_TIMEOUT);
-				audio.addEventListener(SoundJS.AUDIO_COMPLETE, SoundJS.handleAudioComplete, false);
-				audio.addEventListener(SoundJS.AUDIO_PROGRESS, SoundJS.handleProgress, false);
-				audio.addEventListener(SoundJS.AUDIO_STALLED, SoundJS.handleAudioStall, false); // Occasionally we get a stalled event instead of complete - but it still works.
-				audio.addEventListener(SoundJS.AUDIO_ERROR, SoundJS.handleAudioError, false);
-								
-				//var mediaEvents = ["abort", "canplay", "canplaythrough", "duratichange", "emptied", "ended", "error", "loadeddata", "loadedmetadata", "loadstart", "pause", "play", "playing", "progress", "ratechange", "seeked", "seeking", "stalled", "suspend", "timeupdate", "volumechange", "waiting"];
-				
-				// TODO: Retry.
-				audio.loaded = false;
-			}
-			
-			//TODO: Consider only making additional channels once the audio loads.
-			
-			audio.addEventListener(SoundJS.AUDIO_ENDED, SoundJS.handleEnded, false);
-			
-			// set correct id for lookup, loading method and data types
-			audio.setAttribute("id", name + "_" + i);
-			audio.setAttribute("preload", "auto");			
-			
-			// figure out sound specific data
-			var type;
-			if (src instanceof Array) {
-				for (var j=0, l2=src.length; j<l2; j++) {
-					var source = audio.appendChild(document.createElement("source"));
-					type = SoundJS.getType(src[j]);
-					source.setAttribute("type", type);
-					source.setAttribute("src", src[j]);
-				}
-				
-			} else {
-				type = SoundJS.getType(src);
-				audio.setAttribute("type", type);
-				audio.setAttribute("src", src);
-			}
-			
-			audio.load(); // iOS fix
-			
-			// include into list and document
-			document.body.appendChild(audio);
-			SoundJS.soundHash[name].push(audio);
-			SoundJS.instanceCount++;
-		}
-	};
-	
+		return details;
+	}
+
 	/**
-	 * Determine the type of a file.
-	 *
+	 * Parse the path of a manifest item
+	 * @method parsePath
+	 * @param {String | Object} value
+	 * @param {String} type
+	 * @param {String} id
+	 * @param {Number | String | Boolean | Object} data
+	 * @return {Object} A formatted object to load.
 	 * @private
-	 *
 	 */
-	SoundJS.getType = function(src) {
-		var type = src.slice(src.lastIndexOf(".")+1);
-		switch(type){
-			case "mp3" : return "audio/mpeg";
-			case "ogg" : return "audio/ogg";
-			case "wav" : return "audio/wav";
-			default : throw("'" + src + "' is not a recognized audio file"); //LM: Throw seems excessive. Maybe we should dispatch error and move one?
+	SoundJS.parsePath = function(value, type, id, data) {
+		// Assume value is string.
+		var sounds = value.split(SoundJS.DELIMITER);
+		var ret = {type:type||"sound", id:id, data:data, handler:SoundJS.handleSoundReady};
+		var found = false;
+		var c = SoundJS.getCapabilities();
+		for (var i=0, l=sounds.length; i<l; i++) {
+			var sound = sounds[i];
+			var point = sound.lastIndexOf(".");
+			var ext = sound.substr(point+1).toLowerCase();
+			var name = sound.substr(0, point).split("/").pop();
+			switch (ext) {
+				case "mp3":
+					if (c.mp3) { found = true; }
+					break;
+				case "ogg":
+					if (c.ogg) { found = true }
+					break;
+				case "wav":
+					if (c.wav) { found = true; }
+					break;
+				// TODO: Other cases.
+			}
+
+			if (found) {
+				ret.name = name;
+				ret.src = sound;
+				ret.extension = ext;
+				return ret;
+			}
 		}
 		return null;
 	}
-	
-	
+
+
+	/* ---------------
+	 Static API.
+	--------------- */
 	/**
-	 * The audio has finished playing. This happens only on non-looping audio.
-	 *
-	 * @private
-	 *
+	 * Play a sound, receive an instance to control
+	 * @method play
+	 * @param {String} value The src or ID of the audio.
+	 * @param {String} interrupt How to interrupt other instances of audio. Values are defined as constants on SoundJS.
+	 * @param {Number} delay The amount of time to delay the start of the audio. Delay is in milliseconds.
+	 * @param {Number} offset The point to start the audio. Offset is in milliseconds.
+	 * @param {Number} loop Determines how many times the audio loops when it reaches the end of a sound. Default is 0 (no loops). Set to -1 for infinite.
+	 * @param {Number} volume The volume of the sound, between 0 and 1
+	 * @param {Number} pan The left-right pan of the sound (if supported), between -1 (left) and 1 (right)
+	 * @return {SoundInstance} A SoundInstance that can be controlled after it is created.
+	 * @static
 	 */
-	SoundJS.handleEnded = function(event) {
-		if (SoundJS.onSoundEnded) {
-			var parts = this.id.split("_");
-			SoundJS.onSoundEnded(this, parts[0], parts[1]);	
-		}
-	}
-	
-	/**
-	 * Checks if callback exists and calls it with the name of sound having problems.
-	 * Do not call directly as this is an event listener.
-	 * 
-	 * @private
-	 * 
-	 */
-	SoundJS.handleAudioTimeout = function(audio) {
-		// audio object that timed out
-		if (SoundJS.onSoundTimeout) { 
-			var parts = audio.id.split("_");
-			SoundJS.onSoundTimeout(audio, parts[0], parts[1]);
-		}
-		//TODO: Indicate to the audio that it is done, but timed out. Maybe remove event listeners.
-		SoundJS.loadNext();
-	};
-	
-	
-	/** 
-	 * Checks if callback exists and calls it with updated progress.
-	 * Do not call directly as this is an event listener.
-	 * 
-	 * @private
-	 * 
-	 */
-	SoundJS.handleProgress = function(event) {
-		// This occasionally throws errors (???). Just skip it, since progress isn't super important.
-		try {
-			var e = this.buffered.end();
-		} catch (error) {
-			return;	
-		}
-		SoundJS._currentLoad = this.buffered.end()/this.duration;
-		if (SoundJS.onProgress) { SoundJS.onProgress(SoundJS.getCurrentLoadProgress()); }
-	};
-	
-	/** 
-	 * Checks if callback exists and calls it with the name of sound having problems.
-	 * Do not call directly as this is an event listener.
-	 * 
-	 * @private
-	 * 
-	 */
-	SoundJS.handleAudioError = function(event) {
-		clearTimeout(this.timeoutId);
-		
-		// do something about the error
-		if (SoundJS.onSoundLoadError) { 
-			var parts = this.id.split("_");
-			SoundJS.onSoundLoadError(this, parts[0], parts[1]);
-		}
-		SoundJS.loadNext();
-		
-		//TODO: Indicate that the sound failed.
-	};
-	
-	/**
-	 * Checks if callback exists and calls it with the name of sound finished.
-	 * Do not call directly as this is an event listener.
-	 * 
-	 * @private
-	 * 
-	 */
-	SoundJS.handleAudioComplete = function(event) {
-		var parts = this.id.split("_");
-		
-		// clean up refiring
-		this.removeEventListener(SoundJS.AUDIO_COMPLETE, SoundJS.handleAudioComplete, false);
-		clearTimeout(this.timeoutId);
-		
-		// set properties
-		this.loaded = true;
-		
-		// advance progress and/or fire events
-		if (SoundJS.onSoundLoadComplete) { SoundJS.onSoundLoadComplete(this, parts[0], parts[1]); }
-		SoundJS.loadNext();
-	};
-	
-	
-	/**
-	 * Recognizes a stall; however, delays it in case of event duplication with a load&stall firing
-	 * Do not call directly as this is an event listener.
-	 * 
-	 * @private
-	 * 
-	 */
-	SoundJS.handleAudioStall = function(event) {
-		var element = this;
-		setTimeout(function(){ SoundJS.testAudioStall(element, event) }, 0);
-	}
-	
-	
-	/**
-	 * Checks if callback exists and calls it with the name of sound stalling.
-	 * Do not call directly as this is handled similar to an event listener.
-	 *
-	 * Note that this is called on a delay by the above method, and as such
-	 * has be descoped to belong to SoundJS instead of the audio window which
-	 * why it requires a target element to be passed in.
-	 * 
-	 * @private
-	 * 
-	 */
-	SoundJS.testAudioStall = function(target, event) {
-		var parts = target.id.split("_");
-		
-		if(SoundJS.soundHash[parts[0]][parts[1]].loaded){
-			return;
-		}
-		
-		if (SoundJS.onStall) { 
-			SoundJS.onStall(target, parts[0], parts[1]);
-		}
-		
-		SoundJS.loadNext();
+	SoundJS.play = function (src, interrupt, delay, offset, loop, volume, pan) {
+		if (!SoundJS.checkPlugin(true)) { return null; }
+		src = SoundJS.getSrcFromId(src);
+		var instance = SoundJS.activePlugin.create(src);
+		return SoundJS.playInstance(instance, interrupt, delay, offset, loop, volume, pan);
 	}
 
-window.SoundJS = SoundJS;
+	/**
+	 * Play an instance. This is called by the static API, as well as from plugins.
+	 * @private
+	 */
+	SoundJS.playInstance = function(instance, interrupt, delay, offset, loop, volume, pan) {
+		interrupt = interrupt || SoundJS.INTERRUPT_NONE;
+		if (delay == null) { delay = 0; }
+		if (offset == null) { offset = 0; }
+		if (loop == null) { loop = 0; }
+		if (volume == null) { volume = 1; }
+		if (pan == null) { pan = 0; }
 
-/* //TODO: Change structure to use pattern like this.
-	function SoundJSElement(name, src) {
-		this.instances = [];	
-		this.name = name;
-		this.src = src;
-		this.canPlay = false;
-		this.loaded = false;
-		this.length = 0;
+		if (delay == 0) {
+			var ok = SoundJS.beginPlaying(instance, interrupt, offset, loop, volume, pan);
+			if (!ok) { return null; }
+		} else {
+			//Note that we can't pass arguments to proxy OR setTimeout (IE), so just wrap the function call.
+			setTimeout(function() {
+					SoundJS.beginPlaying(instance, interrupt, offset, loop, volume, pan);
+				}, delay); //LM: Can not stop before timeout elapses. Maybe add timeout interval to instance?
+		}
+
+		this.instances.push(instance);
+		this.instanceHash[instance.uniqueId] = instance;
+
+		return instance;
 	}
-	var p = SoundJSElement.prototype;
-	p.add = function(instance) {
-		this.instances.push(instance);	
-		this.length = this.instances.length;
-		
-		if (this.instances.length == 1) {
-			instance.addEventListener("canplaythrough", function(target) { instance.canplaythrough(); });
+
+	/**
+	 * Begin playback. This is called immediately, or after delay by SoundJS.beginPlaying
+	 * @private
+	 */
+	SoundJS.beginPlaying = function(instance, interrupt, offset, loop, volume, pan) {
+		if (!SoundChannel.add(instance, interrupt)) { return false; }
+		var result = instance.beginPlaying(offset, loop, volume, pan);
+		if (result == -1) {
+			this.instances.splice(this.instances.indexOf(instance), 1);
+			delete this.instanceHash[instance.uniqueId];
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Determine if a plugin has been initialized. Optionally initialize a default plugin.
+	 * @returns If a plugin is initialized.
+	 * @private
+	 */
+	SoundJS.checkPlugin = function(initializeDefault) {
+		if (SoundJS.activePlugin == null) {
+			if (initializeDefault && !SoundJS.pluginsRegistered) {
+				SoundJS.registerPlugin(SoundJS.HTMLAudioPlugin);
+			}
+			if (SoundJS.activePlugin == null) {
+				SoundJS.log("*** No Active Plugin Found on SoundJS");
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Get the source of a sound via the ID passed in with the manifest. If no ID is found
+	 * the value is passed back.
+	 * @method getSrcFromId
+	 * @param value The name or src of a sound.
+	 * @return {String} The source of the sound.
+	 * @static
+	 */
+	SoundJS.getSrcFromId = function(value) {
+		if (SoundJS.idHash == null || SoundJS.idHash[value] == null) { return value; }
+		return SoundJS.idHash[value];
+	}
+
+
+/* ---------------
+ Global controls
+--------------- */
+	/**
+	 * Set the volume of all sounds. This sets the volume value of all audio, and
+	 * is not a "master volume". Use setMasterVolume() instead.
+	 * @method setVolume
+	 * @param {Number} The volume to set on all sounds. The acceptable range is 0-1.
+	 * @param {String} id Optional, the specific sound ID to target.
+	 * @return {Boolean} If the volume was set.
+	 * @static
+	 */
+	SoundJS.setVolume = function(value, id) {
+		// don't deal with null volume
+		if (Number(value) == null) { return false; }
+		value = Math.max(0, Math.min(1, value));
+
+		return SoundJS.tellAllInstances("setVolume", id, value);
+		/*SoundJS.activePlugin.setVolume(value, SoundJS.getSrcFromId(id));*/
+		//return true;
+	}
+
+	/**
+	 * Get the master volume. All sounds multiply their current volume against the master volume.
+	 * @method getMasterVolume
+	 * @return {Number} The master volume
+	 * @static
+	 */
+	SoundJS.getMasterVolume = function() { return SoundJS.masterVolume; }
+	/**
+	 * To set the volume of all instances at once, use the setVolume() method.
+	 * @method setMasterVolume
+	 * @param {Number} value The master volume to set.
+	 * @return {Boolean} If the master volume was set.
+	 * @static
+	 */
+	SoundJS.setMasterVolume = function(value) {
+		SoundJS.masterVolume = value;
+		return SoundJS.tellAllInstances("setMasterVolume", null, value);
+	}
+
+	/**
+	 * Mute/Unmute all audio. Note that muted audio still plays at 0 volume, and that
+	 * this method just sets the mute value of each instance, and not a "global mute".
+	 * @method setMute
+	 * @param {Boolean} isMuted Whether the audio should be muted or not.
+	 * @param {String} id The specific sound ID (set) to target.
+	 * @return {Boolean} If the mute was set.
+	 * @static
+	 */
+	SoundJS.setMute = function(isMuted, id) {
+		return SoundJS.tellAllInstances("mute", id, isMuted);
+		//LM: Note that there is no "global" mute. Mute just handles all instances.
+	}
+
+	/**
+	 * Pause all instances.
+	 * @method pause
+	 * @param id The specific sound ID (set) to target.
+	 * @return If the audio was paused or not.
+	 * @static
+	 */
+	SoundJS.pause = function(id) {
+		return SoundJS.tellAllInstances("pause", id);
+	}
+
+	/**
+	 * Resume all instances. Note that the pause/resume methods do not work independantly
+	 * of each instance's paused state. If one instance is already paused when the SoundJS.pause
+	 * method is called, then it will resume when this method is called.
+	 * @method resume
+	 * @param id The specific sound ID (set) to target.
+	 * @return If the audio was resumed or not
+	 * @static
+	 */
+	SoundJS.resume = function(id) {
+		return SoundJS.tellAllInstances("resume", id);
+	}
+
+	/**
+	 * Stop all audio (Global stop).
+	 * @method stop
+	 * @param id The specific sound ID (set) to target.
+	 * @return If the audio was stopped or not.
+	 * @static
+	 */
+	SoundJS.stop = function(id) {
+		return SoundJS.tellAllInstances("stop", id);
+	}
+
+	/**
+	 * Get a SoundInstance by a unique id. It is often useful to store audio
+	 * instances by id (in form elements for example), so this method provides
+	 * a useful way to access the instances via their IDs.
+	 * @method getInstanceById
+	 * @param uniqueId The id to use as lookup.
+	 * @return {SoundInstance} The sound instance with the specified ID.
+	 * @static
+	 */
+	SoundJS.getInstanceById = function(uniqueId) {
+		return this.instanceHash[uniqueId];
+	}
+
+	/**
+	 * A sound has completed playback, been interrupted, failed, or been stopped.
+	 * Remove instance management. It will be added again, if the sound re-plays.
+	 * Note that this method is called from the instances.
+	 * @method playFinished
+	 * @param {SoundInstance} instance The instance that finished playback.
+	 * @private
+	 */
+	SoundJS.playFinished = function(instance) {
+		SoundChannel.remove(instance);
+		this.instances.splice(this.instances.indexOf(instance), 1);
+		// Note: Keep in instance hash.
+	}
+
+	/**
+	 * Call a method on all instances. Passing an optional ID will filter the event
+	 * to only sounds matching that id (or source).
+	 * @private
+	 */
+	SoundJS.tellAllInstances = function(command, id, value) {
+		if (this.activePlugin == null) { return false; }
+		var src = this.getSrcFromId(id);
+		for (var i=this.instances.length-1; i>=0; i--) {
+			var instance = this.instances[i];
+			if (src != null && instance.src != src) { continue; }
+			switch (command) {
+				case "pause":
+					instance.pause(); break;
+				case "resume":
+					instance.resume(); break;
+				case "setVolume":
+					instance.setVolume(value); break;
+				case "setMasterVolume":
+					instance.setMasterVolume(value); break;
+				case "mute":
+					instance.mute(value); break;
+				case "stop":
+					instance.stop(); break;
+				case "setPan":
+					instance.setPan(value); break;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Public proxy for SoundJS methods.
+	 * @method proxy
+	 * @param {Function} method The method name to call.
+	 * @param {Object} scope The scope to call the method name on.
+	 * @return {Function} a wrapper function that calls the specified method on the specified scope.
+	 * @static
+	 */
+	SoundJS.proxy = function(method, scope) {
+		return function() {
+			return method.apply(scope, arguments);
 		}
 	}
-	p.remove = function(instance) {
-		this.instances.splice(instance, 1);
-		this.length = this.instances.length;
+
+	/**
+	 * Debug function wraps console to prevent issues.
+	 * @method log
+	 * @static
+	 */
+	SoundJS.log = function() {
+        //var log = Function.prototype.bind.call(console.log, console);
+        //log.apply(console, arguments);
 	}
-	p.canplaythrough = function() {
-		this.loaded = true;	
+
+
+	// Put SoundJS on window for Global Access
+	window.SoundJS = SoundJS;
+
+
+
+
+
+	/**
+	 * SoundChannel manages the number of active instances
+	 * @class SoundChannel
+	 * @param src The source of the instances
+	 * @param max The number of instances allowed
+	 * @private
+	 */
+	function SoundChannel(src, max) {
+		this.init(src, max);
 	}
-	
-window.SoundJSElement = SoundJSElement;*/
+
+/* ------------
+   Static API
+------------ */
+	/**
+	 * A hash of channel instances by src.
+	 * @private
+	 */
+	SoundChannel.channels = {};
+	/** Create a sound channel.
+	 * @private
+	 */
+	SoundChannel.create = function(src, max) {
+		var channel = SoundChannel.get(src);
+		if (channel == null) {
+			SoundChannel.channels[src] = new SoundChannel(src, max);
+		} else {
+			channel.max += max;
+		}
+	}
+	/** Add an instance to a sound channel.
+	 * @private
+	 */
+	SoundChannel.add = function(instance, interrupt) {
+		var channel = SoundChannel.get(instance.src);
+		if (channel == null) { return false; }
+		return channel.add(instance, interrupt);
+	}
+	/** Remove an instace from its channel.
+	 * @private
+	 */
+	SoundChannel.remove = function(instance) {
+		var channel = SoundChannel.get(instance.src);
+		if (channel == null) { return false; }
+		channel.remove(instance);
+		return true;
+	}
+	/** Get a channel instance by its src.
+	 * @private
+	 */
+	SoundChannel.get = function(src) {
+		return SoundChannel.channels[src];
+	}
+
+	var p = SoundChannel.prototype = {
+
+		/** The src of the channel
+		 * @private
+		 */
+		src: null,
+		/** The maximum number of instances in this channel
+		 * @private
+		 */
+		max: null,
+		/** The current number of active instances.
+		 * @private
+		 */
+		length: 0,
+
+		/**
+		 * Initialize the channel
+		 * @param src The source of the channel
+		 * @param max The maximum number of instances in the channel
+		 * @private
+		 */
+		init: function(src, max) {
+			this.src = src;
+			this.max = max || 1;
+			this.instances = [];
+		},
+
+		/**
+		 * Get an instance by index
+		 * @param index The index to return.
+		 * @private
+		 */
+		get: function(index) {
+			return this.instances[index];
+		},
+
+		/**
+		 * Add a new instance
+		 * @param instance The instance to add.
+		 * @private
+		 */
+		add: function(instance, interrupt) {
+			if (!this.getSlot(interrupt, instance)) {
+				return false;
+			};
+			this.instances.push(instance);
+			this.length++;
+			return true;
+		},
+
+		/**
+		 * Remove an instance
+		 * @param instance The instance to remove
+		 * @private
+		 */
+		remove: function(instance) {
+			var index = this.instances.indexOf(instance);
+			if (index == -1) { return false; }
+			this.instances.splice(index, 1);
+			this.length--;
+			return true;
+		},
+
+		/**
+		 * Get an available slot
+		 * @param interrupt
+		 * @private
+		 */
+		getSlot: function(interrupt, instance) {
+			var target, replacement;
+
+			var margin = SoundJS.activePlugin.FT || 0;
+
+			for (var i=0, l=this.max||100; i<l; i++) {
+				target = this.get(i);
+
+				// Available Space
+				if (target == null) {
+					return true;
+				} else if (interrupt == SoundJS.INTERRUPT_NONE) {
+					continue;
+				}
+
+				// First replacement candidate
+				if (i == 0) {
+					replacement = target;
+					continue;
+				}
+
+				// Audio is complete or not playing
+				if (target.playState == SoundJS.PLAY_FINISHED ||
+						target == SoundJS.PLAY_INTERRUPTED ||
+						target == SoundJS.PLAY_FAILED) {
+					replacement = target;
+
+				// Audio is a better candidate than the current target, according to playhead
+				} else if (
+						(interrupt == SoundJS.INTERRUPT_EARLY && target.getPosition() < replacement.getPosition()) ||
+						(interrupt == SoundJS.INTERRUPT_LATE && target.getPosition() > replacement.getPosition())) {
+					replacement = target;
+				}
+			}
+
+			if (replacement != null) {
+				replacement.interrupt();
+				this.remove(replacement);
+				return true;
+			}
+			return false;
+		},
+
+		toString: function() {
+			return "[SoundJS SoundChannel]";
+		}
+
+	}
+
+	// The SoundChannel is not added to Window
 
 }(window));

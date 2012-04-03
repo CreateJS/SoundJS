@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SoundJS: Preload & Sound APIs</title>
+
+<script language="javascript" src="http://code.createjs.com/preloadjs-0.1.0.min.js"></script>
+<script language="javascript" src="http://code.createjs.com/soundjs-0.2.0.min.js"></script>
+<script type="text/javascript" src="assets/soundjs.flashplugin-0.2.0.min.js"></script>
+<script>
+
+var queue;
+var displayStatus;
+function init() {
+	if (window.top == window) { start(); }
+}
+
+function start() {
+	displayStatus = document.getElementById("status");
+
+	// Create a single item to load.
+	var assetsPath = "assets/";
+	var item = {src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg", id:"music"};
+
+	SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
+
+	// Instantiate a queue.
+	queue = new PreloadJS();
+	queue.installPlugin(SoundJS); // Plug in SoundJS to handle browser-specific paths
+	queue.onComplete = loadComplete;
+	queue.onFileError = handleFileError;
+	queue.onProgress = handleProgress;
+	queue.loadFile(item, true);
+}
+
+function stop() {
+	if (queue != null) { queue.cancel(); }
+	SoundJS.stop();
+}
+
+function handleFileError(o) {
+	// An error occurred.
+	displayStatus.innerText = "Error :("
+}
+
+function handleProgress(event) {
+	// Progress happened.
+	displayStatus.innerText = "Loading: " + (queue.progress.toFixed(2) * 100) + "%";
+}
+
+function loadComplete() {
+	// Load completed.
+	displayStatus.innerText = "Complete :)";
+	playSound("music");
+}
+
+function playSound(name, loop) {
+	// Play the sound using the ID created above.
+	return SoundJS.play(name);
+}
+</script>
+
+	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css" />
+</head>
+
+<body onload="init()">
+	<div class="content">
+		<h1 id="status">Loading...</h1>
+	</div>
+</body>
+</html>
