@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Using PreloadJS and SoundJS together</title>
+
+	<script src="http://code.createjs.com/preloadjs-0.1.0.min.js"></script>
+	<script src="http://code.createjs.com/soundjs-0.2.0.min.js"></script>
+	<script src="http://code.createjs.com/soundjs.flashplugin-0.2.0.min.js"></script>
+	<script>
+
+	function init() {
+		if (window.top == window) { start(); }
+	}
+
+	var preload;
+	function start() {
+		var assetsPath = "assets/";
+		var manifest = [
+		    {src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg", id:1, data: 1},
+		    {src:assetsPath+"Game-Spawn.mp3|"+assetsPath+"Game-Spawn.ogg", id:2, data: 1},
+		    {src:assetsPath+"Game-Shot.mp3|"+assetsPath+"Game-Shot.ogg", id:3, data: 1},
+
+		    {src:assetsPath+"GU-StealDaisy.mp3|"+assetsPath+"GU-StealDaisy.ogg", id:4, data: 1},
+		    {src:assetsPath+"Humm.mp3|"+assetsPath+"Humm.ogg", id:5, data: 1},
+		    {src:assetsPath+"R-Damage.mp3|"+assetsPath+"R-Damage.ogg", id:6, data: 1},
+
+		    {src:assetsPath+"Thunder1.mp3|"+assetsPath+"Thunder1.ogg", id:7, data: 1},
+		    {src:assetsPath+"S-Damage.mp3|"+assetsPath+"S-Damage.ogg", id:8, data: 1},
+		    {src:assetsPath+"U-CabinBoy3.mp3|"+assetsPath+"U-CabinBoy3.ogg", id:9, data: 1},
+
+		    {src:assetsPath+"ToneWobble.mp3|"+assetsPath+"ToneWobble.ogg", id:10, data: 1},
+		    {src:assetsPath+"Game-Death.mp3|"+assetsPath+"Game-Death.ogg", id:11, data: 1},
+		    {src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg", id:12, data: 1}
+		];
+
+		SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
+
+	    preload = new PreloadJS();
+	    //Install SoundJS as a plugin, then PreloadJS will initialize it automatically.
+	    preload.installPlugin(SoundJS);
+
+	    //Available PreloadJS callbacks
+	    preload.onFileLoad = function(event) {
+		    // Show the icon on loaded items.
+			var div = document.getElementById(event.id);
+		    div.style.backgroundImage = "url('assets/audioButtonSheet.png')";
+	    };
+
+	    //Load the manifest and pass 'true' to start loading immediately. Otherwise, you can call load() manually.
+	    preload.loadManifest(manifest, true);
+	}
+
+	function stop() {
+		if (preload != null) { preload.close(); }
+		SoundJS.stop();
+	}
+
+	function playSound(target) {
+	    //Play the sound: play (src, interrupt, delay, offset, loop, volume, pan)
+	    var instance = SoundJS.play(target.id, SoundJS.INTERRUPT_NONE, 0, 0, false, 1);
+		target.className = "gridBox active";
+		instance.onComplete = function(instance) {
+			target.className = "gridBox";
+		}
+
+	}
+	</script>
+
+	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css"/>
+<style>
+   body {
+       font-family: sans-serif;
+       font-size: 11px;
+   }
+
+   #imageGrid {
+	   width: 1000px;
+   }
+   .gridBox {
+		float: left;
+		background-repeat: no-repeat;
+		background-position: 0 0px;
+		background-color: #222;
+	    background-size: 320px 300px;
+		border: 0px solid #666;
+		width: 320px;
+		height: 100px;
+    }
+   .gridBox:hover {
+	   background-position: 0 -100px;
+	   background-color: #322;
+	   cursor: pointer;
+   }
+   .gridBox.active, .gridbox.active:hover {
+	   background-position: 0 -200px;
+	   cursor: auto;
+   }
+ </style>
+
+</head>
+
+<body onload="init();">
+<!-- We'll use the ID of the div to determine which audio file to play.
+These id's match the ones passed into the audioList array. -->
+<div id="imageGrid">
+    <div id="1" onclick="playSound(this)" class="gridBox"></div>
+    <div id="2" onclick="playSound(this)" class="gridBox"></div>
+    <div id="3" onclick="playSound(this)" class="gridBox"></div>
+    <div id="4" onclick="playSound(this)" class="gridBox"></div>
+    <div id="5" onclick="playSound(this)" class="gridBox"></div>
+    <div id="6" onclick="playSound(this)" class="gridBox"></div>
+    <div id="7" onclick="playSound(this)" class="gridBox"></div>
+    <div id="8" onclick="playSound(this)" class="gridBox"></div>
+    <div id="9" onclick="playSound(this)" class="gridBox"></div>
+    <div id="10" onclick="playSound(this)" class="gridBox"></div>
+    <div id="11" onclick="playSound(this)" class="gridBox"></div>
+    <div id="12" onclick="playSound(this)" class="gridBox"></div>
+</div>
+<div style="margin-left: 500px">
+	<!--
+    <p><strong>Advanced Options</strong></p>
+    <p>Interrupt Mode:<select id="interruptInput" style="display: inline-block"><option value="any">INTERRUPT_ANY</option><option value="early">INTERRUPT_EARLY</option><option id="late">INTERRUPT_LATE</option><option value="none">INTERRUPT_NONE</option></select></p>
+    <p>Delay:<input id="delayInput" type="number" value="0" min="0" max="5" step=".5" /></p>
+    <p>Volume:<input id="volumeInput" type="number" value="100" min="0" max="100" step="5" /></p>-->
+</div>
+</body>
+</html>
