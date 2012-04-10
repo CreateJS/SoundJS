@@ -49,7 +49,6 @@
 	 * @static
 	 */
 	HTMLAudioPlugin.isSupported = function() {
-		if (BrowserDetect && BrowserDetect.isIOS) { return false; }
 		HTMLAudioPlugin.generateCapabilities();
 		var t = HTMLAudioPlugin.tag;
 		if (t == null || t.canPlayType == null) { return false; }
