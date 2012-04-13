@@ -1,4 +1,32 @@
-/* Copyright */
+/*
+* SoundJS
+* Visit http://createjs.com/ for documentation, updates and examples.
+*
+*
+* Copyright (c) 2012 gskinner.com, inc.
+*
+* Permission is hereby granted, free of charge, to any person
+* obtaining a copy of this software and associated documentation
+* files (the "Software"), to deal in the Software without
+* restriction, including without limitation the rights to use,
+* copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following
+* conditions:
+*
+* The above copyright notice and this permission notice shall be
+* included in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+* OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 /**
  * The SoundJS library manages the playback of audio in HTML, via plugins which
  * abstract the actual implementation, and allow multiple playback modes depending
@@ -23,9 +51,6 @@
 
 	//TODO: Timeouts
 	//TODO: Put Plugins on SoundJS.lib?
-
-	//TODO: Track number of booked channels. Needs discussion. We could do pre-booked channels
-		// TODO: Or available NOW channels. LM: Recommend former.
 
 	/**
 	 * The public API for creating sounds, and controlling the overall sound levels,
@@ -55,7 +80,7 @@
 	 * @type Number
 	 * @default 8000
 	 */
-	SoundJS.AUDIO_TIMEOUT = 8000; //TODO: Not implemented
+	SoundJS.AUDIO_TIMEOUT = 8000; //TODO: Not fully implemented
 
 	/**
 	 * The interrupt value to use to interrupt any currently playing instance with the same source.
@@ -208,7 +233,6 @@
 		SoundJS.pluginsRegistered = true;
 		if (plugin.isSupported()) {
 			SoundJS.activePlugin = new plugin();
-			SoundJS.log("initialize " + SoundJS.activePlugin.toString());
 			return true;
 		}
 		return false;
@@ -401,7 +425,6 @@
 				SoundJS.registerPlugin(SoundJS.HTMLAudioPlugin);
 			}
 			if (SoundJS.activePlugin == null) {
-				SoundJS.log("*** No Active Plugin Found on SoundJS");
 				return false;
 			}
 		}
@@ -571,29 +594,20 @@
 	}
 
 	/**
-	 * Public proxy for SoundJS methods.
+	 * A function proxy for SoundJS methods. By default, JavaScript methods do not maintain scope, so passing a
+	 * method as a callback will result in the method getting called in the scope of the caller. Using a proxy
+	 * ensures that the method gets called in the correct scope. All internal callbacks in SoundJS use this approach.
 	 * @method proxy
-	 * @param {Function} method The method name to call.
-	 * @param {Object} scope The scope to call the method name on.
-	 * @return {Function} a wrapper function that calls the specified method on the specified scope.
+	 * @param {Function} method The function to call
+	 * @param {Object} scope The scope to call the method name on
 	 * @static
+	 * @private
 	 */
 	SoundJS.proxy = function(method, scope) {
 		return function() {
 			return method.apply(scope, arguments);
 		}
 	}
-
-	/**
-	 * Debug function wraps console to prevent issues.
-	 * @method log
-	 * @static
-	 */
-	SoundJS.log = function() {
-        //var log = Function.prototype.bind.call(console.log, console);
-        //log.apply(console, arguments);
-	}
-
 
 	// Put SoundJS on window for Global Access
 	window.SoundJS = SoundJS;
@@ -618,10 +632,17 @@
 ------------ */
 	/**
 	 * A hash of channel instances by src.
+	 * @property channels
+	 * @static
 	 * @private
 	 */
 	SoundChannel.channels = {};
-	/** Create a sound channel.
+	/**
+	 * Create a sound channel.
+	 * @method create
+	 * @static
+	 * @param {String} src The source for the channel
+	 * @param {Number} max The maximum amount this channel holds.
 	 * @private
 	 */
 	SoundChannel.create = function(src, max) {
@@ -632,7 +653,12 @@
 			channel.max += max;
 		}
 	}
-	/** Add an instance to a sound channel.
+	/**
+	 * Add an instance to a sound channel.
+	 * @method add
+	 * @param {SoundInstance} instance The instance to add to the channel
+	 * @param {String} interrupt The interrupt value to use
+	 * @static
 	 * @private
 	 */
 	SoundChannel.add = function(instance, interrupt) {
@@ -640,7 +666,11 @@
 		if (channel == null) { return false; }
 		return channel.add(instance, interrupt);
 	}
-	/** Remove an instace from its channel.
+	/**
+	 * Remove an instace from its channel.
+	 * @method remove
+	 * @param {SoundInstance} instance The instance to remove from the channel
+	 * @static
 	 * @private
 	 */
 	SoundChannel.remove = function(instance) {
@@ -649,7 +679,11 @@
 		channel.remove(instance);
 		return true;
 	}
-	/** Get a channel instance by its src.
+	/**
+	 * Get a channel instance by its src.
+	 * @method get
+	 * @param {String} src The src to use to look up the channel
+	 * @static
 	 * @private
 	 */
 	SoundChannel.get = function(src) {
@@ -658,23 +692,31 @@
 
 	var p = SoundChannel.prototype = {
 
-		/** The src of the channel
+		/**
+		 * The src of the channel
+		 * @property src
 		 * @private
 		 */
 		src: null,
-		/** The maximum number of instances in this channel
+
+		/**
+		 * The maximum number of instances in this channel
+		 * @property max
 		 * @private
 		 */
 		max: null,
-		/** The current number of active instances.
+		/**
+		 * The current number of active instances.
+		 * @property length
 		 * @private
 		 */
 		length: 0,
 
 		/**
 		 * Initialize the channel
-		 * @param src The source of the channel
-		 * @param max The maximum number of instances in the channel
+		 * @method init
+		 * @param {String} src The source of the channel
+		 * @param {Number} max The maximum number of instances in the channel
 		 * @private
 		 */
 		init: function(src, max) {
@@ -685,7 +727,8 @@
 
 		/**
 		 * Get an instance by index
-		 * @param index The index to return.
+		 * @method get
+		 * @param {Number} index The index to return.
 		 * @private
 		 */
 		get: function(index) {
@@ -694,7 +737,8 @@
 
 		/**
 		 * Add a new instance
-		 * @param instance The instance to add.
+		 * @method add
+		 * @param {SoundInstance} instance The instance to add.
 		 * @private
 		 */
 		add: function(instance, interrupt) {
@@ -708,7 +752,8 @@
 
 		/**
 		 * Remove an instance
-		 * @param instance The instance to remove
+		 * @method remove
+		 * @param {SoundInstance} instance The instance to remove
 		 * @private
 		 */
 		remove: function(instance) {
@@ -721,7 +766,9 @@
 
 		/**
 		 * Get an available slot
-		 * @param interrupt
+		 * @method getSlot
+		 * @param {String} interrupt The interrupt value to use.
+		 * @param {SoundInstance} instance The sound instance the will go in the channel if successful.
 		 * @private
 		 */
 		getSlot: function(interrupt, instance) {
@@ -774,5 +821,22 @@
 	}
 
 	// The SoundChannel is not added to Window
+
+
+	/**
+	 * An additional module to detemermine the current browser, version, operating system, and other environment variables.
+	 */
+	function BrowserDetect() {}
+
+	BrowserDetect.init = function() {
+		var agent = navigator.userAgent;
+		BrowserDetect.isFirefox = (agent.indexOf("Firefox")> -1);
+		BrowserDetect.isOpera = (window.opera != null);
+		BrowserDetect.isIOS = agent.indexOf("iPod") > -1 || agent.indexOf("iPhone") > -1 || agent.indexOf("iPad") > -1;
+	}
+
+	BrowserDetect.init();
+
+	SoundJS.BrowserDetect = BrowserDetect;
 
 }(window));

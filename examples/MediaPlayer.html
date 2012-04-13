@@ -1,0 +1,254 @@
+<html>
+<head>
+	<title>SoundJS: Media Player Example</title>
+
+	<script type="text/javascript" src="http://code.createjs.com/preloadjs-0.1.0.min.js"></script>
+	<script type="text/javascript" src="http://code.createjs.com/soundjs-0.2.0.min.js"></script>
+	<script type="text/javascript" src="assets/soundjs.flashplugin-0.2.0.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+
+	<script type="text/javascript">
+
+		var preload;
+
+		function init() {
+			if (window.top != window) {
+				document.getElementById("header").style.display = "none";
+			}
+
+			SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
+			if (!SoundJS.checkPlugin(true)) {
+				document.getElementById("error").style.display = "block";
+				document.getElementById("content").style.display = "none";
+				return;
+			}
+
+			//$("#position").css("display", "none");
+			//$("#playPauseBtn").attr("disabled", true);
+			//$("#stopBtn").attr("disabled", true);
+			$("#track").css("display", "none");
+
+			document.getElementById("loader").className = "loader";
+			var assetPath = "assets/";
+			var manifest = [
+				{src:assetPath+"M-GameBG.mp3|"+assetPath+"M-GameBG.ogg", id:"music"}
+			];
+
+			preload = new PreloadJS();
+			preload.onProgress = handleProgress;
+			preload.onComplete = handleLoadComplete;
+			preload.installPlugin(SoundJS);
+			preload.loadManifest(manifest);
+			$("#loading").text("Loading...")
+		}
+
+		function stop() {
+			if (preload != null) { preload.cancel(); }
+			SoundJS.stop();
+
+			//$("#position").css("display", "none");
+			//$("#playPauseBtn").attr("disabled", true);
+			//$("#stopBtn").attr("disabled", true);
+		}
+
+		function handleProgress(event) {
+			//$("#progress").width(262*preload.progress);
+			$("#loading").text("Loading: " + (preload.progress*100|0) + "%");
+		}
+
+		var instance;
+		var positionInterval;
+		var seeking = false;
+
+		function handleLoadComplete(preloader) {
+			document.getElementById("loader").className = "";
+
+			$("#track").css("display", "block");
+			$("#loading").css("display", "none");
+			//$("#progress").css("display", "none");
+			//$("#position").css("display", "block");
+
+			instance = SoundJS.play("music");
+			instance.onComplete = function() {
+				clearInterval(positionInterval);
+				$("#playBtn").removeClass("pauseBtn").addClass("playBtn")
+				$("#stopBtn").attr("disabled", true);
+			}
+			//$("#playPauseBtn").attr("disabled", false);
+			$("#playBtn").removeClass("playBtn").addClass("pauseBtn");
+			$("#playBtn").click(function(event){
+				if (instance.playState == SoundJS.PLAY_FINISHED) {
+					instance.play();
+					console.log("PAUSED?",instance.paused)
+					$("#playBtn").removeClass("playBtn").addClass("pauseBtn");
+					trackTime();
+					return;
+				} else {
+					instance.paused ? instance.resume() : instance.pause();
+				}
+
+				if (instance.paused) {
+					$("#playBtn").removeClass("pauseBtn").addClass("playBtn");
+				} else {
+					$("#playBtn").removeClass("playBtn").addClass("pauseBtn");
+				}
+			});
+			$("#stopBtn").click(function(event){
+				instance.stop();
+				clearInterval(positionInterval);
+				$("#playBtn").removeClass("pauseBtn").addClass("playBtn");
+				$("#thumb").css("left", 0);
+			});
+			//$("#stopBtn").attr("disabled", false);
+
+			trackTime();
+
+			$("#thumb").mousedown(function(event) {
+				var div = $();
+				$("#player").append($("<div id='blocker'></div>"));
+				seeking = true;
+				$("#player").mousemove(function(event){
+					$("#thumb").css("left", Math.max(0, Math.min($("#track").width()-$("#thumb").width(), event.offsetX-$("#track").position().left)));
+				})
+				$("#player").mouseup(function(event){
+					seeking = false;
+					$(this).unbind("mouseup mousemove");
+					var pos = $("#thumb").position().left/$("#track").width();
+					instance.setPosition(pos*instance.getDuration());
+					$("#blocker").remove();
+				});
+			});
+		}
+var dragOffset;
+		function trackTime() {
+			positionInterval = setInterval(function(event) {
+				if(seeking) { return; };
+				$("#thumb").css("left", instance.getPosition()/instance.getDuration() * $("#track").width());
+			});
+		}
+
+	</script>
+
+	<link rel="stylesheet" href="assets/demoStyles.css"/>
+	<style type="text/css">
+		#player {
+			width: 451px;
+			height: 101px;
+			background-image: url('assets/mediaplayer/player.png');
+
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-select: none;
+		}
+		#blocker {
+			background-color: #f00;
+			opacity: 0;
+			width: 451px;
+			height: 101px;
+			cursor: pointer;
+		}
+		#player DIV {
+			position: absolute;
+		}
+		.button {
+			width: 64px;
+			height: 64px;
+			top: 31px;
+		}
+		#playBtn {
+			left: 324px;
+		}
+		.playBtn {
+			background-image: url('assets/mediaplayer/buttonPlay.png');
+		}
+		.playBtn:hover {
+			background-image: url('assets/mediaplayer/buttonPlayHover.png');
+		}
+		.pauseBtn {
+			background-image: url('assets/mediaplayer/buttonPause.png');
+		}
+		.pauseBtn:hover {
+			background-image: url('assets/mediaplayer/buttonPauseHover.png');
+		}
+		#stopBtn {
+			left: 387px;
+		}
+		.stopBtn {
+			background-image: url('assets/mediaplayer/buttonStop.png');
+		}
+		.stopBtn:hover {
+			background-image: url('assets/mediaplayer/buttonStopHover.png');
+		}
+
+		#labels {
+			top: 35px;
+			left: 37px;
+			position: absolute;
+		}
+		#player LABEL {
+			color: #336666;
+		}
+		#song {
+		}
+		#artist {
+			top: 52px;
+			left: 37px;
+		}
+
+		#track {
+			width: 262px;
+			height: 5px;
+			top: 78px;
+			left: 40px;
+			background-image: url("assets/mediaplayer/scubberBar.png");
+		}
+		/*#progress {
+			height: 5px;
+			background-image: url("assets/mediaplayer/scubberBar.png");
+		}*/
+		#thumb {
+			cursor: pointer;
+			background-image: url("assets/mediaplayer/scrubberPlayhead.png");
+			width: 16px;
+			height: 16px;
+			top: -5px;
+		}
+		.disabled {
+			opacity: 0.5;
+		}
+	</style>
+</head>
+<body onload="init()">
+
+	<div id="loader"></div>
+
+	<header id="header" class="SoundJS">
+	    <h1><span class="text-product">Sound<strong>JS</strong></span> Media Player</h1>
+		<p>A Simple Media Player using SoundJS and PreloadJS.</p>
+	</header>
+
+	<div id="content" class="content">
+		<div id="player">
+			<div id="playBtn" class="button playBtn"></div>
+			<div id="stopBtn" class="button stopBtn"></div>
+			<div id="labels">
+				<label id="song">Song: <strong>Pirates Love Daisies</strong></label><br />
+				<label id="artist">Artist: <strong>Washingtron</strong></label><br /><br />
+				<label id="loading">Waiting...</label>
+			</div>
+			<div id="track">
+				<div id="progress"></div>
+				<div id="thumb"></div>
+			</div>
+		</div>
+	</div>
+
+	<div id="error">
+		<h1>Sorry!</h1>
+		<p>SoundJS is not currently supported in your browser.</p>
+		<p>We are currently working on support for iOS. Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
+			if you see this in any other browsers.</p>
+	</div>
+
+</body>
+</html>

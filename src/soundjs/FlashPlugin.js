@@ -1,4 +1,32 @@
-/* Copyright */
+/*
+* FlashPlugin for SoundJS
+* Visit http://createjs.com/ for documentation, updates and examples.
+*
+*
+* Copyright (c) 2012 gskinner.com, inc.
+*
+* Permission is hereby granted, free of charge, to any person
+* obtaining a copy of this software and associated documentation
+* files (the "Software"), to deal in the Software without
+* restriction, including without limitation the rights to use,
+* copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following
+* conditions:
+*
+* The above copyright notice and this permission notice shall be
+* included in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+* OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 /**
  * @module SoundJS
  */
@@ -44,7 +72,7 @@
 	 * @static
 	 */
 	FlashPlugin.isSupported = function() {
-		if (BrowserDetect && BrowserDetect.isIOS) { return false; }
+		if (SoundJS.BrowserDetect.isIOS) { return false; }
 		FlashPlugin.generateCapabilities();
 		if (swfobject == null) {
 			return false;
@@ -290,30 +318,35 @@
 
 		/**
 		 * The callback that is fired when a sound has completed playback
+		 * @event onComplete
 		 * @private
 		 */
 		onComplete: null,
 
 		/**
 		 * The callback that is fired when a sound has completed playback, but has loops remaining.
+		 * @event onLoop
 		 * @private
 		 */
 		onLoop: null,
 
 		/**
 		 * The callback that is fired when a sound is ready to play.
+		 * @event onReady
 		 * @private
 		 */
 		onReady: null,
 
 		/**
 		 * The callback that is fired when a sound has failed to start.
+		 * @event onPlayFailed
 		 * @private
 		 */
 		onPlayFailed: null,
 
 		/**
 		 * The callback that is fired when a sound has been interrupted.
+		 * @event onPlayInterrupted
 		 * @private
 		 */
 		onPlayInterrupted: null,
@@ -512,27 +545,21 @@
 		// Calbacks
 		/**
 		 * The callback that fires when the load completes. This follows HTML tag naming.
-		 * @property onloaded
-		 * @type Function
-		 * @default null
+		 * @event onloaded
 		 * @private
 		 */
 		onloaded: null,
 
 		/**
 		 * The callback that fires as the load progresses. This follows HTML tag naming.
-		 * @property onprogress
-		 * @type Function
-		 * @default null
+		 * @event onprogress
 		 * @private
 		 */
 		onprogress: null,
 
 		/**
 		 * The callback that fires if the load hits an error.
-		 * @property onerror
-		 * @type Function
-		 * @default null
+		 * @event onerror
 		 * @private
 		 */
 		onError: null,

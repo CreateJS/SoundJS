@@ -1,4 +1,32 @@
-/* Copyright */
+/*
+* HTMLAudioPlugin for SoundJS
+* Visit http://createjs.com/ for documentation, updates and examples.
+*
+*
+* Copyright (c) 2012 gskinner.com, inc.
+*
+* Permission is hereby granted, free of charge, to any person
+* obtaining a copy of this software and associated documentation
+* files (the "Software"), to deal in the Software without
+* restriction, including without limitation the rights to use,
+* copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following
+* conditions:
+*
+* The above copyright notice and this permission notice shall be
+* included in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+* OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 /**
  * @module SoundJS
  */
@@ -49,7 +77,8 @@
 	 * @static
 	 */
 	HTMLAudioPlugin.isSupported = function() {
-		if (BrowserDetect && BrowserDetect.isIOS) { return false; }
+		if (SoundJS.BrowserDetect.isIOS) { return false; }
+
 		HTMLAudioPlugin.generateCapabilities();
 		var t = HTMLAudioPlugin.tag;
 		if (t == null || t.canPlayType == null) { return false; }
@@ -198,41 +227,31 @@
 
 		/**
 		 * The callback that is fired when a sound has completed playback
-		 * @property onComplete
-		 * @type Function
-		 * @default null
+		 * @event onComplete
 		 */
 		onComplete: null,
 
 		/**
 		 * The callback that is fired when a sound has completed playback, but has loops remaining.
-		 * @property onLoop
-		 * @type Function
-		 * @default null
+		 * @event onLoop
 		 */
 		onLoop: null,
 
 		/**
 		 * The callback that is fired when a sound is ready to play.
-		 * @property onReady
-		 * @type Function
-		 * @default null
+		 * @event onReady
 		 */
 		onReady: null,
 
 		/**
 		 * The callback that is fired when a sound has failed to start.
-		 * @property onPlayFailed
-		 * @type Function
-		 * @default null
+		 * @event onPlayFailed
 		 */
 		onPlayFailed: null,
 
 		/**
 		 * The callback that is fired when a sound has been interrupted.
-		 * @property onPlayInterrupted
-		 * @type Function
-		 * @default null
+		 * @event onPlayInterrupted
 		 */
 		onPlayInterrupted: null,
 
@@ -319,6 +338,7 @@
 
 		handleSoundReady: function(event) {
 			this.playState = SoundJS.PLAY_SUCCEEDED;
+			this.paused = false;
 			this.tag.removeEventListener(HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
 
 			if(this.offset >= this.getDuration()) {
@@ -504,7 +524,7 @@
 	/**
 	 * The TagChannel is an object pool for HTML tag instances.
 	 * In Chrome, we have to pre-create the number of tag instances that we are going to play
-	 * before we load the data, otherwise the audio stalls. LM: Pretty sure this is a bug.
+	 * before we load the data, otherwise the audio stalls. (Note: This seems to be a bug in Chrome)
 	 * @param src The source of the channel.
 	 * @private
 	 */
