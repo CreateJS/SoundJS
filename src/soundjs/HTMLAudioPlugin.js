@@ -331,7 +331,6 @@
 		},
 
 		handleSoundStalled: function(event) {
-			SoundJS.log("* Audio Stalled")
 			if (this.onPlayFailed != null) { this.onPlayFailed(this); }
 			this.cleanUp();
 		},
@@ -342,7 +341,6 @@
 			this.tag.removeEventListener(HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
 
 			if(this.offset >= this.getDuration()) {
-				SoundJS.log("* Out of range", this.offset, this.tag.currentTime);
 				this.playFailed();
 				return;
 			}

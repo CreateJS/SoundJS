@@ -167,7 +167,6 @@
 		},
 
 		handleTimeout: function() {
-			SoundJS.log("Flash Load Error");
 			//TODO: Surface to user?
 			//LM: Maybe SoundJS.handleError(error); ???
 		},
@@ -204,7 +203,7 @@
 			    instance.owner = this;
                 return instance;
             } catch (err) {
-                SoundJS.log("Error: Please ensure you have permission to play audio from this location.", err);
+                //console.log("Error: Please ensure you have permission to play audio from this location.", err);
             }
             return null;
 		},
@@ -266,9 +265,7 @@
 		},
 
 		// Events from Flash when an error occurs.
-        handleErrorEvent: function(error) {
-            SoundJS.log("Handle Error Event", error);
-        },
+        handleErrorEvent: function(error) {},
 
 		toString: function() {
 			return "[FlashPlugin]";
