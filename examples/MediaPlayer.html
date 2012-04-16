@@ -79,7 +79,6 @@
 			$("#playBtn").click(function(event){
 				if (instance.playState == SoundJS.PLAY_FINISHED) {
 					instance.play();
-					console.log("PAUSED?",instance.paused)
 					$("#playBtn").removeClass("playBtn").addClass("pauseBtn");
 					trackTime();
 					return;

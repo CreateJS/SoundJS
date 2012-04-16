@@ -108,10 +108,7 @@
 	}
 
 	function updateLoading() {
-		var states = "/-\|";
-		var index = states.indexOf(messageField.text.charAt(8));
-		var newIndex = (index == -1 || index == states.length-1) ? 0 : index+1;
-		messageField.text = "Loading " + (preload.progress*100|0) + "% " + states.charAt(newIndex);
+		messageField.text = "Loading " + (preload.progress*100|0) + "%"
 		stage.update();
 	}
 

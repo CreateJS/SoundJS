@@ -161,7 +161,7 @@
 	function handleFileLoad(event) {
 	    var list = $("#library").get(0);
 	    var item = event.result;
-	    list.options.add(new Option((event.id || event.src) + " ("+(event.data||0)+")", event.id));
+	    list.options.add(new Option((event.id || event.src) + " ("+(event.data||1)+")", event.id));
 	}
 
 	function handleProgress(event) {}
@@ -408,15 +408,10 @@
 	                <td><div class="offsetSlider" id="offset" data-units="second"></div></td>
 	                <td><label for="offset" id="offsetValue">0 seconds</label></td>
 	            </tr>
-	            <tr>
+	            <tr rowCount="2">
 	                <td><label for="masterVolume" class="nodisable">Master Volume</label></td>
 	                <td> <div class="masterVolumeSlider" id="masterVolume"></div></td>
 	                <td><label for="masterVolume" id="masterVolumeValue">100</label></td>
-	            </tr>
-	            <tr>
-	                <td></label></td>
-	                <td></td>
-	                <td><br /></td>
 	            </tr>
 	        </table>
 	        <input id="stopAllSoundsBtn" name="stopAll" type="button" value="Stop All Sounds" />
