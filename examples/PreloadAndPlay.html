@@ -3,68 +3,90 @@
 <head>
 <title>SoundJS: Preload & Sound APIs</title>
 
-<script language="javascript" src="http://code.createjs.com/preloadjs-0.1.0.min.js"></script>
-<script language="javascript" src="http://code.createjs.com/soundjs-0.2.0.min.js"></script>
-<script type="text/javascript" src="assets/soundjs.flashplugin-0.2.0.min.js"></script>
-<script>
+	<script language="javascript" src="http://code.createjs.com/preloadjs-0.1.0.min.js"></script>
+	<script language="javascript" src="http://code.createjs.com/soundjs-0.2.0.min.js"></script>
+	<script type="text/javascript" src="assets/soundjs.flashplugin-0.2.0.min.js"></script>
+	<script>
 
-var queue;
-var displayStatus;
-function init() {
-	if (window.top == window) { start(); }
-}
+	var queue;
+	var displayStatus;
 
-function start() {
-	displayStatus = document.getElementById("status");
+	function init() {
+		if (window.top != window) {
+			document.getElementById("header").style.display = "none";
+		}
+		
+		SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
+		if (!SoundJS.checkPlugin(true)) {
+			document.getElementById("error").style.display = "block";
+			document.getElementById("content").style.display = "none";
+			return;
+		}
 
-	// Create a single item to load.
-	var assetsPath = "assets/";
-	var item = {src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg", id:"music"};
+		displayStatus = document.getElementById("status");
 
-	SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
+		// Create a single item to load.
+		var assetsPath = "assets/";
+		var item = {src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg", id:"music"};
 
-	// Instantiate a queue.
-	queue = new PreloadJS();
-	queue.installPlugin(SoundJS); // Plug in SoundJS to handle browser-specific paths
-	queue.onComplete = loadComplete;
-	queue.onFileError = handleFileError;
-	queue.onProgress = handleProgress;
-	queue.loadFile(item, true);
-}
+		SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
 
-function stop() {
-	if (queue != null) { queue.cancel(); }
-	SoundJS.stop();
-}
+		// Instantiate a queue.
+		queue = new PreloadJS();
+		queue.installPlugin(SoundJS); // Plug in SoundJS to handle browser-specific paths
+		queue.onComplete = loadComplete;
+		queue.onFileError = handleFileError;
+		queue.onProgress = handleProgress;
+		queue.loadFile(item, true);
+	}
 
-function handleFileError(o) {
-	// An error occurred.
-	displayStatus.innerText = "Error :("
-}
+	function stop() {
+		if (queue != null) { queue.cancel(); }
+		SoundJS.stop();
+	}
 
-function handleProgress(event) {
-	// Progress happened.
-	displayStatus.innerText = "Loading: " + (queue.progress.toFixed(2) * 100) + "%";
-}
+	function handleFileError(o) {
+		// An error occurred.
+		displayStatus.innerText = "Error :("
+	}
 
-function loadComplete() {
-	// Load completed.
-	displayStatus.innerText = "Complete :)";
-	playSound("music");
-}
+	function handleProgress(event) {
+		// Progress happened.
+		displayStatus.innerText = "Loading: " + (queue.progress.toFixed(2) * 100) + "%";
+	}
 
-function playSound(name, loop) {
-	// Play the sound using the ID created above.
-	return SoundJS.play(name);
-}
-</script>
+	function loadComplete() {
+		// Load completed.
+		displayStatus.innerText = "Complete :)";
+		playSound("music");
+	}
+
+	function playSound(name, loop) {
+		// Play the sound using the ID created above.
+		return SoundJS.play(name);
+	}
+	</script>
 
 	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css" />
 </head>
 
 <body onload="init()">
-	<div class="content">
+
+	<header id="header" class="SoundJS">
+	    <h1><span class="text-product">Sound<strong>JS</strong></span> Preload And Play</h1>
+	    <p>This example preloads an audio instance, and immediately plays it using SoundJS. A different audio source will be chosen by SoundJS depending on the browser capabilities. Note that this will not work without a web server in some browsers.</p>
+	</header>
+
+	<div class="content" id="content">
 		<h1 id="status">Loading...</h1>
 	</div>
+	
+	<div id="error">
+		<h1>Sorry!</h1>
+		<p>SoundJS is not currently supported in your browser.</p>
+		<p>We are currently working on support for iOS. Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
+			if you see this in any other browsers.</p>
+	</div>
+
 </body>
 </html>

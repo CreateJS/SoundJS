@@ -1,29 +1,18 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>SoundJS: Test Suite</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>SoundJS: Test Suite</title>
 
-<script src="http://code.createjs.com/preloadjs-0.1.0.min.js"></script>
-<script src="http://code.createjs.com/soundjs-0.2.0.min.js"></script>
-<script src="assets/soundjs.flashplugin-0.2.0.min.js"></script>
+	<script src="http://code.createjs.com/preloadjs-0.1.0.min.js"></script>
+	<script src="http://code.createjs.com/soundjs-0.2.0.min.js"></script>
+	<script src="assets/soundjs.flashplugin-0.2.0.min.js"></script>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>
-<link type="text/css" href="assets/css/jquery-ui-1.8.18.custom.css" rel="stylesheet" />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>
+	<script>
 
-<style type="text/css">
-    /* define a width for the sliders by styling the wrapping div */
-    .panSlider,
-    .volumeSlider,
-    .offsetSlider,
-    .delaySlider,
-    .masterVolumeSlider,
-    .loopSlider { width:200px; }
-</style>
-<script>
-
-	// Read the URL Params
+	// Read the URL Params. We need to do this to determine the plugin mode.
 	var params = {};
 	var pieces = window.location.search.slice(1).split("&");
 	for (var i=0, l=pieces.length; i<l; i++) {
@@ -31,25 +20,28 @@
 	    params[parts[0]] = parts[1];
 	}
 
-	function init() {
-		if (window.top == window) {
-			start();
-			document.getElementById("header").style.display = "block";
-		}
-	}
-
 	var preload;
 
-	function start() {
-	    enableSet("sound", false);
-	    enableSet("instance", false);
+	function init() {
+		if (window.top != window) {
+			document.getElementById("header").style.display = "none";
+		}
 
-	    SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
-	    if (params.type == "flash") {
+		SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
+		if (params.type == "flash") {
 	        SoundJS.registerPlugins([SoundJS.FlashPlugin]);
 	    } else {
 	        SoundJS.registerPlugins([SoundJS.HTMLAudioPlugin, SoundJS.FlashPlugin]);
 	    }
+		if (!SoundJS.checkPlugin(true)) {
+			document.getElementById("error").style.display = "block";
+			document.getElementById("content").style.display = "none";
+			return;
+		}
+
+		document.getElementById("loader").className = "loader";
+	    enableSet("sound", false);
+	    enableSet("instance", false);
 
 	    $(".panSlider").slider({value: 0,
 	        min: -1,
@@ -123,7 +115,6 @@
 
 	    $(".masterVolumeSlider").slider().bind('slide',function(event){
 	        var value = $(this).slider("option", "value");
-		    console.log(value);
 	        SoundJS.setVolume(value/100);
 	    });
 
@@ -170,12 +161,14 @@
 	function handleFileLoad(event) {
 	    var list = $("#library").get(0);
 	    var item = event.result;
-	    list.options.add(new Option((event.id || event.src) + " ("+(event.data||0)+")", event.id));
+	    list.options.add(new Option((event.id || event.src) + " ("+(event.data||1)+")", event.id));
 	}
 
 	function handleProgress(event) {}
 
-	function handleComplete(event) {}
+	function handleComplete(event) {
+		document.getElementById("loader").className = "";
+	}
 
 	function playSound(event) {
 	    var list = $("#library").get(0);
@@ -326,7 +319,18 @@
 	    }
 	}
 
-</script>
+	</script>
+
+	<link type="text/css" href="assets/css/jquery-ui-1.8.18.custom.css" rel="stylesheet" />
+	<style type="text/css">
+	    /* define a width for the sliders by styling the wrapping div */
+	    .panSlider,
+	    .volumeSlider,
+	    .offsetSlider,
+	    .delaySlider,
+	    .masterVolumeSlider,
+	    .loopSlider { width:200px; }
+	</style>
 
 	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css"/>
 	<style>
@@ -340,115 +344,116 @@
 		    margin: 0 0 10px 0;
 	    }
 	    #instanceControls {
-		    border: 1px solid #999;
-		    border-width: 0 0 0 1px;
-		    padding-left: 20px;
 	    }
 	    .select {
-	        width: 200px;
+	        width: 100%;
 	        height: 80px;
 	    }
 	    .disabled {
-	        color: #999;
+	        color: #333;
 	        font-style: italic;
 	    }
 	    .disabled p, .disabled .nodisable {
-	        color: #000;
+	        color: #333;
 	        font-style: normal;
 	    }
 	</style>
-
 </head>
+
 <body onload="init()">
 
-<div class="content">
-    <header id="header">
-	    <h1><span>SoundJS</span> Test Suite</h1>
-        <p>This test suite loads and plays a number of sounds, defined in the source. Playing sounds can be controlled, stopped, etc</p>
-    </header>
+	<div id="loader"></div>
 
-    <div>
-        <a href="?type=normal">HTML with Flash Fallback</a> | <a href="?type=flash">Flash Only</a>
-    </div>
+	<header id="header" class="SoundJS">
+	    <h1><span class="text-product">Sound<strong>JS</strong></span> Test Suite</h1>
+	    <p>This test suite loads and plays a number of sounds, defined in the source. Playing sounds can be controlled, stopped, etc</p>
+	</header>
 
-    <form id="playControls">
-        <p>Select a sound to play it. <br/>Each sound shows how many instances it can play at once.</p>
-        <select id="library" multiple="multiple" class="select"></select><br />
+	<div class="content" id="content">
+	    <div>
+	        <a href="?type=normal">HTML with Flash Fallback</a> | <a href="?type=flash">Flash Only</a>
+	    </div>
 
-        <input type="button" id="playSoundBtn" value="Play" />
+	    <form id="playControls">
+	        <p>Select a sound to play it. <br/>Each sound shows how many instances it can play at once.</p>
+	        <select id="library" multiple="multiple" class="select"></select><br />
 
-        <label for="interrupt">Interrupt</label>
-        <select id="interrupt">
-            <option selected="selected" value="any">
-                Any</option>
-            <option value="none">None</option>
-            <option value="early">Early</option>
-            <option value="late">Late</option>
-        </select>
+	        <input type="button" id="playSoundBtn" value="Play" />
 
-        <br />
-        <br />
+	        <label for="interrupt">Interrupt</label>
+	        <select id="interrupt">
+	            <option selected="selected" value="any">
+	                Any</option>
+	            <option value="none">None</option>
+	            <option value="early">Early</option>
+	            <option value="late">Late</option>
+	        </select>
 
-        <table border="0" width="400" cellpadding="5" cellspacing="5">
-            <tr>
-                <td><label for="loop">Loop</label></td>
-                <td><div class="loopSlider" id="loop"></div></td>
-                <td><label for="loop" id="loopValue">0</label></td>
-            </tr>
-            <tr>
-                <td> <label for="delay">Delay</label></td>
-                <td><div class="delaySlider" id="delay" data-units="second"></div></td>
-                <td><label for="delay" id="delayValue">0 seconds</label></td>
-            </tr>
-            <tr>
-                <td><label for="offset">Offset</label></td>
-                <td><div class="offsetSlider" id="offset" data-units="second"></div></td>
-                <td><label for="offset" id="offsetValue">0 seconds</label></td>
-            </tr>
-            <tr>
-                <td><label for="masterVolume" class="nodisable">Master Volume</label></td>
-                <td> <div class="masterVolumeSlider" id="masterVolume"></div></td>
-                <td><label for="masterVolume" id="masterVolumeValue">100</label></td>
-            </tr>
-            <tr>
-                <td></label></td>
-                <td></td>
-                <td><br /></td>
-            </tr>
-        </table>
-        <input id="stopAllSoundsBtn" name="stopAll" type="button" value="Stop All Sounds" />
-    </form>
+	        <br />
+	        <br />
 
-    <form id="instanceControls">
-        <p>Select a playing sound to stop it, or control its volume. <br/>When a sound completes, it is removed from this list.</p>
-        <select id="nowPlaying" multiple="multiple" disabled="disabled" class="select">
-            <option value="-1">-- No Audio Playing --</option>
-        </select>
+	        <table border="0" width="400" cellpadding="5" cellspacing="5">
+	            <tr>
+	                <td><label for="loop">Loop</label></td>
+	                <td><div class="loopSlider" id="loop"></div></td>
+	                <td><label for="loop" id="loopValue">0</label></td>
+	            </tr>
+	            <tr>
+	                <td> <label for="delay">Delay</label></td>
+	                <td><div class="delaySlider" id="delay" data-units="second"></div></td>
+	                <td><label for="delay" id="delayValue">0 seconds</label></td>
+	            </tr>
+	            <tr>
+	                <td><label for="offset">Offset</label></td>
+	                <td><div class="offsetSlider" id="offset" data-units="second"></div></td>
+	                <td><label for="offset" id="offsetValue">0 seconds</label></td>
+	            </tr>
+	            <tr rowCount="2">
+	                <td><label for="masterVolume" class="nodisable">Master Volume</label></td>
+	                <td> <div class="masterVolumeSlider" id="masterVolume"></div></td>
+	                <td><label for="masterVolume" id="masterVolumeValue">100</label></td>
+	            </tr>
+	        </table>
+	        <input id="stopAllSoundsBtn" name="stopAll" type="button" value="Stop All Sounds" />
+	    </form>
 
-        <br/>
-        <br/>
-        <table border="0" width="400" cellpadding="5" cellspacing="5">
-            <tr>
-                <td><label for="volume">Instance Volume</label></td>
-                <td><div id="volume" class="volumeSlider"></div></td>
-                <td><label for="volume" id="volumeValue">100</label></td>
-            </tr>
-            <tr>
-                <td><label for="pan">Pan</label></td>
-                <td><div class="panSlider" id="pan"></div></td>
-                <td><label for="pan" id="panValue">0</label></td>
-            </tr>
-            <tr>
-                <td></td>
+	    <form id="instanceControls">
+	        <p>Select a playing sound to stop it, or control its volume. <br/>When a sound completes, it is removed from this list.</p>
+	        <select id="nowPlaying" multiple="multiple" disabled="disabled" class="select">
+	            <option value="-1">-- No Audio Playing --</option>
+	        </select>
+
+	        <br/>
+	        <br/>
+	        <table border="0" width="400" cellpadding="5" cellspacing="5">
+	            <tr>
+	                <td><label for="volume">Instance Volume</label></td>
+	                <td><div id="volume" class="volumeSlider"></div></td>
+	                <td><label for="volume" id="volumeValue">100</label></td>
+	            </tr>
+	            <tr>
+	                <td><label for="pan">Pan</label></td>
+	                <td><div class="panSlider" id="pan"></div></td>
+	                <td><label for="pan" id="panValue">0</label></td>
+	            </tr>
+	            <tr>
+	                <td></td>
 
 
-            </tr>
-        </table>
-        <input id="pauseBtn" name="pause" type="button" value="Pause" />
-        <input id="stopBtn" name="stop" type="button" value="Stop" />
-    </form>
+	            </tr>
+	        </table>
+	        <input id="pauseBtn" name="pause" type="button" value="Pause" />
+	        <input id="stopBtn" name="stop" type="button" value="Stop" />
+	    </form>
 
-</div>
+	</div>
+
+	<div id="error">
+		<h1>Sorry!</h1>
+		<p>SoundJS is not currently supported in your browser.</p>
+		<p>We are currently working on support for iOS. Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
+			if you see this in any other browsers.</p>
+	</div>
 
 </body>
 </html>
