@@ -77,7 +77,8 @@
 	 * @static
 	 */
 	HTMLAudioPlugin.isSupported = function() {
-		if (SoundJS.BrowserDetect.isIOS) { return false; }
+		// TODO: Let the user decide. iOS can play one channel of audio in a user event initiated call stack.
+		//if (SoundJS.BrowserDetect.isIOS) { return false; }
 
 		HTMLAudioPlugin.generateCapabilities();
 		var t = HTMLAudioPlugin.tag;
