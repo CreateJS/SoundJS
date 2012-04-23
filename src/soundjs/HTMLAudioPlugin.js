@@ -333,7 +333,7 @@
 
 		handleSoundStalled: function(event) {
 			if (this.onPlayFailed != null) { this.onPlayFailed(this); }
-			this.cleanUp();
+			//this.cleanUp();
 		},
 
 		handleSoundReady: function(event) {
