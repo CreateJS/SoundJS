@@ -597,7 +597,11 @@
 				this.tags.push(tag);
 			}
 
+			try {
 				document.body.removeChild(tag);
+			} catch(e) {
+				console.error && console.error('tag not in DOM', tag);
+			}
 
 			this.available = this.tags.length;
 		},
