@@ -1,17 +1,23 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title>SoundJS: Test Suite</title>
 
 	<script src="http://code.createjs.com/preloadjs-0.1.0.min.js"></script>
-	<script src="http://code.createjs.com/soundjs-0.2.0.min.js"></script>
-	<script src="assets/soundjs.flashplugin-0.2.0.min.js"></script>
+
+	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
+	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
+	<script type="text/javascript" src="../src/swfobject.js"></script>
+	<script type="text/javascript" src="../src/soundjs/FlashPlugin.js"></script>
+
+	<!-- We also provide hosted minified versions of all CreateJS libraries.
+	    http://code.createjs.com -->
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>
-	<script>
 
+	<script>
 	// Read the URL Params. We need to do this to determine the plugin mode.
 	var params = {};
 	var pieces = window.location.search.slice(1).split("&");
