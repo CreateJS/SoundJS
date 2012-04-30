@@ -99,6 +99,7 @@
 			mp3: t.canPlayType("audio/mp3") != "no" && t.canPlayType("audio/mp3") != "",
 			ogg: t.canPlayType("audio/ogg") != "no" && t.canPlayType("audio/ogg") != "",
 			mpeg: t.canPlayType("audio/mpeg") != "no" && t.canPlayType("audio/mpeg") != "",
+			wav:t.canPlayType("audio/wav") != "no" && t.canPlayType("audio/wav") != "",
 			channels: HTMLAudioPlugin.MAX_INSTANCES
 		};
 		// TODO: Other props?

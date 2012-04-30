@@ -94,6 +94,7 @@
 			mp3: true,
 			ogg: false,
 			mpeg: true,
+			wav: true,
 			channels: 255 //TODO: Determine flash limit
 		};
 		//TODO: Other Props
