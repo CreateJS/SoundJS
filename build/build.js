@@ -6,8 +6,8 @@ CONFIGURATION
 // listing of all source files, with dependencies listed in order:
 var SOURCE_FILES = [
 	"../src/soundjs/SoundJS.js",
-	"../src/soundjs/HTMLAudioPlugin.js",
-	//"../src/soundjs/FlashPlugin.js"
+	"../src/soundjs/HTMLAudioPlugin.js"
+	//,"../src/soundjs/FlashPlugin.js"
 ];
 
 // default name for lib output:
@@ -218,11 +218,13 @@ function buildSourceTask(completeHandler)
 	js_file_name = js_file_name.split("%VERSION%").join(version);
 
 	var file_args = [];
+	var source_data = [];
 	var len = SOURCE_FILES.length;
 	for(var i = 0; i < len; i++)
 	{
 		file_args.push("--js");
 		file_args.push(SOURCE_FILES[i]);
+		source_data.push(FILE.readFileSync(SOURCE_FILES[i], "UTF-8"));
 	}
 
 	if(extraSourceFiles)
@@ -232,9 +234,11 @@ function buildSourceTask(completeHandler)
 		{
 			file_args.push("--js");
 			file_args.push(extraSourceFiles[i]);
+			source_data.push(FILE.readFileSync(extraSourceFiles[i], "UTF-8"));
 		}
 	}
 
+	FILE.writeFileSync(PATH.join(OUTPUT_DIR_NAME, "soundjs.source.js"), source_data.join("\n;\n"), "UTF-8");
 
 	var tmp_file = PATH.join(OUTPUT_DIR_NAME,"tmp.js");
 	var final_file = PATH.join(OUTPUT_DIR_NAME, js_file_name);
