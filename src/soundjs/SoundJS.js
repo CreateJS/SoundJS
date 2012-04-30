@@ -249,7 +249,16 @@
 	}
 
 	/**
-	 * Get the active plugin's capabilities.
+	 * Get the active plugin's capabilities, which help determine if a plugin can be
+	 * used in the current environment, or if the plugin supports a specific feature.
+	 * Capabilities include:
+	 * <ul>
+	 *     <li><b>panning:</b> If the plugin can pan audio from left to right</li>
+	 *     <li><b>volume;</b> If the plugin can control audio volume.</li>
+	 *     <li><b>mp3:</b> If MP3 audio is supported.</li>
+	 *     <li><b>ogg:</b> If OGG audio is supported.</li>
+	 *     <li><b>mpeg:</b> If MPEG audio is supported.</li>
+	 *     <li><b>channels:</b> The maximum number of audio channels that can be created.</li>
 	 * @method getCapabilities
 	 * @return {Object} An object containing the capabilities of the active plugin.
 	 * @static
@@ -259,7 +268,8 @@
 	}
 
 	/**
-	 * Get a specific capability of the active plugin
+	 * Get a specific capability of the active plugin. See the <b>getCapabilities</b> for a full list
+	 * of capabilities.
 	 * @method getCapability
 	 * @param {String} key The capability to retrieve
 	 * @return {String | Number | Boolean} The capability value.
