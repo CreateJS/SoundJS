@@ -311,8 +311,19 @@
 		loop:0,
 		volume:1,
 		pan:0,
-		muted:false,
-		paused:false,
+
+		/**
+		 * Determines if the audio is currently muted.
+		 * @private
+		 */
+		muted: false,
+
+		/**
+		 * Determines if the audio is currently paused. If the audio has not yet started playing,
+		 * it will be true, unless the user pauses it.
+		 * @private
+		 */
+		paused: false,
 
 		/**
 		 * The callback that is fired when a sound has completed playback

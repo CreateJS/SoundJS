@@ -214,17 +214,34 @@
 		owner: null,
 
 		loaded: false,
-		paused: false,
 		lastInterrupt: SoundJS.INTERRUPT_NONE,
 		offset: 0,
 		delay: 0,
 		volume: 1,
 		pan: 0,
-		muted: false,
 
 		remainingLoops: 0,
 		delayTimeout: -1,
 		tag: null,
+
+
+		/**
+		 * Determines if the audio is currently muted.
+		 * @property muted
+		 * @type Boolean
+		 * @default false
+		 */
+		muted: false,
+
+		/**
+		 * Determines if the audio is currently paused. If the audio has not yet started playing,
+		 * it will be true, unless the user pauses it.
+		 * @property paused
+		 * @type Boolean
+		 * @default false
+		 */
+		paused: false,
+
 
 		/**
 		 * The callback that is fired when a sound has completed playback
