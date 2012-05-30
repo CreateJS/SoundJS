@@ -382,7 +382,9 @@
 	}
 
 	/**
-	 * Play an instance. This is called by the static API, as well as from plugins.
+	 * Play an instance. This is called by the static API, as well as from plugins. This allows the
+	 * core class to control delays.
+	 * @method playInstance
 	 * @private
 	 */
 	SoundJS.playInstance = function(instance, interrupt, delay, offset, loop, volume, pan) {
@@ -411,6 +413,7 @@
 
 	/**
 	 * Begin playback. This is called immediately, or after delay by SoundJS.beginPlaying
+	 * @method beginPlaying
 	 * @private
 	 */
 	SoundJS.beginPlaying = function(instance, interrupt, offset, loop, volume, pan) {
@@ -425,9 +428,13 @@
 	}
 
 	/**
-	 * Determine if a plugin has been initialized. Optionally initialize a default plugin.
-	 * @returns If a plugin is initialized.
-	 * @private
+	 * Determine if a plugin has been initialized. Optionally initialize the default plugin, which enables
+	 * SoundJS to work without manually setting up the plugins.
+	 * @method checkPlugin
+	 * @param {Boolean} initializeDefault Determines if the default plugin should be initialized if there
+	 * is not yet a plugin when this is checked.
+	 * @returns If a plugin is initialized. If the browser does not have the capabilities to initialize
+	 * an available plugin, this will be false.
 	 */
 	SoundJS.checkPlugin = function(initializeDefault) {
 		if (SoundJS.activePlugin == null) {
