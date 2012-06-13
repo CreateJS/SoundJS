@@ -1,17 +1,19 @@
-SOUNDJS LIBRARY:
+# SoundJS
 
 SoundJS is a library to make working with audio on the web easier. It provides a consistent API for playing audio in different browsers, including using a target plugin model to provide an easy way to provide additional audio plugins like Web Audio, and a Flash fallback. A mechanism has been provided for easily tying in audio preloading to PreloadJS (http://preloadjs.com)
 
-The home page for SoundJS can be found at http://soundjs.com/
 
-There is a GitHub repository, which includes downloads, issue tracking, & a wiki at https://github.com/CreateJS/SoundjS/
-
+## License
 It was built by gskinner.com, and is released for free under the MIT license, which means you can use it for almost any purpose (including commercial projects). We appreciate credit where possible, but it is not a requirement.
 
-SoundJS is currently in alpha. We will be making significant improvements to the library, samples, and documentation over the coming weeks. Please be aware that this may necessitate changes to the existing API.
+
+## Support and Resources
+* Find examples and more information at the [SoundJS web site](http://soundjs.com/)
+* You can also ask questions and interact with other users at our [Community](http://community.createjs.com) site.
+* Have a look at the included [examples](https://github.com/CreateJS/SoundJS/tree/master/examples) and [API documentation](http://createjs.com/Docs/SoundJS/) for more in-depth information.
 
 
-The key classes are:
+## Classes
 
 SoundJS
 The core API for playing sounds. Simply call SoundJS.play(sound, options), and a sound instance is created that can be used to control the audio, and receive events when it is complete, loops, or is interrupted.
