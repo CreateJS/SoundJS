@@ -439,7 +439,10 @@
 	SoundJS.checkPlugin = function(initializeDefault) {
 		if (SoundJS.activePlugin == null) {
 			if (initializeDefault && !SoundJS.pluginsRegistered) {
-				SoundJS.registerPlugin(SoundJS.HTMLAudioPlugin);
+				// preferring WebAudio over HTMLAudio
+				if (!SoundJS.registerPlugin(SoundJS.WebAudioPlugin)) {
+					SoundJS.registerPlugin(SoundJS.HTMLAudioPlugin);
+				}
 			}
 			if (SoundJS.activePlugin == null) {
 				return false;
@@ -789,6 +792,7 @@
 		 * @private
 		 */
 		getSlot: function(interrupt, instance) {
+
 			var target, replacement;
 
 			var margin = SoundJS.activePlugin.FT || 0;
@@ -796,10 +800,11 @@
 			for (var i=0, l=this.max||100; i<l; i++) {
 				target = this.get(i);
 
+
 				// Available Space
 				if (target == null) {
 					return true;
-				} else if (interrupt == SoundJS.INTERRUPT_NONE) {
+				} else if (interrupt == SoundJS.INTERRUPT_NONE && target.playState != SoundJS.PLAY_FINISHED) {
 					continue;
 				}
 
@@ -809,11 +814,13 @@
 					continue;
 				}
 
+
 				// Audio is complete or not playing
 				if (target.playState == SoundJS.PLAY_FINISHED ||
 						target == SoundJS.PLAY_INTERRUPTED ||
 						target == SoundJS.PLAY_FAILED) {
 					replacement = target;
+
 
 				// Audio is a better candidate than the current target, according to playhead
 				} else if (
