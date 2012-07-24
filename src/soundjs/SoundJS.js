@@ -176,6 +176,15 @@
 	 */
 	SoundJS.activePlugin = null;
 
+	/**
+	 * SoundJS is currently muted. No audio will play, unless existing instances are unmuted.
+	 * @property muted
+	 * @type {Boolean}
+	 * @readonly
+	 */
+	SoundJS.muted = false;
+
+
 // Private
 	SoundJS.pluginsRegistered = false;
 	SoundJS.masterVolume = 1;
@@ -183,6 +192,7 @@
 	SoundJS.instances = [];
 	SoundJS.instanceHash = {};
 	SoundJS.idHash = null;
+	SoundJS.defaultSoundInstance = null;
 
 	/**
 	 * Get the preload rules to be used by PreloadJS. This function should not be called, except by PreloadJS.
@@ -362,7 +372,10 @@
 	 Static API.
 	--------------- */
 	/**
-	 * Play a sound, receive an instance to control
+	 * Play a sound, receive an instance to control. If the sound failed to play, the soundInstance
+	 * will still be returned, and have a playState of SoundJS.PLAY_FAILED. Note that even on sounds with
+	 * failed playback, you may still be able to call play(), since the failure could be due to lack of available
+	 * channels.
 	 * @method play
 	 * @param {String} value The src or ID of the audio.
 	 * @param {String} interrupt How to interrupt other instances of audio. Values are defined as constants on SoundJS.
@@ -375,17 +388,21 @@
 	 * @static
 	 */
 	SoundJS.play = function (src, interrupt, delay, offset, loop, volume, pan) {
-		if (!SoundJS.checkPlugin(true)) { return null; }
+		if (!SoundJS.checkPlugin(true)) { return SoundJS.defaultSoundInstance; }
 		src = SoundJS.getSrcFromId(src);
 		var instance = SoundJS.activePlugin.create(src);
-		return SoundJS.playInstance(instance, interrupt, delay, offset, loop, volume, pan);
+		instance.mute(SoundJS.muted);
+		var ok = SoundJS.playInstance(instance, interrupt, delay, offset, loop, volume, pan);
+		if (!ok) { instance.playFailed(); }
+		return instance;
 	}
 
 	/**
 	 * Play an instance. This is called by the static API, as well as from plugins. This allows the
 	 * core class to control delays.
 	 * @method playInstance
-	 * @private
+	 * @return {Boolean} If the sound can start playing.
+	 * @protected
 	 */
 	SoundJS.playInstance = function(instance, interrupt, delay, offset, loop, volume, pan) {
 		interrupt = interrupt || SoundJS.INTERRUPT_NONE;
@@ -397,7 +414,7 @@
 
 		if (delay == 0) {
 			var ok = SoundJS.beginPlaying(instance, interrupt, offset, loop, volume, pan);
-			if (!ok) { return null; }
+			if (!ok) { return false; }
 		} else {
 			//Note that we can't pass arguments to proxy OR setTimeout (IE), so just wrap the function call.
 			setTimeout(function() {
@@ -408,18 +425,18 @@
 		this.instances.push(instance);
 		this.instanceHash[instance.uniqueId] = instance;
 
-		return instance;
+		return true;
 	}
 
 	/**
 	 * Begin playback. This is called immediately, or after delay by SoundJS.beginPlaying
 	 * @method beginPlaying
-	 * @private
+	 * @protected
 	 */
 	SoundJS.beginPlaying = function(instance, interrupt, offset, loop, volume, pan) {
 		if (!SoundChannel.add(instance, interrupt)) { return false; }
 		var result = instance.beginPlaying(offset, loop, volume, pan);
-		if (result == -1) {
+		if (!result) {
 			this.instances.splice(this.instances.indexOf(instance), 1);
 			delete this.instanceHash[instance.uniqueId];
 			return false;
@@ -504,17 +521,17 @@
 	}
 
 	/**
-	 * Mute/Unmute all audio. Note that muted audio still plays at 0 volume, and that
-	 * this method just sets the mute value of each instance, and not a "global mute".
+	 * Mute/Unmute all audio. Note that muted audio still plays at 0 volume,
+	 * and that individually muted audio will be affected by setting the global mute.
 	 * @method setMute
 	 * @param {Boolean} isMuted Whether the audio should be muted or not.
 	 * @param {String} id The specific sound ID (set) to target.
 	 * @return {Boolean} If the mute was set.
 	 * @static
 	 */
-	SoundJS.setMute = function(isMuted, id) {
-		return SoundJS.tellAllInstances("mute", id, isMuted);
-		//LM: Note that there is no "global" mute. Mute just handles all instances.
+	SoundJS.setMute = function(isMuted) {
+		this.muted = isMuted;
+		return SoundJS.tellAllInstances("mute", null, isMuted);
 	}
 
 	/**
@@ -838,6 +855,15 @@
 	}
 
 	// The SoundChannel is not added to Window
+
+	// This is a dummy sound instance, which allows SoundJS to return something so
+	// developers don't need to check nulls.
+	function SoundInstance() {
+		this.pause = this.resume = this.play = this.beginPlaying = this.cleanUp = this.interrupt = this.stop = this.setMasterVolume = this.setVolume = this.mute = this.setPan = this.getPosition = this.setPosition = this.toString = function() { return false; };
+		this.getVolume = this.getPan = this.getDuration = function() { return 0; }
+		this.playState = SoundJS.PLAY_FAILED;
+	}
+	SoundJS.defaultSoundInstance = new SoundInstance();
 
 
 	/**

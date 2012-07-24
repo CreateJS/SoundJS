@@ -401,11 +401,11 @@
 			if (this.flashId == null) {
 				if (this.onPlayFailed != null) { this.onPlayFailed(this); }
 				this.cleanUp();
-				return -1;
+				return false;
 			}
 			this.playState = SoundJS.PLAY_SUCCEEDED;
 			this.owner.registerSoundInstance(this.flashId, this);
-			return 1;
+			return true;
 		},
 
 		/**
