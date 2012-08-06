@@ -5,7 +5,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=9" /> <!-- req for IE 9 else audio tag won't work -->
 	<title>SoundJS: Convolution Example</title>
 
-	<script type="text/javascript" src="http://code.createjs.com/preloadjs-0.1.0.min.js"></script>
+	<script type="text/javascript" src="./assets/preloadjs-NEXT.min.js"></script>
 
 	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
 	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
@@ -25,8 +25,8 @@
 			document.getElementById("header").style.display = "none";
 		}
 
-		SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
-		if (!SoundJS.checkPlugin(true)) {
+		createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
+		if (!createjs.SoundJS.checkPlugin(true)) {
 			document.getElementById("error").style.display = "block";
 			document.getElementById("content").style.display = "none";
 			return;
@@ -42,15 +42,15 @@
 		];
 
 
-		preload = new PreloadJS();
+		preload = new createjs.PreloadJS();
 		preload.onComplete = handleLoadComplete;
-		preload.installPlugin(SoundJS);
+		preload.installPlugin(createjs.SoundJS);
 		preload.loadManifest(manifest);
 	}
 
 	function stop() {
 		if (preload != null) { preload.close(); }
-		SoundJS.stop();
+		createjs.SoundJS.stop();
 	}
 
 	function handleLoadComplete() {
@@ -71,15 +71,15 @@
 		$("#p11").removeClass("active"); // Reset UI
 
 		// Play "dong" immediately
-		instance = SoundJS.play("dong", SoundJS.INTERRUPT_NONE, 0, 400, -1);
+		instance = createjs.SoundJS.play("dong", createjs.SoundJS.INTERRUPT_NONE, 0, 400, -1);
 		$("#p01").addClass("active");
 
 		// Play "gull" immediately
-		SoundJS.play("gull", SoundJS.INTERRUPT_NONE);
+		createjs.SoundJS.play("gull", createjs.SoundJS.INTERRUPT_NONE);
 		$("#p00").addClass("active");
 
 		// Play "gull" after 150 ms. Interrupts first gull sound
-		SoundJS.play("gull", SoundJS.INTERRUPT_ANY, 150);
+		createjs.SoundJS.play("gull", createjs.SoundJS.INTERRUPT_ANY, 150);
 		setTimeout(function(){
 			$("#p00").removeClass("active")
 			$("#p01").removeClass("active")
@@ -87,7 +87,7 @@
 		}, 150);
 
 		// Play "rat" after 1 second
-		SoundJS.play("rat", SoundJS.INTERRUPT_NONE, 1000);
+		createjs.SoundJS.play("rat", createjs.SoundJS.INTERRUPT_NONE, 1000);
 		setTimeout(function(){
 			$("#p02").removeClass("active")
 			$("#p03").addClass("active");
@@ -96,49 +96,49 @@
 		// Play "rat" immediately after previous. Interrupts previous rat sound.
 		setTimeout(function(){
 			$("#p03").removeClass("active")
-			SoundJS.play("rat", SoundJS.INTERRUPT_ANY);
+			createjs.SoundJS.play("rat", createjs.SoundJS.INTERRUPT_ANY);
 			$("#p04").addClass("active");
 		}, 1050);
 
 		// Play "dong" after another second. Should start a new channel.
 		setTimeout(function(){
 			$("#p04").removeClass("active")
-			SoundJS.play("dong", SoundJS.INTERRUPT_NONE, 0, 1000);
+			createjs.SoundJS.play("dong", createjs.SoundJS.INTERRUPT_NONE, 0, 1000);
 			$("#p05").addClass("active");
 		}, 2500);
 
 		// Play "dong" after another second. Should start a new channel.
 		setTimeout(function(){
 			$("#p05").removeClass("active")
-			SoundJS.play("dong", SoundJS.INTERRUPT_NONE, 0, 1000);
+			createjs.SoundJS.play("dong", createjs.SoundJS.INTERRUPT_NONE, 0, 1000);
 			$("#p06").addClass("active");
 		}, 3500);
 
 		// Wait half a second, then pause all "dong" sounds.
 		setTimeout(function(){
 			$("#p06").removeClass("active")
-			SoundJS.pause("dong");
+			createjs.SoundJS.pause("dong");
 			$("#p07").addClass("active");
 		}, 4000);
 
 		// Play another "dong" sound. instances are used up, so it should fail.
 		setTimeout(function(){
 			$("#p07").removeClass("active")
-			SoundJS.play("dong", SoundJS.INTERRUPT_NONE, 0, 1000);
+			createjs.SoundJS.play("dong", createjs.SoundJS.INTERRUPT_NONE, 0, 1000);
 			$("#p08").addClass("active");
 		}, 4500);
 
 		// Wait 3 seconds, then resume all paused sounds.
 		setTimeout(function(){
 			$("#p08").removeClass("active")
-			SoundJS.resume();
+			createjs.SoundJS.resume();
 			$("#p09").addClass("active");
 		}, 8000);
 
 		// Wait another second, and play "dong" sound. Previous instance should be complete, so it will work.
 		setTimeout(function(){
 			$("#p09").removeClass("active")
-			SoundJS.play("dong", SoundJS.INTERRUPT_NONE, 0, 1000);
+			createjs.SoundJS.play("dong", createjs.SoundJS.INTERRUPT_NONE, 0, 1000);
 			$("#p10").addClass("active");
 		}, 9000);
 

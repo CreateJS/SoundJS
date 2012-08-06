@@ -3,7 +3,7 @@
 <head>
 <title>SoundJS: Sound Grid</title>
 
-	<script src="http://code.createjs.com/preloadjs-0.1.0.min.js"></script>
+	<script src="./assets/preloadjs-NEXT.min.js"></script>
 
 	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
 	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
@@ -21,8 +21,8 @@
 			document.getElementById("header").style.display = "none";
 		}
 
-		SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
-		if (!SoundJS.checkPlugin(true)) {
+		createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
+		if (!createjs.SoundJS.checkPlugin(true)) {
 			document.getElementById("error").style.display = "block";
 			document.getElementById("content").style.display = "none";
 			return;
@@ -48,9 +48,9 @@
 		    {src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg", id:12, data: 1}
 		];
 
-	    preload = new PreloadJS();
+	    preload = new createjs.PreloadJS();
 	    //Install SoundJS as a plugin, then PreloadJS will initialize it automatically.
-	    preload.installPlugin(SoundJS);
+	    preload.installPlugin(createjs.SoundJS);
 
 	    //Available PreloadJS callbacks
 	    preload.onFileLoad = function(event) {
@@ -68,13 +68,13 @@
 
 	function stop() {
 		if (preload != null) { preload.close(); }
-		SoundJS.stop();
+		createjs.SoundJS.stop();
 	}
 
 	function playSound(target) {
 	    //Play the sound: play (src, interrupt, delay, offset, loop, volume, pan)
-	    var instance = SoundJS.play(target.id, SoundJS.INTERRUPT_NONE, 0, 0, false, 1);
-		if (instance == null) { return; }
+	    var instance = createjs.SoundJS.play(target.id, createjs.SoundJS.INTERRUPT_NONE, 0, 0, false, 1);
+		if (instance == null || instance.playState == createjs.SoundJS.PLAY_FAILED) { return; }
 		target.className = "gridBox active";
 		instance.onComplete = function(instance) {
 			target.className = "gridBox";
