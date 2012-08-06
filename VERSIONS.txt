@@ -1,3 +1,12 @@
+Version NEXT [release TBD]
+****************************************************************************************************
+- moved all classes into a configurable createjs namespace
+- Added better support for missing sounds. SoundJS returns a lightweight instance that won't fail
+	when calls are made on it.
+- Added static mute/unmute methods to independently control a global mute property.
+- Added support for preloading WAV files
+
+
 Version 0.2.0
 ****************************************************************************************************
 Second release, corresponding with the release of the CreateJS suite of tools (createjs.com).
