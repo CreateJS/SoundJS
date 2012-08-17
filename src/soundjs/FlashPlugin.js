@@ -30,7 +30,7 @@
 /**
  * @module SoundJS
  */
-(function(window) {
+(function(ns) {
 
 	/**
 	 * Play sounds using a Flash instance. This plugin requires swfObject.as
@@ -43,6 +43,8 @@
 		this.init();
 	}
 
+	var s = FlashPlugin;
+
 	/**
 	 * The capabilities of the plugin.
 	 * @property capabilities
@@ -50,7 +52,7 @@
 	 * @default null
 	 * @static
 	 */
-	FlashPlugin.capabilities = null;
+	s.capabilities = null;
 
 	/**
 	 * The path relative to the HTML page that the FlashAudioPlugin.swf resides.
@@ -60,10 +62,10 @@
 	 * @default src/soundjs
 	 * @static
 	 */
-	FlashPlugin.BASE_PATH = "src/soundjs";
+	s.BASE_PATH = "src/soundjs/";
 
 	// Protected static
-	FlashPlugin.lastId = 0;
+	s.lastId = 0;
 
 	/**
 	 * Determine if the plugin can be used.
@@ -71,9 +73,9 @@
 	 * @return {Boolean} If the plugin can be initialized.
 	 * @static
 	 */
-	FlashPlugin.isSupported = function() {
-		if (SoundJS.BrowserDetect.isIOS) { return false; }
-		FlashPlugin.generateCapabilities();
+	s.isSupported = function() {
+		if (createjs.SoundJS.BrowserDetect.isIOS) { return false; }
+		s.generateCapabilities();
 		if (swfobject == null) {
 			return false;
 		}
@@ -86,9 +88,9 @@
 	 * @method generateCapabiities
 	 * @static
 	 */
-	FlashPlugin.generateCapabilities = function() {
-		if (FlashPlugin.capabilities != null) { return; }
-		var c = FlashPlugin.capabilities = {
+	s.generateCapabilities = function() {
+		if (s.capabilities != null) { return; }
+		var c = s.capabilities = {
 			panning: true,
 			volume: true,
 			mp3: true,
@@ -101,7 +103,7 @@
     };
 
 
-	var p = FlashPlugin.prototype = {
+	var p = s.prototype = {
 
 		CONTAINER_ID: "flashAudioContainer",
 		capabilities: null,
@@ -116,7 +118,7 @@
 
 		init: function() {
 
-			this.capabilities = FlashPlugin.capabilities;
+			this.capabilities = s.capabilities;
 
 			this.flashInstances = {};
 			this.flashPreloadInstances = {};
@@ -129,9 +131,9 @@
 			document.body.appendChild(c);
 
 			// Embed SWF
-			var val = swfobject.embedSWF(FlashPlugin.BASE_PATH + "FlashAudioPlugin.swf", this.CONTAINER_ID, "1", "1",//550", "400",
+			var val = swfobject.embedSWF(s.BASE_PATH + "FlashAudioPlugin.swf", this.CONTAINER_ID, "1", "1",//550", "400",
 					"9.0.0",null,null,null,null,
-					SoundJS.proxy(this.handleSWFReady, this)
+					createjs.SoundJS.proxy(this.handleSWFReady, this)
 			);
 
 			//TODO: Internal detection instead of swfobject
@@ -141,9 +143,8 @@
 			this.flash = e.ref;
 
 			//TODO: Confirm that any instances that are asked to be preloaded before this are queued until Flash is ready.
-			//TODO: Wait for a pre-determined time (2 sec?) and dispatch error, since we aren't loaded.
 			this.loadTimeout = setTimeout(function() {
-				SoundJS.proxy(this.handleTimeout, this);
+				createjs.SoundJS.proxy(this.handleTimeout, this);
 			}, 2000);
 		},
 
@@ -274,7 +275,7 @@
 
 	}
 
-	window.SoundJS.FlashPlugin = FlashPlugin;
+	ns.FlashPlugin = FlashPlugin;
 
 
 	/**
@@ -361,7 +362,7 @@
 		onPlayInterrupted: null,
 
 		init: function(src, flash) {
-			this.uniqueId = FlashPlugin.lastId++;
+			this.uniqueId = s.lastId++;
 			this.src = src;
 			this.flash = flash;
 		},
@@ -373,7 +374,7 @@
 	// Public API
 
 		interrupt: function() {
-			this.playState = SoundJS.PLAY_INTERRUPTED;
+			this.playState = createjs.SoundJS.PLAY_INTERRUPTED;
 			if (this.onPlayInterrupted != null) { this.onPlayInterrupted(this); }
 			this.flash.interrupt(this.flashId);
 			this.cleanUp();
@@ -381,7 +382,7 @@
 
 		cleanUp: function() {
 			this.owner.unregisterSoundInstance(this.flashId);
-			SoundJS.playFinished(this);
+			createjs.SoundJS.playFinished(this);
 		},
 
 		/**
@@ -390,7 +391,7 @@
 		 * @private
 		 */
 		play: function(interrupt, delay, offset, loop, volume, pan) {
-			SoundJS.playInstance(this, interrupt, delay, offset, loop, volume, pan);
+			createjs.SoundJS.playInstance(this, interrupt, delay, offset, loop, volume, pan);
 		},
 
 		beginPlaying: function(offset, loop, volume, pan) {
@@ -403,9 +404,15 @@
 				this.cleanUp();
 				return false;
 			}
-			this.playState = SoundJS.PLAY_SUCCEEDED;
+			this.playState = createjs.SoundJS.PLAY_SUCCEEDED;
 			this.owner.registerSoundInstance(this.flashId, this);
 			return true;
+		},
+
+		playFailed: function() {
+			this.playState = createjs.SoundJS.PLAY_FAILED;
+			if (this.onPlayFailed != null) { this.onPlayFailed(this); }
+			this.cleanUp();
 		},
 
 		/**
@@ -431,7 +438,7 @@
 		 * @private
 		 */
 		stop: function() {
-			this.playState = SoundJS.PLAY_FINISHED;
+			this.playState = createjs.SoundJS.PLAY_FINISHED;
 			this.paused = false;
 			var ok = this.flash.stopSound(this.flashId);
 			this.cleanUp();
@@ -507,7 +514,7 @@
 
 	// Flash callbacks
 		handleSoundFinished: function() {
-			this.playState = SoundJS.PLAY_FINISHED;
+			this.playState = createjs.SoundJS.PLAY_FINISHED;
 			if (this.onComplete != null) { this.onComplete(this); }
 			this.cleanUp();
 		},
@@ -631,4 +638,5 @@
 
 	}
 
-}(window))
+}(createjs||(createjs={})));
+var createjs;
