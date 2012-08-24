@@ -1,10 +1,10 @@
-In the NEXT version of CreateJS class definitions reside in a "createjs" namespace by default.
+In this version of SoundJS, class definitions reside in a "createjs" namespace by default.
 
-For example, instead of instantiating a Shape like this:
-var foo = new Shape();
+For example, instead of playing a sound like this:
+var foo = SoundJS.play(id);
 
 You will need to reach into the createjs namespace:
-var bar = new createjs.Shape();
+var bar = createjs.SounJS.play(id);
 
 This functionality is configurable though. You can easily shortcut the namespace or get rid of it completely.
 

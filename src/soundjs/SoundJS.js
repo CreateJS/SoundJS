@@ -27,6 +27,10 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
+
+// namespace:
+this.createjs = this.createjs||{};
+
 /**
  * The SoundJS library manages the playback of audio in HTML, via plugins which
  * abstract the actual implementation, and allow multiple playback modes depending
@@ -42,7 +46,8 @@
  *
  * @module SoundJS
  */
-(function(ns) {
+
+(function() {
 
 	//TODO: Interface to validate plugins and throw warnings
 	//TODO: Determine if methods exist on a plugin before calling
@@ -179,10 +184,11 @@
 	s.activePlugin = null;
 
 	/**
-	 * SoundJS is currently muted. No audio will play, unless existing instances are unmuted.
+	 * SoundJS is currently muted. No audio will play, unless existing instances are unmuted. This property
+	 * is read-only.
 	 * @property muted
 	 * @type {Boolean}
-	 * @readonly
+	 * @default false
 	 */
 	s.muted = false;
 
@@ -190,7 +196,6 @@
 // Private
 	s.pluginsRegistered = false;
 	s.masterVolume = 1;
-	s.muted = false;
 	s.instances = [];
 	s.instanceHash = {};
 	s.idHash = null;
@@ -198,6 +203,7 @@
 
 	/**
 	 * Get the preload rules to be used by PreloadJS. This function should not be called, except by PreloadJS.
+	 * @method getPreloadHandlers
 	 * @return {Object} The callback, file types, and file extensions to use for preloading.
 	 * @static
 	 * @private
@@ -243,6 +249,7 @@
 	 */
 	s.registerPlugin = function(plugin) {
 		s.pluginsRegistered = true;
+		if (plugin == null) { return false; }
 		if (plugin.isSupported()) {
 			s.activePlugin = new plugin();
 			return true;
@@ -395,7 +402,7 @@
 		if (!s.checkPlugin(true)) { return s.defaultSoundInstance; }
 		src = s.getSrcFromId(src);
 		var instance = s.activePlugin.create(src);
-		instance.mute(s.muted);
+		try { instance.mute(s.muted); } catch(error) { } // Sometimes, plugin isn't ready!
 		var ok = s.playInstance(instance, interrupt, delay, offset, loop, volume, pan);
 		if (!ok) { instance.playFailed(); }
 		return instance;
@@ -603,6 +610,11 @@
 	/**
 	 * Call a method on all instances. Passing an optional ID will filter the event
 	 * to only sounds matching that id (or source).
+	 * @method tellAllInstances
+	 * @param {String} command The command to call on each instance.
+	 * @param {String} id A specific sound ID to call. If omitted, the command will be applied
+	 *      to all sound instances.
+	 * @param {Object} value A value to pass on to each sound instance the command is applied to.
 	 * @private
 	 */
 	s.tellAllInstances = function(command, id, value) {
@@ -647,10 +659,7 @@
 		}
 	}
 
-	// Put SoundJS on window for Global Access
-	ns.SoundJS = SoundJS;
-
-
+	createjs.SoundJS = SoundJS;
 
 
 
@@ -693,7 +702,7 @@
 	}
 	/**
 	 * Add an instance to a sound channel.
-	 * @method add
+	 * method add
 	 * @param {SoundInstance} instance The instance to add to the channel
 	 * @param {String} interrupt The interrupt value to use
 	 * @static
@@ -706,7 +715,7 @@
 	}
 	/**
 	 * Remove an instace from its channel.
-	 * @method remove
+	 * method remove
 	 * @param {SoundInstance} instance The instance to remove from the channel
 	 * @static
 	 * @private
@@ -719,7 +728,7 @@
 	}
 	/**
 	 * Get a channel instance by its src.
-	 * @method get
+	 * method get
 	 * @param {String} src The src to use to look up the channel
 	 * @static
 	 * @private
@@ -858,7 +867,7 @@
 
 	}
 
-	// The SoundChannel is not added to Window
+	// do not add to namespace
 
 	// This is a dummy sound instance, which allows SoundJS to return something so
 	// developers don't need to check nulls.
@@ -872,9 +881,7 @@
 	SoundJS.defaultSoundInstance = new SoundInstance();
 
 
-	/**
-	 * An additional module to detemermine the current browser, version, operating system, and other environment variables.
-	 */
+	// An additional module to determine the current browser, version, operating system, and other environment variables.
 	function BrowserDetect() {}
 
 	BrowserDetect.init = function() {
@@ -886,7 +893,6 @@
 
 	BrowserDetect.init();
 
-	ns.SoundJS.BrowserDetect = BrowserDetect;
+	createjs.SoundJS.BrowserDetect = BrowserDetect;
 
-}(createjs||(createjs={})));
-var createjs;
+}());

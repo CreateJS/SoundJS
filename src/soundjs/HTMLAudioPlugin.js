@@ -30,7 +30,11 @@
 /**
  * @module SoundJS
  */
-(function(ns) {
+
+// namespace:
+this.createjs = this.createjs||{};
+
+(function() {
 
 	/**
 	 * Play sounds using HTML <audio> tags in the browser.
@@ -83,7 +87,7 @@
 
 		s.generateCapabilities();
 		var t = s.tag;
-		if (t == null || t.canPlayType == null) { return false; }
+		if (t == null) { return false; }
 		return true;
 	};
 
@@ -95,6 +99,7 @@
 	s.generateCapabilities = function() {
 		if (s.capabilities != null) { return; }
 		var t = s.tag = document.createElement("audio");
+		if (t.canPlayType == null) { return null; }
 		var c = s.capabilities = {
 			panning: false,
 			volume: true,
@@ -163,8 +168,7 @@
 
 	}
 
-	ns.HTMLAudioPlugin = HTMLAudioPlugin;
-
+	createjs.HTMLAudioPlugin = HTMLAudioPlugin;
 
 
 	/**
@@ -282,7 +286,7 @@
 
 		// Constructor
 		init: function(src) {
-			this.uniqueId = ns.HTMLAudioPlugin.lastId++;
+			this.uniqueId = createjs.HTMLAudioPlugin.lastId++;
 			this.src = src;
 			this.endedHandler = createjs.SoundJS.proxy(this.handleSoundComplete, this);
 			this.readyHandler = createjs.SoundJS.proxy(this.handleSoundReady, this);
@@ -294,11 +298,13 @@
 			if (tag != null) {
 				tag.pause();
 				try { tag.currentTime = 0; } catch (e) {} // Reset Position
-				tag.removeEventListener(ns.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
-				tag.removeEventListener(ns.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
+				tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
+				tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
 				TagChannel.setInstance(this.src, tag);
 				this.tag = null;
 			}
+
+			if (window.createjs == null) { return; }
 			createjs.SoundJS.playFinished(this);
 		},
 
@@ -329,10 +335,11 @@
 
 		// Called by SoundJS when ready
 		beginPlaying: function(offset, loop, volume, pan) {
+			if (window.createjs == null) { return; }
 			var tag = this.tag = TagChannel.getInstance(this.src);
 			if (tag == null) { this.playFailed(); return -1; }
 
-			tag.addEventListener(ns.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
+			tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
 
 			this.offset = offset;
 			this.volume = volume;
@@ -340,8 +347,8 @@
 			this.remainingLoops = loop;
 
 			if (tag.readyState !== 4) {
-				tag.addEventListener(ns.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
-				tag.addEventListener(ns.HTMLAudioPlugin.AUDIO_STALLED, this.stalledHandler, false);
+				tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
+				tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_STALLED, this.stalledHandler, false);
 				tag.load();
 			} else {
 				this.handleSoundReady(null);
@@ -356,16 +363,18 @@
 		},
 
 		handleSoundReady: function(event) {
+			if (window.createjs == null) { return; }
 			this.playState = createjs.SoundJS.PLAY_SUCCEEDED;
 			this.paused = false;
-			this.tag.removeEventListener(ns.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
+			this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
 
 			if(this.offset >= this.getDuration()) {
 				this.playFailed();
 				return;
+			} else if (this.offset > 0) {
+				this.tag.currentTime = this.offset * 0.001;
 			}
-
-			this.tag.currentTime = this.offset * 0.001;
+			if (this.remainingLoops == -1) { this.tag.loop = true; }
 			this.tag.play();
 		},
 
@@ -512,12 +521,13 @@
 		handleSoundComplete: function(event) {
 			if (this.remainingLoops != 0) {
 				this.remainingLoops--;
-				try { this.tag.currentTime = 0; } catch(error) {}
+				//try { this.tag.currentTime = 0; } catch(error) {}
 				this.tag.play();
 				if (this.onLoop != null) { this.onLoop(this); }
 				return;
 			}
 
+			if (window.createjs == null) { return; }
 			this.playState = createjs.SoundJS.PLAY_FINISHED;
 			if (this.onComplete != null) { this.onComplete(this); }
 			this.cleanUp();
@@ -525,6 +535,7 @@
 
 		// Play has failed
 		playFailed: function() {
+			if (window.createjs == null) { return; }
 			this.playState = createjs.SoundJS.PLAY_FAILED;
 			if (this.onPlayFailed != null) { this.onPlayFailed(this); }
 			this.cleanUp();
@@ -536,13 +547,14 @@
 
 	}
 
-	// Do not add to window.
+	// Do not add to namespace.
 
 
 	/**
 	 * The TagChannel is an object pool for HTML tag instances.
 	 * In Chrome, we have to pre-create the number of tag instances that we are going to play
 	 * before we load the data, otherwise the audio stalls. (Note: This seems to be a bug in Chrome)
+	 * @class TagChannel
 	 * @param src The source of the channel.
 	 * @private
 	 */
@@ -626,7 +638,9 @@
 		toString: function() {
 			return "[HTMLAudioPlugin TagChannel]";
 		}
+
+		// do not add to namespace
+
 	}
 
-}(createjs||(createjs={})));
-var createjs;
+}());

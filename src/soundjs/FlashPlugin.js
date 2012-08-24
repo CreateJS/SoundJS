@@ -30,7 +30,11 @@
 /**
  * @module SoundJS
  */
-(function(ns) {
+
+// namespace:
+this.createjs = this.createjs||{};
+
+(function() {
 
 	/**
 	 * Play sounds using a Flash instance. This plugin requires swfObject.as
@@ -116,6 +120,14 @@
 		flashPreloadInstances: null, // Hash of preload instances, by Flash ID
 		queuedInstances: null,
 
+		/**
+		 * A developer flag to output all flash events to the console.
+		 * @property showOutput
+		 * @type Boolean
+		 * @default false
+		 */
+		showOutput: false,
+
 		init: function() {
 
 			this.capabilities = s.capabilities;
@@ -177,6 +189,7 @@
 		 * Pre-register a sound instance when preloading/setup.
 		 * Note that the FlashPlugin will return a SoundLoader instance for preloading
 		 * since Flash can not access the browser cache consistently.
+		 * @method register
 		 * @param {String} src The source of the audio
 		 * @param {Number} instances The number of concurrently playing instances to allow for the channel at any time.
 		 * @return {Object} A result object, containing a tag for preloading purposes.
@@ -188,8 +201,10 @@
 			} else {
 				this.flash.register(src);
 			}
+			var tag = new SoundLoader(src, this.flash);
+			tag.owner = this;
 			return {
-				tag: new SoundLoader(src, this.flash)
+				tag: tag
 			};
 		},
 
@@ -223,6 +238,9 @@
 		},
 		unregisterSoundInstance: function(flashId) {
 			delete this.flashInstances[flashId];
+		},
+		flashLog: function(data) {
+			this.showOutput && console.log(data);
 		},
 
 		// Events from Flash pertaining to a specific SoundInstance
@@ -275,7 +293,7 @@
 
 	}
 
-	ns.FlashPlugin = FlashPlugin;
+	createjs.FlashPlugin = FlashPlugin;
 
 
 	/**
@@ -398,6 +416,8 @@
 			this.loop = loop;
 			this.paused = false;
 
+			if (!this.owner.flashReady) { return false; }
+
             this.flashId = this.flash.playSound(this.src, offset, loop, volume, pan);
 			if (this.flashId == null) {
 				if (this.onPlayFailed != null) { this.onPlayFailed(this); }
@@ -501,7 +521,7 @@
 		 * @private
 		 */
 		setPosition: function(value) {
-			return this.flash.setPosition(this.flashId, value);
+			return this.flash && this.flash.setPosition(this.flashId, value);
 		},
 
 		/**
@@ -509,7 +529,7 @@
 		 * @private
 		 */
 		getDuration: function() {
-			return this.flash.getDuration(this.flashId);
+			return this.flash ? 0 : this.flash.getDuration(this.flashId);
 		},
 
 	// Flash callbacks
@@ -529,7 +549,7 @@
 
 	}
 
-	// Do NOT add SoundInstance to window.
+	// do not add to namespace
 
 
 	/**
@@ -561,10 +581,10 @@
 		// Calbacks
 		/**
 		 * The callback that fires when the load completes. This follows HTML tag naming.
-		 * @event onloaded
+		 * @event onload
 		 * @private
 		 */
-		onloaded: null,
+		onload: null,
 
 		/**
 		 * The callback that fires as the load progresses. This follows HTML tag naming.
@@ -601,13 +621,14 @@
 		 * @private
 		 */
 		load: function(src) {
+			if (src != null) { this.src = src; }
 			if (this.flash == null) {
 				loading = true;
 				return false;
 			}
 
 			//LM: Consider checking the result of the preload call.
-			this.flashId = this.flash.preload(src);
+			this.flashId = this.flash.preload(this.src);
 			// Associate this preload instance with the FlashID, so callbacks can route here.
 			this.owner.registerPreloadInstance(this.flashId, this);
 			return true;
@@ -622,8 +643,8 @@
 		handleComplete: function() {
 			this.progress = 1;
 			this.readyState = 4;
-			if (this.onloaded == null) { return; }
-			this.onloaded();
+			if (this.onload == null) { return; }
+			this.onload();
 		},
 
 		handleError: function(error) {
@@ -635,8 +656,8 @@
 			return "[FlashPlugin SoundLoader]";
 		}
 
+		// do not add to namespace
 
 	}
 
-}(createjs||(createjs={})));
-var createjs;
+}());
