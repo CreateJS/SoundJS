@@ -448,7 +448,10 @@ this.createjs = this.createjs||{};
 		if (!SoundChannel.add(instance, interrupt)) { return false; }
 		var result = instance.beginPlaying(offset, loop, volume, pan);
 		if (!result) {
-			this.instances.splice(this.instances.indexOf(instance), 1);
+			var index = this.instances.indexOf(instance);
+			if (index > -1) {
+				this.instances.splice(index, 1);
+			}
 			delete this.instanceHash[instance.uniqueId];
 			return false;
 		}
@@ -603,7 +606,10 @@ this.createjs = this.createjs||{};
 	 */
 	s.playFinished = function(instance) {
 		SoundChannel.remove(instance);
-		this.instances.splice(this.instances.indexOf(instance), 1);
+		var index = this.instances.indexOf(instance);
+		if (index > -1) {
+			this.instances.splice(index, 1);
+		}
 		// Note: Keep in instance hash.
 	}
 
