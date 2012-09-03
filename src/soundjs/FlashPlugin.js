@@ -323,6 +323,7 @@ this.createjs = this.createjs||{};
 		 */
 		uniqueId: -1,
 
+		owner: null,
 		capabilities: null,
 		flash: null,
 		flashId: null, // To communicate with Flash
@@ -424,6 +425,7 @@ this.createjs = this.createjs||{};
 				this.cleanUp();
 				return false;
 			}
+			if (this.muted) { this.mute(true); }
 			this.playState = createjs.SoundJS.PLAY_SUCCEEDED;
 			this.owner.registerSoundInstance(this.flashId, this);
 			return true;
@@ -577,6 +579,7 @@ this.createjs = this.createjs||{};
 		progress: -1,
 		readyState: 0,
 		loading: false,
+		owner: null,
 
 		// Calbacks
 		/**
@@ -622,12 +625,11 @@ this.createjs = this.createjs||{};
 		 */
 		load: function(src) {
 			if (src != null) { this.src = src; }
-			if (this.flash == null) {
+			if (this.flash == null || !this.owner.flashReady) {
 				loading = true;
 				return false;
 			}
 
-			//LM: Consider checking the result of the preload call.
 			this.flashId = this.flash.preload(this.src);
 			// Associate this preload instance with the FlashID, so callbacks can route here.
 			this.owner.registerPreloadInstance(this.flashId, this);
