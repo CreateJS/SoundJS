@@ -1,3 +1,21 @@
+Version NEXT
+****************************************************************************************************
+- Fixed issues with indexOf that were preventing stop/mute, etc.
+- Fixed issue with initial mute state in FlashPlugin
+
+Version 0.3.0 [Aug 24, 2012]
+****************************************************************************************************
+- moved all classes into a configurable createjs namespace
+- Added better support for missing sounds. SoundJS returns a lightweight instance that won't fail
+	when calls are made on it.
+- Added static mute/unmute methods to independently control a global mute property.
+- Added support for preloading WAV files
+- Fixed flash preload support when in tag mode
+- Added lightweight flash instance, which is code only
+- Added a debug flag [showOutput] to FlashPlugin, which will log Flash Activity
+- Fixed issue with canPlayType throwing runtime in non-supported browsers.
+
+
 Version 0.2.0
 ****************************************************************************************************
 Second release, corresponding with the release of the CreateJS suite of tools (createjs.com).

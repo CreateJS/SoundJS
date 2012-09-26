@@ -3,7 +3,7 @@
 <head>
 	<title>SoundJS: Media Player Example</title>
 
-	<script type="text/javascript" src="http://code.createjs.com/preloadjs-0.1.0.min.js"></script>
+	<script type="text/javascript" src="./assets/preloadjs-0.2.0.min.js"></script>
 
 	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
 	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
@@ -24,8 +24,8 @@
 				document.getElementById("header").style.display = "none";
 			}
 
-			SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
-			if (!SoundJS.checkPlugin(true)) {
+			createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
+			if (!createjs.SoundJS.checkPlugin(true)) {
 				document.getElementById("error").style.display = "block";
 				document.getElementById("content").style.display = "none";
 				return;
@@ -42,17 +42,17 @@
 				{src:assetPath+"M-GameBG.mp3|"+assetPath+"M-GameBG.ogg", id:"music"}
 			];
 
-			preload = new PreloadJS();
+			preload = new createjs.PreloadJS();
 			preload.onProgress = handleProgress;
 			preload.onComplete = handleLoadComplete;
-			preload.installPlugin(SoundJS);
+			preload.installPlugin(createjs.SoundJS);
 			preload.loadManifest(manifest);
 			$("#loading").text("Loading...")
 		}
 
 		function stop() {
 			if (preload != null) { preload.cancel(); }
-			SoundJS.stop();
+			createjs.SoundJS.stop();
 
 			//$("#position").css("display", "none");
 			//$("#playPauseBtn").attr("disabled", true);
@@ -76,7 +76,7 @@
 			//$("#progress").css("display", "none");
 			//$("#position").css("display", "block");
 
-			instance = SoundJS.play("music");
+			instance = createjs.SoundJS.play("music");
 			instance.onComplete = function() {
 				clearInterval(positionInterval);
 				$("#playBtn").removeClass("pauseBtn").addClass("playBtn")
@@ -85,7 +85,7 @@
 			//$("#playPauseBtn").attr("disabled", false);
 			$("#playBtn").removeClass("playBtn").addClass("pauseBtn");
 			$("#playBtn").click(function(event){
-				if (instance.playState == SoundJS.PLAY_FINISHED) {
+				if (instance.playState == createjs.SoundJS.PLAY_FINISHED) {
 					instance.play();
 					$("#playBtn").removeClass("playBtn").addClass("pauseBtn");
 					trackTime();
@@ -126,7 +126,8 @@
 				});
 			});
 		}
-var dragOffset;
+
+		var dragOffset;
 		function trackTime() {
 			positionInterval = setInterval(function(event) {
 				if(seeking) { return; };

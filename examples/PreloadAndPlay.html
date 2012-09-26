@@ -3,7 +3,7 @@
 <head>
 <title>SoundJS: Preload & Sound APIs</title>
 
-	<script type="text/javascript" src="http://code.createjs.com/preloadjs-0.1.0.min.js"></script>
+	<script type="text/javascript" src="./assets/preloadjs-0.2.0.min.js"></script>
 
 	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
 	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
@@ -22,8 +22,8 @@
 			document.getElementById("header").style.display = "none";
 		}
 		
-		SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
-		if (!SoundJS.checkPlugin(true)) {
+		createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
+		if (!createjs.SoundJS.checkPlugin(true)) {
 			document.getElementById("error").style.display = "block";
 			document.getElementById("content").style.display = "none";
 			return;
@@ -35,11 +35,9 @@
 		var assetsPath = "assets/";
 		var item = {src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg", id:"music"};
 
-		SoundJS.FlashPlugin.BASE_PATH = "assets/" // Initialize the base path from this document to the Flash Plugin
-
 		// Instantiate a queue.
-		queue = new PreloadJS();
-		queue.installPlugin(SoundJS); // Plug in SoundJS to handle browser-specific paths
+		queue = new createjs.PreloadJS();
+		queue.installPlugin(createjs.SoundJS); // Plug in SoundJS to handle browser-specific paths
 		queue.onComplete = loadComplete;
 		queue.onFileError = handleFileError;
 		queue.onProgress = handleProgress;
@@ -48,7 +46,7 @@
 
 	function stop() {
 		if (queue != null) { queue.cancel(); }
-		SoundJS.stop();
+		createjs.SoundJS.stop();
 	}
 
 	function handleFileError(o) {
@@ -69,7 +67,7 @@
 
 	function playSound(name, loop) {
 		// Play the sound using the ID created above.
-		return SoundJS.play(name);
+		return createjs.SoundJS.play(name);
 	}
 	</script>
 

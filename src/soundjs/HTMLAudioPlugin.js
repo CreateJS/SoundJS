@@ -30,7 +30,11 @@
 /**
  * @module SoundJS
  */
-(function(window) {
+
+// namespace:
+this.createjs = this.createjs||{};
+
+(function() {
 
 	/**
 	 * Play sounds using HTML <audio> tags in the browser.
@@ -41,6 +45,8 @@
 		this.init();
 	}
 
+	var s = HTMLAudioPlugin;
+
 	/**
 	 * The maximum number of instances that can be played. This is a browser limitation.
 	 * @property MAX_INSTANCES
@@ -48,7 +54,7 @@
 	 * @default 30
 	 * @static
 	 */
-	HTMLAudioPlugin.MAX_INSTANCES = 30;
+	s.MAX_INSTANCES = 30;
 
 	/**
 	 * The capabilities of the plugin.
@@ -57,18 +63,18 @@
 	 * @default null
 	 * @static
 	 */
-	HTMLAudioPlugin.capabilities = null;
+	s.capabilities = null;
 
-	HTMLAudioPlugin.lastId = 0;
+	s.lastId = 0;
 
 	// Event constants
-	HTMLAudioPlugin.AUDIO_READY = "canplaythrough";
-	HTMLAudioPlugin.AUDIO_ENDED = "ended";
-	HTMLAudioPlugin.AUDIO_ERROR = "error"; //TODO: Handle error cases
-	HTMLAudioPlugin.AUDIO_STALLED = "stalled";
+	s.AUDIO_READY = "canplaythrough";
+	s.AUDIO_ENDED = "ended";
+	s.AUDIO_ERROR = "error"; //TODO: Handle error cases
+	s.AUDIO_STALLED = "stalled";
 
 	//TODO: Not used. Chrome can not do this when loading audio from a server.
-	HTMLAudioPlugin.fillChannels = false;
+	s.fillChannels = false;
 
 	/**
 	 * Determine if the plugin can be used.
@@ -76,12 +82,12 @@
 	 * @return {Boolean} If the plugin can be initialized.
 	 * @static
 	 */
-	HTMLAudioPlugin.isSupported = function() {
-		if (SoundJS.BrowserDetect.isIOS) { return false; }
+	s.isSupported = function() {
+		if (createjs.SoundJS.BrowserDetect.isIOS) { return false; }
 
-		HTMLAudioPlugin.generateCapabilities();
-		var t = HTMLAudioPlugin.tag;
-		if (t == null || t.canPlayType == null) { return false; }
+		s.generateCapabilities();
+		var t = s.tag;
+		if (t == null) { return false; }
 		return true;
 	};
 
@@ -90,29 +96,30 @@
 	 * @method generateCapabiities
 	 * @static
 	 */
-	HTMLAudioPlugin.generateCapabilities = function() {
-		if (HTMLAudioPlugin.capabilities != null) { return; }
-		var t = HTMLAudioPlugin.tag = document.createElement("audio");
-		var c = HTMLAudioPlugin.capabilities = {
+	s.generateCapabilities = function() {
+		if (s.capabilities != null) { return; }
+		var t = s.tag = document.createElement("audio");
+		if (t.canPlayType == null) { return null; }
+		var c = s.capabilities = {
 			panning: false,
 			volume: true,
 			mp3: t.canPlayType("audio/mp3") != "no" && t.canPlayType("audio/mp3") != "",
 			ogg: t.canPlayType("audio/ogg") != "no" && t.canPlayType("audio/ogg") != "",
 			mpeg: t.canPlayType("audio/mpeg") != "no" && t.canPlayType("audio/mpeg") != "",
 			wav:t.canPlayType("audio/wav") != "no" && t.canPlayType("audio/wav") != "",
-			channels: HTMLAudioPlugin.MAX_INSTANCES
+			channels: s.MAX_INSTANCES
 		};
 		// TODO: Other props?
 	}
 
-	var p = HTMLAudioPlugin.prototype = {
+	var p = s.prototype = {
 
 		capabilities: null,
 		FT: 0.001,
 		channels: null,
 
 		init: function() {
-			this.capabilities = HTMLAudioPlugin.capabilities;
+			this.capabilities = s.capabilities;
 			this.channels = {};
 		},
 
@@ -161,8 +168,7 @@
 
 	}
 
-	window.SoundJS.HTMLAudioPlugin = HTMLAudioPlugin;
-
+	createjs.HTMLAudioPlugin = HTMLAudioPlugin;
 
 
 	/**
@@ -214,7 +220,7 @@
 		owner: null,
 
 		loaded: false,
-		lastInterrupt: SoundJS.INTERRUPT_NONE,
+		lastInterrupt: createjs.SoundJS.INTERRUPT_NONE,
 		offset: 0,
 		delay: 0,
 		volume: 1,
@@ -280,11 +286,11 @@
 
 		// Constructor
 		init: function(src) {
-			this.uniqueId = HTMLAudioPlugin.lastId++;
+			this.uniqueId = createjs.HTMLAudioPlugin.lastId++;
 			this.src = src;
-			this.endedHandler = SoundJS.proxy(this.handleSoundComplete, this);
-			this.readyHandler = SoundJS.proxy(this.handleSoundReady, this);
-			this.stalledHandler = SoundJS.proxy(this.handleSoundStalled, this);
+			this.endedHandler = createjs.SoundJS.proxy(this.handleSoundComplete, this);
+			this.readyHandler = createjs.SoundJS.proxy(this.handleSoundReady, this);
+			this.stalledHandler = createjs.SoundJS.proxy(this.handleSoundStalled, this);
 		},
 
 		cleanUp: function() {
@@ -292,17 +298,19 @@
 			if (tag != null) {
 				tag.pause();
 				try { tag.currentTime = 0; } catch (e) {} // Reset Position
-				tag.removeEventListener(HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
-				tag.removeEventListener(HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
+				tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
+				tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
 				TagChannel.setInstance(this.src, tag);
 				this.tag = null;
 			}
-			SoundJS.playFinished(this);
+
+			if (window.createjs == null) { return; }
+			createjs.SoundJS.playFinished(this);
 		},
 
 		interrupt: function () {
 			if (this.tag == null) { return; }
-			this.playState = SoundJS.PLAY_INTERRUPTED;
+			this.playState = createjs.SoundJS.PLAY_INTERRUPTED;
 			if (this.onPlayInterrupted) { this.onPlayInterrupted(this); }
 			this.cleanUp();
 			this.paused = false;
@@ -322,15 +330,16 @@
 		 */
 		play: function(interrupt, delay, offset, loop, volume, pan) {
 			this.cleanUp();
-			SoundJS.playInstance(this, interrupt, delay, offset, loop, volume, pan);
+			createjs.SoundJS.playInstance(this, interrupt, delay, offset, loop, volume, pan);
 		},
 
 		// Called by SoundJS when ready
 		beginPlaying: function(offset, loop, volume, pan) {
+			if (window.createjs == null) { return; }
 			var tag = this.tag = TagChannel.getInstance(this.src);
 			if (tag == null) { this.playFailed(); return -1; }
 
-			tag.addEventListener(HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
+			tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
 
 			this.offset = offset;
 			this.volume = volume;
@@ -338,8 +347,8 @@
 			this.remainingLoops = loop;
 
 			if (tag.readyState !== 4) {
-				tag.addEventListener(HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
-				tag.addEventListener(HTMLAudioPlugin.AUDIO_STALLED, this.stalledHandler, false);
+				tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
+				tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_STALLED, this.stalledHandler, false);
 				tag.load();
 			} else {
 				this.handleSoundReady(null);
@@ -354,16 +363,18 @@
 		},
 
 		handleSoundReady: function(event) {
-			this.playState = SoundJS.PLAY_SUCCEEDED;
+			if (window.createjs == null) { return; }
+			this.playState = createjs.SoundJS.PLAY_SUCCEEDED;
 			this.paused = false;
-			this.tag.removeEventListener(HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
+			this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
 
 			if(this.offset >= this.getDuration()) {
 				this.playFailed();
 				return;
+			} else if (this.offset > 0) {
+				this.tag.currentTime = this.offset * 0.001;
 			}
-
-			this.tag.currentTime = this.offset * 0.001;
+			if (this.remainingLoops == -1) { this.tag.loop = true; }
 			this.tag.play();
 		},
 
@@ -403,7 +414,7 @@
 		 */
 		stop: function() {
 			this.pause();
-			this.playState = SoundJS.PLAY_FINISHED;
+			this.playState = createjs.SoundJS.PLAY_FINISHED;
 			this.cleanUp();
 			return true;
 		},
@@ -428,7 +439,7 @@
 
 		updateVolume: function() {
 			if (this.tag != null) {
-				this.tag.volume = this.muted ? 0 : this.volume * SoundJS.masterVolume;
+				this.tag.volume = this.muted ? 0 : this.volume * createjs.SoundJS.masterVolume;
 				return true;
 			} else {
 				return false;
@@ -510,37 +521,40 @@
 		handleSoundComplete: function(event) {
 			if (this.remainingLoops != 0) {
 				this.remainingLoops--;
-				try { this.tag.currentTime = 0; } catch(error) {}
+				//try { this.tag.currentTime = 0; } catch(error) {}
 				this.tag.play();
 				if (this.onLoop != null) { this.onLoop(this); }
 				return;
 			}
 
-			this.playState = SoundJS.PLAY_FINISHED;
+			if (window.createjs == null) { return; }
+			this.playState = createjs.SoundJS.PLAY_FINISHED;
 			if (this.onComplete != null) { this.onComplete(this); }
 			this.cleanUp();
 		},
 
 		// Play has failed
 		playFailed: function() {
-			this.playState = SoundJS.PLAY_FAILED;
+			if (window.createjs == null) { return; }
+			this.playState = createjs.SoundJS.PLAY_FAILED;
 			if (this.onPlayFailed != null) { this.onPlayFailed(this); }
 			this.cleanUp();
 		},
 
 		toString: function() {
-			return "[HTMLAudio SoundInstance]";
+			return "[HTMLAudioPlugin SoundInstance]";
 		}
 
 	}
 
-	// Do not add to window.
+	// Do not add to namespace.
 
 
 	/**
 	 * The TagChannel is an object pool for HTML tag instances.
 	 * In Chrome, we have to pre-create the number of tag instances that we are going to play
 	 * before we load the data, otherwise the audio stalls. (Note: This seems to be a bug in Chrome)
+	 * @class TagChannel
 	 * @param src The source of the channel.
 	 * @private
 	 */
@@ -553,7 +567,8 @@
 	 * @private
 	 */
 	TagChannel.channels = {};
-	/** Get a tag channel.
+	/**
+	 * Get a tag channel.
 	 * @private
 	 */
 	TagChannel.get = function(src) {
@@ -564,7 +579,8 @@
 		return channel;
 	}
 
-	/** Get a tag instance. This is a shortcut method.
+	/**
+	 * Get a tag instance. This is a shortcut method.
 	 * @private
 	 */
 	TagChannel.getInstance = function(src) {
@@ -622,8 +638,9 @@
 		toString: function() {
 			return "[HTMLAudioPlugin TagChannel]";
 		}
+
+		// do not add to namespace
+
 	}
 
-
-
-}(window));
+}());
