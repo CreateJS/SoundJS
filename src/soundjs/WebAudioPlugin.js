@@ -114,7 +114,7 @@
 
 	}
 
-	window.SoundJS.WebAudioPlugin = WebAudioPlugin;
+	createjs.SoundJS.WebAudioPlugin = WebAudioPlugin;
 
 
 
@@ -143,7 +143,7 @@
 
 		// WTF is this?
 		play: function(interrupt, delay, offset, loop, volume, pan) {
-			SoundJS.playInstance(this, interrupt, delay, offset, loop, volume, pan);
+			createjs.SoundJS.playInstance(this, interrupt, delay, offset, loop, volume, pan);
 		},
 
 		beginPlaying: function(offset, loop, volume, pan) {
@@ -165,7 +165,7 @@
 			// Why isn't it automatically done via SoundJS?
 			var that = this;
 			global.setTimeout(function() {
-				that.playState = SoundJS.PLAY_FINISHED;
+				that.playState = createjs.SoundJS.PLAY_FINISHED;
 				that.lastPlayback = null;
 				if (that.onComplete != null) that.onComplete(that);
 			}, source.buffer.duration * 1000);
@@ -184,7 +184,7 @@
 		resume: function() {},
 
 		stop: function() {
-			this.playState = SoundJS.PLAY_FINISHED;
+			this.playState = createjs.SoundJS.PLAY_FINISHED;
 			return true;
 		},
 
@@ -213,7 +213,7 @@
 		updateVolume: function() {
 
 			if (this.gain !== null) {
-				this.gain.gain.value = this.muted ? 0 : this.volume * SoundJS.masterVolume;
+				this.gain.gain.value = this.muted ? 0 : this.volume * createjs.SoundJS.masterVolume;
 				return true;
 			} else {
 				return false;

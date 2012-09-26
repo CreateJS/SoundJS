@@ -467,20 +467,14 @@ this.createjs = this.createjs||{};
 	 * @returns If a plugin is initialized. If the browser does not have the capabilities to initialize
 	 * an available plugin, this will be false.
 	 */
-<<<<<<< HEAD
-	SoundJS.checkPlugin = function(initializeDefault) {
-		if (SoundJS.activePlugin == null) {
-			if (initializeDefault && !SoundJS.pluginsRegistered) {
-				// preferring WebAudio over HTMLAudio
-				if (!SoundJS.registerPlugin(SoundJS.WebAudioPlugin)) {
-					SoundJS.registerPlugin(SoundJS.HTMLAudioPlugin);
-				}
-=======
 	s.checkPlugin = function(initializeDefault) {
 		if (s.activePlugin == null) {
 			if (initializeDefault && !s.pluginsRegistered) {
-				s.registerPlugin(createjs.HTMLAudioPlugin);
->>>>>>> 1b0119d6a7038d3809c9fa7958a4dcfbc08e1db8
+//				s.registerPlugin(createjs.HTMLAudioPlugin);
+//prefer WebAudio over HTMLAudio
+if (!s.registerPlugin(SoundJS.WebAudioPlugin)) {
+  s.registerPlugin(SoundJS.WebAudioPlugin);
+}
 			}
 			if (s.activePlugin == null) {
 				return false;
@@ -835,14 +829,12 @@ this.createjs = this.createjs||{};
 		 * @private
 		 */
 		getSlot: function(interrupt, instance) {
-
 			var target, replacement;
 
 			var margin = SoundJS.activePlugin.FT || 0;
 
 			for (var i=0, l=this.max||100; i<l; i++) {
 				target = this.get(i);
-
 
 				// Available Space
 				if (target == null) {
@@ -857,13 +849,11 @@ this.createjs = this.createjs||{};
 					continue;
 				}
 
-
 				// Audio is complete or not playing
 				if (target.playState == SoundJS.PLAY_FINISHED ||
 						target == SoundJS.PLAY_INTERRUPTED ||
 						target == SoundJS.PLAY_FAILED) {
 					replacement = target;
-
 
 				// Audio is a better candidate than the current target, according to playhead
 				} else if (
@@ -915,8 +905,4 @@ this.createjs = this.createjs||{};
 
 	createjs.SoundJS.BrowserDetect = BrowserDetect;
 
-<<<<<<< HEAD
-}(window));
-=======
 }());
->>>>>>> 1b0119d6a7038d3809c9fa7958a4dcfbc08e1db8
