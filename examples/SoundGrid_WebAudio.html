@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SoundJS: Sound Grid</title>
+
+	<script type="text/javascript" src="./assets/preloadjs-0.2.0.min.js"></script>
+
+	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
+	<script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
+
+	<!-- We also provide hosted minified versions of all CreateJS libraries.
+	    http://code.createjs.com -->
+
+	<script>
+	var preload;
+
+	function init() {
+		if (window.top != window) {
+			document.getElementById("header").style.display = "none";
+		}
+
+		if (!createjs.SoundJS.checkPlugin(true)) {
+			document.getElementById("error").style.display = "block";
+			document.getElementById("content").style.display = "none";
+			return;
+		}
+
+		document.getElementById("loader").className = "loader";
+		var assetsPath = "assets/";
+		var manifest = [
+		    {src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg", id:1, data: 1},
+		    {src:assetsPath+"Game-Spawn.mp3|"+assetsPath+"Game-Spawn.ogg", id:2, data: 1},
+		    {src:assetsPath+"Game-Shot.mp3|"+assetsPath+"Game-Shot.ogg", id:3, data: 1},
+
+		    {src:assetsPath+"GU-StealDaisy.mp3|"+assetsPath+"GU-StealDaisy.ogg", id:4, data: 1},
+		    {src:assetsPath+"Humm.mp3|"+assetsPath+"Humm.ogg", id:5, data: 1},
+		    {src:assetsPath+"R-Damage.mp3|"+assetsPath+"R-Damage.ogg", id:6, data: 1},
+
+		    {src:assetsPath+"Thunder1.mp3|"+assetsPath+"Thunder1.ogg", id:7, data: 1},
+		    {src:assetsPath+"S-Damage.mp3|"+assetsPath+"S-Damage.ogg", id:8, data: 1},
+		    {src:assetsPath+"U-CabinBoy3.mp3|"+assetsPath+"U-CabinBoy3.ogg", id:9, data: 1},
+
+		    {src:assetsPath+"ToneWobble.mp3|"+assetsPath+"ToneWobble.ogg", id:10, data: 1},
+		    {src:assetsPath+"Game-Death.mp3|"+assetsPath+"Game-Death.ogg", id:11, data: 1},
+		    {src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg", id:12, data: 1}
+		];
+
+	    preload = new createjs.PreloadJS();
+	    //Install SoundJS as a plugin, then PreloadJS will initialize it automatically.
+	    preload.installPlugin(createjs.SoundJS);
+
+	    //Available PreloadJS callbacks
+	    preload.onFileLoad = function(event) {
+		    // Show the icon on loaded items.
+			var div = document.getElementById(event.id);
+		    div.style.backgroundImage = "url('assets/audioButtonSheet.png')";
+	    };
+		preload.onComplete = function(event) {
+			document.getElementById("loader").className = "";
+		}
+
+	    //Load the manifest and pass 'true' to start loading immediately. Otherwise, you can call load() manually.
+	    preload.loadManifest(manifest, true);
+	}
+
+	function stop() {
+		if (preload != null) { preload.close(); }
+		createjs.SoundJS.stop();
+	}
+
+	function playSound(target) {
+	    //Play the sound: play (src, interrupt, delay, offset, loop, volume, pan)
+	    var instance = createjs.SoundJS.play(target.id, createjs.SoundJS.INTERRUPT_NONE, 0, 0, false, 1);
+		if (instance == null) { return; }
+		target.className = "gridBox active";
+		instance.onComplete = function(instance) {
+			target.className = "gridBox";
+		}
+
+	}
+	</script>
+
+	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css"/>
+	<style>
+	   body {
+	       font-family: sans-serif;
+	       font-size: 11px;
+	   }
+
+	   #content {
+		   width: 1000px;
+	   }
+	   .gridBox {
+			float: left;
+			background-repeat: no-repeat;
+			background-position: 0 0px;
+			background-color: #222;
+		    background-size: 320px 300px;
+			border: 0px solid #666;
+			width: 320px;
+			height: 100px;
+	    }
+	   .gridBox:hover {
+		   background-position: 0 -100px;
+		   background-color: #322;
+		   cursor: pointer;
+	   }
+	   .gridBox.active, .gridbox.active:hover {
+		   background-position: 0 -200px;
+		   cursor: auto;
+	   }
+	 </style>
+
+</head>
+
+<body onload="init();">
+
+	<div id="loader"></div>
+
+	<header id="header" class="SoundJS">
+	    <h1><span class="text-product">Sound<strong>JS</strong></span> Sound Grid</h1>
+	    <p>Click audio instances in the grid to play them.</p>
+	</header>
+	
+	<!-- We'll use the ID of the div to determine which audio file to play.
+	These id's match the ones passed into the audioList array. -->
+	<div id="content">
+	    <div id="1" onclick="playSound(this)" class="gridBox"></div>
+	    <div id="2" onclick="playSound(this)" class="gridBox"></div>
+	    <div id="3" onclick="playSound(this)" class="gridBox"></div>
+	    <div id="4" onclick="playSound(this)" class="gridBox"></div>
+	    <div id="5" onclick="playSound(this)" class="gridBox"></div>
+	    <div id="6" onclick="playSound(this)" class="gridBox"></div>
+	    <div id="7" onclick="playSound(this)" class="gridBox"></div>
+	    <div id="8" onclick="playSound(this)" class="gridBox"></div>
+	    <div id="9" onclick="playSound(this)" class="gridBox"></div>
+	    <div id="10" onclick="playSound(this)" class="gridBox"></div>
+	    <div id="11" onclick="playSound(this)" class="gridBox"></div>
+	    <div id="12" onclick="playSound(this)" class="gridBox"></div>
+	</div>
+
+	<div id="error">
+		<h1>Sorry!</h1>
+		<p>SoundJS is not currently supported in your browser.</p>
+		<p>We are currently working on support for iOS. Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
+			if you see this in any other browsers.</p>
+	</div>
+
+</body>
+</html>

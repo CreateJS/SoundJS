@@ -470,7 +470,11 @@ this.createjs = this.createjs||{};
 	s.checkPlugin = function(initializeDefault) {
 		if (s.activePlugin == null) {
 			if (initializeDefault && !s.pluginsRegistered) {
-				s.registerPlugin(createjs.HTMLAudioPlugin);
+//				s.registerPlugin(createjs.HTMLAudioPlugin);
+//prefer WebAudio over HTMLAudio
+if (!s.registerPlugin(SoundJS.WebAudioPlugin)) {
+  s.registerPlugin(SoundJS.WebAudioPlugin);
+}
 			}
 			if (s.activePlugin == null) {
 				return false;
@@ -835,7 +839,7 @@ this.createjs = this.createjs||{};
 				// Available Space
 				if (target == null) {
 					return true;
-				} else if (interrupt == SoundJS.INTERRUPT_NONE) {
+				} else if (interrupt == SoundJS.INTERRUPT_NONE && target.playState != SoundJS.PLAY_FINISHED) {
 					continue;
 				}
 
