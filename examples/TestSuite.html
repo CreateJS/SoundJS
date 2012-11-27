@@ -151,6 +151,8 @@
 	        var value = $(this).slider("option", "value");
 	        instance.setPan(value/100);
 	    });
+
+        removeSound("all");  //disable instance volume, pan, pause, and stop on startup
 	}
 
 	function stop() {
@@ -201,7 +203,7 @@
 
 	        // Play Sound
 	        var instance = createjs.SoundJS.play(item.value, interruptValue, delay, offset, loop, 1, 0);
-	        if (instance == null) { continue; }
+	        if (instance == null || instance.playState == createjs.SoundJS.PLAY_FAILED) { continue; }
 	        instance.onPlayFailed = handlePlayFailed;
 	        instance.onComplete = handleSoundComplete;
 	        instance.onPlayInterrupted = handlePlayFailed;

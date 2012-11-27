@@ -184,7 +184,7 @@ this.createjs = this.createjs||{};
 	s.activePlugin = null;
 
 	/**
-	 * SoundJS is currently muted. No audio will play, unless existing instances are unmuted. This property
+	 * SoundJS is currently muted. No audio will play, unless existing instances are un-muted. This property
 	 * is read-only.
 	 * @property muted
 	 * @type {Boolean}
@@ -212,7 +212,7 @@ this.createjs = this.createjs||{};
 		return {
 			callback: s.proxy(s.initLoad, s),
 			types: ["sound"],
-			extensions: ["mp3", "ogg", "wav"]
+            extensions: ["mp3", "m4a", "mp4", "mpeg", "ogg", "wav"]
 		}
 	}
 
@@ -302,12 +302,16 @@ this.createjs = this.createjs||{};
 	}
 
 	/**
-	 * Process manifest items from PreloadJS.
+	 * Process manifest items from PreloadJS. This method is intended for usage by a plugin, and not for direct
+	 *      interaction. Currently there is no way to add instances to SoundJS without PreloadJS.
 	 * @method initLoad
 	 * @param {String | Object} value The src or object to load
 	 * @param {String} type The optional type of object. Will likely be "sound".
 	 * @param {String} id An optional id
-	 * @param {Number | String | Boolean | Object} data Optional data associated with the item
+	 * @param {Number | String | Boolean | Object} data Optional data associated with the item. SoundJS uses the data
+	 *      parameter as the number of channels for an audio instance, however a "channels" property can be appended
+	 *      to the data object if it is used for other information. The audio channels will default to 1 if no value
+	 *      is found.
 	 * @return {Object} An object with the modified values that were passed in.
 	 * @private
 	 */
@@ -322,8 +326,14 @@ this.createjs = this.createjs||{};
 			s.idHash[id] = details.src;
 		}
 
-		var ok = SoundChannel.create(details.src, data);
-		var instance = s.activePlugin.register(details.src, data);
+		var numChannels = 1;
+		if (data != null) {
+			if (!isNaN(data.channels)) { numChannels = parseInt(data.channels); }
+			else if (!isNaN(data)) { numChannels = parseInt(data); }
+		}
+
+		var ok = SoundChannel.create(details.src, numChannels);
+		var instance = s.activePlugin.register(details.src, numChannels);
 		if (instance != null) {
 			// If the instance returns a tag, return it instead for preloading.
 			if (instance.tag != null) { details.tag = instance.tag; }
@@ -355,12 +365,19 @@ this.createjs = this.createjs||{};
 			var point = sound.lastIndexOf(".");
 			var ext = sound.substr(point+1).toLowerCase();
 			var name = sound.substr(0, point).split("/").pop();
+            // OJR: Is there a way to unstring the ext, and use it like if(c.[ext]) { found = true ;} ??  Then we can support infinite types without having to maintain this case statement
 			switch (ext) {
 				case "mp3":
 					if (c.mp3) { found = true; }
 					break;
+				case "m4a":
+					if (c.mp4) { found = true; }
+					break;
+                case "mpeg":
+                    if (c.mpeg) { found = true; }
+                    break;
 				case "ogg":
-					if (c.ogg) { found = true }
+					if (c.ogg) { found = true; }
 					break;
 				case "wav":
 					if (c.wav) { found = true; }
@@ -430,6 +447,7 @@ this.createjs = this.createjs||{};
 			//Note that we can't pass arguments to proxy OR setTimeout (IE), so just wrap the function call.
 			setTimeout(function() {
 					s.beginPlaying(instance, interrupt, offset, loop, volume, pan);
+					// OJR can't we pass arguments in an array [arg1, arg2, ...] // and then parse the arguments array in the function?
 				}, delay); //LM: Can not stop before timeout elapses. Maybe add timeout interval to instance?
 		}
 
@@ -459,10 +477,10 @@ this.createjs = this.createjs||{};
 	}
 
 	/**
-	 * Determine if a plugin has been initialized. Optionally initialize the default plugin, which enables
+	 * Determine if a plugin has been initialized. Optionally initialize one of the default plugins, which enables
 	 * SoundJS to work without manually setting up the plugins.
 	 * @method checkPlugin
-	 * @param {Boolean} initializeDefault Determines if the default plugin should be initialized if there
+	 * @param {Boolean} initializeDefault Determines if one of the default plugins should be initialized if there
 	 * is not yet a plugin when this is checked.
 	 * @returns If a plugin is initialized. If the browser does not have the capabilities to initialize
 	 * an available plugin, this will be false.
@@ -470,7 +488,12 @@ this.createjs = this.createjs||{};
 	s.checkPlugin = function(initializeDefault) {
 		if (s.activePlugin == null) {
 			if (initializeDefault && !s.pluginsRegistered) {
-				s.registerPlugin(createjs.HTMLAudioPlugin);
+                s.registerPlugin(createjs.HTMLAudioPlugin); // For now.
+
+				// Prep for WebAudio default, coming soon.
+                // if (!createjs.WebAudioPlugin || !(s.registerPlugin(createjs.WebAudioPlugin))) {
+				//      instantiate html audio backup.
+                // }
 			}
 			if (s.activePlugin == null) {
 				return false;
@@ -629,6 +652,7 @@ this.createjs = this.createjs||{};
 		for (var i=this.instances.length-1; i>=0; i--) {
 			var instance = this.instances[i];
 			if (src != null && instance.src != src) { continue; }
+            // OJR: Again, I think we can unstring the command and use it directly [command](value)
 			switch (command) {
 				case "pause":
 					instance.pause(); break;
@@ -669,6 +693,7 @@ this.createjs = this.createjs||{};
 
 
 
+    // OJR: Why is SoundChannel not it's own .js file?
 	/**
 	 * SoundChannel manages the number of active instances
 	 * @class SoundChannel
@@ -835,7 +860,7 @@ this.createjs = this.createjs||{};
 				// Available Space
 				if (target == null) {
 					return true;
-				} else if (interrupt == SoundJS.INTERRUPT_NONE) {
+				} else if (interrupt == SoundJS.INTERRUPT_NONE && target.playState != SoundJS.PLAY_FINISHED) {
 					continue;
 				}
 

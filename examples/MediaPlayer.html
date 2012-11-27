@@ -121,7 +121,7 @@
 					seeking = false;
 					$(this).unbind("mouseup mousemove");
 					var pos = $("#thumb").position().left/$("#track").width();
-					instance.setPosition(pos*instance.getDuration());
+					instance.setPosition(pos*instance.getDuration());  // note that getDuration will return 0 if you have stopped the audio because of the way it handles tags
 					$("#blocker").remove();
 				});
 			});

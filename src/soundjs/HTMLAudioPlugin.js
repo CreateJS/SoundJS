@@ -38,6 +38,9 @@ this.createjs = this.createjs||{};
 
 	/**
 	 * Play sounds using HTML <audio> tags in the browser.
+     * Note it is recommended to use WebAudioPlugin for iOS, as you can only have one <audio> tag,
+     *  cannot preload or autoplay the audio, cannot cache the audio, and cannot play the audio except
+     *  inside a user initiated event
 	 * @class HTMLAudioPlugin
 	 * @constructor
 	 */
@@ -65,6 +68,15 @@ this.createjs = this.createjs||{};
 	 */
 	s.capabilities = null;
 
+	/**
+	 * The current value of the audio tag.
+	 *
+	 * @property tagVolume
+	 * @type Number
+	 * @default null
+	 */
+	s.tagVolume = null;
+
 	s.lastId = 0;
 
 	// Event constants
@@ -84,7 +96,8 @@ this.createjs = this.createjs||{};
 	 */
 	s.isSupported = function() {
 		if (createjs.SoundJS.BrowserDetect.isIOS) { return false; }
-
+        // OJR let the user decide, inform them of limits in iOS.
+        // iOS can only have a single <audio> instance, cannot preload or autoplay, cannot cache sound, and can only be played in response to a user event (click)
 		s.generateCapabilities();
 		var t = s.tag;
 		if (t == null) { return false; }
@@ -107,6 +120,7 @@ this.createjs = this.createjs||{};
 			ogg: t.canPlayType("audio/ogg") != "no" && t.canPlayType("audio/ogg") != "",
 			mpeg: t.canPlayType("audio/mpeg") != "no" && t.canPlayType("audio/mpeg") != "",
 			wav:t.canPlayType("audio/wav") != "no" && t.canPlayType("audio/wav") != "",
+			mp4: t.canPlayType("audio/mp4") != "no" && t.canPlayType("audio/mp4") != "",
 			channels: s.MAX_INSTANCES
 		};
 		// TODO: Other props?
@@ -359,7 +373,7 @@ this.createjs = this.createjs||{};
 
 		handleSoundStalled: function(event) {
 			if (this.onPlayFailed != null) { this.onPlayFailed(this); }
-			this.cleanUp();
+			// this.cleanUp();  // OJR let the music keep playing which is better?
 		},
 
 		handleSoundReady: function(event) {
@@ -369,7 +383,7 @@ this.createjs = this.createjs||{};
 			this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
 
 			if(this.offset >= this.getDuration()) {
-				this.playFailed();
+				this.playFailed();  // OJR: throw error?
 				return;
 			} else if (this.offset > 0) {
 				this.tag.currentTime = this.offset * 0.001;
@@ -439,7 +453,11 @@ this.createjs = this.createjs||{};
 
 		updateVolume: function() {
 			if (this.tag != null) {
-				this.tag.volume = this.muted ? 0 : this.volume * createjs.SoundJS.masterVolume;
+				var newVolume = this.muted ? 0 : this.volume * createjs.SoundJS.masterVolume;
+				if (newVolume != this.tagVolume) {
+					this.tag.volume = newVolume;
+					this.tagVolume = newVolume;
+				}
 				return true;
 			} else {
 				return false;
@@ -503,7 +521,7 @@ this.createjs = this.createjs||{};
 			try {
 				this.tag.currentTime = value * 0.001;
 			} catch(error) { // Out of range
-				return false;
+				return false;  //OJR: throw error?
 			}
 			return true;
 		},
@@ -620,7 +638,7 @@ this.createjs = this.createjs||{};
 			if (this.tags.length == 0) { return null; }
 			this.available = this.tags.length;
 			var tag = this.tags.pop();
-			document.body.appendChild(tag);
+			if (tag.parentNode == null) { document.body.appendChild(tag); }
 			return tag;
 		},
 
@@ -630,7 +648,7 @@ this.createjs = this.createjs||{};
 				this.tags.push(tag);
 			}
 
-				document.body.removeChild(tag);
+				//document.body.removeChild(tag);
 
 			this.available = this.tags.length;
 		},

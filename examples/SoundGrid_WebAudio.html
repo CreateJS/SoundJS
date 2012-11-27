@@ -22,6 +22,9 @@
 			document.getElementById("header").style.display = "none";
 		}
 
+        // Register the webaudio plugin as the default. Please see the /extras folder to find the WebAudio plugin.
+        createjs.SoundJS.registerPlugins([WebAudioPlugin, createjs.HTMLAudioPlugin]);
+
 		createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
 		if (!createjs.SoundJS.checkPlugin(true)) {
 			document.getElementById("error").style.display = "block";
@@ -32,21 +35,21 @@
 		document.getElementById("loader").className = "loader";
 		var assetsPath = "assets/";
 		var manifest = [
-		    {src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg", id:1},
-		    {src:assetsPath+"Game-Spawn.mp3|"+assetsPath+"Game-Spawn.ogg", id:2},
-		    {src:assetsPath+"Game-Shot.mp3|"+assetsPath+"Game-Shot.ogg", id:3},
+		    {src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg", id:1, data: 1},
+		    {src:assetsPath+"Game-Spawn.mp3|"+assetsPath+"Game-Spawn.ogg", id:2, data: 1},
+		    {src:assetsPath+"Game-Shot.mp3|"+assetsPath+"Game-Shot.ogg", id:3, data: 1},
 
-		    {src:assetsPath+"GU-StealDaisy.mp3|"+assetsPath+"GU-StealDaisy.ogg", id:4},
-		    {src:assetsPath+"Humm.mp3|"+assetsPath+"Humm.ogg", id:5},
-		    {src:assetsPath+"R-Damage.mp3|"+assetsPath+"R-Damage.ogg", id:6},
+		    {src:assetsPath+"GU-StealDaisy.mp3|"+assetsPath+"GU-StealDaisy.ogg", id:4, data: 1},
+		    {src:assetsPath+"Humm.mp3|"+assetsPath+"Humm.ogg", id:5, data: 1},
+		    {src:assetsPath+"R-Damage.mp3|"+assetsPath+"R-Damage.ogg", id:6, data: 1},
 
-		    {src:assetsPath+"Thunder1.mp3|"+assetsPath+"Thunder1.ogg", id:7},
-		    {src:assetsPath+"S-Damage.mp3|"+assetsPath+"S-Damage.ogg", id:8},
-		    {src:assetsPath+"U-CabinBoy3.mp3|"+assetsPath+"U-CabinBoy3.ogg", id:9},
+		    {src:assetsPath+"Thunder1.mp3|"+assetsPath+"Thunder1.ogg", id:7, data: 1},
+		    {src:assetsPath+"S-Damage.mp3|"+assetsPath+"S-Damage.ogg", id:8, data: 1},
+		    {src:assetsPath+"U-CabinBoy3.mp3|"+assetsPath+"U-CabinBoy3.ogg", id:9, data: 1},
 
-		    {src:assetsPath+"ToneWobble.mp3|"+assetsPath+"ToneWobble.ogg", id:10},
-		    {src:assetsPath+"Game-Death.mp3|"+assetsPath+"Game-Death.ogg", id:11},
-		    {src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg", id:12}
+		    {src:assetsPath+"ToneWobble.mp3|"+assetsPath+"ToneWobble.ogg", id:10, data: 1},
+		    {src:assetsPath+"Game-Death.mp3|"+assetsPath+"Game-Death.ogg", id:11, data: 1},
+		    {src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg", id:12, data: 1}
 		];
 
 	    preload = new createjs.PreloadJS();

@@ -2,6 +2,9 @@ Version NEXT
 ****************************************************************************************************
 - Fixed issues with indexOf that were preventing stop/mute, etc.
 - Fixed issue with initial mute state in FlashPlugin
+- A few major performance updates
+- Added support for M4A audio
+- Added WebAudio plugin in "extras". Official WebAudio support coming soon.
 
 Version 0.3.0 [Aug 24, 2012]
 ****************************************************************************************************

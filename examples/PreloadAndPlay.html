@@ -22,7 +22,7 @@
 			document.getElementById("header").style.display = "none";
 		}
 		
-		createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
+		createjs.FlashPlugin.BASE_PATH = "../src/soundjs/"; // Initialize the base path from this document to the Flash Plugin
 		if (!createjs.SoundJS.checkPlugin(true)) {
 			document.getElementById("error").style.display = "block";
 			document.getElementById("content").style.display = "none";
