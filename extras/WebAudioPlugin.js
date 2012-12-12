@@ -59,16 +59,17 @@
 		if (s.capabilities != null) { return; }
 
 		var audio = null;
+        if (window.Audio) {  // iOS changed how they define this, so it is no longer returns as a typeof == "function"
+            audio = document.createElement("audio");
+        } else {
+            return;
+        }
 
-		if (typeof Audio == "function") {
-			audio = new Audio();  // could use instead -> document.createElement("audio");
-		}
-
-        if(typeof AudioContext == "function") {
+        if(window.AudioContext) {
             s.context = new AudioContext();
-        } else if (typeof webkitAudioContext == "function") {
-			s.context = new webkitAudioContext();
-		}
+        } else if (window.webkitAudioContext) {
+            s.context = new webkitAudioContext();
+        }
 
 		if (audio && s.context) {
 			s.capabilities = {
@@ -173,9 +174,9 @@
 
 			this.lastPlaybackCurrentTime = WebAudioPlugin.context.currentTime;
 
-			setTimeout(createjs.SoundJS.proxy(this.handlePlaybackComplete, this), source.buffer.duration*1000);
+			setTimeout(createjs.SoundJS.proxy(this.handlePlaybackComplete, this), source.buffer.duration*1000);  // NOTE *1000 because WebAudio reports everything in seconds but js uses milliseconds
 
-			//LM: Should we do this?
+			//LM: Should we do this?  //OJR Yes, it is the only way to keep the sound playing smoothly.  But it might need to be set before the buffer is set.
 			if (loop === true) {
 				source.loop = true;
 			}
