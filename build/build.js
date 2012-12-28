@@ -5,7 +5,10 @@ CONFIGURATION
 */
 // listing of all source files, with dependencies listed in order:
 var SOURCE_FILES = [
-	__dirname + "/../src/soundjs/SoundJS.js"
+	__dirname + "/../src/easeljs/events/EventDispatcher.js",
+	__dirname + "/../src/soundjs/SoundJS.js",
+	__dirname + "/../src/soundjs/WebAudioPlugin.js",
+	__dirname + "/../src/soundjs/HTMLAudioPlugin.js"
 ];
 
 // default name for lib output:
