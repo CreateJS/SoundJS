@@ -1,0 +1,16 @@
+{
+    "version": "1.0.0",
+    "name": "SoundJS",
+    "description": "SoundJS API.",
+
+    "url": "http://www.createjs.com/#!/SoundJS",
+    "logo":"http://beta.createjs.com/resources/SuiteIcons/SoundJS/SoundJS_128x128.png",
+    "options": {
+        "outdir": "../docs/output",
+        "linkNatives": "true",
+        "attributesEmit": "true",
+        "selleck": "true",
+        "paths":["../src"],
+		"helpers" : ["./path.js"]
+    }
+}

@@ -6,6 +6,7 @@
 	<script type="text/javascript" src="./assets/preloadjs-0.2.0.min.js"></script>
 
 	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
+    <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
 	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
 	<script type="text/javascript" src="../src/swfobject.js"></script>
 	<script type="text/javascript" src="../src/soundjs/FlashPlugin.js"></script>
@@ -24,8 +25,7 @@
 				document.getElementById("header").style.display = "none";
 			}
 
-			createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
-			if (!createjs.SoundJS.checkPlugin(true)) {
+			if (!createjs.SoundJS.initializeDefaultPlugins()) {
 				document.getElementById("error").style.display = "block";
 				document.getElementById("content").style.display = "none";
 				return;
@@ -38,16 +38,20 @@
 
 			document.getElementById("loader").className = "loader";
 			var assetPath = "assets/";
-			var manifest = [
+            var src = assetPath+"M-GameBG.mp3|"+assetPath+"M-GameBG.ogg";
+			/*var manifest = [
 				{src:assetPath+"M-GameBG.mp3|"+assetPath+"M-GameBG.ogg", id:"music"}
 			];
 
-			preload = new createjs.PreloadJS();
+			/*preload = new createjs.PreloadJS();
 			preload.onProgress = handleProgress;
 			preload.onComplete = handleLoadComplete;
 			preload.installPlugin(createjs.SoundJS);
 			preload.loadManifest(manifest);
-			$("#loading").text("Loading...")
+			$("#loading").text("Loading...") */
+
+            createjs.SoundJS.registerSound(src, "music");
+            handleLoadComplete(null);
 		}
 
 		function stop() {
@@ -77,7 +81,7 @@
 			//$("#position").css("display", "block");
 
 			instance = createjs.SoundJS.play("music");
-			instance.onComplete = function() {
+ 			instance.onComplete = function() {
 				clearInterval(positionInterval);
 				$("#playBtn").removeClass("pauseBtn").addClass("playBtn")
 				$("#stopBtn").attr("disabled", true);

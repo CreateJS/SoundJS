@@ -8,6 +8,7 @@
 	<script type="text/javascript" src="./assets/easeljs-0.5.0.min.js"></script>
 
 	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
+    <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
 	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
 	<script type="text/javascript" src="../src/swfobject.js"></script>
 	<script type="text/javascript" src="../src/soundjs/FlashPlugin.js"></script>
@@ -72,7 +73,6 @@
 			document.getElementById("header").style.display = "none";
 		}
 
-		createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
 		if (!createjs.SoundJS.checkPlugin(true)) {
 			document.getElementById("error").style.display = "block";
 			document.getElementById("content").style.display = "none";

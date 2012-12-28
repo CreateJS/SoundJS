@@ -6,6 +6,7 @@
 
 	<!--<script type="text/javascript" src="./assets/preloadjs-0.2.0.min.js"></script>-->
 
+    <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
 	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
     <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
 	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
@@ -187,17 +188,13 @@
 	        {id:"Cabin Boy", src:assetsPath + "U-CabinBoy3.mp3", type:"sound", id:"CabinBoy", data:1}
 	    ];
 
-        var details = createjs.SoundJS.registerManifest(manifest);
-        for(var i= 0, l = details.length; i < l; i++) {
-           if (details[i]) {  // Note registerSound returns false if type is not supported by browser
-               addSoundToList(details[i]);  // it would be better to do this on successful load but plugins do not have that capability yet
-           }
-        }
+        createjs.SoundJS.addEventListener("loadComplete", addSoundToList, this); // add an event listener for when load is completed
+        createjs.SoundJS.registerManifest(manifest);
 	}
 
-    function addSoundToList(details) {
+    function addSoundToList(event) {
         var list = $("#library").get(0);
-        list.options.add(new Option((details.id || details.src) + " ("+(details.data||1)+")", details.id));
+        list.options.add(new Option((event.id || event.src) + " ("+(event.data||1)+")", event.id));
     }
 
     function handleSliderChange(evt) {
@@ -210,68 +207,62 @@
 	    var list = $("#library").get(0);
 	    if (list.selectedIndex == -1) { return; }
 
-	    var indices = [];
-	    for (var i=0, l=list.options.length; i<l; i++) {
-	        if (list.options[i].selected) { indices.push(i); }
-	    }
-
 	    // Options
 	    var interrupt = $("#interrupt").get(0);
 	    var interruptValue = interrupt.options[interrupt.selectedIndex].value;
 	    var loop = $(".loopSlider").slider("option", "value");
 	    var delay = $(".delaySlider").slider("option", "value") *1000;
 	    var offset = $(".offsetSlider").slider("option", "value")*1000;
-	    var nowPlaying = $("#nowPlaying").get(0);
 
-	    for (var i=0, l=indices.length; i<l; i++) {
-	        var index = indices[i]; //list.selectedIndex;
-	        if (index == null) { continue; }
-	        var item = list.options[index];
+	    for (var i=0, l=list.options.length; i<l; i++) {
+            if (!list.options[i].selected) { continue; }
+	        var item = list.options[i];
 
-	        // Play Sound
-	        var instance = createjs.SoundJS.play(item.value, interruptValue, delay, offset, loop, 1, 0);
-	        if (instance == null || instance.playState == createjs.SoundJS.PLAY_FAILED) {
-                if (nowPlaying.options[0].value == "-1") {
-                    nowPlaying.remove(0);
-                    // remove existing message
-                    nowPlaying.options.add(new Option("-- Audio Not Finished Loading --", -1));
-                }
-                continue;
-            }
-	        instance.onPlayFailed = handlePlayFailed;
-	        instance.onComplete = handleSoundComplete;
-	        instance.onPlayInterrupted = handlePlayFailed;
+            var instance = createjs.SoundJS.createInstance(item.value);
+            instance.addEventListener("playSucceeded", handlePlaySuccess, instance);
+            instance.addEventListener("playInterrupted", handlePlayFailed, instance);
+            instance.addEventListener("playFailed", handlePlayFailed, instance);
+            instance.addEventListener("playComplete", handleSoundComplete, instance);
 
-            instanceHash[instance.uniqueId] = instance;
-
-		    // Put in the nowPlaying list. (Remember to remove first temp item)
-	        if (nowPlaying.options[0].value == "-1") {
-	            nowPlaying.remove(0);
-	            nowPlaying.disabled = false;
-	        } else {
-	            for (var j=nowPlaying.options.length-1; j>=0; j--) {
-	                if (nowPlaying.options[j].value == instance.uniqueId) {
-	                    if (nowPlaying.options.remove) {
-	                        nowPlaying.options.remove(j);
-	                    } else if (nowPlaying.remove) {
-	                        nowPlaying.remove(j);
-	                    }
-	                }
-	            }
-	        }
-
-	        nowPlaying.options.add(new Option(instance.src + "("+instance.uniqueId + ")", instance.uniqueId));
+            instance.play(interruptValue, delay, offset, loop);
 	    }
 	}
 
+    // Create a sound, add listeners, and try playing it.
+    function handlePlaySuccess(event) {
+        instance = this;
+        instanceHash[instance.uniqueId] = instance;
+        instance.removeEventListener("playSucceeded", handlePlaySuccess, instance);  // because we only want this to fire the first time we start playing
+
+        var nowPlaying = $("#nowPlaying").get(0);
+
+        // Put in the nowPlaying list. (Remember to remove first temp item)
+        if (nowPlaying.options[0].value == "-1") {
+            nowPlaying.remove(0);
+            nowPlaying.disabled = false;
+        } else {
+            for (var j=nowPlaying.options.length-1; j>=0; j--) {  // OJR review this code, it seems over complicated for what it's doing
+                if (nowPlaying.options[j].value == instance.uniqueId) {
+                    if (nowPlaying.options.remove) {
+                        nowPlaying.options.remove(j);
+                    } else if (nowPlaying.remove) {
+                        nowPlaying.remove(j);
+                    }
+                }
+            }
+        }
+
+        nowPlaying.options.add(new Option(instance.src + "("+instance.uniqueId + ")", instance.uniqueId));
+    }
+
 	// Sound finished. Remove it from the list.
-	function handleSoundComplete(instance) {
-	    removeSound(instance);
+	function handleSoundComplete(event) {
+	    removeSound(this);
 	}
 
 	// Playback failed (usually interrupt failed)
-	function handlePlayFailed(instance) {
-	    removeSound(instance);
+	function handlePlayFailed(event) {
+	    removeSound(this);
     }
 
 	// Remove the sound from the list.
@@ -429,7 +420,7 @@
             font-size: 16px;
             font-weight: bold;
         }
-	</style>
+    </style>
 </head>
 
 <body onload="init()">

@@ -1,10 +1,41 @@
-Version NEXT
+Version NEXT 0.4.0 [Jan XX, 2013]
 ****************************************************************************************************
+**     Please note that it is recommended to use PreloadJS 0.3.0 with SoundJS 0.4.0.     ***********
+****************************************************************************************************
+- A few major performance updates
+- Added default support for M4A, MP4, aiff, wma, and mid audio formats
+- Removed global pause/resume
+- Removed global setMasterVolume, in place of SoundJS.setVolume(), which is now global volume
+- Added proper global mute, which affects sounds globally, instead of just applying mute to sounds
+- Removed id-based lookup
+- Revised plugin approach, and simplified internal APIs
+- Revised path parsing to support a larger range of file path formats
 - Fixed issues with indexOf that were preventing stop/mute, etc.
 - Fixed issue with initial mute state in FlashPlugin
-- A few major performance updates
-- Added support for M4A audio
-- Added WebAudio plugin in "extras". Official WebAudio support coming soon.
+
+LM: IN PROGRESS CHANGES FOR NEXT RELEASE
+- Added sound registration and manifest registration allowing simple internal preloading, so Sounds can preload and play
+without PreloadJS.  This includes callback and EventDispatch as files load.
+- added default behavior to load src when play is called if src has not been registered or preloaded
+- added EventDispatcher functionality to SoundJS and SoundInstance.
+- Better documentation throughout
+- Improved examples
+- Official WebAudio support via the new WebAudioPlugin, which is the default audio handler
+- Changed mute() to getMute() and setMute() on SoundJS and SoundInstances.
+- Added global volume/mute methods on plugins, can be used in place of setting properties of all instances and exist
+independent of those same properties on instances
+- Added create() method on SoundJS, which can be used to create a stopped sound
+- Changed setPosition() method on SoundInstance so it is available on stopped instances
+- Changed getDuration() method on SoundInstance so it returns the duration of stopped instances, instead of 0
+- Changed default values set when SoundJS.play is called so instances retain position, volume, and pan unless explicitly changed
+- fixed issue to how delay was handled in SoundInstance so it will not fire if pause() or stop() is called before playback begins
+- changed how file extension support is determined so changes only need to be made to SoundJS
+- Fixed an issue in FlashPlugin that caused getDuration to always return 0
+- Fixed an issue in FlashPlugin that would cause a looping sound to loop from the same point it was paused from or set position to
+- Fixed loop callback in FlashPlugin SoundInstance (previously it would not be called).
+- Fixed an issue with FlashPlugin in IE that caused a race condition due to caching, which would stop it from working
+- Fixed an issue with FlashPlugin that would cause a paused instance, once resumed, to not fire onComplete callback.
+- Fixed an issue in HTMLAudioPlugin that caused it to incorrectly return isSupported as true when it should be false
 
 Version 0.3.0 [Aug 24, 2012]
 ****************************************************************************************************

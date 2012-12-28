@@ -5,9 +5,7 @@ CONFIGURATION
 */
 // listing of all source files, with dependencies listed in order:
 var SOURCE_FILES = [
-	__dirname + "/../src/soundjs/SoundJS.js",
-	__dirname + "/../src/soundjs/HTMLAudioPlugin.js",
-	//"../src/soundjs/FlashPlugin.js"
+	__dirname + "/../src/soundjs/SoundJS.js"
 ];
 
 // default name for lib output:
@@ -17,7 +15,8 @@ var JS_FILE_NAME = "soundjs-%VERSION%.min.js";
 var PROJECT_NAME = "SoundJS";
 
 // url for website or github repo for project:
-var PROJECT_URL = "http://soundjs.com";
+var PROJECT_URL = "http://soundjs.com/";
+
 
 // name of directory for docs:
 var DOCS_DIR_NAME = PROJECT_NAME+"_docs-%VERSION%";
@@ -26,7 +25,7 @@ var DOCS_DIR_NAME = PROJECT_NAME+"_docs-%VERSION%";
 var DOCS_FILE_NAME = DOCS_DIR_NAME+".zip";
 
 // name of directory where generated files are placed
-var OUTPUT_DIR_NAME = __dirname + "/output";
+var OUTPUT_DIR_NAME =__dirname + "/output";
 
 
 // path to directory that includes YUI Doc templates
@@ -42,13 +41,12 @@ var YUI_DOC_PATH = __dirname + "/../tools/yuidoc/bin/yuidoc.py";
 // yui version being used
 var YUI_VERSION = 2;
 
-
 /*
 END CONFIGURATION
 ************************************************************/
 
 
-// TODO: add support for recursively checking to see if we are omitting any files
+// TODO: add support for recursively checking to see if we are ommiting any files
 
 
 var FILE = require("fs");
@@ -131,7 +129,7 @@ function main(argv)
 	version = argv.version;
 
 	extraSourceFiles = argv.s;
-
+	
 	if(argv.o)
 	{
 		js_file_name = argv.o;
@@ -151,7 +149,7 @@ function main(argv)
 	}
 
 	if(task == TASK.ALL)
-	{
+	{	
 		shouldBuildSource = true;
 		shouldBuildDocs = true;
 	}
@@ -165,7 +163,7 @@ function main(argv)
 	if(shouldBuildSource)
 	{
 		buildSourceTask(function(success)
-		{
+		{		
 			print("Build Source Task Complete");
 			if(shouldBuildDocs)
 			{
@@ -188,7 +186,7 @@ function main(argv)
 				print("Build Docs Task Complete");
 			}
 		);
-	}
+	}	
 }
 
 
@@ -197,26 +195,26 @@ function main(argv)
 
 function cleanTask(completeHandler)
 {
-	if(PATH.existsSync(TMP_DIR_NAME))
-	{
+	if(FILE.existsSync(TMP_DIR_NAME))
+	{	
 		WRENCH.rmdirSyncRecursive(TMP_DIR_NAME);
 	}
-
-	if(PATH.existsSync(OUTPUT_DIR_NAME))
+	
+	if(FILE.existsSync(OUTPUT_DIR_NAME))
 	{
 		WRENCH.rmdirSyncRecursive(OUTPUT_DIR_NAME);
 	}
 }
 
 function buildSourceTask(completeHandler)
-{
-	if(!PATH.existsSync(OUTPUT_DIR_NAME))
+{	
+	if(!FILE.existsSync(OUTPUT_DIR_NAME))
 	{
 		FILE.mkdirSync(OUTPUT_DIR_NAME);
 	}
-
-	js_file_name = js_file_name.split("%VERSION%").join(version);
-
+    
+    js_file_name = js_file_name.split("%VERSION%").join(version);
+    
 	var file_args = [];
 	var len = SOURCE_FILES.length;
 	for(var i = 0; i < len; i++)
@@ -224,7 +222,7 @@ function buildSourceTask(completeHandler)
 		file_args.push("--js");
 		file_args.push(SOURCE_FILES[i]);
 	}
-
+	
 	if(extraSourceFiles)
 	{
 		len = extraSourceFiles.length;
@@ -234,8 +232,8 @@ function buildSourceTask(completeHandler)
 			file_args.push(extraSourceFiles[i]);
 		}
 	}
-
-
+	
+	
 	var tmp_file = PATH.join(OUTPUT_DIR_NAME,"tmp.js");
 	var final_file = PATH.join(OUTPUT_DIR_NAME, js_file_name);
 
@@ -246,7 +244,7 @@ function buildSourceTask(completeHandler)
 		).concat(
 			["--js_output_file", tmp_file]
 		);
-
+		
 
 	CHILD_PROCESS.exec(
 		cmd.join(" "),
@@ -258,7 +256,7 @@ function buildSourceTask(completeHandler)
 				{
 					print(stdout);
 				}
-
+			
 				if(stderr)
 				{
 					print(stderr);
@@ -270,41 +268,34 @@ function buildSourceTask(completeHandler)
 				print("Error Running Google Closure : " + error);
 				exitWithFailure();
 		    }
-
+		
 			var license_data = FILE.readFileSync(__dirname + "/license.txt", "UTF-8");
 			var final_data = FILE.readFileSync(tmp_file, "UTF-8");
 
 			FILE.writeFileSync(final_file, license_data + final_data, "UTF-8");
 
 			FILE.unlinkSync(tmp_file);
-
+			
 			completeHandler(true);
 		}
 	);
 }
 
 function buildDocsTask(version, completeHandler)
-{
+{	
 	var parser_in="../src";
 	var	parser_out= PATH.join(TMP_DIR_NAME , "parser");
 
 	var doc_dir=DOCS_DIR_NAME.split("%VERSION%").join(version);
 	var doc_file=DOCS_FILE_NAME.split("%VERSION%").join(version);
-
+	
 	var generator_out=PATH.join(OUTPUT_DIR_NAME, doc_dir);
+    console.log("version", version);
+	var cmd = ["yuidoc -q --themedir ./createjsTheme --project-version", version];              
 
-	var cmd = [
-		"python", YUI_DOC_PATH,
-		parser_in,
-		"-p", parser_out,
-		"-o", generator_out,
-		"-t", TEMPLATE_DIR_PATH,
-		"-v", version,
-		"-Y", YUI_VERSION,
-		"-m", PROJECT_NAME,
-		"-u", PROJECT_URL
-	];
-
+	var whereZipLives = PATH.resolve("../docs/");  
+	var cmd1 = "cd " + whereZipLives + "; zip -r " + doc_file + " " + "./output" + " -x *.DS_Store";
+    	
 	CHILD_PROCESS.exec(
 		cmd.join(" "),
 		function(error, stdout, stderr)
@@ -315,7 +306,7 @@ function buildDocsTask(version, completeHandler)
 				{
 					print(stdout);
 				}
-
+			
 				if(stderr)
 				{
 					print(stderr);
@@ -327,9 +318,9 @@ function buildDocsTask(version, completeHandler)
 				print("Error Running YUI DOC : " + error);
 				exitWithFailure();
 		    }
-
+		
 			CHILD_PROCESS.exec(
-				"cd " + OUTPUT_DIR_NAME + ";zip -r " + doc_file + " " + doc_dir + " -x *.DS_Store",
+				cmd1,
 				function(error, stdout, stderr)
 				{
 					if(verbose)
@@ -350,14 +341,14 @@ function buildDocsTask(version, completeHandler)
 						print("Error ZIPPING Docs : " + error);
 						exitWithFailure();
 				    }
-
-					WRENCH.rmdirSyncRecursive(TMP_DIR_NAME);
-
-					completeHandler(true);
-				});
-
-
-		});
+				
+					//WRENCH.rmdirSyncRecursive(TMP_DIR_NAME);
+				
+					completeHandler(true);				
+				});		
+		
+		
+		});	
 }
 
 /*************** some util methods ******************/
@@ -375,12 +366,12 @@ function displayUsage()
 function displayTasks()
 {
 	var out = "Available tasks: ";
-
+	
 	for(var _t in TASK)
 	{
 		out += TASK[_t] +", "
 	}
-
+	
 	print(out.slice(0, -2));
 }
 
@@ -396,9 +387,6 @@ function print(msg)
 
 //call the main script entry point
 main(OPTIMIST.argv);
-
-
-
 
 
 

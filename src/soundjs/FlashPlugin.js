@@ -68,9 +68,6 @@ this.createjs = this.createjs||{};
 	 */
 	s.BASE_PATH = "src/soundjs/";
 
-	// Protected static
-	s.lastId = 0;
-
 	/**
 	 * Determine if the plugin can be used.
 	 * @method isSupported
@@ -94,30 +91,103 @@ this.createjs = this.createjs||{};
 	 */
 	s.generateCapabilities = function() {
 		if (s.capabilities != null) { return; }
+        // TODO change to support file types like other plugins if possible
+        // if not possible add default types "m4a", "mp4", "aiff", "wma", "mid"
 		var c = s.capabilities = {
 			panning: true,
 			volume: true,
+            tracks: -1,
 			mp3: true,
 			ogg: false,
 			mpeg: true,
-			wav: true,
-			channels: 255 //TODO: Determine flash limit
+			wav: true
 		};
-		//TODO: Other Props
     };
 
 
 	var p = s.prototype = {
 
+        audioSources: null,  // object hash that tells us if an audioSource has started loading
+        volume:1,
+
+		/**
+		 * The id name of the DIV that gets created for Flash content.
+		 * @property CONTAINER_ID
+		 * @type String
+		 * @default flashAudioContainer
+		 * @protected
+		 */
 		CONTAINER_ID: "flashAudioContainer",
+
+		/**
+		 * An object that defines the capabilities of the plugin. Please see SoundJS.getCapabilities for more
+		 * information on plugin capabilities.
+		 * @property capabilities
+		 * @type Object
+		 * @protected
+		 */
 		capabilities: null,
 
 		// FlashPlugin Specifics
+		/**
+		 * A reference to the DIV container that gets created to hold the Flash instance.
+		 * @property container
+		 * @type HTMLDivElement
+		 * @protected
+		 */
 		container: null, // Reference to the DIV containing the Flash Player
+
+		/**
+		 * A reference to the Flash instance that gets created.
+		 * @property flash
+		 * @type Object | Embed
+		 * @protected
+		 */
 		flash: null, // Reference to the flash player instance
+
+		/**
+		 * Determines if the Flash object has been created and initialized. This is required to make ExternalInterface
+		 * calls from JavaScript to Flash.
+		 * @property flashReady
+		 * @type Boolean
+		 * @default false
+		 */
 		flashReady: false,
-		flashInstances: null, // Hash of flashSoundInstances by Flash ID
+
+		/**
+		 * A hash of SoundInstances indexed by the related ID in Flash. This lookup is required to connect sounds in
+		 * JavaScript to their respective instances in Flash.
+		 * @property flashInstances
+		 * @type Object
+		 * @protected
+		 */
+		flashInstances: null,
+
+		/**
+		 * A hash of Sound Preload instances indexed by the related ID in Flash. This lookup is required to connect
+		 * a preloading sound in Flash with its respective instance in JavaScript.
+		 * @property flashPreloadInstances
+		 * @type Object
+		 * @protected
+		 */
 		flashPreloadInstances: null, // Hash of preload instances, by Flash ID
+
+        /**
+         * A hash of Sound Preload instances indexed by the src. This lookup is required to load sounds if preloading
+         * is tried when flash is not ready.
+         * @property preloadInstances
+         * @type Object
+         * @protected
+         */
+        preloadInstances: null, // Hash of preload instances, by src
+
+        /**
+		 * An array of Sound Preload instances that is waiting for preload before the Flash instance is ready. Once
+		 * Flash is initialized, the queued instances are preloaded.
+		 * @property queuedInstances
+		 * @type Object
+		 * @protected
+		 */
 		queuedInstances: null,
 
 		/**
@@ -129,11 +199,12 @@ this.createjs = this.createjs||{};
 		showOutput: false,
 
 		init: function() {
-
 			this.capabilities = s.capabilities;
+            this.audioSources = {};
 
 			this.flashInstances = {};
 			this.flashPreloadInstances = {};
+            this.preloadInstances = {};
 			this.queuedInstances = [];
 
 			// Create DIV
@@ -151,15 +222,25 @@ this.createjs = this.createjs||{};
 			//TODO: Internal detection instead of swfobject
 		},
 
-		handleSWFReady: function(e) {
-			this.flash = e.ref;
-
-			//TODO: Confirm that any instances that are asked to be preloaded before this are queued until Flash is ready.
+		/**
+		 * The SWF used for sound preloading and playback has been initialized.
+		 * @method handleSWFReady
+		 * @param {Object} event
+		 * @protected
+		 */
+		handleSWFReady: function(event) {
+			this.flash = event.ref;
 			this.loadTimeout = setTimeout(function() {
 				createjs.SoundJS.proxy(this.handleTimeout, this);
 			}, 2000);
 		},
 
+		/**
+		 * The Flash application that handles preloading and playback is ready. We wait for a callback from Flash
+		 * to ensure that everything is in place before playback begins.
+		 * @method handleFlashReady
+		 * @protected
+		 */
 		handleFlashReady: function() {
 			this.flashReady = true;
 
@@ -170,9 +251,16 @@ this.createjs = this.createjs||{};
 			this.queuedInstances = null;
 
 			// Associate flash instance with any preloadInstance that already exists.
+            // OJR this might not be needed anymore, need to further investigate how PreloadJS interacts when it's ready
 			for (var n in this.flashPreloadInstances) {
 				this.flashPreloadInstances[n].initialize(this.flash);
 			}
+
+            // load sounds that tried to preload before flash was ready
+            for (var n in this.preloadInstances) {
+                this.preloadInstances[n].initialize(this.flash);
+            }
+            this.preloadInstances = null;
 
 			// Associate flash instance with any sound instance that has already been played.
 			for (var n in this.flashInstances) {
@@ -180,8 +268,13 @@ this.createjs = this.createjs||{};
 			}
 		},
 
+		/**
+		 * The callback when Flash does not initialize. This usually means the SWF is missing or incorrectly pathed.
+		 * @method handleTimeout
+		 * @protected
+		 */
 		handleTimeout: function() {
-			//TODO: Surface to user?
+			//TODO: Surface to user? AUDIO_FLASH_FAILED
 			//LM: Maybe SoundJS.handleError(error); ???
 		},
 
@@ -195,13 +288,14 @@ this.createjs = this.createjs||{};
 		 * @return {Object} A result object, containing a tag for preloading purposes.
 		 */
 		register: function(src, instances) {
+			//Note that currently, registering with the flash instance does nothing.
+            this.audioSources[src] = true;  // OJR this does not mean preloading has started
 			if (!this.flashReady) {
-				// Queue
 				this.queuedInstances.push(src);
 			} else {
 				this.flash.register(src);
 			}
-			var tag = new SoundLoader(src, this.flash);
+			var tag = new SoundLoader(src, this, this.flash);
 			tag.owner = this;
 			return {
 				tag: tag
@@ -215,14 +309,40 @@ this.createjs = this.createjs||{};
 		 * @return {SoundInstance} A sound instance for playback and control.
 		 */
 		create: function(src) {
+            if (!this.preloadStarted(src)) {
+                this.preload(src);
+            }
+
             try {
-                var instance = new SoundInstance(src, this.flash);
-			    instance.owner = this;
+                var instance = new SoundInstance(src, this, this.flash);
                 return instance;
-            } catch (err) {
+            } catch (err) {  // OJR why would this ever fail?
                 //console.log("Error: Please ensure you have permission to play audio from this location.", err);
             }
             return null;
+		},
+
+        /**
+         * Checks if preloading has started for a src
+         * @param src The sound URI to load.
+         * @return {Boolean}
+         */
+        preloadStarted: function(src) {
+            return (this.audioSources[src] != null);
+        },
+
+        /**
+		 * Preload a sound instance. This plugin uses Flash to preload and play all sounds.
+		 * @method preload
+		 * @param {String} src The path to the Sound
+		 * @param {Object} instance Additional details to use when loading.
+		 */
+		preload: function(src, instance) {
+            this.audioSources[src] = true;  // OJR this does not mean preloading has started
+			var loader = new SoundLoader(src, this, this.flash);
+			if (!loader.load(src)) {  // NOTE this returns false if flash is not ready
+                this.preloadInstances[src] = loader;
+            }
 		},
 
 	// Flash Communication
@@ -287,6 +407,48 @@ this.createjs = this.createjs||{};
 		// Events from Flash when an error occurs.
         handleErrorEvent: function(error) {},
 
+        /**
+         * Set the master volume, which affects all SoundInstances.
+         * @method setVolume
+         * @param value
+         * @return {Boolean} If the setVolume call succeeds.
+         */
+        setVolume: function(value) {
+            this.volume = value;
+            return this.updateVolume();
+        },
+
+        /**
+         * Internal function used to set the gain value for master audio.  Should not be called externally.
+         * @method updateVolume
+         * @return {Boolean}
+         * @private
+         */
+        updateVolume: function() {
+            var newVolume = createjs.SoundJS.masterMute ? 0 : this.volume;
+            return this.flash.setMasterVolume(newVolume);
+        },
+
+        /**
+         * Get the master volume, which affects all SoundInstances.
+         * @method getVolume
+         * @param value
+         * @return The master volume.
+         */
+        getVolume: function(value) {
+            return this.volume;
+        },
+
+        /**
+         * Mute all sound.
+         * @method setMute
+         * @param {Boolean} isMuted If all sound should be muted or not.
+         * @return {Boolean} If the mute call succeeds.
+         */
+        setMute: function(isMuted) {
+            return this.updateVolume();
+        },
+
 		toString: function() {
 			return "[FlashPlugin]";
 		}
@@ -305,8 +467,8 @@ this.createjs = this.createjs||{};
 	 * @param {Object} flash A reference to the Flash Player instance that controls the audio.
 	 * @private
 	 */
-	function SoundInstance(src, flash) {
-		this.init(src, flash);
+	function SoundInstance(src, owner, flash) {
+		this.init(src, owner, flash);
 	}
 
 	var p = SoundInstance.prototype = {
@@ -331,8 +493,14 @@ this.createjs = this.createjs||{};
 		loop:0,
 		volume:1,
 		pan:0,
+        offset: 0,  // used for setPosition on a stopped instance
+        duration:0,
 
-		/**
+        // is created by SoundJS when this instance is played with a delay, so we can remove the delay if stop or pause or cleanup are called
+        delayTimeoutId: null,
+
+
+        /**
 		 * Determines if the audio is currently muted.
 		 * @private
 		 */
@@ -380,13 +548,39 @@ this.createjs = this.createjs||{};
 		 */
 		onPlayInterrupted: null,
 
-		init: function(src, flash) {
-			this.uniqueId = s.lastId++;
+        // mix-ins:
+        // EventDispatcher methods:
+        addEventListener: null,
+        removeEventListener: null,
+        removeAllEventListeners: null,
+        dispatchEvent: null,
+        hasEventListener: null,
+        _listeners: null,
+
+        // Constructor
+        init: function(src, owner, flash) {
 			this.src = src;
+			this.owner = owner;
 			this.flash = flash;
 		},
 
-		initialize: function(flash) {
+        /**
+         * Dispatch a generic event of type eventString. The dispatched event contains:
+         * <ul><li>target: A reference to the dispatching instance</li>
+         *      <li>type: The string used to identify the type of event.</li>
+         * @method sendLoadComplete
+         * @param {String} eventString The string to send as the event type.
+         * @private
+         */
+        sendLoadComplete: function(eventString) {
+            var event = {
+                target: this,
+                type: eventString
+            };
+            this._listeners && this.dispatchEvent(event);
+        },
+
+        initialize: function(flash) {
 			this.flash = flash;
 		},
 
@@ -396,10 +590,13 @@ this.createjs = this.createjs||{};
 			this.playState = createjs.SoundJS.PLAY_INTERRUPTED;
 			if (this.onPlayInterrupted != null) { this.onPlayInterrupted(this); }
 			this.flash.interrupt(this.flashId);
+            this.sendLoadComplete("playInterrupted");
 			this.cleanUp();
-		},
+            this.paused = false;
+        },
 
 		cleanUp: function() {
+            clearTimeout(this.delayTimeoutId);
 			this.owner.unregisterSoundInstance(this.flashId);
 			createjs.SoundJS.playFinished(this);
 		},
@@ -419,21 +616,27 @@ this.createjs = this.createjs||{};
 
 			if (!this.owner.flashReady) { return false; }
 
+            this.offset = offset;
+
             this.flashId = this.flash.playSound(this.src, offset, loop, volume, pan);
 			if (this.flashId == null) {
 				if (this.onPlayFailed != null) { this.onPlayFailed(this); }
 				this.cleanUp();
 				return false;
 			}
-			if (this.muted) { this.mute(true); }
+
+            //this.duration = this.flash.getDuration(this.flashId);  // this is 0 at this point
+			if (this.muted) { this.setMute(true); }
 			this.playState = createjs.SoundJS.PLAY_SUCCEEDED;
 			this.owner.registerSoundInstance(this.flashId, this);
+            this.sendLoadComplete("playSucceeded");  // OJR may not need this
 			return true;
 		},
 
 		playFailed: function() {
 			this.playState = createjs.SoundJS.PLAY_FAILED;
 			if (this.onPlayFailed != null) { this.onPlayFailed(this); }
+            this.sendLoadComplete("playFailed");
 			this.cleanUp();
 		},
 
@@ -443,6 +646,7 @@ this.createjs = this.createjs||{};
 		 */
 		pause: function() {
 			this.paused = true;
+            clearTimeout(this.delayTimeoutId);
 			return this.flash.pauseSound(this.flashId);
 		},
 
@@ -462,6 +666,7 @@ this.createjs = this.createjs||{};
 		stop: function() {
 			this.playState = createjs.SoundJS.PLAY_FINISHED;
 			this.paused = false;
+            this.offset = 0;  // flash destroys the wrapper, so we need to track offset on our own
 			var ok = this.flash.stopSound(this.flashId);
 			this.cleanUp();
 			return ok;
@@ -486,6 +691,7 @@ this.createjs = this.createjs||{};
 
 		/**
 		 * Mute the sound.
+         * @deprecated
 		 * @private
 		 */
 		mute: function(value) {
@@ -493,7 +699,24 @@ this.createjs = this.createjs||{};
 			return value ? this.flash.muteSound(this.flashId) : this.flash.unmuteSound(this.flashId);
 		},
 
-		/**
+        /**
+         * Mute the sound.
+         * @private
+         */
+        setMute: function(value) {
+            this.muted = value;
+            return value ? this.flash.muteSound(this.flashId) : this.flash.unmuteSound(this.flashId);
+        },
+
+        /**
+         * Mute value of the sound.
+         * @private
+         */
+        getMute: function() {
+            return this.muted;
+        },
+
+        /**
 		 * Get the pan of a sound instance.
 		 * @private
 		 */
@@ -515,7 +738,12 @@ this.createjs = this.createjs||{};
 		 * @private
 		 */
 		getPosition: function() {
-			return this.flash.getPosition(this.flashId);
+            var value = -1;
+            if(this.flash && this.flashId) {
+			    value = this.flash.getPosition(this.flashId); // this returns -1 on stopped instance
+            }
+            if (value != -1) {this.offset = value;}
+            return this.offset;
 		},
 
 		/**
@@ -523,7 +751,9 @@ this.createjs = this.createjs||{};
 		 * @private
 		 */
 		setPosition: function(value) {
-			return this.flash && this.flash.setPosition(this.flashId, value);
+            this.offset = value;  //
+			this.flash && this.flashId && this.flash.setPosition(this.flashId, value);
+            return true;  // this is always true now, we either hold value internally to set later or set immediately
 		},
 
 		/**
@@ -531,17 +761,23 @@ this.createjs = this.createjs||{};
 		 * @private
 		 */
 		getDuration: function() {
-			return this.flash ? 0 : this.flash.getDuration(this.flashId);
+            var value = -1;
+            if(this.flash && this.flashId) {
+                value = this.flash.getDuration(this.flashId);
+            }
+            if (value != -1) {this.duration = value;}
+			return this.duration;
 		},
 
-	// Flash callbacks
+	    // Flash callbacks, only exist in FlashPlugin
 		handleSoundFinished: function() {
 			this.playState = createjs.SoundJS.PLAY_FINISHED;
 			if (this.onComplete != null) { this.onComplete(this); }
+            this.sendLoadComplete("playComplete");
 			this.cleanUp();
 		},
 
-		handleLoop: function() {
+		handleSoundLoop: function() {
 			if (this.onLoop != null) { this.onLoop(this); }
 		},
 
@@ -551,11 +787,14 @@ this.createjs = this.createjs||{};
 
 	}
 
-	// do not add to namespace
+    // we only use EventDispatcher if it's available:
+    createjs.EventDispatcher && createjs.EventDispatcher.initialize(SoundInstance.prototype); // inject EventDispatcher methods.
+
+    // do not add to namespace
 
 
 	/**
-	 * SoundLoader provides a mechanism to preload Flash content via PreloadJS.
+	 * SoundLoader provides a mechanism to preload Flash content via PreloadJS or internally.
 	 * Instances are returned to the preloader, and the load method is called when
 	 * the asset needs to be requested.
 	 *
@@ -566,8 +805,8 @@ this.createjs = this.createjs||{};
 	 * @param {Object} flash The flash instance that will do the preloading.
 	 * @private
 	 */
-	function SoundLoader(src, flash) {
-		this.init(src, flash);
+	function SoundLoader(src, owner, flash) {
+		this.init(src, owner, flash);
 	}
 
 	var p = SoundLoader.prototype = {
@@ -604,8 +843,9 @@ this.createjs = this.createjs||{};
 		onError: null,
 
 		// The loader has been created.
-		init: function(src, flash) {
+		init: function(src, owner, flash) {
 			this.src = src;
+            this.owner = owner;
 			this.flash = flash;
 		},
 
@@ -613,6 +853,7 @@ this.createjs = this.createjs||{};
 		initialize: function(flash) {
 			this.flash = flash;
 			if (this.loading) {
+                this.loading = false;
 				this.load(this.src);
 			}
 		},
@@ -626,7 +867,7 @@ this.createjs = this.createjs||{};
 		load: function(src) {
 			if (src != null) { this.src = src; }
 			if (this.flash == null || !this.owner.flashReady) {
-				loading = true;
+				this.loading = true;
 				return false;
 			}
 
@@ -645,7 +886,8 @@ this.createjs = this.createjs||{};
 		handleComplete: function() {
 			this.progress = 1;
 			this.readyState = 4;
-			if (this.onload == null) { return; }
+            createjs.SoundJS.sendLoadComplete(this.src);  // fire event or callback on SoundJS // can't use onload callback because we need to pass the source
+            if (this.onload == null) { return; }
 			this.onload();
 		},
 
