@@ -41,6 +41,7 @@ this.createjs = this.createjs||{};
 	 * as well as the FlashAudioPlugin.swf. Ensure that FlashPlugin.BASE_PATH
 	 * is set when using this plugin, so that the script can find the swf.
 	 * @class FlashPlugin
+	 * @uses EventDispatcher
 	 * @constructor
 	 */
 	function FlashPlugin() {
@@ -463,6 +464,7 @@ this.createjs = this.createjs||{};
 	 * Instances are created by the FlashPlugin, and returned to the user.
 	 * The user can control the audio directly.
 	 * Note that audio control is shuttled to a flash player instance via the flash reference.
+	 * #class SoundInstance
 	 * @param {String} src The path to the sound source
 	 * @param {Object} flash A reference to the Flash Player instance that controls the audio.
 	 * @private
@@ -475,6 +477,7 @@ this.createjs = this.createjs||{};
 
 		/**
 		 * The source of the sound.
+		 * #property src
 		 * @private
 		 */
 		src: null,
@@ -794,13 +797,13 @@ this.createjs = this.createjs||{};
 
 
 	/**
-	 * SoundLoader provides a mechanism to preload Flash content via PreloadJS or internally.
-	 * Instances are returned to the preloader, and the load method is called when
-	 * the asset needs to be requested.
+	 * SoundLoader provides a mechanism to preload Flash content via PreloadJS or internally. Instances are returned to
+	 * the preloader, and the load method is called when the asset needs to be requested.
 	 *
-	 * SoundLoader has the same APIs as an <audio> tag.
-	 * The instance calls the onloaded, onprogress, and onerror callbacks when necessary.
-	 * @class SoundLoader
+	 * SoundLoader has the same APIs as an &lt;audio&gt; tag. The instance calls the <code>onload</code>, <code>onprogress</code>,
+	 * and <code>onerror</code> callbacks when necessary.
+	 *
+	 * #class SoundLoader
 	 * @param {String} src The path to the sound
 	 * @param {Object} flash The flash instance that will do the preloading.
 	 * @private
@@ -822,25 +825,22 @@ this.createjs = this.createjs||{};
 
 		// Calbacks
 		/**
-		 * The callback that fires when the load completes. This follows HTML tag naming.
-		 * @event onload
-		 * @private
+		 * The callback that fires when the load completes. This follows HTML tag name conventions.
+		 * #event onload
 		 */
 		onload: null,
 
 		/**
-		 * The callback that fires as the load progresses. This follows HTML tag naming.
-		 * @event onprogress
-		 * @private
+		 * The callback that fires as the load progresses. This follows HTML tag name conventions.
+		 * #event onprogress
 		 */
 		onprogress: null,
 
 		/**
-		 * The callback that fires if the load hits an error.
-		 * @event onerror
-		 * @private
+		 * The callback that fires if the load hits an error. This follows HTML tag name conventions.
+		 * #event onerror
 		 */
-		onError: null,
+		onerror: null,
 
 		// The loader has been created.
 		init: function(src, owner, flash) {
@@ -860,9 +860,9 @@ this.createjs = this.createjs||{};
 
 		/**
 		 * Start loading.
+		 * #method load
 		 * @param {String} src The path to the sound.
 		 * @return {Boolean} If the load was started. If Flash has not been initialized, the load will fail.
-		 * @private
 		 */
 		load: function(src) {
 			if (src != null) { this.src = src; }
@@ -879,29 +879,27 @@ this.createjs = this.createjs||{};
 
 		handleProgress: function(loaded, total) {
 			this.progress = loaded / total;
-			if (this.onprogress == null) { return; }
-			this.onprogress({loaded:loaded, total:total, progress:this.progress});
+			this.onprogress && this.onprogress({loaded:loaded, total:total, progress:this.progress});
 		},
+
 
 		handleComplete: function() {
 			this.progress = 1;
 			this.readyState = 4;
             createjs.SoundJS.sendLoadComplete(this.src);  // fire event or callback on SoundJS // can't use onload callback because we need to pass the source
-            if (this.onload == null) { return; }
-			this.onload();
+            this.onload && this.onload();
 		},
 
 		handleError: function(error) {
-			if (this.onerror == null) { return; }
-			this.onerror(error);
+			this.onerror && this.onerror(error);
 		},
 
 		toString: function() {
 			return "[FlashPlugin SoundLoader]";
 		}
 
-		// do not add to namespace
-
 	}
+
+	// do not add SoundLoader to namespace
 
 }());

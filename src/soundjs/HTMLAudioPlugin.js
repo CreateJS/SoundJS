@@ -34,14 +34,21 @@
 // namespace:
 this.createjs = this.createjs||{};
 
+/*
+Note in IE 9 there is a delay in applying volume changes to tags that occurs once playback is started.
+So if you have muted all sounds, they will all play during this delay until the mute applies internally.
+This happens regardless of when or how you apply the volume change, as the tag seems to need to play to apply it.
+*/
+
 (function() {
 
 	/**
-	 * Play sounds using HTML <audio> tags in the browser.
-     * Note it is recommended to use WebAudioPlugin for iOS, as you can only have one <audio> tag,
-     *  cannot preload or autoplay the audio, cannot cache the audio, and cannot play the audio except
-     *  inside a user initiated event
+	 * Play sounds using HTML &lt;audio&gt; tags in the browser.
+     * Note it is recommended to use {{#crossLink "WebAudioPlugin"}}{{/crossLink}} for iOS. HTML Audio can only have one
+	 * &lt;audio&gt; tag, can not preload or autoplay the audio, can not cache the audio, and can not play the audio
+	 * except inside a user initiated event.
 	 * @class HTMLAudioPlugin
+	 * @uses EventDispatcher
 	 * @constructor
 	 */
 	function HTMLAudioPlugin() {
@@ -695,8 +702,9 @@ this.createjs = this.createjs||{};
 
 
 	/**
-	 * An internal helper class that preloads html audio via HTMLAudioElement tags.
-	 * @class HTMLAudioLoader
+	 * An internal helper class that preloads html audio via HTMLAudioElement tags. Note that PreloadJS will NOT use
+	 * this load class like it does Flash and WebAudio plugins.
+	 * #class HTMLAudioLoader
 	 * @param {String} src The source of the sound to load.
 	 * @param {HTMLAudioElement} tag The tag of the sound to load.
 	 * @constructor
@@ -720,11 +728,12 @@ this.createjs = this.createjs||{};
 
 			this.preloadTimer = setInterval(createjs.SoundJS.proxy(this.preloadTick, this), 200);
 
-            this.loadedHandler = createjs.SoundJS.proxy(this.sendLoadedEvent, this);  // we need this proxy to be able to remove event listeners
 
             // This will tell us when audio is buffered enough to play through, but not when its loaded.
             // The tag doesn't keep loading in Chrome once enough has buffered, and we have decided that behaviour is sufficient.
-            this.tag.addEventListener && this.tag.addEventListener("canplaythrough", this.loadedHandler); // because canplaythrough callback doesn't work in Chrome
+            // Note that canplaythrough callback doesn't work in Chrome, we have to use the event.
+            this.loadedHandler = createjs.SoundJS.proxy(this.sendLoadedEvent, this);  // we need this proxy to be able to remove event listeners
+            this.tag.addEventListener && this.tag.addEventListener("canplaythrough", this.loadedHandler);
             this.tag.onreadystatechange = createjs.SoundJS.proxy(this.sendLoadedEvent, this);  // OJR not 100% sure we need this, just copied from PreloadJS
 
             this.tag.preload = "auto";
@@ -766,7 +775,7 @@ this.createjs = this.createjs||{};
 	 * The TagPool is an object pool for HTMLAudio tag instances. In Chrome, we have to pre-create the number of HTML
 	 * audio tag instances that we are going to play before we load the data, otherwise the audio stalls.
 	 * (Note: This seems to be a bug in Chrome)
-	 * @class TagPool
+	 * #class TagPool
 	 * @param src The source of the channel.
 	 * @private
 	 */
@@ -776,12 +785,16 @@ this.createjs = this.createjs||{};
 
 	/**
 	 * A hash lookup of each sound channel, indexed by the audio source.
+	 * #property tags
+	 * @static
 	 * @private
 	 */
 	TagPool.tags = {};
 
 	/**
 	 * Get a tag pool. If the pool doesn't exist, create it.
+	 * #method get
+	 * @static
 	 * @private
 	 */
 	TagPool.get = function(src) {
@@ -794,6 +807,8 @@ this.createjs = this.createjs||{};
 
 	/**
 	 * Get a tag instance. This is a shortcut method.
+	 * #method getInstance
+	 * @static
 	 * @private
 	 */
 	TagPool.getInstance = function(src) {
@@ -803,6 +818,8 @@ this.createjs = this.createjs||{};
 	}
 
 	/** Return a tag instance. This is a shortcut method.
+	 * #method setInstance
+	 * @static
 	 * @private
 	 */
 	TagPool.setInstance = function(src, tag) {
@@ -815,7 +832,7 @@ this.createjs = this.createjs||{};
 
 		/**
 		 * The source of the tag pool.
-		 * @property src
+		 * #property src
 		 * @type String
 		 * @private
 		 */
@@ -824,7 +841,7 @@ this.createjs = this.createjs||{};
 		/**
 		 * The total number of HTMLAudio tags in this pool. This is the maximum number of instance of a certain sound
 		 * that can play at one time.
-		 * @property length
+		 * #property length
 		 * @type Number
 		 * @default 0
 		 * @private
@@ -833,7 +850,7 @@ this.createjs = this.createjs||{};
 
 		/**
 		 * The number of unused HTMLAudio tags.
-		 * @property available
+		 * #property available
 		 * @type Number
 		 * @default 0
 		 * @private
@@ -842,7 +859,7 @@ this.createjs = this.createjs||{};
 
 		/**
 		 * A list of all available tags in the pool.
-		 * @property tags
+		 * #property tags
 		 * @type Array
 		 * @private
 		 */
@@ -855,7 +872,7 @@ this.createjs = this.createjs||{};
 
 		/**
 		 * Add an HTMLAudio tag into the pool.
-		 * @method add
+		 * #method add
 		 * @param HTMLAudioElement tag A tag to be used for playback.
 		 * @private
 		 */
@@ -867,7 +884,7 @@ this.createjs = this.createjs||{};
 
 		/**
 		 * Get an HTMLAudioElement for immediate playback. This takes it out of the pool.
-		 * @methdo get
+		 * #methdo get
 		 * @return {HTMLAudioElement}
 		 */
 		get: function() {
@@ -880,7 +897,7 @@ this.createjs = this.createjs||{};
 
 		/**
 		 * Put an HTMLAudioElement back in the pool for use.
-		 * @method set
+		 * #method set
 		 * @param {HTMLAudioElement} tag
 		 */
 		set: function(tag) {
@@ -888,9 +905,6 @@ this.createjs = this.createjs||{};
 			if (index == -1) {
 				this.tags.push(tag);
 			}
-
-				//document.body.removeChild(tag);
-
 			this.available = this.tags.length;
 		},
 

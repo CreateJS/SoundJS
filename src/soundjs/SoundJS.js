@@ -32,15 +32,28 @@
 this.createjs = this.createjs||{};
 
 /**
- * The SoundJS library manages the playback of audio on the web via plugins which abstract the implementation, so
- * playback is possible on any platform without specific knowledge of what mechanisms are necessary to play audio. By
- * default, WebAudio and HTML audio modes are available, although developers can change plugin priority or add new
- * plugins (such as Flash). Please see the SoundJS documentation for more on the playback and plugin APIs.
+ * The SoundJS library manages the playback of audio on the web. It works via plugins which abstract the actual audio
+ * implementation, so playback is possible on any platform without specific knowledge of what mechanisms are necessary
+ * to play sounds.
  *
- * When sounds are played, SoundJS returns instances which can be paused, resumed, muted, etc. Please see the
- * SoundInstance documentation for more on the instance control APIs.
+ * By default, the Web Audio and HTML plugins are used (when available), although developers can change plugin priority
+ * or add new plugins (such as the provided {{#crossLink "FlashPlugin"}}{{/crossLink}}). Please see the SoundJS API
+ * methods for more on the playback and plugin APIs. To install plugins, or specify a different plugin order, see
+ * {{#crossLink "SoundJS/installPlugins"}}{{/crossLink}}.
+ *
+ * Before you can play a sound, it must be registered. You can do this with the {{#crossLink "SoundJS/createInstance"}}{{/crossLink}}
+ * method. If you use <a href="http://preloadjs.com" target="_blank">PreloadJS</a>, this is handled for you when the
+ * sound is preloaded.
+ *
+ * To play a sound, use the {{#crossLink "SoundJS/play"}}{{/crossLink}} method. When sounds are played, SoundJS returns
+ * instances which can be paused, resumed, muted, etc. Please see the {{#crossLink "SoundInstance"}}{{/crossLink}}
+ * documentation for more on the instance control APIs.
+ *
+ * @example
+ *
  *
  * @module SoundJS
+ * @main SoundJS
  */
 
 /*OJR
@@ -91,10 +104,10 @@ Notes on Android limitations
 	 * is played.
 	 *
 	 * @example
-	 *  createjs.PreloadJS.installPlugin(createjs.SoundJS);
+	 * createjs.PreloadJS.installPlugin(createjs.SoundJS);
 	 *
 	 * @class SoundJS
-	 * @constructor
+	 * @uses EventDispatcher
 	 */
 	function SoundJS() {
 		throw "SoundJS cannot be instantiated";
@@ -222,6 +235,7 @@ Notes on Android limitations
 	s.SUPPORTED_EXTENSIONS = ["mp3", "ogg", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"];  // OJR does not currently support FlashPlugin
 	 // More details on file formats can be found at http://en.wikipedia.org/wiki/Audio_file_format
     // A very detailed list of file formats can be found //http://www.fileinfo.com/filetypes/audio
+    // also http://html5doctor.com/html5-audio-the-state-of-play/  includes a useful list of extensions for a format
 
     /**
      * Some extensions use another type of extension support to play (one of them is a codex).  This allows you to map
@@ -355,8 +369,6 @@ Notes on Android limitations
 	 * @return {Object} An object containing:
 	 * <ol><li>A preload callback (callback) that is fired when a file is added to PreloadJS, which provides SoundJS
 	 *      a mechanism to modify the load parameters, select the correct file format, register the sound, etc.</li>
-	 * <li>A post-load callback (postCallback) that is fired when a file has completed preloading, which provides SoundJS
-	 *      a mechanism to run any processes once a sound is ready.</li>
 	 * <li>A list of file types that are supported by SoundJS (currently supports "sound").</li>
 	 * <li>A list of file extensions that are supported by SoundJS (see the SoundJS.SUPPORTED_EXTENSIONS).</li>
 	 * @static
@@ -539,14 +551,13 @@ Notes on Android limitations
 			if (instance.tag != null) { details.tag = instance.tag; }
 			else if (instance.src) { details.src = instance.src; }
 			// If the instance returns a complete handler, pass it on to the prelaoder.
-			if (instance.completeHandler != null) { details.handler = instance.completeHandler; }
+			if (instance.completeHandler != null) { details.completeHandler = instance.completeHandler; }
 			details.type = instance.type;
 		}
 
 		if (preload != false) {
             s.preloadHash[details.src] = {src:src, id:id, data:data};  // keep this data so we can return it onLoadComplete
 			s.activePlugin.preload(details.src, instance);
-            // OJR add a callback for load complete, then dispatch event
 		}
 
 		return details;
@@ -592,7 +603,7 @@ Notes on Android limitations
      * percentage of 1. Alternately, there is an <code>onFileProgress</code> callback that can be used as well.
      * @event fileProgress
      */
-    s.onLoadComplete = null;
+    s.onLoadComplete = null; //LM: This is doc'd wrong. Also, this belongs at the top with the properties.
 
     /**
      * Dispatch a loadComplete event (onLoadComplete callback). The dispatched event contains:
@@ -684,10 +695,12 @@ Notes on Android limitations
 	}
 
     /**
-     * Creates a SoundInstance using the passed in src.
+     * Creates a SoundInstance using the passed in src.  If the src does not have an supported extension, a default
+     * SoundInstance will be returned.
      * @method createInstance
      * @param {String} src The src of the audio.
-     * @return {SoundInstance} A SoundInstance that can be controlled after it is created.
+     * @return {SoundInstance} A SoundInstance that can be controlled after it is created.  Unsupported extensions will
+     * return the default SoundInstance.
      */
     s.createInstance = function (src) {
         if (!s.initializeDefaultPlugins()) { return s.defaultSoundInstance; }
@@ -698,10 +711,17 @@ Notes on Android limitations
             src = s.getSrcById(src);
         }
 
-        // make sure that we have a sound channel (sound is registered or previously played)
-        SoundChannel.create(src);
+        var dot = src.lastIndexOf(".");
+        var ext = src.slice(dot+1);  // sound have format of "path+name . ext"
+        if (dot != -1 && s.SUPPORTED_EXTENSIONS.indexOf(ext) > -1) {  // we have an ext and it is one of our supported,Note this does not mean the plugin supports it.  // OJR consider changing to check against activePlugin.capabilities[ext]
+            // make sure that we have a sound channel (sound is registered or previously played)
+            SoundChannel.create(src);
 
-        var instance = s.activePlugin.create(src);
+            var instance = s.activePlugin.create(src);
+        } else var instance = SoundJS.defaultSoundInstance;  // the src is not supported, so give back a dummy instance.
+        // This can happen if PreloadJS fails because the plugin does not support the ext, and was passed an id which
+        // will not get added to the idHash.
+
         instance.uniqueId = s.lastId++;  // OJR moved this here so we can have multiple plugins active in theory
 
         return instance;
@@ -901,17 +921,16 @@ Notes on Android limitations
 
 
 	/**
-	 * SoundChannel manages the number of active instances for each sound type. The number of sounds is artificially
-	 * limited by SoundJS in order to prevent over-saturation of a single sound, as well as to stay within hardware
-	 * limitations, although the latter may disappear with better browser support and updated plugins like WebAudio.
-	 * When a sound is played, this class ensures that there is an available instance, or interrupts an appropriate
-	 * sound that is already playing.
+	 * SoundChannel is an internal class that manages the number of active instances for each sound type. The number of
+	 * sounds is artificially limited by SoundJS in order to prevent over-saturation of a single sound, as well as to
+	 * stay within hardware limitations, although the latter may disappear with better browser support. When a sound is
+	 * played, this class ensures that there is an available instance, or interrupts an appropriate sound that is
+	 * already playing.
 	 * @class SoundChannel
 	 * @param src The source of the instances
 	 * @param max The number of instances allowed
-	 * @private
+	 * @constructor
 	 */
-    //OJR this naming could be changed, as sound channels in sound engineering and web audio refer to mono, left and right, surround, etc
 	function SoundChannel(src, max) {
 		this.init(src, max);
 	}
@@ -922,6 +941,7 @@ Notes on Android limitations
 	/**
 	 * A hash of channel instances indexed by source.
 	 * @property channels
+	 * @for SoundChannel
 	 * @type Object
 	 * @static
 	 * @private
@@ -934,7 +954,7 @@ Notes on Android limitations
 	 * @param {String} src The source for the channel
 	 * @param {Number} max The maximum amount this channel holds. The default is 1
 	 * @return {Boolean} If the channels were created.
-	 * @private
+	 * @protected
 	 */
 	SoundChannel.create = function(src, max) {
 		var channel = SoundChannel.get(src);
@@ -952,7 +972,7 @@ Notes on Android limitations
 	 * @param {String} interrupt The interrupt value to use. Please see the SoundJS.play for details on interrupt modes.
 	 * @see SoundJS.play
 	 * @static
-	 * @private
+	 * @protected
 	 */
 	SoundChannel.add = function(instance, interrupt) {
 		var channel = SoundChannel.get(instance.src);
@@ -965,7 +985,6 @@ Notes on Android limitations
 	 * @param {SoundInstance} instance The instance to remove from the channel
 	 * @return The success of the method call. If there is no channel, it will return false.
 	 * @static
-	 * @private
 	 */
 	SoundChannel.remove = function(instance) {
 		var channel = SoundChannel.get(instance.src);
@@ -975,10 +994,9 @@ Notes on Android limitations
 	}
 	/**
 	 * Get a channel instance by its src.
-	 * method get
+	 * @method get
 	 * @param {String} src The src to use to look up the channel
 	 * @static
-	 * @private
 	 */
 	SoundChannel.get = function(src) {
 		return SoundChannel.channels[src];
@@ -990,7 +1008,6 @@ Notes on Android limitations
 		 * The source of the channel.
 		 * @property src
 		 * @type String
-		 * @private
 		 */
 		src: null,
 
@@ -998,14 +1015,12 @@ Notes on Android limitations
 		 * The maximum number of instances in this channel.
 		 * @property max
 		 * @type Number
-		 * @private
 		 */
 		max: null,
 		/**
 		 * The current number of active instances.
 		 * @property length
 		 * @type Number
-		 * @private
 		 */
 		length: 0,
 
@@ -1027,7 +1042,6 @@ Notes on Android limitations
 		 * @method get
 		 * @param {Number} index The index to return.
 		 * @return {SoundInstance} The SoundInstance at a specific instance.
-		 * @private
 		 */
 		get: function(index) {
 			return this.instances[index];
@@ -1038,7 +1052,6 @@ Notes on Android limitations
 		 * @method add
 		 * @param {SoundInstance} instance The instance to add.
 		 * @return {Boolean} If the instance could not be played because the channel is full.
-		 * @private
 		 */
 		add: function(instance, interrupt) {
 			if (!this.getSlot(interrupt, instance)) {
@@ -1055,7 +1068,6 @@ Notes on Android limitations
 		 * @param {SoundInstance} instance The instance to remove
 		 * @return {Boolean} The success of the remove call. If the instance is not found in this channel, it will
 		 *      return false.
-		 * @private
 		 */
 		remove: function(instance) {
 			var index = this.instances.indexOf(instance);
@@ -1068,11 +1080,11 @@ Notes on Android limitations
 		/**
 		 * Get an available slot. This will
 		 * @method getSlot
+		 * @for SoundChannel
 		 * @param {String} interrupt The interrupt value to use.
 		 * @param {SoundInstance} instance The sound instance the will go in the channel if successful.
 		 * @return {Boolean} Determines if there is an available slot. Depending on the interrupt mode, if there are no slots,
 		 *      an existing SoundInstance may be interrupted. If there are no slots, this method returns false.
-		 * @private
 		 */
 		getSlot: function(interrupt, instance) {
 			var target, replacement;
@@ -1125,6 +1137,7 @@ Notes on Android limitations
 
 	// do not add SoundChannel to namespace
 
+
 	// This is a dummy sound instance, which allows SoundJS to return something so
 	// developers don't need to check nulls.
 	function SoundInstance() {
@@ -1152,7 +1165,7 @@ Notes on Android limitations
 
 	createjs.SoundJS.BrowserDetect = BrowserDetect;
 
-    //Patch for IE7 and 8 that don't have indexOf
+    //Polyfill for IE7 and 8 that don't have indexOf
     //Used from https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/indexOf
     if (!Array.prototype.indexOf) {
         Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {

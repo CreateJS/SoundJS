@@ -3,8 +3,7 @@
 <head>
 <title>SoundJS: Sound Grid</title>
 
-	<script type="text/javascript" src="./assets/preloadjs-0.2.0.min.js"></script>
-
+    <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
 	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
     <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
 	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
@@ -22,7 +21,7 @@
 			document.getElementById("header").style.display = "none";
 		}
 
-		if (!createjs.SoundJS.checkPlugin(true)) {
+        if (!createjs.SoundJS.initializeDefaultPlugins()) {
 			document.getElementById("error").style.display = "block";
 			document.getElementById("content").style.display = "none";
 			return;
@@ -45,26 +44,19 @@
 
 		    {src:assetsPath+"ToneWobble.mp3|"+assetsPath+"ToneWobble.ogg", id:10},
 		    {src:assetsPath+"Game-Death.mp3|"+assetsPath+"Game-Death.ogg", id:11},
-		    {src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg", id:12}
+            {src:assetsPath+"Thunder1Copy.mp3|"+assetsPath+"Thunder1Copy.ogg", id:12}  //OJR would prefer a new sound rather than a copy
 		];
 
-	    preload = new createjs.PreloadJS();
-	    //Install SoundJS as a plugin, then PreloadJS will initialize it automatically.
-	    preload.installPlugin(createjs.SoundJS);
-
-	    //Available PreloadJS callbacks
-	    preload.onFileLoad = function(event) {
-		    // Show the icon on loaded items.
-			var div = document.getElementById(event.id);
-		    div.style.backgroundImage = "url('assets/audioButtonSheet.png')";
-	    };
-		preload.onComplete = function(event) {
-			document.getElementById("loader").className = "";
-		}
-
-	    //Load the manifest and pass 'true' to start loading immediately. Otherwise, you can call load() manually.
-	    preload.loadManifest(manifest, true);
+        createjs.SoundJS.addEventListener("loadComplete", soundLoaded, this); // add an event listener for when load is completed
+        createjs.SoundJS.registerManifest(manifest);
 	}
+
+    function soundLoaded(event) {
+        //console.log("event ", event);
+        document.getElementById("loader").className = "";
+        var div = document.getElementById(event.id);
+        div.style.backgroundImage = "url('assets/audioButtonSheet.png')";
+    }
 
 	function stop() {
 		if (preload != null) { preload.close(); }

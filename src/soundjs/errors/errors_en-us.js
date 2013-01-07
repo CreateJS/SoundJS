@@ -7,7 +7,3 @@
 	}
 	createjs.Log && createjs.Log.addKeys(logs);
 }())
-
-Log.log("AUDIO_FAILED_404", src);
-// AUDIO_FAILED_404
-// dfkdlskfsdlkfjlksdfjlkfkopasf

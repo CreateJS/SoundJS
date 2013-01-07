@@ -183,30 +183,10 @@ this.createjs = this.createjs||{};
 		 */
 		register: function(src, instances) {
 			this.arrayBuffers[src] = true;  // OJR this seems incorrect, need to review
-			return {
-				type: "binary", // For PreloadJS to load audio as binary data.
-				completeHandler: createjs.SoundJS.proxy(this.handlePreload, this)
-			};
-        },
-
-		/**
-		 * Once a preloaded item is finished, it returns the loaded data which can be stored.
-		 * @method handlePreload
-		 * @param {Object} result The resulting loaded object, containing a src and data property
-         * @private
-		 */
-		handlePreload: function(result) {
-			this.arrayBuffers[result.src] = result.data;
-            createjs.SoundJS.sendLoadComplete(result.src);  // fire event or callback on SoundJS
-		},
-
-        /**
-         * Handle if there is an error loading an object so we can attempt to load it again.
-         * @method handlePreloadError
-         * @param {Object} result The resulting loaded object, containing a src and data property
-         */
-        handlePreloadError: function(result) {
-            delete(this.arrayBuffers[result.src]);
+            var tag = new WebAudioLoader(src, this);
+            return {
+                tag: tag
+            };
         },
 
 		/**
@@ -228,6 +208,33 @@ this.createjs = this.createjs||{};
         },
 
         /**
+         * Remove a src from our preload list.
+         * Note this does not cancel a preload.
+         * @param src The sound URI to unload.
+         * @return {Boolean}
+         */
+        removeFromPreload: function(src) {
+            delete(this.owner.arrayBuffers[src]);
+        },
+
+        /**
+         * Add results to our preload list.
+         * @param src The sound URI to unload.
+         * @return {Boolean}
+         */
+        addPreloadResults: function(src, result) {
+            this.arrayBuffers[src] = result;
+        },
+
+        /**
+         * Handles internal preloader completing
+         */
+        handlePreloadComplete: function() {
+            createjs.SoundJS.sendLoadComplete(this.src);  // fire event or callback on SoundJS
+            // note "this" will reference WebAudioLoader object
+        },
+
+        /**
          * Internally preload a sound. Loading uses XHR2 in order to get back an array buffer for use with Web Audio.
          * @method preload
          * @param {String} src The sound URI to load.
@@ -235,10 +242,10 @@ this.createjs = this.createjs||{};
          * @protected
          */
         preload: function(src, instance) {
-            this.arrayBuffers[src] = true;  // OJR should we check this value before preloading?
-            var completeHandler = createjs.SoundJS.proxy(this.handlePreload, this);
-            var errorHandler = createjs.SoundJS.proxy(this.handlePreloadError, this);
-	        new WebAudioLoader(src, completeHandler, errorHandler);
+            this.arrayBuffers[src] = true;
+	        var loader = new WebAudioLoader(src, this);
+            loader.onload = this.handlePreloadComplete;
+            loader.load();
         },
 
 		/**
@@ -851,7 +858,7 @@ this.createjs = this.createjs||{};
 
     /**
 	 * An internal helper class that preloads web audio via XHR.
-	 * @class WebAudioLoader
+     * #class WebAudioLoader
 	 * @param {String} src The source of the sound to load.
      * @param {method} completeHandler The callback that is fired when src is loaded, taking this as a parameter.
      * @param {method} errorHandler The callback that is fired  if there is an error during loading, taking this
@@ -859,18 +866,21 @@ this.createjs = this.createjs||{};
 	 * @constructor
 	 * @protected
 	 */
-	function WebAudioLoader(src, completeHandler, errorHandler) {
-		this.init(src, completeHandler, errorHandler);
+	function WebAudioLoader(src, owner) {
+		this.init(src, owner);
 	}
 
-	WebAudioLoader.prototype = {
+	var p = WebAudioLoader.prototype = {
 
         // the request object for or XHR2 request
 		request: null,
 
+        owner: null,
+        progress: -1,
+
         /**
          * The source of the sound to load.  Used by callback functions when we return this class.
-         * @property src
+         * #property
          * @type String
          * @default null
          * @protected
@@ -878,73 +888,104 @@ this.createjs = this.createjs||{};
 		src: null,
 
         /**
-         * The callback that is fired when src is loaded, taking this as a parameter.
-         * @event onComplete
-         * @type method
-         * @protected
-         */
-		onComplete: null,
-
-        /**
-         * The callback that is fired  if there is an error during loading, taking this as a parameter.
-         * @event onError
-         * @type method
-         * @protected
-         */
-        onError: null,
-
-        /**
          * The decoded AudioBuffer array that is returned when loading is complete.
-         * @property data
+         * #property
          * @type AudioBuffer
          * @protected
          */
-        data:null,
+        result:null,
+
+        // Calbacks
+        /**
+         * The callback that fires when the load completes. This follows HTML tag naming.
+         * #event onload
+         * @private
+         */
+        onload: null,
+
+        /**
+         * The callback that fires as the load progresses. This follows HTML tag naming.
+         * #event onprogress
+         * @private
+         */
+        onprogress: null,
+
+        /**
+         * The callback that fires if the load hits an error.
+         * #event onerror
+         * @private
+         */
+        onError: null,
 
         // constructor
-		init: function(src, completeHandler, errorHandler) {
+		init: function(src, owner) {
 			this.src = src;
-            this.onComplete = completeHandler;
-            this.onError = errorHandler;
+            this.owner = owner;
+        },
 
-            // load the src file
+        /**
+         * Start loading.
+         * #method
+         * @param {String} src The path to the sound.
+         * @return {Boolean} If the load was started.
+         * @private
+         */
+        load: function(src) {
+            if (src != null) { this.src = src; }
+
 			this.request = new XMLHttpRequest();
-			this.request.open("GET", src, true);
+			this.request.open("GET", this.src, true);
 			this.request.responseType = "arraybuffer";
-			this.request.onload = createjs.SoundJS.proxy(this.decodeAudio, this);
+			this.request.onload = createjs.SoundJS.proxy(this.handleLoad, this);
             this.request.onError = createjs.SoundJS.proxy(this.handleError, this);
+            this.request.onprogress = createjs.SoundJS.proxy(this.handleProgress, this);
 
             this.request.send();
         },
 
         /**
+         * Handler for loading progress
+         * #method
+         * @param loaded
+         * @param total
+         */
+        handleProgress: function(loaded, total) {
+            this.progress = loaded / total;
+            if (this.onprogress == null) { return; }
+            this.onprogress({loaded:loaded, total:total, progress:this.progress});
+        },
+
+        /**
          * Handler for loading src.  Takes the loaded ArrayBuffer and decodes it for use with Web Audio.
-         * @method decodeAudio
+         * #method
          * @protected
          */
-		decodeAudio: function() {
+        handleLoad: function() {
             s.context.decodeAudioData(this.request.response,
                 createjs.SoundJS.proxy(this.handleAudioDecoded, this),
                 createjs.SoundJS.proxy(this.handleError, this));
 		},
 
         /**
-         * Handler for decoding audio.  Sets data to the decodedAudio and fires the onComplete callback.
-         * @method decodeAudio
+         * Handler for decoding audio.  Sets result to the decodedAudio and fires the onComplete callback.
+         * #method
          * @protected
          */
 		handleAudioDecoded: function(decodedAudio) {
-            this.data = decodedAudio;
-			this.onComplete(this);
+            this.progress = 1;
+            this.result = decodedAudio;
+            this.owner.addPreloadResults(this.src, this.result);
+            this.onload && this.onload();
 		},
 
         /**
          *  Handler for errors when loading or decoding.  Fires the onError callback.
-         * @method decodeAudio
+         *  #method
          * @protected
          */
         handleError: function(evt) {
-            this.onError(this);
+            this.owner.removeFromPreload(this.src);
+            this.onerror && this.onerror(evt);
         },
 
 		toString: function() {

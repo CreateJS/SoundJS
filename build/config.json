@@ -1,0 +1,19 @@
+{
+	"config_soundjs": {
+		"SOURCE_FILES": [
+            "/../src/soundjs/SoundJS.js",
+            "/../src/soundjs/WebAudioPlugin.js",
+            "/../src/soundjs/HTMLAudioPlugin.js",
+            "/../src/easeljs/events/EventDispatcher.js"
+        ],
+		"JS_FILE_NAME" : "soundjs-%VERSION%.min.js",
+		"PROJECT_NAME" : "SoundJS",
+		"PROJECT_URL" : "http://createjs.com/",
+		"DOCS_DIR_NAME" : "_docs-%VERSION%",
+		"DOCS_FILE_NAME": ".zip",
+		"OUTPUT_DIR_NAME" : "/output_min",
+		"TEMPLATE_DIR_PATH" : "/template",    
+		"TMP_DIR_NAME" : "/tmp",
+		"GOOGLE_CLOSURE_PATH" : "/../tools/google-closure/compiler.jar"     
+	}
+}

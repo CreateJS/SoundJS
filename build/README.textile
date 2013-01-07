@@ -4,31 +4,25 @@ For building the compiled library and API documentation, we use a custom build s
 * "YUI Doc":http://developer.yahoo.com/yui/yuidoc/
 
 Google Closure requires that Java is installed on the system.
-
-YUI Doc requires that Python is installed on your system, along with the following modules:
-
-* setuptools
-* Pygments
-* SimpleJSON
-* Cheetah
-
 View the "YUI Doc":http://developer.yahoo.com/yui/yuidoc/ page for more information.
 
-YUI Doc and Google Closure are included in the repository, which makes it easier to run the build, and ensures that we don't have version mismatches between the source and the libraries.
+Google Closure is included in the repository, which makes it easier to run the build, and ensures that we don't have version mismatches between the source and the libraries.
 
 
 h2. Configuration
 
-In order to run the script, you must have "node.js":http://nodejs.org/ installed, along with the "wrench":https://github.com/ryanmcgrath/wrench-js and "optimist":https://github.com/substack/node-optimist modules.
+In order to run the script, you must have "node.js":http://nodejs.org/ installed, along with the "wrench":https://github.com/ryanmcgrath/wrench-js and "optimist":https://github.com/substack/node-optimist modules and finally "yuidocs":https://github.com/yui/yuidoc/
 
 * "node.js":http://nodejs.org/
 * "wrench module":https://github.com/ryanmcgrath/wrench-js
-* "optimist module":https://github.com/substack/node-optimist
+* "optimist module":https://github.com/substack/node-optimist 
+* "yuidoc":https://github.com/yui/yuidoc/t
 
 The easiest way to install the required modules is to first install "NPM":http://npmjs.org/ (node package manager) and then run:
 
 <code>npm install wrench</code>
-<code>npm install optimist</code>
+<code>npm install optimist</code> 
+<code>npm -g install yuidocjs</code> 
 
 
 h2. Building the Source

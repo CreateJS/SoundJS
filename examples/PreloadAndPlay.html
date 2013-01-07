@@ -3,23 +3,32 @@
 <head>
 <title>SoundJS: Preload & Sound APIs</title>
 
-	<!--<script type="text/javascript" src="./assets/preloadjs-0.2.0.min.js"></script>-->
-    <script type="text/javascript" src="../../preloadjs/src/preloadjs/AbstractLoader.js"></script>
-    <script type="text/javascript" src="../../preloadjs/src/preloadjs/PreloadJS.js"></script>
-    <script type="text/javascript" src="../../preloadjs/src/preloadjs/TagLoader.js"></script>
-    <script type="text/javascript" src="../../preloadjs/src/preloadjs/XHRLoader.js"></script>
+<!--<script type="text/javascript" src="./assets/preloadjs-0.2.0.min.js"></script>
+TODO: update this when next preload version is ready -->
+<script type="text/javascript" src="../../preloadjs/src/preloadjs/AbstractLoader.js"></script>
+<script type="text/javascript" src="../../preloadjs/src/preloadjs/PreloadJS.js"></script>
+<script type="text/javascript" src="../../preloadjs/src/preloadjs/TagLoader.js"></script>
+<script type="text/javascript" src="../../preloadjs/src/preloadjs/XHRLoader.js"></script>
 
 
-	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
-    <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
-	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
-	<script type="text/javascript" src="../src/swfobject.js"></script>
-	<script type="text/javascript" src="../src/soundjs/FlashPlugin.js"></script>
+<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
+<script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
+<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
+<script type="text/javascript" src="../src/swfobject.js"></script>
+<script type="text/javascript" src="../src/soundjs/FlashPlugin.js"></script>
 
-	<!-- We also provide hosted minified versions of all CreateJS libraries.
-	    http://code.createjs.com -->
+<!-- We also provide hosted minified versions of all CreateJS libraries.
+    http://code.createjs.com -->
 
-	<script>
+<script>
+    // Read the URL Params. We need to do this to determine the plugin mode.
+    var params = {};
+    var pieces = window.location.search.slice(1).split("&");
+    for (var i=0, l=pieces.length; i<l; i++) {
+        var parts = pieces[i].split("=");
+        params[parts[0]] = parts[1];
+    }
+
 	var queue;
 	var displayStatus;
 
@@ -27,12 +36,24 @@
 		if (window.top != window) {
 			document.getElementById("header").style.display = "none";
 		}
-		
-		if (!createjs.SoundJS.initializeDefaultPlugins()) {
+
+        createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
+        if (params.type == "flash") {
+            createjs.SoundJS.registerPlugins([createjs.FlashPlugin]);
+        } else if (params.type == "html5") {
+            createjs.SoundJS.registerPlugins([createjs.HTMLAudioPlugin]);
+        } else {
+            createjs.SoundJS.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
+        }
+
+        if (!createjs.SoundJS.isReady()) {
 			document.getElementById("error").style.display = "block";
 			document.getElementById("content").style.display = "none";
 			return;
 		}
+
+        var pluginStatus = document.getElementById("activePlugin");
+        pluginStatus.innerHTML = "Active Plugin is " + createjs.SoundJS.activePlugin.toString();  // innerText does not work in FF
 
 		displayStatus = document.getElementById("status");
 
@@ -74,11 +95,16 @@
 	function playSound(name, loop) {
 		// Play the sound using the ID created above.
 		return createjs.SoundJS.play("music");
-        //return createjs.SoundJS.play("assets/18-machinae_supremacy-lord_krutors_dominion.mp3");
 	}
 	</script>
 
 	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css" />
+    <style>
+        .plugin {
+            font-size: 16px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body onload="init()">
@@ -89,6 +115,14 @@
 	</header>
 
 	<div class="content" id="content">
+        <div>
+            <a href="?type=normal">Web Audio with HTML Audio then Flash Fallbacks</a> | <a href="?type=html5">HTML Audio Only</a> | <a href="?type=flash">Flash Only</a>
+        </div>
+
+        <div class="plugin">
+            <p id="activePlugin">Active Plugin is</p>
+        </div>
+
 		<h1 id="status">Loading...</h1>
 	</div>
 	

@@ -5,7 +5,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=9" /> <!-- req for IE 9 else audio tag won't work -->
 	<title>SoundJS: Convolution Example</title>
 
-	<script type="text/javascript" src="./assets/preloadjs-0.2.0.min.js"></script>
+    <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
 
 	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
     <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
@@ -26,14 +26,13 @@
 			document.getElementById("header").style.display = "none";
 		}
 
-		if (!createjs.SoundJS.checkPlugin(true)) {
+        if (!createjs.SoundJS.initializeDefaultPlugins()) {
 			document.getElementById("error").style.display = "block";
 			document.getElementById("content").style.display = "none";
 			return;
 		}
 
 		document.getElementById("loader").className = "loader";
-		// Preload a set of sounds.
 		var assetPath = "assets/";
 		var manifest = [
 			{id:"dong", src:assetPath+"ToneWobble.mp3|"+assetPath+"ToneWobble.ogg", data:3},
@@ -41,25 +40,19 @@
 			{id:"gull", src:assetPath+"S-Damage.mp3|"+assetPath+"S-Damage.ogg", data:1}
 		];
 
-
-		preload = new createjs.PreloadJS();
-		preload.onComplete = handleLoadComplete;
-		preload.installPlugin(createjs.SoundJS);
-		preload.loadManifest(manifest);
-	}
-
-	function stop() {
-		if (preload != null) { preload.close(); }
-		createjs.SoundJS.stop();
+        createjs.SoundJS.addEventListener("loadComplete", handleLoadComplete, this); // add an event listener for when load is completed
+        createjs.SoundJS.registerManifest(manifest);
 	}
 
 	function handleLoadComplete() {
+        handleLoadComplete.count = ++handleLoadComplete.count || 1;  // increments this or creates this and sets it to 1
+        if(handleLoadComplete.count < 3) {return;}  // OJR it would be better to check this against manifest length
 		document.getElementById("loader").className = "";
 		// Enable the UI
 		$("#demoStarter").attr("disabled", false);
 	}
 
-	var instance; // Controllable instance
+	var instance, instance2; // Controllable instance
 	function begin(){
 
 		//  In this demo, we play sounds at specific times, and show
@@ -110,14 +103,14 @@
 		// Play "dong" after another second. Should start a new channel.
 		setTimeout(function(){
 			$("#p05").removeClass("active")
-			createjs.SoundJS.play("dong", createjs.SoundJS.INTERRUPT_NONE, 0, 1000);
+            instance2 = createjs.SoundJS.play("dong", createjs.SoundJS.INTERRUPT_NONE, 0, 1000);
 			$("#p06").addClass("active");
 		}, 3500);
 
 		// Wait half a second, then pause all "dong" sounds.
 		setTimeout(function(){
 			$("#p06").removeClass("active")
-			createjs.SoundJS.pause("dong");
+			instance2.pause();
 			$("#p07").addClass("active");
 		}, 4000);
 
@@ -131,7 +124,7 @@
 		// Wait 3 seconds, then resume all paused sounds.
 		setTimeout(function(){
 			$("#p08").removeClass("active")
-			createjs.SoundJS.resume();
+			instance2.resume();
 			$("#p09").addClass("active");
 		}, 8000);
 

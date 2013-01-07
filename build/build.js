@@ -1,54 +1,5 @@
 #!/usr/bin/env node
 
-/************************************************************
-CONFIGURATION
-*/
-// listing of all source files, with dependencies listed in order:
-var SOURCE_FILES = [
-	__dirname + "/../src/easeljs/events/EventDispatcher.js",
-	__dirname + "/../src/soundjs/SoundJS.js",
-	__dirname + "/../src/soundjs/WebAudioPlugin.js",
-	__dirname + "/../src/soundjs/HTMLAudioPlugin.js"
-];
-
-// default name for lib output:
-var JS_FILE_NAME = "soundjs-%VERSION%.min.js";
-
-// project name:
-var PROJECT_NAME = "SoundJS";
-
-// url for website or github repo for project:
-var PROJECT_URL = "http://soundjs.com/";
-
-
-// name of directory for docs:
-var DOCS_DIR_NAME = PROJECT_NAME+"_docs-%VERSION%";
-
-// name of file for zipped docs:
-var DOCS_FILE_NAME = DOCS_DIR_NAME+".zip";
-
-// name of directory where generated files are placed
-var OUTPUT_DIR_NAME =__dirname + "/output";
-
-
-// path to directory that includes YUI Doc templates
-var TEMPLATE_DIR_PATH = __dirname + "/template";
-
-// tmp directory used when running scripts:
-var TMP_DIR_NAME = __dirname + "/tmp";
-
-// paths to tools:
-var GOOGLE_CLOSURE_PATH = __dirname + "/../tools/google-closure/compiler.jar";
-var YUI_DOC_PATH = __dirname + "/../tools/yuidoc/bin/yuidoc.py";
-
-// yui version being used
-var YUI_VERSION = 2;
-
-/*
-END CONFIGURATION
-************************************************************/
-
-
 // TODO: add support for recursively checking to see if we are ommiting any files
 
 
@@ -62,6 +13,52 @@ var WRENCH = require("wrench");
 
 //for parsing command line args
 var OPTIMIST = require("optimist");
+
+/************************************************************
+CONFIGURATION
+*/
+
+var json = FILE.readFileSync(PATH.resolve("./config.json"), "UTF-8");
+json = JSON.parse(json);
+var config =json.config_soundjs;
+
+var SOURCE_FILES = [];
+// listing of all source files, with dependencies listed in order:
+SOURCE_FILES = config.SOURCE_FILES;
+
+// default name for lib output:
+var JS_FILE_NAME = config.JS_FILE_NAME;
+// project name:
+var PROJECT_NAME = config.PROJECT_NAME;
+
+// url for website or github repo for project:
+var PROJECT_URL = config.PROJECT_URL;
+
+// name of directory for docs:
+var DOCS_DIR_NAME =  PROJECT_NAME + config.DOCS_DIR_NAME;
+
+// name of file for zipped docs:
+var DOCS_FILE_NAME = DOCS_DIR_NAME + config.DOCS_FILE_NAME
+
+// name of directory where generated files are placed
+var OUTPUT_DIR_NAME = __dirname + config.OUTPUT_DIR_NAME;
+
+// path to directory that includes YUI Doc templates
+var TEMPLATE_DIR_PATH = __dirname + config.TEMPLATE_DIR_PATH;
+
+// tmp directory used when running scripts:
+var TMP_DIR_NAME = __dirname + config.TMP_DIR_NAME;
+
+// paths to tools:
+var GOOGLE_CLOSURE_PATH =  __dirname + config.GOOGLE_CLOSURE_PATH;
+var YUI_DOC_PATH =  __dirname + config.YUI_DOC_PATH;
+
+// yui version being used
+var YUI_VERSION = config.YUI_VERSION;
+
+/*
+END CONFIGURATION
+************************************************************/
 
 OPTIMIST.describe("v", "Enable verbose output")
 	.alias("v", "verbose")
@@ -130,7 +127,7 @@ function main(argv)
 
 	verbose = argv.v != undefined;
 	version = argv.version;
-
+	
 	extraSourceFiles = argv.s;
 	
 	if(argv.o)
@@ -167,7 +164,7 @@ function main(argv)
 	{
 		buildSourceTask(function(success)
 		{		
-			print("Build Source Task Complete");
+			print("\nBuild Source Task Complete");
 			if(shouldBuildDocs)
 			{
 				buildDocsTask(version,
@@ -197,33 +194,34 @@ function main(argv)
 
 
 function cleanTask(completeHandler)
-{
+{                                         
 	if(FILE.existsSync(TMP_DIR_NAME))
 	{	
 		WRENCH.rmdirSyncRecursive(TMP_DIR_NAME);
 	}
-	
-	if(FILE.existsSync(OUTPUT_DIR_NAME))
+	  
+	if(FILE.existsSync(OUTPUT_DIR_NAME))  
 	{
 		WRENCH.rmdirSyncRecursive(OUTPUT_DIR_NAME);
 	}
 }
 
 function buildSourceTask(completeHandler)
-{	
+{	        
 	if(!FILE.existsSync(OUTPUT_DIR_NAME))
 	{
 		FILE.mkdirSync(OUTPUT_DIR_NAME);
 	}
-    
-    js_file_name = js_file_name.split("%VERSION%").join(version);
-    
+	
+	js_file_name = js_file_name.split("%VERSION%").join(version);
+
 	var file_args = [];
 	var len = SOURCE_FILES.length;
 	for(var i = 0; i < len; i++)
 	{
 		file_args.push("--js");
-		file_args.push(SOURCE_FILES[i]);
+        var dirName = __dirname + SOURCE_FILES[i];
+		file_args.push(dirName);
 	}
 	
 	if(extraSourceFiles)
@@ -248,7 +246,7 @@ function buildSourceTask(completeHandler)
 			["--js_output_file", tmp_file]
 		);
 		
-
+    
 	CHILD_PROCESS.exec(
 		cmd.join(" "),
 		function(error, stdout, stderr)
@@ -293,14 +291,12 @@ function buildDocsTask(version, completeHandler)
 	var doc_file=DOCS_FILE_NAME.split("%VERSION%").join(version);
 	
 	var generator_out=PATH.join(OUTPUT_DIR_NAME, doc_dir);
-    console.log("version", version);
-	var cmd = ["yuidoc -q --themedir ./createjsTheme --project-version", version];              
-
-	var whereZipLives = PATH.resolve("../docs/");  
-	var cmd1 = "cd " + whereZipLives + "; zip -r " + doc_file + " " + "./output" + " -x *.DS_Store";
-    	
-	CHILD_PROCESS.exec(
-		cmd.join(" "),
+    
+    var yuidocCommand = ["yuidoc -q --themedir ./createjsTheme --project-version", version];
+    var zipCommand = "zip -rq " + "../docs/" + doc_file + " " + "output   " + "*.DS_Store";
+    
+    CHILD_PROCESS.exec(
+		yuidocCommand.join(" "),
 		function(error, stdout, stderr)
 		{
 			if(verbose)
@@ -323,7 +319,7 @@ function buildDocsTask(version, completeHandler)
 		    }
 		
 			CHILD_PROCESS.exec(
-				cmd1,
+				zipCommand,
 				function(error, stdout, stderr)
 				{
 					if(verbose)
@@ -344,9 +340,6 @@ function buildDocsTask(version, completeHandler)
 						print("Error ZIPPING Docs : " + error);
 						exitWithFailure();
 				    }
-				
-					//WRENCH.rmdirSyncRecursive(TMP_DIR_NAME);
-				
 					completeHandler(true);				
 				});		
 		
@@ -390,6 +383,8 @@ function print(msg)
 
 //call the main script entry point
 main(OPTIMIST.argv);
+
+
 
 
 

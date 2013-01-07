@@ -4,8 +4,9 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title>CreateJS Example: Space Rocks Game</title>
 
-	<script type="text/javascript" src="./assets/preloadjs-0.2.0.min.js"></script>
 	<script type="text/javascript" src="./assets/easeljs-0.5.0.min.js"></script>
+
+    <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
 
 	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
     <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
@@ -66,14 +67,12 @@
 	document.onkeydown = handleKeyDown;
 	document.onkeyup = handleKeyUp;
 
-	var preload;
-
 	function init() {
 		if (window.top != window) {
 			document.getElementById("header").style.display = "none";
 		}
 
-		if (!createjs.SoundJS.checkPlugin(true)) {
+        if (!createjs.SoundJS.initializeDefaultPlugins()) {
 			document.getElementById("error").style.display = "block";
 			document.getElementById("content").style.display = "none";
 			return;
@@ -88,12 +87,10 @@
 			{id:"music", src:"assets/18-machinae_supremacy-lord_krutors_dominion.mp3|../../assets/18-machinae_supremacy-lord_krutors_dominion.ogg"}
 		];
 
-		preload = new createjs.PreloadJS();
-		preload.onComplete = doneLoading;
-		preload.installPlugin(createjs.SoundJS);
-		preload.loadManifest(manifest);
+        createjs.SoundJS.addEventListener("loadComplete", doneLoading, this); // add an event listener for when load is completed
+        createjs.SoundJS.registerManifest(manifest);
 
-		canvas = document.getElementById("gameCanvas");
+        canvas = document.getElementById("gameCanvas");
 		stage = new createjs.Stage(canvas);
 		messageField = new createjs.Text("Loading", "bold 24px Arial", "#FFFFFF");
 		messageField.maxWidth = 1000;
@@ -106,18 +103,16 @@
 		loadingInterval = setInterval(updateLoading, 200);
 	}
 
-	function stop() {
-		if (preload != null) { preload.close(); }
-		createjs.SoundJS.stop();
-	}
-
+    // OJR sound is failing to load in FF.  Possibly add error handling.
 	function updateLoading() {
-		messageField.text = "Loading " + (preload.progress*100|0) + "%"
+		messageField.text += ".";
 		stage.update();
 	}
 
 
 	function doneLoading() {
+        doneLoading.count = ++doneLoading.count || 1;  // increments this or creates this and sets it to 1
+        if(doneLoading.count < 5) {return;}  // OJR it would be better to check this against manifest.length
 		clearInterval(loadingInterval);
 		scoreField = new createjs.Text("0", "bold 12px Arial", "#FFFFFF");
 		scoreField.textAlign = "right";
