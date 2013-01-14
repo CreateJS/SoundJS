@@ -34,21 +34,32 @@
 // namespace:
 this.createjs = this.createjs||{};
 
-/*
-Note in IE 9 there is a delay in applying volume changes to tags that occurs once playback is started.
-So if you have muted all sounds, they will all play during this delay until the mute applies internally.
-This happens regardless of when or how you apply the volume change, as the tag seems to need to play to apply it.
-*/
-
 (function() {
 
 	/**
-	 * Play sounds using HTML &lt;audio&gt; tags in the browser.
-     * Note it is recommended to use {{#crossLink "WebAudioPlugin"}}{{/crossLink}} for iOS. HTML Audio can only have one
-	 * &lt;audio&gt; tag, can not preload or autoplay the audio, can not cache the audio, and can not play the audio
-	 * except inside a user initiated event.
+	 * Play sounds using HTML &lt;audio&gt; tags in the browser. This plugin is the second priority plugin installed
+	 * by default, after the {{#crossLink "WebAudioPlugin"}}{{/crossLink}}, which is supported on Chrome, Safari, and
+	 * iOS. This handles audio in all other modern browsers. For non-supported browsers, include and install the
+	 * {{#crossLink "FlashPlugin"}}{{/crossLink}}.
+     *
+     * <h4>Known Browser and OS issues for HTML Audio</h4>
+     * <b>IE 9 html audio quirk</b><br />
+     * Note in IE 9 there is a delay in applying volume changes to tags that occurs once playback is started. So if you have
+     * muted all sounds, they will all play during this delay until the mute applies internally. This happens regardless of
+     * when or how you apply the volume change, as the tag seems to need to play to apply it.
+     *
+     * <b>iOS 6 limitations</b><br />
+     * Note it is recommended to use {{#crossLink "WebAudioPlugin"}}{{/crossLink}} for iOS (6+). HTML Audio can only
+	 * have one &lt;audio&gt; tag, can not preload or autoplay the audio, can not cache the audio, and can not play the
+	 * audio except inside a user initiated event.
+     *
+     * <b>Android limitations</b><br />
+     *      <li>We have no control over audio volume. Only the user can set volume on their device.</li>
+     *      <li>We can only play audio inside a user event (touch).  This currently means you cannot loop sound.</li></ul>
+     *
+     * See {{#crossLink "Sound"}}{{/crossLink}} for general notes on known issues.
+     *
 	 * @class HTMLAudioPlugin
-	 * @uses EventDispatcher
 	 * @constructor
 	 */
 	function HTMLAudioPlugin() {
@@ -58,62 +69,87 @@ This happens regardless of when or how you apply the volume change, as the tag s
 	var s = HTMLAudioPlugin;
 
 	/**
-	 * The maximum number of instances that can be played. This is a browser limitation.
+	 * The maximum number of instances that can be played. This is a browser limitation. The actual number varies from
+	 * browser to browser (and is largely hardware dependant), but this is a safe estimate.
 	 * @property MAX_INSTANCES
-	 * @type Number
+	 * @type {Number}
 	 * @default 30
 	 * @static
 	 */
 	s.MAX_INSTANCES = 30;
 
-	/**
-	 * The capabilities of the plugin.
-	 * @property capabilities
-	 * @type Object
-	 * @default null
-	 * @static
-	 */
+    /**
+     * The capabilities of the plugin. This is generated via the the SoundInstance {{#crossLink "TMLAudioPlugin/generateCapabilities"}}{{/crossLink}}
+     * method. Please see the Sound {{#crossLink "Sound/getCapabilities"}}{{/crossLink}} method for an overview of all
+     * of the available properties.
+     * @property capabilities
+     * @type {Object}
+     * @static
+     */
 	s.capabilities = null;
 
-	/**
-	 * The current value of the audio tag.
-	 *
-	 * @property tagVolume
-	 * @type Number
-	 * @default null
-	 */
-	s.tagVolume = null;
-
-	// Event constants
+    /**
+     * Event constant for the "canPlayThrough" event for cleaner code.
+     * @property AUDIO_READY
+     * @type {String}
+     * @default canplaythrough
+     * @static
+     */
 	s.AUDIO_READY = "canplaythrough";
-	s.AUDIO_ENDED = "ended";
+
+    /**
+     * Event constant for the "ended" event for cleaner code.
+     * @property AUDIO_ENDED
+     * @type {String}
+     * @default ended
+     * @static
+     */
+    s.AUDIO_ENDED = "ended";
+
+    /**
+     * Event constant for the "error" event for cleaner code.
+     * @property AUDIO_ERROR
+     * @type {String}
+     * @default error
+     * @static
+     */
 	s.AUDIO_ERROR = "error"; //TODO: Handle error cases
+
+    /**
+     * Event constant for the "stalled" event for cleaner code.
+     * @property AUDIO_STALLED
+     * @type {String}
+     * @default stalled
+     * @static
+     */
 	s.AUDIO_STALLED = "stalled";
 
-	//TODO: Not used. Chrome can not do this when loading audio from a server.  // OJR can we remove this?
-	s.fillChannels = false;
 
-	/**
-	 * Determine if the plugin can be used.
-	 * @method isSupported
-	 * @return {Boolean} If the plugin can be initialized.
-	 * @static
-	 */
+    /**
+     * Determine if the plugin can be used in the current browser/OS. Note that HTML audio is available in most modern
+     * browsers except iOS, where it is limited.
+     * @method isSupported
+     * @return {Boolean} If the plugin can be initialized.
+     * @static
+     */
 	s.isSupported = function() {
-		if (createjs.SoundJS.BrowserDetect.isIOS) { return false; }
-        // OJR alternately let the developer decide, inform them of limits in iOS.
-        // iOS can only have a single <audio> instance, cannot preload or autoplay, cannot cache sound, and can only be played in response to a user event (click)
+		if (createjs.Sound.BrowserDetect.isIOS) { return false; }
+        // You can enable this plugin on iOS by removing this line, but it is not recommended due to the limitations:
+        // iOS can only have a single <audio> instance, cannot preload or autoplay, cannot cache sound, and can only be
+        // played in response to a user event (click)
 		s.generateCapabilities();
 		var t = s.tag;  // OJR do we still need this check, when cap will already be null if this is the case
 		if (t == null || s.capabilities == null) { return false; }
 		return true;
 	};
 
-	/**
-	 * Determine the capabilities of the plugin.
-	 * @method generateCapabiities
-	 * @static
-	 */
+    /**
+     * Determine the capabilities of the plugin. Used internally. Please see the Sound API {{#crossLink "Sound/getCapabilities"}}{{/crossLink}}
+     * method for an overview of plugin capabilities.
+     * @method generateCapabiities
+     * @static
+     * @protected
+     */
 	s.generateCapabilities = function() {
 		if (s.capabilities != null) { return; }
 		var t = s.tag = document.createElement("audio");
@@ -124,66 +160,103 @@ This happens regardless of when or how you apply the volume change, as the tag s
             volume: true,
             tracks: -1
         };
-        // TODO: Other props?
 
-        // determine which extensions our browser supports for this plugin by iterating through SoundJS.SUPPORTED_EXTENSIONS
-        for(var i= 0, l = createjs.SoundJS.SUPPORTED_EXTENSIONS.length; i < l; i++) {
-            var ext = createjs.SoundJS.SUPPORTED_EXTENSIONS[i];
-            var playType = createjs.SoundJS.EXTENSION_MAP[ext] || ext;
+        // determine which extensions our browser supports for this plugin by iterating through Sound.SUPPORTED_EXTENSIONS
+        for(var i= 0, l = createjs.Sound.SUPPORTED_EXTENSIONS.length; i < l; i++) {
+            var ext = createjs.Sound.SUPPORTED_EXTENSIONS[i];
+            var playType = createjs.Sound.EXTENSION_MAP[ext] || ext;
             s.capabilities[ext] = (t.canPlayType("audio/" + ext) != "no" && t.canPlayType("audio/" + ext) != "") || (t.canPlayType("audio/" + playType) != "no" && t.canPlayType("audio/" + playType) != "");
         }  // OJR another way to do this might be canPlayType:"m4a", codex: mp4
 	}
 
 	var p = s.prototype = {
 
+		/**
+		 * The capabilities of the plugin, created by the {{#crossLink "HTMLAudioPlugin/generateCapabilities"}}{{/crossLink}}
+		 * method.
+		 */
 		capabilities: null,
-		FT: 0.001,
 
-		audioSources: null,  // object hash that tells us if an audioSource has started loading
+        /**
+         * Object hash indexed by the source of each file to indicate if an audio source is loaded, or loading.
+         * @property audioSources
+         * @type {Object}
+         * @protected
+         * @since 0.4.0
+         */
+		audioSources: null,
 
+        /**
+         * The default number of instances to allow.  Passed back to {{#crossLink "Sound"}}{{/crossLink}} when a source
+         * is registered using the {{#crossLink "Sound/register"}}{{/crossLink}} method.  This is only used if
+         * a value is not provided.
+         *
+         * <b>NOTE this only exists as a limitation of HTML audio.</b>
+         * @property defaultNumChannels
+         * @type {Number}
+         * @default 2
+         * @since 0.4.0
+         */
+        defaultNumChannels: 2,
+
+        /**
+         * An initialization function run by the constructor
+         * @method init
+         * @private
+         */
 		init: function() {
 			this.capabilities = s.capabilities;
 			this.audioSources = {};
 		},
 
 		/**
-		 * Pre-register a sound instance when preloading/setup. This plugin
-		 * @method register
+		 * Pre-register a sound instance when preloading/setup. This is called by {{#crossLink "Sound"}}{{/crossLink}}.
+         * Note that this provides an object containing a tag used for preloading purposes, which
+		 * <a href="http://preloadjs.com">PreloadJS</a> can use to assist with preloading.
+         * @method register
 		 * @param {String} src The source of the audio
 		 * @param {Number} instances The number of concurrently playing instances to allow for the channel at any time.
-		 * @return {Object} A result object, containing a tag for preloading purposes.
+		 * @return {Object} A result object, containing a tag for preloading purposes and a numChannels value for internally
+         * controlling how many instances of a source can be played by default.
 		 */
 		register: function(src, instances) {
-			this.audioSources[src] = true;  // OJR this does not mean preloading has started
+			this.audioSources[src] = true;  // Note this does not mean preloading has started
 			var channel = TagPool.get(src);
 			var tag;
-			for (var i=0, l=instances||1; i<l; i++) {
+            var l = instances||this.defaultNumChannels;
+			for (var i=0; i<l; i++) {
 				tag = this.createTag(src);
 				channel.add(tag);
 			}
 			return {
-				tag: tag       // Return one instance for preloading purposes
+				tag: tag,       // Return one instance for preloading purposes
+                numChannels: l  // The default number of channels to make for this Sound or the passed in value
 			};
 		},
 
+        /**
+         * Create an HTML audio tag.
+         * @method createTag
+         * @param {String} src The source file to set for the audio tag.
+         * @return {HTMLElement} Returns an HTML audio tag.
+         * @protected
+         */
 		createTag: function(src) {
 			var tag = document.createElement("audio");
 			tag.preload = false;
 			tag.src = src;
-			//tag.type = "audio/ogg"; //LM: Need to set properly
 			return tag;
 		},
 
-		/**
-		 * Create a sound instance. All SoundInstances implement this method.
-		 * @method create
-		 * @param {String} src The source to use.
-		 * @return {SoundInstance} A sound instance for playback and control.
-		 */
+        /**
+         * Create a sound instance. If the sound has not been preloaded, it is internally preloaded here.
+         * @method create
+         * @param {String} src The sound source to use.
+         * @return {SoundInstance} A sound instance for playback and control.
+         */
 		create: function(src) {
             // if this sound has not be registered, create a tag and preload it
-            //OJR LM might want to review this and see if there is a better way.
-            if (!this.preloadStarted(src)) {
+            if (!this.isPreloadStarted(src)) {
                 var channel = TagPool.get(src);
                 var tag = this.createTag(src);
                 channel.add(tag);
@@ -194,22 +267,25 @@ This happens regardless of when or how you apply the volume change, as the tag s
 		},
 
         /**
-         * Checks if preloading has started for a src
-         * @param src The sound URI to load.
-         * @return {Boolean}
+         * Checks if preloading has started for a specific source.
+         * @method isPreloadStarted
+         * @param {String} src The sound URI to check.
+         * @return {Boolean} If the preload has started.
+         * @since 0.4.0
 		 */
-		preloadStarted: function(src) {
+		isPreloadStarted: function(src) {
 			return (this.audioSources[src] != null);
 		},
 
         /**
-         * Internally preload a sound. Loading uses XHR2 in order to get back an array buffer for use with Web Audio.
+         * Internally preload a sound.
          * @method preload
          * @param {String} src The sound URI to load.
-		 * @param instance
+		 * @param {Object} instance An object containing a tag property that is an HTML audio tag used to load src.
+         * @since 0.4.0
 		 */
-		preload: function(src, instance) {  // OJR each call to this wraps tag in an object just so this can pull it out, why don't we just pass a tag or create it here?
-            this.audioSources[src] = true;  // OJR should we check for this value before beginning preload?
+		preload: function(src, instance) {
+            this.audioSources[src] = true;
 			new HTMLAudioLoader(src, instance.tag);
 		},
 
@@ -222,118 +298,31 @@ This happens regardless of when or how you apply the volume change, as the tag s
 	createjs.HTMLAudioPlugin = HTMLAudioPlugin;
 
 
-	/**
-	 * Sound Instances are created when any calls to SoundJS.play() or SoundJS.createInstance are made.
-	 * The instances are returned by the active plugin for control by the user.
-	 * Users can control audio directly through the instance.
-	 * @class SoundInstance
-	 * @param {String} src The path to the sound
-	 * @constructor
-	 */
+// NOTE Documentation for the SoundInstance class in WebAudioPlugin file. Each plugin generates a SoundInstance that
+// follows the same interface.
 	function SoundInstance(src, owner) {
 		this.init(src, owner);
 	}
 
 	var p = SoundInstance.prototype = {
 
-		/**
-		 * The source of the sound.
-		 * @property src
-		 * @type String
-		 * @default null
-		 */
 		src: null,
-
-		/**
-		 * The unique ID of the instance
-		 * @property uniqueId
-		 * @type String | Number
-		 * @default -1
-		 */
 		uniqueId:-1,
-
-		/**
-		 * The play state of the sound. Play states are defined as constants on SoundJS
-		 * @property playState
-		 * @type String
-		 * @default null
-		 */
 		playState: null,
-
-		/**
-		 * The plugin that created the instance
-		 * @property owner
-		 * @type HTMLAudioPlugin
-		 * @default null
-		 */
 		owner: null,
-
-		// Private undocumented props.
 		loaded: false,
-		lastInterrupt: createjs.SoundJS.INTERRUPT_NONE,
 		offset: 0,
 		delay: 0,
 		volume: 1,
 		pan: 0,
         duration: 0,
-
 		remainingLoops: 0,
 		delayTimeoutId: null,
 		tag: null,
-
-		/**
-		 * Determines if the audio is currently muted.
-		 * @property muted
-		 * @type Boolean
-		 * @default false
-		 */
 		muted: false,
-
-		/**
-		 * Determines if the audio is currently paused. If the audio has not yet started playing,
-		 * it will be true, unless the user pauses it.
-		 * @property paused
-		 * @type Boolean
-		 * @default false
-		 */
 		paused: false,
 
-		/**
-		 * The callback that is fired when a sound has completed playback.
-		 * @event onComplete
-		 */
-		onComplete: null,
-
-		/**
-		 * The callback that is fired when a sound has completed playback, but has loops remaining.
-		 * @event onLoop
-		 */
-		onLoop: null,
-
-		/**
-		 * The callback that is fired when a sound is ready to play.
-		 * @event onReady
-		 */
-		onReady: null,
-
-		/**
-		 * The callback that is fired when a sound has failed to start.
-		 * @event onPlayFailed
-		 */
-		onPlayFailed: null,
-
-		/**
-		 * The callback that is fired when a sound has been interrupted.
-		 * @event onPlayInterrupted
-		 */
-		onPlayInterrupted: null,
-
-		// Proxies, make removing listeners easier.
-		endedHandler: null,
-		readyHandler: null,
-		stalledHandler:null,
-
-        // mix-ins:
+// mix-ins:
         // EventDispatcher methods:
         addEventListener: null,
         removeEventListener: null,
@@ -342,38 +331,37 @@ This happens regardless of when or how you apply the volume change, as the tag s
         hasEventListener: null,
         _listeners: null,
 
-        // Constructor
+// Callbacks
+		onComplete: null,
+		onLoop: null,
+		onReady: null,
+		onPlayFailed: null,
+		onPlayInterrupted: null,
+        onPlaySucceeded: null,
+
+		// Proxies, make removing listeners easier.
+		endedHandler: null,
+		readyHandler: null,
+		stalledHandler:null,
+
+// Constructor
 		init: function(src, owner) {
 			this.src = src;
 			this.owner = owner;
 
-			this.endedHandler = createjs.SoundJS.proxy(this.handleSoundComplete, this);
-			this.readyHandler = createjs.SoundJS.proxy(this.handleSoundReady, this);
-			this.stalledHandler = createjs.SoundJS.proxy(this.handleSoundStalled, this);
+			this.endedHandler = createjs.proxy(this.handleSoundComplete, this);
+			this.readyHandler = createjs.proxy(this.handleSoundReady, this);
+			this.stalledHandler = createjs.proxy(this.handleSoundStalled, this);
 		},
 
-        /**
-         * Dispatch a generic event of type eventString. The dispatched event contains:
-         * <ul><li>target: A reference to the dispatching instance</li>
-         *      <li>type: The string used to identify the type of event.</li>
-         * @method sendLoadComplete
-         * @param {String} eventString The string to send as the event type.
-         * @private
-         */
-        sendLoadComplete: function(eventString) {
-            var event = {
-                target: this,
-                type: eventString
-            };
-            this._listeners && this.dispatchEvent(event);
-        },
+		sendEvent:function (eventString) {
+			var event = {
+				target:this,
+				type:eventString
+			};
+			this.dispatchEvent(event);
+		},
 
-        /**
-		 * The sound instance has finished playing. Clean up any parts of the instance that have to be GC'd, and
-		 * notify SoundJS that the instance finished.
-		 * @method cleanUp
-		 * @protected
-		 */
 		cleanUp: function() {
 			var tag = this.tag;
 			if (tag != null) {
@@ -387,50 +375,24 @@ This happens regardless of when or how you apply the volume change, as the tag s
 
             clearTimeout(this.delayTimeoutId);
 			if (window.createjs == null) { return; }
-			createjs.SoundJS.playFinished(this);
+			createjs.Sound.playFinished(this);
 		},
 
-		/**
-		 * Interrupt a currently playing instance, usually to make room for a new one.
-		 * @method interrupt
-		 * @protected
-		 */
 		interrupt: function () {
 			if (this.tag == null) { return; }
-			this.playState = createjs.SoundJS.PLAY_INTERRUPTED;
+			this.playState = createjs.Sound.PLAY_INTERRUPTED;
 			if (this.onPlayInterrupted) { this.onPlayInterrupted(this); }
-            this.sendLoadComplete("playInterrupted");
+            this.sendEvent("interrupted");
 			this.cleanUp();
 			this.paused = false;
 		},
 
-	// Public API
-		/**
-		 * Play an instance. This method is only used to play an instance after it has been stopped or interrupted.
-		 * @method play
-		 * @param {String} interrupt How this sound interrupts other instances with the same source. Interrupt values
-		 *      are defined as constants on SoundJS.
-		 * @param {Number} delay The delay in milliseconds before the sound starts
-		 * @param {Number} offset How far into the sound to begin playback.
-		 * @param {Number} loop The number of times to loop the audio. Use -1 for infinite loops.
-		 * @param {Number} volume The volume of the sound between 0 and 1.
-		 * @param {Number} pan The pan of the sound between -1 and 1. Note that pan does not work for HTML Audio.
-		 */
+// Public API
 		play: function(interrupt, delay, offset, loop, volume, pan) {
 			this.cleanUp(); //LM: Is this redundant?
-			createjs.SoundJS.playInstance(this, interrupt, delay, offset, loop, volume, pan);
+			createjs.Sound.playInstance(this, interrupt, delay, offset, loop, volume, pan);
 		},
 
-		/**
-		 * When a sound is ready to play, SoundJS will call beginPlaying. This is the call to action to actually
-		 * begin playback.
-		 * @method beginPlaying
-		 * @param {Number} offset The number of milliseconds to offset playback.
-		 * @param {Number} loop The number of loops. The default is 0 (plays once). Use -1 for infinite loops.
-		 * @param {Number} volume The volume of the sound between 0 and 1.
-		 * @param {Number} pan The pan of the sound between -1 and 1. Note that pan does not work for HTML Audio.
-		 * @return {Number} If the sound started (1) or failed (-1).
- 		 */
 		beginPlaying: function(offset, loop, volume, pan) {
 			if (window.createjs == null) { return -1; }
 			var tag = this.tag = TagPool.getInstance(this.src);
@@ -456,7 +418,8 @@ This happens regardless of when or how you apply the volume change, as the tag s
 				this.handleSoundReady(null);
 			}
 
-            this.sendLoadComplete("playSucceeded");  // OJR may not need this
+            this.onPlaySucceeded && this.onPlaySucceeded(this);
+            this.sendEvent("succeeded");
             return 1;
 		},
 
@@ -464,13 +427,13 @@ This happens regardless of when or how you apply the volume change, as the tag s
 		//  has not loaded yet. This doesn't mean the sound will not play.
 		handleSoundStalled: function(event) {
 			if (this.onPlayFailed != null) { this.onPlayFailed(this); }
-            this.sendLoadComplete("playFailed");
+            this.sendEvent("failed");
             this.cleanUp();  // OJR NOTE this will stop playback, and I think we should remove this and let the developer decide how to handle stalled instances
 		},
 
 		handleSoundReady: function(event) {
 			if (window.createjs == null) { return; }
-			this.playState = createjs.SoundJS.PLAY_SUCCEEDED;
+			this.playState = createjs.Sound.PLAY_SUCCEEDED;
 			this.paused = false;
 			this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
 
@@ -484,71 +447,50 @@ This happens regardless of when or how you apply the volume change, as the tag s
 			this.tag.play();
 		},
 
-		/**
-		 * Pause the instance.
-		 * @method pause
-		 * @return {Boolean} If the pause call succeeds.
-		 */
 		pause: function() {
-			this.paused = true;
-			clearTimeout(this.delayTimeoutId);
-			// Note: when paused by user, we hold a reference to our tag. We do not release it until stopped.
-			if (this.tag != null) {
-				this.tag.pause();
-				return false;
-			}
-			return true;
+            if(!this.paused && this.playState == createjs.Sound.PLAY_SUCCEEDED && this.tag != null) {
+                this.paused = true;
+                // Note: when paused by user, we hold a reference to our tag. We do not release it until stopped.
+                this.tag.pause();
+
+                clearTimeout(this.delayTimeoutId);
+
+                return true;
+            }
+            return false;
 		},
 
-		/**
-		 * Resume a sound instance that has been paused.
-		 * @method resume
-		 * @return {Boolean} If the resume call succeeds.
-		 */
 		resume: function() {
+            if(!this.paused || this.tag == null) {return false;}
 			this.paused = false;
-			if (this.tag != null) {
-				this.tag.play();
-				return false;
-			}
-			return true;
+            this.tag.play();
+            return true;
 		},
 
-		/**
-		 * Stop a sound instance. Stopped instances can be started over using the instance.play() method.
-		 * @method stop
-		 * @return {Boolean} If the stop call succeeds.
-		 */
 		stop: function() {
             this.offset = 0;
 			this.pause();
-			this.playState = createjs.SoundJS.PLAY_FINISHED;
+			this.playState = createjs.Sound.PLAY_FINISHED;
 			this.cleanUp();
 			return true;
 		},
 
-		// Called by SoundJS
 		setMasterVolume: function(value) {
 			this.updateVolume();
 			return true;
 		},
 
-		/**
-		 * Set the volume of the sound instance.
-		 * @method setVolume
-		 * @param value
-		 * @return {Boolean} If the setVolume call succeeds.
-		 */
 		setVolume: function(value) {
+            if (Number(value) == null) { return false; }
+            value = Math.max(0, Math.min(1, value));
 			this.volume = value;
 			this.updateVolume();
 			return true;
 		},
 
-		// When any volume properties change, this method updates the actual playback volume.
 		updateVolume: function() {
 			if (this.tag != null) {
-				var newVolume = (this.muted || createjs.SoundJS.masterMute) ? 0 : this.volume * createjs.SoundJS.masterVolume;
+				var newVolume = (this.muted || createjs.Sound.masterMute) ? 0 : this.volume * createjs.Sound.masterVolume;
 				if (newVolume != this.tagVolume) {
 					this.tag.volume = newVolume;
 					this.tagVolume = newVolume;
@@ -559,24 +501,10 @@ This happens regardless of when or how you apply the volume change, as the tag s
 			}
 		},
 
-		/**
-		 * Get the volume of the sound, not including how the master volume has affected it.
-		 * @method getVolume
-		 * @param value
-		 * @return The volume of the sound.
-		 */
 		getVolume: function(value) {
 			return this.volume;
 		},
 
-		/**
-         * This method has been deprecated.  Please use setMute.
-		 * Mute the sound.
-		 * @method mute
-		 * @param {Boolean} isMuted If the sound should be muted or not.
-		 * @return {Boolean} If the mute call succeeds.
-         * @deprecated
-		 */
 		mute: function(isMuted) {
 			this.muted = isMuted;
 			this.updateVolume();
@@ -588,12 +516,6 @@ This happens regardless of when or how you apply the volume change, as the tag s
 			return true;
 		},
 
-        /**
-         * Mute the sound.
-         * @method mute
-         * @param {Boolean} isMuted If the sound should be muted or not.
-         * @return {Boolean} If the mute call succeeds.
-         */
         setMute: function(isMuted) {
             if(isMuted == null || isMuted == undefined) { return false};
 
@@ -602,90 +524,59 @@ This happens regardless of when or how you apply the volume change, as the tag s
             return true;
         },
 
-        /**
-         * Returns the mute value.
-         * @method getMute
-         * @return {Boolean} If the mute is set.
-         */
         getMute: function() {
             return this.muted;
         },
 
-		/**
-		 * Set the pan of a sound instance. Note that this does not work in HTML audio.
-		 * @method setPan
-		 * @param {Number} value The pan value between -1 (left) and 1 (right).
-		 * @return {Number} If the setPan call succeeds.
-		 */
 		setPan: function(value) { return false; }, // Can not set pan in HTML
 
-		/**
-		 * Get the pan of a sound instance. Note that this does not work in HTML audio.
-		 * @method getPan
-		 * @return {Number} The value of the pan between -1 (left) and 1 (right).
-		 */
 		getPan: function() { return 0; },
 
-		/**
-		 * Get the position of the playhead in the sound instance.
-		 * @method getPosition
-		 * @return {Number} The position of the playhead in milliseconds.
-		 */
 		getPosition: function() {
 			if (this.tag == null) { return this.offset; }
 			return this.tag.currentTime * 1000;
 		},
 
-		/**
-		 * Set the position of the playhead in the sound instance.
-		 * @method setPosition
-		 * @param {Number} value The position of the playhead in milliseconds.
-		 */
 		setPosition: function(value) {
 			if (this.tag == null) {
                 this.offset = value
             } else try {
 				this.tag.currentTime = value * 0.001;
                 } catch(error) { // Out of range
-                    return false;  //OJR: throw error?
+                    return false;
                 }
 			return true;
 		},
 
-		/**
-		 * Get the duration of the sound instance.
-		 * @method getDuration
-		 * @return {Number} The duration of the sound instance in milliseconds.
-		 */
-        getDuration: function() {  // OJR this will always return 0 until sound has been played.
+        getDuration: function() {  // NOTE this will always return 0 until sound has been played.
             return this.duration;
         },
 
-		// Audio has finished playing. Manually loop it if required.
 		handleSoundComplete: function(event) {
+            this.offset = 0;
+
 			if (this.remainingLoops != 0) {
 				this.remainingLoops--;
 
-                this.offset = 0;
 				//try { this.tag.currentTime = 0; } catch(error) {}
 				this.tag.play();
 				if (this.onLoop != null) { this.onLoop(this); }
+                this.sendEvent("loop");
 				return;
 			}
 
 			if (window.createjs == null) { return; }
-			this.playState = createjs.SoundJS.PLAY_FINISHED;
+			this.playState = createjs.Sound.PLAY_FINISHED;
 			if (this.onComplete != null) { this.onComplete(this); }
-            this.sendLoadComplete("playComplete");
+            this.sendEvent("complete");
 			this.cleanUp();
 		},
 
-		// Playback has failed
 		playFailed: function() {
 			if (window.createjs == null) { return; }
-			this.playState = createjs.SoundJS.PLAY_FAILED;
+			this.playState = createjs.Sound.PLAY_FAILED;
 			if (this.onPlayFailed != null) { this.onPlayFailed(this); }
-            this.sendLoadComplete("playFailed");
+            this.sendEvent("failed");
 			this.cleanUp();
 		},
 
@@ -695,8 +586,7 @@ This happens regardless of when or how you apply the volume change, as the tag s
 
 	}
 
-    // we only use EventDispatcher if it's available:
-    createjs.EventDispatcher && createjs.EventDispatcher.initialize(SoundInstance.prototype); // inject EventDispatcher methods.
+    createjs.EventDispatcher.initialize(SoundInstance.prototype);
 
     // Do not add SoundInstance to namespace.
 
@@ -704,37 +594,64 @@ This happens regardless of when or how you apply the volume change, as the tag s
 	/**
 	 * An internal helper class that preloads html audio via HTMLAudioElement tags. Note that PreloadJS will NOT use
 	 * this load class like it does Flash and WebAudio plugins.
+     * Note that this class and its methods are not documented properly to avoid generating HTML documentation.
 	 * #class HTMLAudioLoader
 	 * @param {String} src The source of the sound to load.
-	 * @param {HTMLAudioElement} tag The tag of the sound to load.
+	 * @param {HTMLAudioElement} tag The audio tag of the sound to load.
 	 * @constructor
 	 * @private
+     * @since 0.4.0
 	 */
 	function HTMLAudioLoader(src, tag) {
 		this.init(src, tag);
 	}
 
 	HTMLAudioLoader.prototype = {
+
+        /**
+         * The source to be loaded.
+         * #property src
+         * @type {String}
+         * @default null
+         * @protected
+         */
 		src: null,
+
+        /**
+         * The tag to load the source with / into.
+         * #property tag
+         * @type {AudioTag}
+         * @default null
+         * @protected
+         */
 		tag: null,
+
+        /**
+         * An intervale used to give us progress.
+         * #property preloadTimer
+         * @type {String}
+         * @default null
+         * @protected
+         */
 		preloadTimer: null,
 
         // Proxies, make removing listeners easier.
         loadedHandler: null,
 
+        // constructor
 		init: function(src, tag) {
 			this.src = src;
 			this.tag = tag;
 
-			this.preloadTimer = setInterval(createjs.SoundJS.proxy(this.preloadTick, this), 200);
+			this.preloadTimer = setInterval(createjs.proxy(this.preloadTick, this), 200);
 
 
             // This will tell us when audio is buffered enough to play through, but not when its loaded.
             // The tag doesn't keep loading in Chrome once enough has buffered, and we have decided that behaviour is sufficient.
             // Note that canplaythrough callback doesn't work in Chrome, we have to use the event.
-            this.loadedHandler = createjs.SoundJS.proxy(this.sendLoadedEvent, this);  // we need this proxy to be able to remove event listeners
+            this.loadedHandler = createjs.proxy(this.sendLoadedEvent, this);  // we need this bind to be able to remove event listeners
             this.tag.addEventListener && this.tag.addEventListener("canplaythrough", this.loadedHandler);
-            this.tag.onreadystatechange = createjs.SoundJS.proxy(this.sendLoadedEvent, this);  // OJR not 100% sure we need this, just copied from PreloadJS
+            this.tag.onreadystatechange = createjs.proxy(this.sendLoadedEvent, this);  // OJR not 100% sure we need this, just copied from PreloadJS
 
             this.tag.preload = "auto";
             this.tag.src = src;
@@ -742,6 +659,11 @@ This happens regardless of when or how you apply the volume change, as the tag s
 
 		},
 
+        /**
+         * Allows us to have preloading progress and tell when its done.
+         * #method preloadTick
+         * @protected
+         */
 		preloadTick: function() {
 			var buffered = this.tag.buffered;
 		    var duration = this.tag.duration;
@@ -753,16 +675,27 @@ This happens regardless of when or how you apply the volume change, as the tag s
             }
 		},
 
-		handleTagLoaded: function() {  // OJR is this the same as canplaythrough?
+        /**
+         * Internal handler for when a tag is loaded.
+         * #method handleTagLoaded
+         * @protected
+         */
+		handleTagLoaded: function() {
 			clearInterval(this.preloadTimer);
 		},
 
+        /**
+         * Communicates back to Sound that a load is complete.
+         * #method sendLoadedEvent
+         * @param {Object} evt The load Event
+         */
         sendLoadedEvent: function(evt) {
             this.tag.removeEventListener && this.tag.removeEventListener("canplaythrough", this.loadedHandler);  // cleanup and so we don't send the event more than once
             this.tag.onreadystatechange = null;  // cleanup and so we don't send the event more than once
-            createjs.SoundJS.sendLoadComplete(this.src);  // fire event or callback on SoundJS
+            createjs.Sound.sendLoadComplete(this.src);  // fire event or callback on Sound
         },
 
+        // used for debugging
 		toString: function() {
 			return "[HTMLAudioPlugin HTMLAudioLoader]";
 		}
@@ -776,7 +709,7 @@ This happens regardless of when or how you apply the volume change, as the tag s
 	 * audio tag instances that we are going to play before we load the data, otherwise the audio stalls.
 	 * (Note: This seems to be a bug in Chrome)
 	 * #class TagPool
-	 * @param src The source of the channel.
+	 * @param {String} src The source of the channel.
 	 * @private
 	 */
 	function TagPool(src) {
@@ -794,6 +727,7 @@ This happens regardless of when or how you apply the volume change, as the tag s
 	/**
 	 * Get a tag pool. If the pool doesn't exist, create it.
 	 * #method get
+     * @param {String} src The source file used by the audio tag.
 	 * @static
 	 * @private
 	 */
@@ -808,6 +742,7 @@ This happens regardless of when or how you apply the volume change, as the tag s
 	/**
 	 * Get a tag instance. This is a shortcut method.
 	 * #method getInstance
+     * @param {String} src The source file used by the audio tag.
 	 * @static
 	 * @private
 	 */
@@ -819,6 +754,8 @@ This happens regardless of when or how you apply the volume change, as the tag s
 
 	/** Return a tag instance. This is a shortcut method.
 	 * #method setInstance
+     * @param {String} src The source file used by the audio tag.
+     * @param {HTMLElement} tag Audio tag to set.
 	 * @static
 	 * @private
 	 */
@@ -833,7 +770,7 @@ This happens regardless of when or how you apply the volume change, as the tag s
 		/**
 		 * The source of the tag pool.
 		 * #property src
-		 * @type String
+		 * @type {String}
 		 * @private
 		 */
 		src: null,
@@ -842,7 +779,7 @@ This happens regardless of when or how you apply the volume change, as the tag s
 		 * The total number of HTMLAudio tags in this pool. This is the maximum number of instance of a certain sound
 		 * that can play at one time.
 		 * #property length
-		 * @type Number
+		 * @type {Number}
 		 * @default 0
 		 * @private
 		 */
@@ -851,7 +788,7 @@ This happens regardless of when or how you apply the volume change, as the tag s
 		/**
 		 * The number of unused HTMLAudio tags.
 		 * #property available
-		 * @type Number
+		 * @type {Number}
 		 * @default 0
 		 * @private
 		 */
@@ -860,11 +797,12 @@ This happens regardless of when or how you apply the volume change, as the tag s
 		/**
 		 * A list of all available tags in the pool.
 		 * #property tags
-		 * @type Array
+		 * @type {Array}
 		 * @private
 		 */
 		tags: null,
 
+        // constructor
 		init: function(src) {
 			this.src = src;
 			this.tags = [];
@@ -873,8 +811,7 @@ This happens regardless of when or how you apply the volume change, as the tag s
 		/**
 		 * Add an HTMLAudio tag into the pool.
 		 * #method add
-		 * @param HTMLAudioElement tag A tag to be used for playback.
-		 * @private
+		 * @param {HTMLAudioElement} tag A tag to be used for playback.
 		 */
 		add: function(tag) {
 			this.tags.push(tag);
@@ -884,8 +821,8 @@ This happens regardless of when or how you apply the volume change, as the tag s
 
 		/**
 		 * Get an HTMLAudioElement for immediate playback. This takes it out of the pool.
-		 * #methdo get
-		 * @return {HTMLAudioElement}
+		 * #method get
+		 * @return {HTMLAudioElement} An HTML audio tag.
 		 */
 		get: function() {
 			if (this.tags.length == 0) { return null; }
@@ -898,7 +835,7 @@ This happens regardless of when or how you apply the volume change, as the tag s
 		/**
 		 * Put an HTMLAudioElement back in the pool for use.
 		 * #method set
-		 * @param {HTMLAudioElement} tag
+		 * @param {HTMLAudioElement} tag HTML audio tag
 		 */
 		set: function(tag) {
 			var index = this.tags.indexOf(tag);

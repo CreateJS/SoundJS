@@ -15,8 +15,8 @@ Built by gskinner.com, and released for free under the MIT license, which means 
 
 ## Classes
 
-### [SoundJS](http://createjs.com/Docs/SoundJS/SoundJS.html)
-The core API for playing sounds. Simply call SoundJS.play(sound, options), and a sound instance is created that can be used to control the audio, and receive events when it is complete, loops, or is interrupted.
+### [Sound](http://createjs.com/Docs/SoundJS/Sound.html)
+The core API for playing sounds. Simply call Sound.play(sound, options), and a sound instance is created that can be used to control the audio, and receive events when it is complete, loops, or is interrupted.
 
 ### [SoundInstance](http://createjs.com/Docs/SoundJS/SoundInstance.html)
 A controllable sound object that wraps the actual plugin implementation, providing a consistent API for audio playback, no matter what happens in the background. Sound instances can be paused, muted, and stopped, and the volume, pan (where available), and position using the simple API.

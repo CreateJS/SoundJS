@@ -17,15 +17,15 @@
 		public static const MAX_INSTANCES:uint = 255;
 	
 		/** Generic ExternalInterface callback string to Flash. */
-		public static const FLASH_CALLBACK:String = "createjs.SoundJS.activePlugin.handleEvent";
+		public static const FLASH_CALLBACK:String = "createjs.Sound.activePlugin.handleEvent";
 		/** Generic ExternalInterface error callback string to Flash. */
-		public static const ERROR_CALLBACK:String = "createjs.SoundJS.activePlugin.handleErrorEvent";
+		public static const ERROR_CALLBACK:String = "createjs.Sound.activePlugin.handleErrorEvent";
 		/** Generic ExternalInterface preload callback string to Flash. */
-		public static const PRELOAD_CALLBACK:String = "createjs.SoundJS.activePlugin.handlePreloadEvent";
+		public static const PRELOAD_CALLBACK:String = "createjs.Sound.activePlugin.handlePreloadEvent";
 		/** Generic ExternalInterface sound instance callback string to Flash. */
-		public static const SOUND_CALLBACK:String = "createjs.SoundJS.activePlugin.handleSoundEvent";
+		public static const SOUND_CALLBACK:String = "createjs.Sound.activePlugin.handleSoundEvent";
 		/** Output method */
-		public static const LOG_CALLBACK:String = "createjs.SoundJS.activePlugin.flashLog";
+		public static const LOG_CALLBACK:String = "createjs.Sound.activePlugin.flashLog";
 
 		
 	// Public Properties:

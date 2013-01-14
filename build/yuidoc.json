@@ -4,7 +4,7 @@
     "description": "SoundJS API.",
 
     "url": "http://www.createjs.com/#!/SoundJS",
-    "logo":"http://beta.createjs.com/resources/SuiteIcons/SoundJS/SoundJS_64x64.png",
+    "logo":"http://createjs.com/resources/SuiteIcons/SoundJS/SoundJS_64x64.png",
     "options": {
         "outdir": "./output",
         "linkNatives": "true",

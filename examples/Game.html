@@ -8,7 +8,7 @@
 
     <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
 
-	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
+	<script type="text/javascript" src="../src/soundjs/Sound.js"></script>
     <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
 	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
 	<script type="text/javascript" src="../src/swfobject.js"></script>
@@ -72,7 +72,7 @@
 			document.getElementById("header").style.display = "none";
 		}
 
-        if (!createjs.SoundJS.initializeDefaultPlugins()) {
+        if (!createjs.Sound.initializeDefaultPlugins()) {
 			document.getElementById("error").style.display = "block";
 			document.getElementById("content").style.display = "none";
 			return;
@@ -87,8 +87,8 @@
 			{id:"music", src:"assets/18-machinae_supremacy-lord_krutors_dominion.mp3|../../assets/18-machinae_supremacy-lord_krutors_dominion.ogg"}
 		];
 
-        createjs.SoundJS.addEventListener("loadComplete", doneLoading, this); // add an event listener for when load is completed
-        createjs.SoundJS.registerManifest(manifest);
+        createjs.Sound.addEventListener("loadComplete", createjs.proxy(doneLoading,this)); // add an event listener for when load is completed
+        createjs.Sound.registerManifest(manifest);
 
         canvas = document.getElementById("gameCanvas");
 		stage = new createjs.Stage(canvas);
@@ -123,7 +123,7 @@
 		messageField.text = "Welcome:  Click to play";
 
 		// start the music
-		createjs.SoundJS.play("music", createjs.SoundJS.INTERRUPT_NONE, 0, 0, -1, 0.4);
+		createjs.Sound.play("music", createjs.Sound.INTERRUPT_NONE, 0, 0, -1, 0.4);
 
 		watchRestart();
 	}
@@ -141,7 +141,7 @@
 		stage.removeChild(messageField);
 
 		// indicate the player is now on screen
-		createjs.SoundJS.play("begin");
+		createjs.Sound.play("begin");
 
 		restart();
 	}
@@ -256,7 +256,7 @@
 				watchRestart();
 
 				//play death sound
-				createjs.SoundJS.play("death", createjs.SoundJS.INTERRUPT_ANY);
+				createjs.Sound.play("death", createjs.Sound.INTERRUPT_ANY);
 				continue;
 			}
 
@@ -303,7 +303,7 @@
 					bulletStream[bullet].active = false;
 
 					// play sound
-					createjs.SoundJS.play("break", createjs.SoundJS.INTERUPT_LATE, 0, 0.8);
+					createjs.Sound.play("break", createjs.Sound.INTERUPT_LATE, 0, 0.8);
 				}
 			}
 		}
@@ -347,7 +347,7 @@
 		o.graphics.beginStroke("#FFFFFF").moveTo(-1, 0).lineTo(1, 0);
 
 		// play the shot sound
-		createjs.SoundJS.play("laser", createjs.SoundJS.INTERUPT_LATE);
+		createjs.Sound.play("laser", createjs.Sound.INTERUPT_LATE);
 	}
 
 	function getSpaceRock(size) {

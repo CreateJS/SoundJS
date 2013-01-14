@@ -4,7 +4,7 @@
 	<title>SoundJS: Media Player Example</title>
 
     <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
-	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
+	<script type="text/javascript" src="../src/soundjs/Sound.js"></script>
     <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
 	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
 	<script type="text/javascript" src="../src/swfobject.js"></script>
@@ -22,7 +22,7 @@
 				document.getElementById("header").style.display = "none";
 			}
 
-			if (!createjs.SoundJS.initializeDefaultPlugins()) {
+			if (!createjs.Sound.initializeDefaultPlugins()) {
 				document.getElementById("error").style.display = "block";
 				document.getElementById("content").style.display = "none";
 				return;
@@ -37,8 +37,8 @@
 			var assetPath = "assets/";
             var src = assetPath+"M-GameBG.mp3|"+assetPath+"M-GameBG.ogg";
 
-            createjs.SoundJS.addEventListener("loadComplete", handleLoadComplete, this); // add an event listener for when load is completed
-            createjs.SoundJS.registerSound(src, "music");
+            createjs.Sound.addEventListener("loadComplete", createjs.proxy(handleLoadComplete,this)); // add an event listener for when load is completed
+            createjs.Sound.registerSound(src, "music");
 		}
 
 		var instance;
@@ -53,7 +53,7 @@
 			$("#progress").css("display", "none");
 			$("#position").css("display", "block");
 
-			instance = createjs.SoundJS.play("music");
+			instance = createjs.Sound.play("music");
  			instance.onComplete = function() {
                  //console.log("onComplete");
 				clearInterval(positionInterval);
@@ -63,7 +63,7 @@
 			$("#playPauseBtn").attr("disabled", false);
 			$("#playBtn").removeClass("playBtn").addClass("pauseBtn");
 			$("#playBtn").click(function(event){
-				if (instance.playState == createjs.SoundJS.PLAY_FINISHED) {
+				if (instance.playState == createjs.Sound.PLAY_FINISHED) {
 					instance.play();
 					$("#playBtn").removeClass("playBtn").addClass("pauseBtn");
 					trackTime();

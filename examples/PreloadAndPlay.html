@@ -3,15 +3,11 @@
 <head>
 <title>SoundJS: Preload & Sound APIs</title>
 
-<!--<script type="text/javascript" src="./assets/preloadjs-0.2.0.min.js"></script>
-TODO: update this when next preload version is ready -->
-<script type="text/javascript" src="../../preloadjs/src/preloadjs/AbstractLoader.js"></script>
-<script type="text/javascript" src="../../preloadjs/src/preloadjs/PreloadJS.js"></script>
-<script type="text/javascript" src="../../preloadjs/src/preloadjs/TagLoader.js"></script>
-<script type="text/javascript" src="../../preloadjs/src/preloadjs/XHRLoader.js"></script>
+<script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
 
+<script type="text/javascript" src="./assets/preloadjs-0.3.0.min.js"></script>
 
-<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
+<script type="text/javascript" src="../src/soundjs/Sound.js"></script>
 <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
 <script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
 <script type="text/javascript" src="../src/swfobject.js"></script>
@@ -39,21 +35,21 @@ TODO: update this when next preload version is ready -->
 
         createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
         if (params.type == "flash") {
-            createjs.SoundJS.registerPlugins([createjs.FlashPlugin]);
+            createjs.Sound.registerPlugins([createjs.FlashPlugin]);
         } else if (params.type == "html5") {
-            createjs.SoundJS.registerPlugins([createjs.HTMLAudioPlugin]);
+            createjs.Sound.registerPlugins([createjs.HTMLAudioPlugin]);
         } else {
-            createjs.SoundJS.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
+            createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
         }
 
-        if (!createjs.SoundJS.isReady()) {
+        if (!createjs.Sound.isReady()) {
 			document.getElementById("error").style.display = "block";
 			document.getElementById("content").style.display = "none";
 			return;
 		}
 
         var pluginStatus = document.getElementById("activePlugin");
-        pluginStatus.innerHTML = "Active Plugin is " + createjs.SoundJS.activePlugin.toString();  // innerText does not work in FF
+        pluginStatus.innerHTML = "Active Plugin is " + createjs.Sound.activePlugin.toString();  // innerText does not work in FF
 
 		displayStatus = document.getElementById("status");
 
@@ -62,8 +58,8 @@ TODO: update this when next preload version is ready -->
 		var item = {src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg", id:"music"};
 
 		// Instantiate a queue.
-		queue = new createjs.PreloadJS();
-		queue.installPlugin(createjs.SoundJS); // Plug in SoundJS to handle browser-specific paths
+		queue = new createjs.LoadQueue();
+		queue.installPlugin(createjs.Sound); // Plug in Sound to handle browser-specific paths
 		queue.onComplete = loadComplete;
 		queue.onFileError = handleFileError;
 		queue.onProgress = handleProgress;
@@ -72,7 +68,7 @@ TODO: update this when next preload version is ready -->
 
 	function stop() {
 		if (queue != null) { queue.cancel(); }
-		createjs.SoundJS.stop();
+		createjs.Sound.stop();
 	}
 
 	function handleFileError(o) {
@@ -94,7 +90,7 @@ TODO: update this when next preload version is ready -->
 
 	function playSound(name, loop) {
 		// Play the sound using the ID created above.
-		return createjs.SoundJS.play("music");
+		return createjs.Sound.play("music");
 	}
 	</script>
 

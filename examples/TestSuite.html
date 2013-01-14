@@ -6,7 +6,8 @@
 
 	<!--<script type="text/javascript" src="./assets/preloadjs-0.2.0.min.js"></script>-->
 
-	<script type="text/javascript" src="../src/soundjs/SoundJS.js"></script>
+    <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
+	<script type="text/javascript" src="../src/soundjs/Sound.js"></script>
     <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
 	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
 	<script type="text/javascript" src="../src/swfobject.js"></script>
@@ -39,21 +40,21 @@
 
 		createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
 		if (params.type == "flash") {
-			createjs.SoundJS.registerPlugins([createjs.FlashPlugin]);
+			createjs.Sound.registerPlugins([createjs.FlashPlugin]);
 	    } else if (params.type == "html5") {
-            createjs.SoundJS.registerPlugins([createjs.HTMLAudioPlugin]);
+            createjs.Sound.registerPlugins([createjs.HTMLAudioPlugin]);
         } else {
-            createjs.SoundJS.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
+            createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
         }
 
-		if (!createjs.SoundJS.isReady()) {
+		if (!createjs.Sound.isReady()) {
 			document.getElementById("error").style.display = "block";
 			document.getElementById("content").style.display = "none";
 			return;
 		}
 
         var pluginStatus = document.getElementById("activePlugin");
-        pluginStatus.innerHTML = "Active Plugin is " + createjs.SoundJS.activePlugin.toString();  // innerText does not work in FF
+        pluginStatus.innerHTML = "Active Plugin is " + createjs.Sound.activePlugin.toString();  // innerText does not work in FF
 
         // Library controls
 	    $(".offsetSlider").slider({value: 0,
@@ -90,18 +91,18 @@
         $("#playSoundBtn").click(playSound);
         $("#stopAllSoundsBtn").click(function(event) {
             clearInterval(audioInterval);
-            createjs.SoundJS.stop();
+            createjs.Sound.stop();
             removeSound("all");
         });
         $("#muteAllSoundsBtn").click(function(event){
-            var muted = !createjs.SoundJS.getMute();
-            createjs.SoundJS.setMute(muted);
+            var muted = !createjs.Sound.getMute();
+            createjs.Sound.setMute(muted);
             $("#muteAllSoundsBtn").attr("value", muted ? "Unmute All Sounds" : "Mute All Sounds");
         });
 
-        $(".masterVolumeSlider").slider().bind('slidestop',function(event){
+        $(".masterVolumeSlider").on('slidestop',function(event){
             var value = $(this).slider("option", "value");
-            createjs.SoundJS.setVolume(value/100);
+            createjs.Sound.setVolume(value/100);
         });
 
         // instance controls
@@ -149,26 +150,26 @@
         });
         // OJR it would be nice to add an instance play button, which would require re-architecting how instances are removed
 
-        $(".volumeSlider").slider().bind('slidestop',function(event){
+        $(".volumeSlider").on('slidestop',function(event){
             var instance = getInstance();
             if (instance == null) { return; }
             var value = $(this).slider("option", "value");
             instance.setVolume(value/100);
         });
 
-        $(".panSlider").slider().bind('slidestop',function(event){
+        $(".panSlider").on('slidestop',function(event){
             var instance = getInstance();
             var value = $(this).slider("option", "value");
             instance.setPan(value);
         });
 
-        $(".posSlider").slider().bind('slidestop',function(event){
+        $(".posSlider").on('slidestop',function(event){
             var instance = getInstance();
             var value = $(this).slider("option", "value");
             instance.setPosition(value/100 * instance.getDuration());
             audioInterval = setInterval(setPosSlider, intervalTime);
         });
-        $(".posSlider").slider().bind('slidestart',function(event){
+        $(".posSlider").on('slidestart',function(event){
             clearInterval(audioInterval);
         });
 
@@ -183,21 +184,17 @@
 	        {id:"Thunder", src:assetsPath + "Thunder1.mp3|"+assetsPath + "Thunder1.ogg", data:3},
 	        {id:"Tone wobble", src:assetsPath + "ToneWobble.mp3|"+assetsPath + "ToneWobble.ogg", type:"sound"},
 	        {id:"Rat Damage", src:assetsPath + "R-Damage.mp3", type:"sound"},
-	        {id:"Seagull Damage", src:assetsPath + "S-Damage.mp3", type:"sound", id:"Damage"},
-	        {id:"Cabin Boy", src:assetsPath + "U-CabinBoy3.mp3", type:"sound", id:"CabinBoy", data:1}
+	        {id:"Seagull Damage", src:assetsPath + "S-Damage.mp3", type:"sound"},
+	        {id:"Cabin Boy", src:assetsPath + "U-CabinBoy3.mp3", type:"sound", data:1}
 	    ];
 
-        var details = createjs.SoundJS.registerManifest(manifest);
-        for(var i= 0, l = details.length; i < l; i++) {
-           if (details[i]) {  // Note registerSound returns false if type is not supported by browser
-               addSoundToList(details[i]);  // it would be better to do this on successful load but plugins do not have that capability yet
-           }
-        }
+        createjs.Sound.addEventListener("loadComplete", createjs.proxy(addSoundToList,this)); // add an event listener for when load is completed
+        createjs.Sound.registerManifest(manifest);
 	}
 
-    function addSoundToList(details) {
+    function addSoundToList(event) {
         var list = $("#library").get(0);
-        list.options.add(new Option((details.id || details.src) + " ("+(details.data||1)+")", details.id));
+        list.options.add(new Option((event.id || event.src) + " ("+(event.data||1)+")", event.id));
     }
 
     function handleSliderChange(evt) {
@@ -210,68 +207,62 @@
 	    var list = $("#library").get(0);
 	    if (list.selectedIndex == -1) { return; }
 
-	    var indices = [];
-	    for (var i=0, l=list.options.length; i<l; i++) {
-	        if (list.options[i].selected) { indices.push(i); }
-	    }
-
 	    // Options
 	    var interrupt = $("#interrupt").get(0);
 	    var interruptValue = interrupt.options[interrupt.selectedIndex].value;
 	    var loop = $(".loopSlider").slider("option", "value");
 	    var delay = $(".delaySlider").slider("option", "value") *1000;
 	    var offset = $(".offsetSlider").slider("option", "value")*1000;
-	    var nowPlaying = $("#nowPlaying").get(0);
 
-	    for (var i=0, l=indices.length; i<l; i++) {
-	        var index = indices[i]; //list.selectedIndex;
-	        if (index == null) { continue; }
-	        var item = list.options[index];
+	    for (var i=0, l=list.options.length; i<l; i++) {
+            if (!list.options[i].selected) { continue; }
+	        var item = list.options[i];
 
-	        // Play Sound
-	        var instance = createjs.SoundJS.play(item.value, interruptValue, delay, offset, loop, 1, 0);
-	        if (instance == null || instance.playState == createjs.SoundJS.PLAY_FAILED) {
-                if (nowPlaying.options[0].value == "-1") {
-                    nowPlaying.remove(0);
-                    // remove existing message
-                    nowPlaying.options.add(new Option("-- Audio Not Finished Loading --", -1));
-                }
-                continue;
-            }
-	        instance.onPlayFailed = handlePlayFailed;
-	        instance.onComplete = handleSoundComplete;
-	        instance.onPlayInterrupted = handlePlayFailed;
+            var instance = createjs.Sound.createInstance(item.value);
+            instance.addEventListener("succeeded", createjs.proxy(handlePlaySuccess,instance));
+            instance.addEventListener("interrupted", createjs.proxy(handlePlayFailed,instance));
+            instance.addEventListener("failed", createjs.proxy(handlePlayFailed,instance));
+            instance.addEventListener("complete", createjs.proxy(handleSoundComplete,instance));
 
-            instanceHash[instance.uniqueId] = instance;
-
-		    // Put in the nowPlaying list. (Remember to remove first temp item)
-	        if (nowPlaying.options[0].value == "-1") {
-	            nowPlaying.remove(0);
-	            nowPlaying.disabled = false;
-	        } else {
-	            for (var j=nowPlaying.options.length-1; j>=0; j--) {
-	                if (nowPlaying.options[j].value == instance.uniqueId) {
-	                    if (nowPlaying.options.remove) {
-	                        nowPlaying.options.remove(j);
-	                    } else if (nowPlaying.remove) {
-	                        nowPlaying.remove(j);
-	                    }
-	                }
-	            }
-	        }
-
-	        nowPlaying.options.add(new Option(instance.src + "("+instance.uniqueId + ")", instance.uniqueId));
+            instance.play(interruptValue, delay, offset, loop);
 	    }
 	}
 
+    // Create a sound, add listeners, and try playing it.
+    function handlePlaySuccess(event) {
+        instance = event.target;
+        instanceHash[instance.uniqueId] = instance;
+        instance.removeEventListener("succeeded", handlePlaySuccess, instance);  // because we only want this to fire the first time we start playing
+
+        var nowPlaying = $("#nowPlaying").get(0);
+
+        // Put in the nowPlaying list. (Remember to remove first temp item)
+        if (nowPlaying.options[0].value == "-1") {
+            nowPlaying.remove(0);
+            nowPlaying.disabled = false;
+        } else {
+            for (var j=nowPlaying.options.length-1; j>=0; j--) {  // OJR review this code, it seems over complicated for what it's doing
+                if (nowPlaying.options[j].value == instance.uniqueId) {
+                    if (nowPlaying.options.remove) {
+                        nowPlaying.options.remove(j);
+                    } else if (nowPlaying.remove) {
+                        nowPlaying.remove(j);
+                    }
+                }
+            }
+        }
+
+        nowPlaying.options.add(new Option(instance.src + "("+instance.uniqueId + ")", instance.uniqueId));
+    }
+
 	// Sound finished. Remove it from the list.
-	function handleSoundComplete(instance) {
-	    removeSound(instance);
+	function handleSoundComplete(event) {
+	    removeSound(event.target);
 	}
 
 	// Playback failed (usually interrupt failed)
-	function handlePlayFailed(instance) {
-	    removeSound(instance);
+	function handlePlayFailed(event) {
+	    removeSound(event.target);
     }
 
 	// Remove the sound from the list.
@@ -429,7 +420,7 @@
             font-size: 16px;
             font-weight: bold;
         }
-	</style>
+    </style>
 </head>
 
 <body onload="init()">
@@ -445,7 +436,7 @@
 	    </div>
 
         <div class="plugin">
-            <p id="activePlugin">Active Plugin is</p>
+            <p id="activePlugin">Active Plugin is</p> <!-- OJR it would be nice to make this larger or more prominent -->
         </div>
 
 	    <form id="playControls">
