@@ -3,96 +3,6 @@
 <head>
 <title>SoundJS: Preload & Sound APIs</title>
 
-<script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
-
-<script type="text/javascript" src="./assets/preloadjs-0.3.0.min.js"></script>
-
-<script type="text/javascript" src="../src/soundjs/Sound.js"></script>
-<script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
-<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
-<script type="text/javascript" src="../src/swfobject.js"></script>
-<script type="text/javascript" src="../src/soundjs/FlashPlugin.js"></script>
-
-<!-- We also provide hosted minified versions of all CreateJS libraries.
-    http://code.createjs.com -->
-
-<script>
-    // Read the URL Params. We need to do this to determine the plugin mode.
-    var params = {};
-    var pieces = window.location.search.slice(1).split("&");
-    for (var i=0, l=pieces.length; i<l; i++) {
-        var parts = pieces[i].split("=");
-        params[parts[0]] = parts[1];
-    }
-
-	var queue;
-	var displayStatus;
-
-	function init() {
-		if (window.top != window) {
-			document.getElementById("header").style.display = "none";
-		}
-
-        createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
-        if (params.type == "flash") {
-            createjs.Sound.registerPlugins([createjs.FlashPlugin]);
-        } else if (params.type == "html5") {
-            createjs.Sound.registerPlugins([createjs.HTMLAudioPlugin]);
-        } else {
-            createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
-        }
-
-        if (!createjs.Sound.isReady()) {
-			document.getElementById("error").style.display = "block";
-			document.getElementById("content").style.display = "none";
-			return;
-		}
-
-        var pluginStatus = document.getElementById("activePlugin");
-        pluginStatus.innerHTML = "Active Plugin is " + createjs.Sound.activePlugin.toString();  // innerText does not work in FF
-
-		displayStatus = document.getElementById("status");
-
-		// Create a single item to load.
-		var assetsPath = "assets/";
-		var item = {src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg", id:"music"};
-
-		// Instantiate a queue.
-		queue = new createjs.LoadQueue();
-		queue.installPlugin(createjs.Sound); // Plug in Sound to handle browser-specific paths
-		queue.onComplete = loadComplete;
-		queue.onFileError = handleFileError;
-		queue.onProgress = handleProgress;
-		queue.loadFile(item, true);
-	}
-
-	function stop() {
-		if (queue != null) { queue.cancel(); }
-		createjs.Sound.stop();
-	}
-
-	function handleFileError(o) {
-		// An error occurred.
-		displayStatus.innerText = "Error :("
-	}
-
-	function handleProgress(event) {
-		// Progress happened.
-		displayStatus.innerText = "Loading: " + (queue.progress.toFixed(2) * 100) + "%";
-	}
-
-	function loadComplete() {
-        console.log("html loadComplete");
-		// Load completed.
-		displayStatus.innerText = "Complete :)";
-		playSound("music");
-	}
-
-	function playSound(name, loop) {
-		// Play the sound using the ID created above.
-		return createjs.Sound.play("music");
-	}
-	</script>
 
 	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css" />
     <style>
@@ -128,6 +38,98 @@
 		<p>We are currently working on support for iOS. Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
 			if you see this in any other browsers.</p>
 	</div>
+
+    <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
+
+    <script type="text/javascript" src="./assets/preloadjs-0.3.0.min.js"></script>
+
+    <script type="text/javascript" src="../src/soundjs/Sound.js"></script>
+    <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
+    <script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
+    <script type="text/javascript" src="../src/swfobject.js"></script>
+    <script type="text/javascript" src="../src/soundjs/FlashPlugin.js"></script>
+
+    <!-- We also provide hosted minified versions of all CreateJS libraries.
+        http://code.createjs.com -->
+
+    <script>
+        // Read the URL Params. We need to do this to determine the plugin mode.
+        var params = {};
+        var pieces = window.location.search.slice(1).split("&");
+        for (var i=0, l=pieces.length; i<l; i++) {
+            var parts = pieces[i].split("=");
+            params[parts[0]] = parts[1];
+        }
+
+        var queue;
+        var displayStatus;
+
+        function init() {
+            if (window.top != window) {
+                document.getElementById("header").style.display = "none";
+            }
+
+            createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
+            if (params.type == "flash") {
+                createjs.Sound.registerPlugins([createjs.FlashPlugin]);
+            } else if (params.type == "html5") {
+                createjs.Sound.registerPlugins([createjs.HTMLAudioPlugin]);
+            } else {
+                createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
+            }
+
+            if (!createjs.Sound.isReady()) {
+                document.getElementById("error").style.display = "block";
+                document.getElementById("content").style.display = "none";
+                return;
+            }
+
+            var pluginStatus = document.getElementById("activePlugin");
+            pluginStatus.innerHTML = "Active Plugin is " + createjs.Sound.activePlugin.toString();  // innerText does not work in FF
+
+            displayStatus = document.getElementById("status");
+
+            // Create a single item to load.
+            var assetsPath = "assets/";
+            var item = {src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg", id:"music"};
+
+            // Instantiate a queue.
+            queue = new createjs.LoadQueue();
+            queue.installPlugin(createjs.Sound); // Plug in Sound to handle browser-specific paths
+            queue.onComplete = loadComplete;
+            queue.onFileError = handleFileError;
+            queue.onProgress = handleProgress;
+            queue.loadFile(item, true);
+        }
+
+        function stop() {
+            if (queue != null) { queue.cancel(); }
+            createjs.Sound.stop();
+        }
+
+        function handleFileError(o) {
+            // An error occurred.
+            displayStatus.innerText = "Error :("
+        }
+
+        function handleProgress(event) {
+            // Progress happened.
+            displayStatus.innerText = "Loading: " + (queue.progress.toFixed(2) * 100) + "%";
+        }
+
+        function loadComplete() {
+            console.log("html loadComplete");
+            // Load completed.
+            displayStatus.innerText = "Complete :)";
+            playSound("music");
+        }
+
+        function playSound(name, loop) {
+            // Play the sound using the ID created above.
+            return createjs.Sound.play("music");
+        }
+
+    </script>
 
 </body>
 </html>

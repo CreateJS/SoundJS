@@ -3,50 +3,6 @@
 <head>
 <title>SoundJS: Just Play</title>
 
-    <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
-	<script type="text/javascript" src="../src/soundjs/Sound.js"></script>
-    <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
-	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
-
-	<script>
-	var src;
-    var soundInstance;
-
-	function init() {
-		if (window.top != window) {
-			document.getElementById("header").style.display = "none";
-		}
-		
-		if (!createjs.Sound.initializeDefaultPlugins()) {
-			document.getElementById("error").style.display = "block";
-			document.getElementById("content").style.display = "none";
-			return;
-		}
-
-		displayStatus = document.getElementById("status");
-
-		// Create a single item to load.
-		var assetsPath = "assets/";
-		src = assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg";
-
-        //createjs.Sound.onLoadComplete = playSound;  // add a callback for when load is completed
-        createjs.Sound.addEventListener("loadComplete", createjs.proxy(playSound,this)); // add an event listener for when load is completed
-        createjs.Sound.registerSound(src);  // register sound, which preloads by default
-
-		displayStatus.innerText = "Waiting for load to complete.";
-	}
-
-	function playSound(evt) {
-        if (evt.src == src) {  // note that callback and event listener return the same event, and in this example will fire within milliseconds of each other
-            soundInstance = createjs.Sound.play(src);  // start playing the sound we just loaded
-
-            displayStatus = document.getElementById("status");
-            displayStatus.innerText = "Playing source: " + evt.src;
-        }
-    }
-
-	</script>
-
 	<link rel="stylesheet" type="text/css" href="../examples/assets/demoStyles.css" />
 </head>
 
@@ -67,6 +23,50 @@
 		<p>Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
 			with the device and browser you are using.  Thank you.</p>
 	</div>
+
+    <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
+    <script type="text/javascript" src="../src/soundjs/Sound.js"></script>
+    <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
+    <script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
+
+    <script>
+        var src;
+        var soundInstance;
+
+        function init() {
+            if (window.top != window) {
+                document.getElementById("header").style.display = "none";
+            }
+
+            if (!createjs.Sound.initializeDefaultPlugins()) {
+                document.getElementById("error").style.display = "block";
+                document.getElementById("content").style.display = "none";
+                return;
+            }
+
+            displayStatus = document.getElementById("status");
+
+            // Create a single item to load.
+            var assetsPath = "assets/";
+            src = assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg";
+
+            //createjs.Sound.onLoadComplete = playSound;  // add a callback for when load is completed
+            createjs.Sound.addEventListener("loadComplete", createjs.proxy(playSound,this)); // add an event listener for when load is completed
+            createjs.Sound.registerSound(src);  // register sound, which preloads by default
+
+            displayStatus.innerText = "Waiting for load to complete.";
+        }
+
+        function playSound(evt) {
+            if (evt.src == src) {  // note that callback and event listener return the same event, and in this example will fire within milliseconds of each other
+                soundInstance = createjs.Sound.play(src);  // start playing the sound we just loaded
+
+                displayStatus = document.getElementById("status");
+                displayStatus.innerText = "Playing source: " + evt.src;
+            }
+        }
+
+    </script>
 
 </body>
 </html>

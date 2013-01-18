@@ -384,7 +384,8 @@ this.createjs = this.createjs||{};
 
     /**
      * A hash lookup of preloading sound sources via the parsed source that is passed to the plugin.  Contains the
-     * source and id that was passed in by the user.
+     * source, id, and data that was passed in by the user.  Parsed sources can contain multiple instances of source, id,
+     * and data.
      * @property preloadHash
      * @type {Object}
      * @private
@@ -447,17 +448,19 @@ this.createjs = this.createjs||{};
 	 * @since 0.4.0
 	 */
     s.sendLoadComplete = function(src) {
-	    var item = s.preloadHash[src];
-        var event = {
-            target: this,
-            type: "loadComplete",
-            src: item.src,
-            id: item.id,
-            data: item.data
-        };
-        s.preloadHash[src] = true;
-        s.onLoadComplete && s.onLoadComplete(event);
-        s.dispatchEvent(event);
+        for(var i= 0, l = s.preloadHash[src].length; i < l; i++) {
+            var item = s.preloadHash[src][i];
+            var event = {
+                target: this,
+                type: "loadComplete",
+                src: item.src,  // OJR LM thinks this might be more consistent if it returned item like PreloadJS
+                id: item.id,
+                data: item.data
+            };
+            s.preloadHash[src][i] = true;
+            s.onLoadComplete && s.onLoadComplete(event);
+            s.dispatchEvent(event);
+        }
     }
 
     /**
@@ -679,8 +682,9 @@ this.createjs = this.createjs||{};
 		}
 
 		if (preload != false) {
-            s.preloadHash[details.src] = {src:src, id:id, data:data};  // keep this data so we can return it onLoadComplete
-			s.activePlugin.preload(details.src, loader);
+            if(!s.preloadHash[details.src]) { s.preloadHash[details.src] = [];}  // we do this so we can store multiple id's and data if needed
+            s.preloadHash[details.src].push({src:src, id:id, data:data});  // keep this data so we can return it onLoadComplete
+			if(s.preloadHash[details.src].length == 1) {s.activePlugin.preload(details.src, loader)};  // if already loaded once, don't load a second time  // OJR note this will disallow reloading a sound if loading fails or the source changes
 		}
 
 		return details;
@@ -732,7 +736,7 @@ this.createjs = this.createjs||{};
         } else {
             src = s.getSrcById(src);
         }
-        return (s.preloadHash[src] == true);
+        return (s.preloadHash[src][0] == true);  // src only loads once, so if it's true for the first it's true for all
     }
 
     /**

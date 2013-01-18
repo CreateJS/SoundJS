@@ -3,125 +3,6 @@
 <head>
 	<title>SoundJS: Media Player Example</title>
 
-    <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
-	<script type="text/javascript" src="../src/soundjs/Sound.js"></script>
-    <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
-	<script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
-	<script type="text/javascript" src="../src/swfobject.js"></script>
-	<script type="text/javascript" src="../src/soundjs/FlashPlugin.js"></script>
-
-	<!-- We also provide hosted minified versions of all CreateJS libraries.
-	    http://code.createjs.com -->
-
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-
-	<script type="text/javascript">
-
-		function init() {
-			if (window.top != window) {
-				document.getElementById("header").style.display = "none";
-			}
-
-			if (!createjs.Sound.initializeDefaultPlugins()) {
-				document.getElementById("error").style.display = "block";
-				document.getElementById("content").style.display = "none";
-				return;
-			}
-
-			$("#position").css("display", "none");
-			$("#playPauseBtn").attr("disabled", true);
-			$("#stopBtn").attr("disabled", true);
-			$("#track").css("display", "none");
-
-			document.getElementById("loader").className = "loader";
-			var assetPath = "assets/";
-            var src = assetPath+"M-GameBG.mp3|"+assetPath+"M-GameBG.ogg";
-
-            createjs.Sound.addEventListener("loadComplete", createjs.proxy(handleLoadComplete,this)); // add an event listener for when load is completed
-            createjs.Sound.registerSound(src, "music");
-		}
-
-		var instance;
-		var positionInterval;
-		var seeking = false;
-
-		function handleLoadComplete(event) {
-			document.getElementById("loader").className = "";
-
-			$("#track").css("display", "block");
-			$("#loading").css("display", "none");
-			$("#progress").css("display", "none");
-			$("#position").css("display", "block");
-
-			instance = createjs.Sound.play("music");
- 			instance.onComplete = function() {
-                 //console.log("onComplete");
-				clearInterval(positionInterval);
-				$("#playBtn").removeClass("pauseBtn").addClass("playBtn")
-				$("#stopBtn").attr("disabled", true);
-			}
-			$("#playPauseBtn").attr("disabled", false);
-			$("#playBtn").removeClass("playBtn").addClass("pauseBtn");
-			$("#playBtn").click(function(event){
-				if (instance.playState == createjs.Sound.PLAY_FINISHED) {
-					instance.play();
-					$("#playBtn").removeClass("playBtn").addClass("pauseBtn");
-					trackTime();
-					return;
-				} else {
-					instance.paused ? instance.resume() : instance.pause();
-				}
-
-				if (instance.paused) {
-					$("#playBtn").removeClass("pauseBtn").addClass("playBtn");
-				} else {
-					$("#playBtn").removeClass("playBtn").addClass("pauseBtn");
-				}
-			});
-			$("#stopBtn").click(function(event){
-				instance.stop();
-                //console.log("stop");
-				clearInterval(positionInterval);
-				$("#playBtn").removeClass("pauseBtn").addClass("playBtn");
-				$("#thumb").css("left", 0);
-			});
-			$("#stopBtn").attr("disabled", false);
-
-			trackTime();
-
-            // TODO Get this working in FF
-            // http://forums.mozillazine.org/viewtopic.php?f=25&t=2329667
-			$("#thumb").mousedown(function(event) {
-                //console.log("mousedown");
-				var div = $();
-				$("#player").append($("<div id='blocker'></div>"));
-				seeking = true;
-				$("#player").mousemove(function(event){  // OJR this is not working in FF
-                    $("#thumb").css("left", Math.max(0, Math.min($("#track").width()-$("#thumb").width(), event.offsetX-$("#track").position().left)));
-				})
-				$("#player").mouseup(function(event){
-                    //console.log("mouseup");
-					seeking = false;
-					$(this).unbind("mouseup mousemove");
-					var pos = $("#thumb").position().left/$("#track").width();
-					instance.setPosition(pos*instance.getDuration());  // note that getDuration will return 0 if you have stopped the audio because of the way it handles tags
-					$("#blocker").remove();
-				});
-			});
-		}
-
-		var dragOffset;
-		function trackTime() {
-			positionInterval = setInterval(function(event) {  // OJR setInterval is not working in FF, is only called once  // tried giving this function a return value.  Tried commention out everything but console.log.  Tried closing web developer console in ff.
-                //console.log("tracktime ", seeking);
-				if(seeking) { return; };
-				$("#thumb").css("left", instance.getPosition()/instance.getDuration() * $("#track").width());
-                //console.log("success");
-			});
-		}
-
-	</script>
-
 	<link rel="stylesheet" href="assets/demoStyles.css"/>
 	<style type="text/css">
 		#player {
@@ -239,6 +120,128 @@
 		<p>We are currently working on support for iOS. Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
 			if you see this in any other browsers.</p>
 	</div>
+
+    <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
+    <script type="text/javascript" src="../src/soundjs/Sound.js"></script>
+    <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
+    <script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
+    <script type="text/javascript" src="../src/swfobject.js"></script>
+    <script type="text/javascript" src="../src/soundjs/FlashPlugin.js"></script>
+
+    <!-- We also provide hosted minified versions of all CreateJS libraries.
+        http://code.createjs.com -->
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+    <script type="text/javascript">
+
+        function init() {
+            if (window.top != window) {
+                document.getElementById("header").style.display = "none";
+            }
+
+            if (!createjs.Sound.initializeDefaultPlugins()) {
+                document.getElementById("error").style.display = "block";
+                document.getElementById("content").style.display = "none";
+                return;
+            }
+
+            $("#position").css("display", "none");
+            $("#playPauseBtn").attr("disabled", true);
+            $("#stopBtn").attr("disabled", true);
+            $("#track").css("display", "none");
+
+            document.getElementById("loader").className = "loader";
+            var assetPath = "assets/";
+            var src = assetPath+"M-GameBG.mp3|"+assetPath+"M-GameBG.ogg";
+
+            createjs.Sound.addEventListener("loadComplete", createjs.proxy(handleLoadComplete,this)); // add an event listener for when load is completed
+            createjs.Sound.registerSound(src, "music");
+        }
+
+        var instance;
+        var positionInterval;
+        var seeking = false;
+
+        function handleLoadComplete(event) {
+            document.getElementById("loader").className = "";
+
+            $("#track").css("display", "block");
+            $("#loading").css("display", "none");
+            $("#progress").css("display", "none");
+            $("#position").css("display", "block");
+
+            instance = createjs.Sound.play("music");
+            instance.onComplete = function() {
+                //console.log("onComplete");
+                clearInterval(positionInterval);
+                $("#playBtn").removeClass("pauseBtn").addClass("playBtn")
+                $("#stopBtn").attr("disabled", true);
+            }
+            $("#playPauseBtn").attr("disabled", false);
+            $("#playBtn").removeClass("playBtn").addClass("pauseBtn");
+            $("#playBtn").click(function(event){
+                if (instance.playState == createjs.Sound.PLAY_FINISHED) {
+                    instance.play();
+                    $("#playBtn").removeClass("playBtn").addClass("pauseBtn");
+                    trackTime();
+                    return;
+                } else {
+                    instance.paused ? instance.resume() : instance.pause();
+                }
+
+                if (instance.paused) {
+                    $("#playBtn").removeClass("pauseBtn").addClass("playBtn");
+                } else {
+                    $("#playBtn").removeClass("playBtn").addClass("pauseBtn");
+                }
+            });
+            $("#stopBtn").click(function(event){
+                instance.stop();
+                //console.log("stop");
+                clearInterval(positionInterval);
+                $("#playBtn").removeClass("pauseBtn").addClass("playBtn");
+                $("#thumb").css("left", 0);
+            });
+            $("#stopBtn").attr("disabled", false);
+
+            trackTime();
+
+            // http://forums.mozillazine.org/viewtopic.php?f=25&t=2329667
+            $("#thumb").mousedown(function(event) {
+                //console.log("mousedown");
+                var div = $();
+                $("#player").append($("<div id='blocker'></div>"));
+                seeking = true;
+                $("#player").mousemove(function(event){
+                    // event.offsetX is not supported by FF, hence the following from http://bugs.jquery.com/ticket/8523
+                    if(typeof event.offsetX === "undefined") { // || typeof event.offsetY === "undefined") {
+                        var targetOffset = $(event.target).offset();
+                        event.offsetX = event.pageX - targetOffset.left;
+                        //event.offsetY = event.pageY - targetOffset.top;
+                    }
+                    $("#thumb").css("left", Math.max(0, Math.min($("#track").width()-$("#thumb").width(), event.offsetX-$("#track").position().left)));
+                })
+                $("#player").mouseup(function(event){
+                    //console.log("mouseup");
+                    seeking = false;
+                    $(this).unbind("mouseup mousemove");
+                    var pos = $("#thumb").position().left/$("#track").width();
+                    instance.setPosition(pos*instance.getDuration());
+                    $("#blocker").remove();
+                });
+            });
+        }
+
+        var dragOffset;
+        function trackTime() {
+            positionInterval = setInterval(function(event) {
+                if(seeking) { return; }
+                $("#thumb").css("left", instance.getPosition()/instance.getDuration() * $("#track").width());
+            }, 30);
+        }
+
+    </script>
 
 </body>
 </html>

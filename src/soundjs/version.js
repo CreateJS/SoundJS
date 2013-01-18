@@ -23,6 +23,6 @@ o.version = /*version*/"NEXT"; // injected by build process
  * @type String
  * @static
  **/
-o.buildDate = /*date*/"Mon, 14 Jan 2013 21:07:17 GMT"; // injected by build process
+o.buildDate = /*date*/"Fri, 18 Jan 2013 22:54:01 GMT"; // injected by build process
 
 })();
