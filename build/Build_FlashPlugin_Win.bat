@@ -1,7 +1,7 @@
 @ECHO off
 CD %~dp0
 
-SET LCNAME=flashplugin
+SET LCNAME=soundjs.flashplugin
 
 ECHO --- %LCNAME% ---
 SET /P VERSION=Please enter version number [x.x.x] [default: 'NEXT'] : 

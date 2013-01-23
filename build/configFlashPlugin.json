@@ -5,7 +5,7 @@
         "/../src/soundjs/FlashPlugin.js",
         "/../src/soundjs/version_flashplugin.js"
         ],
-		"JS_FILE_NAME" : "flashplugin-%VERSION%.min.js",
+		"JS_FILE_NAME" : "soundjs.flashplugin-%VERSION%.min.js",
 		"PROJECT_NAME" : "SoundJS",
 		"PROJECT_URL" : "http://createjs.com/",
 		"DOCS_DIR_NAME" : "_docs-%VERSION%",

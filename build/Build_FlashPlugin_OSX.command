@@ -1,7 +1,7 @@
 #!/bin/bash
 cd $(dirname "$0")
 
-LCNAME="flashplugin"
+LCNAME="soundjs.flashplugin"
 
 echo -e "\r--- $LCNAME ---"
 echo -n "Enter version number [x.x.x] [default: "NEXT"] "
