@@ -114,9 +114,11 @@ this.createjs = this.createjs||{};
 		};
 
         // determine which extensions our browser supports for this plugin by iterating through Sound.SUPPORTED_EXTENSIONS
-        for(var i= 0, l = createjs.Sound.SUPPORTED_EXTENSIONS.length; i < l; i++) {
-            var ext = createjs.Sound.SUPPORTED_EXTENSIONS[i];
-            var playType = createjs.Sound.EXTENSION_MAP[ext] || ext;
+        var supportedExtensions = createjs.Sound.SUPPORTED_EXTENSIONS;
+        var extensionMap = createjs.Sound.EXTENSION_MAP;
+        for(var i= 0, l = supportedExtensions.length; i < l; i++) {
+            var ext = supportedExtensions[i];
+            var playType = extensionMap[ext] || ext;
             s.capabilities[ext] = (t.canPlayType("audio/" + ext) != "no" && t.canPlayType("audio/" + ext) != "") || (t.canPlayType("audio/" + playType) != "no" && t.canPlayType("audio/" + playType) != "");
         }  // OJR another way to do this might be canPlayType:"m4a", codex: mp4
 
@@ -721,7 +723,7 @@ this.createjs = this.createjs||{};
                 this.panNode = this.owner.gainNode;  // to prevent errors when trying to connect to panNode
             }
 
-            this.gainNode = WebAudioPlugin.context.createGainNode();  // allows us to manipulate instance volume
+            this.gainNode = this.owner.context.createGainNode();  // allows us to manipulate instance volume
             this.gainNode.connect(this.panNode);  // connect us to our sequence that leads to context.destination
 
             if (this.owner.isPreloadComplete(this.src)) {

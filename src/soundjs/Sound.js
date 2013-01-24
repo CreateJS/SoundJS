@@ -55,7 +55,7 @@ this.createjs = this.createjs||{};
  *
  * <h4>Feature Set Example</h4>
  *      createjs.Sound.addEventListener("loadComplete", createjs.proxy(this.loadHandler, this));
- *      createjs.Sound.registerSound("path/to/mySound.mp3"+createjs.Sound.DELIMITER+"path/to/mySound.ogg", "sound");
+ *      createjs.Sound.registerSound("path/to/mySound.mp3|path/to/mySound.ogg", "sound");
  *      function loadHandler(event) {
  *          // This is fired for each sound that is registered.
  *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use source.
@@ -102,7 +102,7 @@ this.createjs = this.createjs||{};
 	 * <h4>Example</h4>
 	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashPlugin]);
      *      createjs.Sound.addEventListener("loadComplete", createjs.proxy(this.loadHandler, (this));
-     *      createjs.Sound.registerSound("path/to/mySound.mp3"+createjs.Sound.DELIMITER+"path/to/mySound.ogg", "sound");
+     *      createjs.Sound.registerSound("path/to/mySound.mp3|path/to/mySound.ogg", "sound");
      *      function loadHandler(event) {
      *          // This is fired for each sound that is registered.
      *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use source.
@@ -631,14 +631,14 @@ this.createjs = this.createjs||{};
 	 * internal preloading when required.
      *
      * <h4>Example</h4>
-     *      createjs.Sound.registerSound("myAudioPath/mySound.mp3"+createjs.Sound.DELIMITER+"myAudioPath/mySound.ogg", "myID", 3);
+     *      createjs.Sound.registerSound("myAudioPath/mySound.mp3|myAudioPath/mySound.ogg", "myID", 3);
      *
 	 * @method registerSound
 	 * @param {String | Object} src The source or an Objects with a "src" property
 	 * @param {String} [id] An id specified by the user to play the sound later.
 	 * @param {Number | Object} [data] Data associated with the item. Sound uses the data parameter as the number of
 	 * channels for an audio instance, however a "channels" property can be appended to the data object if it is used
-	 * for other information. The audio channels will default to 1 if no value is found.
+	 * for other information. The audio channels will set a default based on plugin if no value is found.
 	 * @param {Boolean} [preload=true] If the sound should be internally preloaded so that it can be played back
      * without an external preloader.
 	 * @return {Object} An object with the modified values that were passed in, which defines the sound. Returns false
@@ -653,6 +653,7 @@ this.createjs = this.createjs||{};
 			src = src.src;
 			id = src.id;
 			data = src.data;
+            //OJR also do? preload = src.preload;
 		}
 		var details = s.parsePath(src, "sound", id, data);
 		if (details == null) { return false; }
@@ -669,9 +670,15 @@ this.createjs = this.createjs||{};
 		var loader = s.activePlugin.register(details.src, numChannels);  // Note only HTML audio uses numChannels
 
 		if (loader != null) {
-            if (loader.numChannels != null) {numChannels = loader.numChannels;}  // currently only HTMLAudio returns this
+            if (loader.numChannels != null) {numChannels = loader.numChannels;} // currently only HTMLAudio returns this
             SoundChannel.create(details.src, numChannels);
-            // OJR this change needs thorough testing
+
+            // return the number of instances to the user.  This will also be returned in the load event.
+            if(data == null || !isNaN(data)) {
+                data = details.data = numChannels || SoundChannel.maxPerChannel();
+            } else {
+                data.channels = details.data.channels = numChannels || SoundChannel.maxPerChannel();
+            }
 
             // If the loader returns a tag, return it instead for preloading.
 			if (loader.tag != null) { details.tag = loader.tag; }
@@ -696,8 +703,8 @@ this.createjs = this.createjs||{};
      *
      * <h4>Example</h4>
      *      var manifest = [
-     *      	{src:"assetPath/asset0.mp3"+createjs.Sound.DELIMITER+"assetPath/asset0.ogg", id:"example"}, // Note the Sound.DELIMITER
-     *      	{src:"assetPath/asset1.mp3"+createjs.Sound.DELIMITER+"assetPath/asset1.ogg", id:"1", data:6},
+     *      	{src:"assetPath/asset0.mp3|assetPath/asset0.ogg", id:"example"}, // Note the Sound.DELIMITER
+     *      	{src:"assetPath/asset1.mp3|assetPath/asset1.ogg", id:"1", data:6},
      *          {src:"assetPath/asset2.mp3", id:"works"}
      *      ];
      *      createjs.Sound.addEventListener("loadComplete", doneLoading); // call doneLoading when each sound loads
@@ -863,8 +870,9 @@ this.createjs = this.createjs||{};
 		value = Math.max(0, Math.min(1, value));
 		s.masterVolume = value;
 		if (!this.activePlugin || !this.activePlugin.setVolume || !this.activePlugin.setVolume(value)) {
-			for (var i= 0,l=this.instances.length; i<l; i++) {
-				this.instances[i].setMasterVolume(value);
+            var instances = this.instances;  // OJR does this impact garbage collection more than it helps performance?
+			for (var i= 0,l=instances.length; i<l; i++) {
+                instances[i].setMasterVolume(value);
 			}
 		}
 	}
@@ -890,8 +898,9 @@ this.createjs = this.createjs||{};
 	s.mute = function(value) {
 		this.masterMute = value;
 		if (!this.activePlugin || !this.activePlugin.setMute || !this.activePlugin.setMute(value)) {
-			for (var i= 0, l=this.instances.length; i<l; i++) {
-				this.instances[i].setMasterMute(value);
+            var instances = this.instances;
+			for (var i= 0, l=instances.length; i<l; i++) {
+                instances[i].setMasterMute(value);
 			}
 		}
 	}
@@ -911,8 +920,9 @@ this.createjs = this.createjs||{};
 
         this.masterMute = value;
         if (!this.activePlugin || !this.activePlugin.setMute || !this.activePlugin.setMute(value)) {
-            for (var i= 0, l=this.instances.length; i<l; i++) {
-                this.instances[i].setMasterMute(value);
+            var instances = this.instances;
+            for (var i= 0, l=instances.length; i<l; i++) {
+                instances[i].setMasterMute(value);
             }
         }
         return true;
@@ -937,8 +947,9 @@ this.createjs = this.createjs||{};
 	 * @static
 	 */
 	s.stop = function() {
-        for (var i= this.instances.length; i>0; i--) {
-			this.instances[i-1].stop();  // NOTE stop removes instance from this.instances
+        var instances = this.instances;
+        for (var i= instances.length; i>0; i--) {
+            instances[i-1].stop();  // NOTE stop removes instance from this.instances
 		}
 	}
 
@@ -1127,7 +1138,7 @@ this.createjs = this.createjs||{};
 	 * Create a sound channel. Note that if the sound channel already exists, this will fail.
 	 * #method create
 	 * @param {String} src The source for the channel
-	 * @param {Number} max The maximum amount this channel holds. The default is 1
+	 * @param {Number} max The maximum amount this channel holds. The default is {{#crossLink "SoundChannel.maxDefault"}}{{/crossLink}}.
 	 * @return {Boolean} If the channels were created.
 	 * @static
 	 */
@@ -1167,6 +1178,14 @@ this.createjs = this.createjs||{};
 		channel.remove(instance);
 		return true;
 	}
+    /**
+     * Get the maximum number of sounds you can have in a channel.
+     * #method
+     * @return {Number} The maximum number of sounds you can have in a channel.
+     */
+    SoundChannel.maxPerChannel = function(){
+        return p.maxDefault;
+    }
 	/**
 	 * Get a channel instance by its src.
 	 * #method get
@@ -1341,6 +1360,8 @@ this.createjs = this.createjs||{};
      * @param {Boolean} isChrome True if our browser is Chrome.  Note that Chrome for Android returns true, but is a
      * completely different browser with different abilities.
      * @param {Boolean} isIOS True if our browser is safari for iOS devices (iPad, iPhone, and iPad).
+     * @param {Boolean} isAndroid True if our browser is Android.
+     * @param {Boolean} isBlackberry True if our browser is Blackberry.
      * @constructor
      * @static
      */
@@ -1352,6 +1373,8 @@ this.createjs = this.createjs||{};
 		BrowserDetect.isOpera = (window.opera != null);
 		BrowserDetect.isChrome = (agent.indexOf("Chrome") > -1);  // NOTE that Chrome on Android returns true but is a completely different browser with different abilities
 		BrowserDetect.isIOS = agent.indexOf("iPod") > -1 || agent.indexOf("iPhone") > -1 || agent.indexOf("iPad") > -1;
+        BrowserDetect.isAndroid = (agent.indexOf("Android") > -1);
+        BrowserDetect.isBlackberry = (agent.indexOf("Blackberry") > -1);
 	}
 
 	BrowserDetect.init();

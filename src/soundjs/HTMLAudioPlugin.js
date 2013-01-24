@@ -162,9 +162,11 @@ this.createjs = this.createjs||{};
         };
 
         // determine which extensions our browser supports for this plugin by iterating through Sound.SUPPORTED_EXTENSIONS
-        for(var i= 0, l = createjs.Sound.SUPPORTED_EXTENSIONS.length; i < l; i++) {
-            var ext = createjs.Sound.SUPPORTED_EXTENSIONS[i];
-            var playType = createjs.Sound.EXTENSION_MAP[ext] || ext;
+        var supportedExtensions = createjs.Sound.SUPPORTED_EXTENSIONS;
+        var extensionMap = createjs.Sound.EXTENSION_MAP;
+        for(var i= 0, l = supportedExtensions.length; i < l; i++) {
+            var ext = supportedExtensions[i];
+            var playType = extensionMap[ext] || ext;
             s.capabilities[ext] = (t.canPlayType("audio/" + ext) != "no" && t.canPlayType("audio/" + ext) != "") || (t.canPlayType("audio/" + playType) != "no" && t.canPlayType("audio/" + playType) != "");
         }  // OJR another way to do this might be canPlayType:"m4a", codex: mp4
 	}
@@ -243,7 +245,8 @@ this.createjs = this.createjs||{};
          */
 		createTag: function(src) {
 			var tag = document.createElement("audio");
-			tag.preload = false;
+            tag.autoplay = false;
+			tag.preload = "none";
 			tag.src = src;
 			return tag;
 		},
@@ -491,9 +494,8 @@ this.createjs = this.createjs||{};
 		updateVolume: function() {
 			if (this.tag != null) {
 				var newVolume = (this.muted || createjs.Sound.masterMute) ? 0 : this.volume * createjs.Sound.masterVolume;
-				if (newVolume != this.tagVolume) {
+				if (newVolume != this.tag.volume) {
 					this.tag.volume = newVolume;
-					this.tagVolume = newVolume;
 				}
 				return true;
 			} else {

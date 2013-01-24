@@ -140,12 +140,12 @@
 
 	</div>
 
-	<div id="error">
-		<h1>Sorry!</h1>
-		<p>SoundJS is not currently supported in your browser.</p>
-		<p>We are currently working on support for iOS. Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
-			if you see this in any other browsers.</p>
-	</div>
+    <div id="error">
+        <h1>Sorry!</h1>
+        <p>SoundJS is not currently supported in your browser.</p>
+        <p>Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
+            with the device and browser you are using.  Thank you.</p>
+    </div>
 
     <!--<script type="text/javascript" src="./assets/preloadjs-0.2.0.min.js"></script>-->
 
@@ -325,7 +325,7 @@
             {id:"Humm (mp3)", src:assetsPath + "Humm.mp3"},
             {id:"Humm (ogg)", src:assetsPath + "Humm.ogg"},
             {id:"Thunder", src:assetsPath + "Thunder1.mp3|"+assetsPath + "Thunder1.ogg", data:3},
-            {id:"Tone wobble", src:assetsPath + "ToneWobble.mp3|"+assetsPath + "ToneWobble.ogg", type:"sound"},
+            {id:"Tone wobble", src:assetsPath + "ToneWobble.mp3|"+assetsPath + "ToneWobble.ogg", type:"sound", data:1},
             {id:"Rat Damage", src:assetsPath + "R-Damage.mp3", type:"sound"},
             {id:"Seagull Damage", src:assetsPath + "S-Damage.mp3", type:"sound"},
             {id:"Cabin Boy", src:assetsPath + "U-CabinBoy3.mp3", type:"sound", data:1}
@@ -337,7 +337,7 @@
 
     function addSoundToList(event) {
         var list = $("#library").get(0);
-        list.options.add(new Option((event.id || event.src) + " ("+(event.data||1)+")", event.id));
+        list.options.add(new Option((event.id || event.src) + " ("+(event.data||"unknown")+")", event.id));  //event.data should never be undefined, because it is set to the max limit by SoundJS
     }
 
     function handleSliderChange(evt) {

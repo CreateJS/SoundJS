@@ -24,6 +24,13 @@
 			with the device and browser you are using.  Thank you.</p>
 	</div>
 
+    <div id="mobile">
+        <h1>Sorry!</h1>
+        <p>Mobile devices require sound to be played inside of user events, which this demo does not do.</p>
+        <p>Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
+            with the OS and browser if you see this on a device that is not mobile.  Thank you.</p>
+    </div>
+
     <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
     <script type="text/javascript" src="../src/soundjs/Sound.js"></script>
     <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
@@ -32,6 +39,7 @@
     <script>
         var src;
         var soundInstance;
+        var displayStatus;
 
         function init() {
             if (window.top != window) {
@@ -40,6 +48,12 @@
 
             if (!createjs.Sound.initializeDefaultPlugins()) {
                 document.getElementById("error").style.display = "block";
+                document.getElementById("content").style.display = "none";
+                return;
+            }
+
+            if (createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid) {  // || createjs.Sound.BrowserDetect.isBlackberry  OJR blackberry has not been tested yet
+                document.getElementById("mobile").style.display = "block";
                 document.getElementById("content").style.display = "none";
                 return;
             }
@@ -61,7 +75,6 @@
             if (evt.src == src) {  // note that callback and event listener return the same event, and in this example will fire within milliseconds of each other
                 soundInstance = createjs.Sound.play(src);  // start playing the sound we just loaded
 
-                displayStatus = document.getElementById("status");
                 displayStatus.innerText = "Playing source: " + evt.src;
             }
         }

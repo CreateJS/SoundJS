@@ -27,12 +27,19 @@
 		<canvas id="gameCanvas" width="960" height="400"></canvas>
 	</div>
 
-	<div id="error">
-		<h1>Sorry!</h1>
-		<p>SoundJS is not currently supported in your browser.</p>
-		<p>We are currently working on support for iOS. Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
-			if you see this in any other browsers.</p>
-	</div>
+    <div id="error">
+        <h1>Sorry!</h1>
+        <p>SoundJS is not currently supported in your browser.</p>
+        <p>Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
+            with the device and browser you are using.  Thank you.</p>
+    </div>
+
+    <div id="mobile">
+        <h1>Sorry!</h1>
+        <p>Mobile devices require sound to be played inside of user events, which this demo does not do.</p>
+        <p>Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
+            with the OS and browser if you see this on a device that is not mobile.  Thank you.</p>
+    </div>
 
     <script type="text/javascript" src="./assets/easeljs-0.5.0.min.js"></script>
 
@@ -106,6 +113,12 @@
 
         if (!createjs.Sound.initializeDefaultPlugins()) {
             document.getElementById("error").style.display = "block";
+            document.getElementById("content").style.display = "none";
+            return;
+        }
+
+        if (createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid) {  // || createjs.Sound.BrowserDetect.isBlackberry  OJR blackberry has not been tested yet
+            document.getElementById("mobile").style.display = "block";
             document.getElementById("content").style.display = "none";
             return;
         }
