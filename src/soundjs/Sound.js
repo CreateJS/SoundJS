@@ -448,6 +448,7 @@ this.createjs = this.createjs||{};
 	 * @since 0.4.0
 	 */
     s.sendLoadComplete = function(src) {
+        if(!s.preloadHash[src]) {return;}
         for(var i= 0, l = s.preloadHash[src].length; i < l; i++) {
             var item = s.preloadHash[src][i];
             var event = {

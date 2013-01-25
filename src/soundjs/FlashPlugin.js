@@ -215,8 +215,8 @@ this.createjs = this.createjs||{};
         preloadInstances: null,
 
         /**
-		 * An array of Sound Preload instances that is waiting for preload before the Flash instance is ready. Once
-		 * Flash is initialized, the queued instances are preloaded.
+		 * An array of Sound Preload instances that are waiting to preload. Once Flash is initialized, the queued
+         * instances are preloaded.
 		 * @property queuedInstances
 		 * @type {Object}
 		 * @protected
@@ -285,7 +285,7 @@ this.createjs = this.createjs||{};
 
 			// Anything that needed to be preloaded, can now do so.
 			for (var i=0, l=this.queuedInstances.length; i<l; i++) {
-				this.flash.register(this.queuedInstances[i]);
+				this.flash.register(this.queuedInstances[i]);  // NOTE this flash function currently does nothing
 			}
 			this.queuedInstances = null;
 
@@ -330,10 +330,9 @@ this.createjs = this.createjs||{};
 			if (!this.flashReady) {
 				this.queuedInstances.push(src);
 			} else {
-				this.flash.register(src);
+				this.flash.register(src);  // NOTE this flash function currently does nothing  // OJR remove this entire thing, as it does nothing?
 			}
 			var tag = new SoundLoader(src, this, this.flash);
-			tag.owner = this;
 			return {
 				tag: tag
 			};
@@ -379,9 +378,10 @@ this.createjs = this.createjs||{};
 		preload: function(src, instance) {
             this.audioSources[src] = true;  // NOTE this does not mean preloading has started, just that it will
 			var loader = new SoundLoader(src, this, this.flash);
-			if (!loader.load(src)) {  // NOTE this returns false if flash is not ready
+            loader.load();  // this will handle if flash is not ready
+			/*if (!loader.load(src)) {  // NOTE this returns false if flash is not ready
                 this.preloadInstances[src] = loader;
-            }
+            }*/
 		},
 
         /**
@@ -906,6 +906,8 @@ this.createjs = this.createjs||{};
 			if (src != null) { this.src = src; }
 			if (this.flash == null || !this.owner.flashReady) {
 				this.loading = true;
+                // register for future preloading
+                this.owner.preloadInstances[this.src] = this; // OJR this would be better as an API call
 				return false;
 			}
 

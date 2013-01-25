@@ -99,11 +99,17 @@
 				for (var n:String in map) {
 					ExternalInterface.addCallback(n, map[n]);
 				}
-				this.addEventListener(Event.ENTER_FRAME, function(evt) {ExternalInterface.call(FLASH_CALLBACK, "ready");}, false, 0, true);
                 // NOTE this is in an ENTER_FRAME to deal with a race issue in IE caused by caching
+				this.addEventListener(Event.ENTER_FRAME, handleReady, false, 0, true);
 			} catch (e:*) {
 				handleError(e);
 			}
+		}
+		
+		// call to let JS know we are ready
+		protected function handleReady(evt) {
+			this.removeEventListener(Event.ENTER_FRAME, handleReady);
+			ExternalInterface.call(FLASH_CALLBACK, "ready");
 		}
 		
 		// General error handler.

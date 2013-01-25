@@ -4,7 +4,7 @@ Version NEXT 0.4.0 [Jan 11, 2013]
 ************************************************************************************************************************
 - Class name change to createjs.Sound from createjs.SoundJS
 - Added versions file that is automatically updated via the build process, which provides run-time
-	version information on the new PreloadJS object
+	version information on the new SoundJS object
 - A few major performance updates
 - Added default support for M4A, MP4, aiff, wma, and mid audio formats
 - Changed how file extension support is determined so changes only need to be made to SoundJS

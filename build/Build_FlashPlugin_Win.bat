@@ -21,7 +21,7 @@ GOTO :ASK
 :Build
 ECHO.
 ECHO Building %LCNAME% version: %VERSION%
-node ./buildMovieClip.js --tasks=ALL --version=%VERSION% -v
+node ./buildFlashPlugin.js --tasks=ALL --version=%VERSION% -v
 ECHO.
 
 IF "%COPY%"=="N" GOTO :Wait

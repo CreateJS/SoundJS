@@ -84,7 +84,6 @@
             if (params.type == "flash") {
                 createjs.FlashPlugin.BASE_PATH = "../src/soundjs/"; // Initialize the base path from this document to the Flash Plugin
                 createjs.Sound.registerPlugins([createjs.FlashPlugin]);
-                createjs.Sound.activePlugin.showOutput = true;
             } else if (params.type == "html5") {
                 createjs.Sound.registerPlugins([createjs.HTMLAudioPlugin]);
             } else {
@@ -112,29 +111,22 @@
             var assetsPath = "assets/";
             var item = {src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg", id:"music"};
             var manifest = [
-                {id:"test", src:assetsPath+"Game-Shot.mp3|"+assetsPath+"Game-Shot.ogg"},
-                {id:"music", src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"},
-                {id:"test2", src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg"}
+                {id:"music", src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"}
             ]
 
             // Instantiate a queue.
             queue = new createjs.LoadQueue();
-            queue.installPlugin(createjs.Sound); // Plug in Sound to handle browser-specific paths
+            queue.installPlugin(createjs.Sound);
             queue.addEventListener("complete", loadComplete);
             queue.addEventListener("fileload", fileComplete);
             queue.addEventListener("error",handleFileError);
             queue.addEventListener("progress",handleProgress);
-            /*testing with callbacks*/
-            queue.onComplete = loadCompleteCallback;
-            queue.onFileLoad = fileCompleteCallback;
-            queue.onError = handleFileErrorCallback;
-            queue.onProgress = handleProgressCallback;
             queue.loadManifest(manifest);
             //queue.loadFile(item, true);  // to load a single item
         }
 
         function handleFileError(evt) {
-            console.log("Event error ", evt);
+            console.log("error ", evt);
             // An error occurred.
             displayStatus.innerText = "Error :("
         }
@@ -145,40 +137,16 @@
         }
 
         function loadComplete(evt) {
-            console.log("Event loadComplete ", evt);
+            console.log("loadComplete ", evt);
             // Load completed.
             displayStatus.innerText = "Complete :)";
-            var myInstance = playSound("music");
-            console.log("Event myInstance ", myInstance);
+            playSound("music");
         }
 
         function fileComplete(evt) {
             console.log("Event Callback file loaded ", evt);
         }
 
-        // OJR callback testing
-        function handleFileErrorCallback(evt) {
-            console.log("Callback error ", evt);
-            // An error occurred.
-            displayStatus.innerText = "Error :("
-        }
-
-        function handleProgressCallback(evt) {
-            // Progress happened.
-            displayStatus.innerText = "Callback Loading: " + (queue.progress.toFixed(2) * 100) + "%";
-        }
-
-        function loadCompleteCallback(evt) {
-            console.log("Callback loadComplete ", evt);
-            // Load completed.
-            displayStatus.innerText = "Complete :)";
-            var myInstance = playSound("music");
-            console.log("Callback myInstance ", myInstance);
-        }
-
-        function fileCompleteCallback(evt) {
-            console.log("Callback file loaded ", evt);
-        }
         function playSound(name) {
             // Play the sound using the ID created above.
             return createjs.Sound.play("music");
