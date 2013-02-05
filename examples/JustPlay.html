@@ -3,7 +3,7 @@
 <head>
 <title>SoundJS: Just Play</title>
 
-	<link rel="stylesheet" type="text/css" href="../examples/assets/demoStyles.css" />
+	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css" />
 </head>
 
 <body onload="init()">
@@ -37,45 +37,48 @@
     <script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
 
     <script>
-        var src;
-        var soundInstance;
-        var displayStatus;
+        var src;            // the audio src we are trying to play
+        var soundInstance;  // the soundInstance returned by Sound when we create or play a src
+        var displayStatus;  // the HTML element we use to display messages to the user
 
         function init() {
             if (window.top != window) {
                 document.getElementById("header").style.display = "none";
             }
 
+            // this does two things, it initializes the default plugins, and if that fails the if statement triggers and we display an error
             if (!createjs.Sound.initializeDefaultPlugins()) {
                 document.getElementById("error").style.display = "block";
                 document.getElementById("content").style.display = "none";
                 return;
             }
 
+            // check if we are on a mobile device, as these currently require us to launch sound inside of a user event
             if (createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid) {  // || createjs.Sound.BrowserDetect.isBlackberry  OJR blackberry has not been tested yet
                 document.getElementById("mobile").style.display = "block";
                 document.getElementById("content").style.display = "none";
                 return;
             }
 
+            // store the DOM element so we do not have to keep looking it up
             displayStatus = document.getElementById("status");
 
             // Create a single item to load.
             var assetsPath = "assets/";
             src = assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg";
+            // NOTE the "|" character is used by Sound to separate source into distinct files, which allows you to provide multiple extensions for wider browser support
 
             //createjs.Sound.onLoadComplete = playSound;  // add a callback for when load is completed
             createjs.Sound.addEventListener("loadComplete", createjs.proxy(playSound,this)); // add an event listener for when load is completed
             createjs.Sound.registerSound(src);  // register sound, which preloads by default
 
-            displayStatus.innerText = "Waiting for load to complete.";
+            displayStatus.innerText = "Waiting for load to complete.";  // letting the user know what's happening
         }
 
         function playSound(evt) {
-            if (evt.src == src) {  // note that callback and event listener return the same event, and in this example will fire within milliseconds of each other
-                soundInstance = createjs.Sound.play(src);  // start playing the sound we just loaded
-
-                displayStatus.innerText = "Playing source: " + evt.src;
+            if (evt.src == src) {  // note that callback and event listener return the same event
+                soundInstance = createjs.Sound.play(src);  // start playing the sound we just loaded, storing the playing instance
+                displayStatus.innerText = "Playing source: " + evt.src;  // let the user know what we are playing
             }
         }
 
