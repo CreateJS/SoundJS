@@ -799,7 +799,7 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	s.parsePath = function (value, type, id, data) {
-		// Assume value is string.
+        if (typeof(value) != "string") {value = value.toString();}
 		var sounds = value.split(s.DELIMITER);
 		var ret = {type:type || "sound", id:id, data:data};
 		var c = s.getCapabilities();
