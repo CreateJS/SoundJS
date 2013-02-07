@@ -25,7 +25,7 @@
         <canvas id="testCanvas" width="960" height="400"></canvas>
     </div>
 
-    <script type="text/javascript" src="assets/easeljs-NEXT.min.js"></script>
+    <script type="text/javascript" src="assets/easeljs-0.6.0.min.js"></script>
 
     <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
     <script type="text/javascript" src="../src/soundjs/Sound.js"></script>
@@ -41,7 +41,7 @@
         var HUE_VARIANCE = 30;  // amount hue can vary by
         var COLOR_CHANGE_THRESHOLD = 30;    // amount of change before we change color
         var WAVE_EMIT_THRESHOLD = 10;   // amount of positive change before we emit a wave
-        var WAVE_SCALE = 0.05;  // amount to scale wave per tick
+        var WAVE_SCALE = 0.03;  // amount to scale wave per tick
 
         // global variables
         var stage;              // the stage we draw everything to
@@ -214,10 +214,12 @@
                 // set the x and y so that when we scale, it does so from this point
                 waveShape.x = centerX;
                 waveShape.y = centerY;
-                var g = waveShape.graphics.beginStroke ("hsl("+circleHue+",85%,90%)").drawCircle(0,0, lastRadius).endStroke();
+                var g = waveShape.graphics.beginStroke ("hsl("+circleHue+",85%,90%)").drawCircle(0,0, lastRadius<<1).endStroke();
+                // we doubled the size and scale down so it looks better at larger scale
+                waveShape.scaleX = waveShape.scaleY = 0.5;
 
                 waveShape.radius = lastRadius+dataDiff;  // this is used to check if we are offstage
-                waveShape.cache(-lastRadius-1, -lastRadius-1, lastRadius<<1+1, lastRadius<<1+1);  // cache the shape so it performs better
+                waveShape.cache((-lastRadius<<1)-1, -(lastRadius<<1)-1, (lastRadius<<2)+2, (lastRadius<<2)+2);  // cache the shape so it performs better
 
                 // add new wave to our waves container
                 waves.addChild(waveShape);
