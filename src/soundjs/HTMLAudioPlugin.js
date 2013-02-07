@@ -238,7 +238,7 @@ this.createjs = this.createjs || {};
 		register:function (src, instances) {
 			this.audioSources[src] = true;  // Note this does not mean preloading has started
 			var channel = TagPool.get(src);
-			var tag;
+			var tag = null;
 			var l = instances || this.defaultNumChannels;
 			for (var i = 0; i < l; i++) {  // OJR should we be enforcing s.MAX_INSTANCES here?  Does the chrome bug still exist, or can we change this code?
 				tag = this.createTag(src);
