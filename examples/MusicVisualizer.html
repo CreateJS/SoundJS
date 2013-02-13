@@ -16,7 +16,7 @@
 	<div id="error">
 		<h1>Sorry!</h1>
 		<p>SoundJS or Web Audio is not currently supported in your browser.
-        Currently only Chrome and iOS6 Safari support web audio.</p>
+        Currently only Chrome and iOS6 Safari support the Web Audio API, and content must be run from a server.</p>
 		<p>Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
 			with the device and browser you are using if you see this in Chrome or Safari.  Thank you.</p>
 	</div>
@@ -33,15 +33,16 @@
 
     <script>
         // global constants
-        var FFTSIZE = 256;      // number of samples for the analyser node FFT
+        var FFTSIZE = 32;      // number of samples for the analyser node FFT, min 32
         var TICK_FREQ = 20;     // how often to run the tick function, in milliseconds
         var CIRCLES = 8;        // the number of circles to draw.  This is also the amount to break the files into, so FFTSIZE/2 needs to divide by this evenly
-        var RADIUS_FACTOR = 60; // the radius of the circles, factored for which ring we are drawing
+        var RADIUS_FACTOR = 120; // the radius of the circles, factored for which ring we are drawing
         var MIN_RADIUS = 1;     // the minimum radius of each circle
-        var HUE_VARIANCE = 30;  // amount hue can vary by
-        var COLOR_CHANGE_THRESHOLD = 30;    // amount of change before we change color
-        var WAVE_EMIT_THRESHOLD = 10;   // amount of positive change before we emit a wave
+        var HUE_VARIANCE = 120;  // amount hue can vary by
+        var COLOR_CHANGE_THRESHOLD = 10;    // amount of change before we change color
+        var WAVE_EMIT_THRESHOLD = 15;   // amount of positive change before we emit a wave
         var WAVE_SCALE = 0.03;  // amount to scale wave per tick
+        var WAVE_RADIUS = 200; // the radius the wave images will be drawn with
 
         // global variables
         var stage;              // the stage we draw everything to
@@ -54,10 +55,11 @@
         var analyserNode;       // the analyser node that allows us to visualize the audio
         var freqFloatData, freqByteData, timeByteData;  // arrays to retrieve data from analyserNode
         var circles = {};       // object has of circles shapes
-        var circleHue = 180;   // the base color hue used when drawing circles, which can change
+        var circleHue = 300;   // the base color hue used when drawing circles, which can change
         var waves = new createjs.Container();   // container to store waves we draw coming off of circles
         var circleFreqChunk;    // The chunk of freqByteData array that is computed per circle
         var dataAverage = [42,42,42,42];   // an array recording data for the last 4 ticks
+        var waveImgs = []; // array of wave images with different stroke thicknesses
 
         function init() {
             if (window.top != window) {
@@ -80,7 +82,7 @@
             // calculate the center point, so we only have to do this math once (quicker)
             centerX = w >> 1;
             centerY = h >> 1;
-
+            
             // a message on our stage that we use to let the user know what is going on.  Useful when preloading.
             messageField = new createjs.Text("Loading Audio", "bold 24px Arial", "#FFFFFF");
             messageField.maxWidth = w;
@@ -135,15 +137,12 @@
             stage.removeEventListener("stagemousedown", startPlayback);
 
             if(soundInstance) {return;} // if this is defined, we've already started playing.  This is very unlikely to happen.
-
+			
             // we're starting, so we can remove the message
             stage.removeChild(messageField);
 
             // start playing the sound we just loaded, looping indefinitely
             soundInstance = createjs.Sound.play(src, null, null, 0, -1);
-
-            // set the composite operation so we can mix our image colors
-            stage.compositeOperation = "lighter";
 
             // testing function that allows a quick stop
             /*stage.addEventListener("stagemousedown", function(){
@@ -153,9 +152,12 @@
 
             // create circles so they are persistent
             for(var i=0; i<CIRCLES; i++) {
-                circles[i] = new createjs.Shape();
-                stage.addChild(circles[i]);
+                var circle = circles[i] = new createjs.Shape();
+           		// set the composite operation so we can blend our image colors
+                circle.compositeOperation = "lighter";
+                stage.addChild(circle);
             }
+            
             // add waves container to stage
             stage.addChild(waves);
 
@@ -185,8 +187,8 @@
 
                 // draw circle
                 lastRadius += freqSum*RADIUS_FACTOR + MIN_RADIUS;
-                var g = new createjs.Graphics().beginFill("hsl("+(timeSum/255*HUE_VARIANCE+circleHue)+",85%,50%)")
-                    .drawCircle(centerX,centerY, lastRadius).endFill();
+                var color = createjs.Graphics.getHSL((i/CIRCLES*HUE_VARIANCE+circleHue)%360, 100, 50);
+                var g = new createjs.Graphics().beginFill(color).drawCircle(centerX,centerY, lastRadius).endFill();
                 circles[i].graphics = g;
             }
 
@@ -209,35 +211,57 @@
 
             // emit a wave for large enough changes
             if(dataDiff > WAVE_EMIT_THRESHOLD){
-                // draw expanding wave
-                var waveShape = new createjs.Shape();
-                // set the x and y so that when we scale, it does so from this point
-                waveShape.x = centerX;
-                waveShape.y = centerY;
-                var g = waveShape.graphics.beginStroke ("hsl("+circleHue+",85%,90%)").drawCircle(0,0, lastRadius<<1).endStroke();
-                // we doubled the size and scale down so it looks better at larger scale
-                waveShape.scaleX = waveShape.scaleY = 0.5;
-
-                waveShape.radius = lastRadius+dataDiff;  // this is used to check if we are offstage
-                waveShape.cache((-lastRadius<<1)-1, -(lastRadius<<1)-1, (lastRadius<<2)+2, (lastRadius<<2)+2);  // cache the shape so it performs better
+                // create the wave, and center it on screen:
+                var wave = new createjs.Bitmap(getWaveImg(dataDiff*0.1+1));
+				wave.x = centerX;
+				wave.y = centerY;
+				wave.regX = wave.regY = WAVE_RADIUS;
+				
+				// set the expansion speed as a factor of the value difference:
+                wave.speed = dataDiff*0.1+1;
+                
+                // set the initial scale:
+                wave.scaleX = wave.scaleY = lastRadius/WAVE_RADIUS;
 
                 // add new wave to our waves container
-                waves.addChild(waveShape);
+                waves.addChild(wave);
             }
 
             // animate all of our waves by scaling them up by a fixed about
+            var maxR = Math.sqrt(w*w+h*h)*0.5; // the maximum radius for the waves.
             for(var i = waves.getNumChildren()-1; i>-1; i--) {
                 wave = waves.getChildAt(i);
-                wave.scaleX = wave.scaleY = wave.scaleX+WAVE_SCALE;
+                wave.scaleX = wave.scaleY = wave.scaleX+wave.speed*0.02;
 
-                // check if we are offstage and therefore not visible, if so remove us
-                if(wave.scaleX*wave.radius > w) {
-                    waves.removeChild(wave);
+                // check if it is offstage and therefore not visible, if so remove it
+                if(wave.scaleX*WAVE_RADIUS > maxR) {
+                    waves.removeChildAt(i);
                 }
             }
 
             // draw the updates to stage
             stage.update();
+        }
+        
+        function getWaveImg(thickness) {
+        	// floor the thickness so we only have to deal with integer values:
+        	thickness |= 0;
+        	if (thickness < 1) { return null; }
+        	
+        	// if we already have an image with the right thickness, return it:
+        	if (waveImgs[thickness]) { return waveImgs[thickness]; }
+        	
+        	// otherwise, draw the wave into a Shape instance:
+        	var waveShape = new createjs.Shape();
+			waveShape.graphics.setStrokeStyle(thickness).beginStroke ("#FFF").drawCircle(0,0,WAVE_RADIUS);
+			
+			// cache it to create a bitmap version of the shape:
+			var r = WAVE_RADIUS+thickness;
+			waveShape.cache(-r, -r, r*2, r*2);
+			
+			// save the image into our list, and return it:
+			waveImgs[thickness] = waveShape.cacheCanvas
+			return waveShape.cacheCanvas;
         }
 
     </script>
