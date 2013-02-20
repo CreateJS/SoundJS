@@ -729,6 +729,7 @@ this.createjs = this.createjs || {};
 			this.src = src;
 
 			this.panNode = this.owner.context.createPanner();  // allows us to manipulate left and right audio  // TODO test how this affects when we have mono audio
+            this.panNode.panningModel = "equalpower";
 
 			this.gainNode = this.owner.context.createGainNode();  // allows us to manipulate instance volume
 			this.gainNode.connect(this.panNode);  // connect us to our sequence that leads to context.destination
