@@ -49,10 +49,12 @@ this.createjs = this.createjs || {};
 	 * tags are precreated to all Chrome to load them.  Please use {{#crossLink "Sound.MAX_INSTANCES"}}{{/crossLink}} as
 	 * a guide to how many total audio tags you can safely use in all browsers.
 	 *
-	 * <b>IE 9 html audio quirk</b><br />
-	 * Note in IE 9 there is a delay in applying volume changes to tags that occurs once playback is started. So if you have
-	 * muted all sounds, they will all play during this delay until the mute applies internally. This happens regardless of
-	 * when or how you apply the volume change, as the tag seems to need to play to apply it.
+     * <b>IE 9 html limitations</b><br />
+     * <ul><li>There is a delay in applying volume changes to tags that occurs once playback is started. So if you have
+     * muted all sounds, they will all play during this delay until the mute applies internally. This happens regardless of
+     * when or how you apply the volume change, as the tag seems to need to play to apply it.</li>
+     * <li>MP3 encoding will not always work for audio tags if it's not default.  We've found default encoding with
+     * 64kbps works.</li></ul>
 	 *
 	 * <b>iOS 6 limitations</b><br />
 	 * Note it is recommended to use {{#crossLink "WebAudioPlugin"}}{{/crossLink}} for iOS (6+). HTML Audio can only

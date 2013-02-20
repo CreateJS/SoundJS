@@ -59,7 +59,7 @@ this.createjs = this.createjs || {};
  *      function loadHandler(event) {
  *          // This is fired for each sound that is registered.
  *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use source.
- *          instance.addEventListener("playComplete", createjs.proxy(this.handleComplete, this));
+ *          instance.addEventListener("complete", createjs.proxy(this.handleComplete, this));
  *          instance.setVolume(0.5);
  *      }
  *
@@ -106,7 +106,7 @@ this.createjs = this.createjs || {};
 	 *      function loadHandler(event) {
      *          // This is fired for each sound that is registered.
      *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use source.
-     *          instance.addEventListener("playComplete", createjs.proxy(this.handleComplete, this));
+     *          instance.addEventListener("complete", createjs.proxy(this.handleComplete, this));
      *          instance.setVolume(0.5);
 	 *      }
 	 *
@@ -124,10 +124,12 @@ this.createjs = this.createjs || {};
 	 *      createjs.PreloadJS.installPlugin(createjs.Sound);
 	 *
 	 * <h4>Known Browser and OS issues</h4>
-	 * <b>IE 9 html audio quirk</b><br />
-	 * Note in IE 9 there is a delay in applying volume changes to tags that occurs once playback is started. So if you have
+	 * <b>IE 9 html limitations</b><br />
+	 * <ul><li>There is a delay in applying volume changes to tags that occurs once playback is started. So if you have
 	 * muted all sounds, they will all play during this delay until the mute applies internally. This happens regardless of
-	 * when or how you apply the volume change, as the tag seems to need to play to apply it.
+	 * when or how you apply the volume change, as the tag seems to need to play to apply it.</li>
+     * <li>MP3 encoding will not always work for audio tags, particularly in Internet Explorer. We've found default
+	 * encoding with 64kbps works.</li></ul>
 	 *
 	 * <b>iOS 6 limitations</b><br />
 	 * <ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event (touch).</li>
