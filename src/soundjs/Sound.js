@@ -325,7 +325,7 @@ this.createjs = this.createjs || {};
 	 * @type {Object}
 	 * @static
 	 */
-			s.activePlugin = null;
+    s.activePlugin = null;
 
 	/**
 	 * Determines if the plugins have been registered. If false, the first call to play() will instantiate the default
@@ -1390,8 +1390,8 @@ this.createjs = this.createjs || {};
 
 				// Audio is complete or not playing
 				if (target.playState == Sound.PLAY_FINISHED ||
-						target == Sound.PLAY_INTERRUPTED ||
-						target == Sound.PLAY_FAILED) {
+						target.playState == Sound.PLAY_INTERRUPTED ||
+						target.playState == Sound.PLAY_FAILED) {
 					replacement = target;
 
 					// Audio is a better candidate than the current target, according to playhead

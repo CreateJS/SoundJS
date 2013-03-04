@@ -263,6 +263,7 @@ this.createjs = this.createjs || {};
 			var tag = document.createElement("audio");
 			tag.autoplay = false;
 			tag.preload = "none";
+			//LM: Firefox fails when this the preload="none" for other tags, but it needs to be "none" to ensure PreloadJS works.
 			tag.src = src;
 			return tag;
 		},
@@ -446,6 +447,7 @@ this.createjs = this.createjs || {};
 			if (tag.readyState !== 4) {
 				tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
 				tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_STALLED, this.stalledHandler, false);
+				tag.preload = "auto"; // This is necessary for Firefox, as it won't ever "load" until this is set.
 				tag.load();
 			} else {
 				this.handleSoundReady(null);

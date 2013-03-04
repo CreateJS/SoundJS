@@ -1,6 +1,12 @@
-Version Next [Not Released]
+Version NEXT [Not Released]
 ************************************************************************************************************************
-- Updated WebAudioPlugin to use a better panning model (equal power).
+- Updated WebAudioPlugin to use a better panning model (equal power), which matches the sound quality of the other
+	plugins.
+- Fixed playback for secondary sounds in HTMLAudio Plugin that affected Firefox. An issue with durations on those files
+	still exists.
+- Fixed issue where sound channels that had failed or were interrupted could not be used, resulting in less instances
+	available then expected.
+
 
 Version 0.4.0 [Feb 12, 2013]
 ************************************************************************************************************************
