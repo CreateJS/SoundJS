@@ -142,7 +142,15 @@ this.createjs = this.createjs || {};
 		// set up AudioNodes that all of our source audio will connect to
 		s.dynamicsCompressorNode = s.context.createDynamicsCompressor();
 		s.dynamicsCompressorNode.connect(s.context.destination);
-		s.gainNode = s.context.createGainNode();
+		if (typeof s.context.createGain !== 'undefined') {
+			// Firefox or Chrome, currently
+			s.gainNode = s.context.createGain();
+		}
+		else {
+			// Safari, or older versions of Web Audio Api
+			s.gainNode = s.context.createGainNode();
+		}
+		
 		s.gainNode.connect(s.dynamicsCompressorNode);
 	}
 
@@ -731,7 +739,15 @@ this.createjs = this.createjs || {};
 			this.panNode = this.owner.context.createPanner();  // allows us to manipulate left and right audio  // TODO test how this affects when we have mono audio
             this.panNode.panningModel = "equalpower";
 
-			this.gainNode = this.owner.context.createGainNode();  // allows us to manipulate instance volume
+            // detect new api implementation
+            if (typeof owner.context.createGain !== 'undefined') {
+            	this.gainNode = this.owner.context.createGain();
+            }
+            else {
+            	// support for Safari
+            	this.gainNode = this.owner.context.createGainNode();
+            }
+			  // allows us to manipulate instance volume
 			this.gainNode.connect(this.panNode);  // connect us to our sequence that leads to context.destination
 
 			if (this.owner.isPreloadComplete(this.src)) {
@@ -751,7 +767,11 @@ this.createjs = this.createjs || {};
 		cleanUp:function () {
 			// if playbackState is UNSCHEDULED_STATE, then noteON or noteGrainOn has not been called so calling noteOff would throw an error
 			if (this.sourceNode && this.sourceNode.playbackState != this.sourceNode.UNSCHEDULED_STATE) {
-				this.sourceNode.noteOff(0);
+				if (typeof this.sourceNode.stop !== 'undefined') {
+					this.sourceNode.stop(0);
+				} else {
+					this.sourceNode.noteOff(0);	
+				}
 				this.sourceNode = null; // release reference so Web Audio can handle removing references and garbage collection
 			}
 
@@ -821,7 +841,12 @@ this.createjs = this.createjs || {};
 			this.soundCompleteTimeout = setTimeout(this.endedHandler, (this.sourceNode.buffer.duration - this.offset) * 1000);  // NOTE *1000 because WebAudio reports everything in seconds but js uses milliseconds
 
 			this.startTime = this.owner.context.currentTime - this.offset;
-			this.sourceNode.noteGrainOn(0, this.offset, this.sourceNode.buffer.duration - this.offset);
+			if (typeof this.sourceNode.start !== 'undefined') {
+				this.sourceNode.start(0, this.offset, this.sourceNode.buffer.duration - this.offset);
+			}
+			else {
+				this.sourceNode.noteGrainOn(0, this.offset, this.sourceNode.buffer.duration - this.offset);	
+			}			
 		},
 
 		// Public API
@@ -899,7 +924,13 @@ this.createjs = this.createjs || {};
 				this.paused = true;
 
 				this.offset = this.owner.context.currentTime - this.startTime;  // this allows us to restart the sound at the same point in playback
-				this.sourceNode.noteOff(0);  // note this means the sourceNode cannot be reused and must be recreated
+
+				// note this means the sourceNode cannot be reused and must be recreated	
+				if (typeof this.sourceNode.end !== 'undefined') {
+					this.sourceNode.end(0);
+				} else {
+					this.sourceNode.noteOff(0); 
+				}
 
 				if (this.panNode.numberOfOutputs != 0) {
 					this.panNode.disconnect();
@@ -1094,7 +1125,13 @@ this.createjs = this.createjs || {};
 			this.offset = value / 1000; // convert milliseconds to seconds
 
 			if (this.sourceNode && this.sourceNode.playbackState != this.sourceNode.UNSCHEDULED_STATE) {  // if playbackState is UNSCHEDULED_STATE, then noteON or noteGrainOn has not been called so calling noteOff would throw an error
-				this.sourceNode.noteOff(0);  // we need to stop this sound from continuing to play, as we need to recreate the sourceNode to change position
+				// we need to stop this sound from continuing to play, as we need to recreate the sourceNode to change position
+				if (typeof this.sourceNode.end !== 'undefined') {
+					this.sourceNode.end(0);	
+				}
+				else {
+					this.sourceNode.noteOff(0);	
+				}				
 				clearTimeout(this.soundCompleteTimeout);  // clear timeout that triggers sound complete
 			}  // NOTE we cannot just call cleanup because it also calls the Sound function playFinished which releases this instance in SoundChannel
 
