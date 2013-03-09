@@ -81,7 +81,9 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.isSupported = function () {
-        if (location.protocol == "file:") { return false; }  // Web Audio requires XHR, which is not available locally
+		// check if this is some kind of mobile device, Web Audio works with local protocol under PhoneGap
+		var isMobilePhoneGap = ( navigator.userAgent.toLowerCase().match(/(ipad|iphone|ipod|android|blackberry)/g) ? true : false );
+    if (location.protocol == "file:" && !isMobilePhoneGap) { return false; }  // Web Audio requires XHR, which is not available locally
 		s.generateCapabilities();
 		if (s.context == null) {
 			return false;
