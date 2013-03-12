@@ -432,10 +432,6 @@ this.createjs = this.createjs || {};
 				return -1;
 			}
 
-			this.duration = this.tag.duration * 1000;
-			// OJR would like a cleaner way to do this in init, discuss with LM
-			// need this for setPosition on stopped sounds
-
 			tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
 
 			// Reset this instance.
@@ -472,6 +468,10 @@ this.createjs = this.createjs || {};
 			if (window.createjs == null) {
 				return;
 			}
+
+            // OJR would like a cleaner way to do this in init, discuss with LM
+            this.duration = this.tag.duration * 1000;  // need this for setPosition on stopped sounds
+
 			this.playState = createjs.Sound.PLAY_SUCCEEDED;
 			this.paused = false;
 			this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
