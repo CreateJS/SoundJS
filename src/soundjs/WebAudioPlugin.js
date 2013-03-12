@@ -36,6 +36,7 @@ this.createjs = this.createjs || {};
 
 (function () {
 
+    // TODO OJR replace deprecated WebAudio API calls with current values using lazyload style method where functions are replaced
 	/**
 	 * Play sounds using Web Audio in the browser. The WebAudio plugin has been successfully tested with:
 	 * <ul><li>Google Chrome, version 23+ on OS X and Windows</li>
@@ -142,7 +143,7 @@ this.createjs = this.createjs || {};
 		// set up AudioNodes that all of our source audio will connect to
 		s.dynamicsCompressorNode = s.context.createDynamicsCompressor();
 		s.dynamicsCompressorNode.connect(s.context.destination);
-		s.gainNode = s.context.createGainNode();
+		s.gainNode = s.context.createGainNode();  // OJR deprecated, replaced with createGain
 		s.gainNode.connect(s.dynamicsCompressorNode);
 	}
 
@@ -729,9 +730,9 @@ this.createjs = this.createjs || {};
 			this.src = src;
 
 			this.panNode = this.owner.context.createPanner();  // allows us to manipulate left and right audio  // TODO test how this affects when we have mono audio
-            this.panNode.panningModel = "equalpower";
+            this.panNode.panningModel = 0;  // OJR deprecated in favor of "equalpower"
 
-			this.gainNode = this.owner.context.createGainNode();  // allows us to manipulate instance volume
+			this.gainNode = this.owner.context.createGainNode();  // allows us to manipulate instance volume  // OJR deprecated in favor of context.createGain
 			this.gainNode.connect(this.panNode);  // connect us to our sequence that leads to context.destination
 
 			if (this.owner.isPreloadComplete(this.src)) {
@@ -751,7 +752,7 @@ this.createjs = this.createjs || {};
 		cleanUp:function () {
 			// if playbackState is UNSCHEDULED_STATE, then noteON or noteGrainOn has not been called so calling noteOff would throw an error
 			if (this.sourceNode && this.sourceNode.playbackState != this.sourceNode.UNSCHEDULED_STATE) {
-				this.sourceNode.noteOff(0);
+				this.sourceNode.noteOff(0);  // OJR deprecated, replaced with stop()
 				this.sourceNode = null; // release reference so Web Audio can handle removing references and garbage collection
 			}
 
@@ -821,7 +822,7 @@ this.createjs = this.createjs || {};
 			this.soundCompleteTimeout = setTimeout(this.endedHandler, (this.sourceNode.buffer.duration - this.offset) * 1000);  // NOTE *1000 because WebAudio reports everything in seconds but js uses milliseconds
 
 			this.startTime = this.owner.context.currentTime - this.offset;
-			this.sourceNode.noteGrainOn(0, this.offset, this.sourceNode.buffer.duration - this.offset);
+			this.sourceNode.noteGrainOn(0, this.offset, this.sourceNode.buffer.duration - this.offset);  // OJR deprecated in favor of start()
 		},
 
 		// Public API
@@ -899,7 +900,7 @@ this.createjs = this.createjs || {};
 				this.paused = true;
 
 				this.offset = this.owner.context.currentTime - this.startTime;  // this allows us to restart the sound at the same point in playback
-				this.sourceNode.noteOff(0);  // note this means the sourceNode cannot be reused and must be recreated
+				this.sourceNode.noteOff(0);  // note this means the sourceNode cannot be reused and must be recreated  // OJR deprecated in favor of stop()
 
 				if (this.panNode.numberOfOutputs != 0) {
 					this.panNode.disconnect();
@@ -1014,9 +1015,9 @@ this.createjs = this.createjs || {};
 		 */
 		setMute:function (value) {
 			if (value == null || value == undefined) {
-				return false
+				return false;
 			}
-			;
+
 			this.muted = value;
 			this.updateVolume();
 			return true;
@@ -1094,7 +1095,7 @@ this.createjs = this.createjs || {};
 			this.offset = value / 1000; // convert milliseconds to seconds
 
 			if (this.sourceNode && this.sourceNode.playbackState != this.sourceNode.UNSCHEDULED_STATE) {  // if playbackState is UNSCHEDULED_STATE, then noteON or noteGrainOn has not been called so calling noteOff would throw an error
-				this.sourceNode.noteOff(0);  // we need to stop this sound from continuing to play, as we need to recreate the sourceNode to change position
+				this.sourceNode.noteOff(0);  // we need to stop this sound from continuing to play, as we need to recreate the sourceNode to change position  // OJR deprecated in favor of stop()
 				clearTimeout(this.soundCompleteTimeout);  // clear timeout that triggers sound complete
 			}  // NOTE we cannot just call cleanup because it also calls the Sound function playFinished which releases this instance in SoundChannel
 
