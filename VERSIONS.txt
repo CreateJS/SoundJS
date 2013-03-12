@@ -6,6 +6,10 @@ Version NEXT [Not Released]
 	still exists.
 - Fixed issue where sound channels that had failed or were interrupted could not be used, resulting in less instances
 	available then expected.
+- Updated file validation RegExp. Supports double-byte characters, prevents partial matches, better
+	support for relative paths, improved matching of domains, and modified the "file name" match to
+	include the extension (file.mp3 instead of file). The match arguments have not changed otherwise.
+	Also used the "extended" argument to make the pattern more readable.
 
 
 Version 0.4.0 [Feb 12, 2013]

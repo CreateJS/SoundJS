@@ -287,13 +287,13 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * The RegExp pattern to use to parse file URIs. This supports simple file names, as well as full domain URIs with
-	 * query strings. The resulting match is: protocol:$1 domain:$2 path:$3 file:$4 extension:$5 query string:$6.
+	 * query strings. The resulting match is: protocol:$1 domain:$2 path:$3 file:$4 extension:$5 query:$6.
 	 * @property FILE_PATTERN
 	 * @type {RegExp}
 	 * @static
-	 * @private
+	 * @protected
 	 */
-	s.FILE_PATTERN = /(\w+:\/{2})?((?:\w+\.){2}\w+)?(\/?[\S]+\/|\/)?([\w\-%\.]+)(?:\.)(\w+)?(\?\S+)?/i;
+	s.FILE_PATTERN = /^(?:(\w+:)\/{2}(\w+(?:\.\w+)*\/?))?([/.]+?(?:[^?]+)?\/)?([^/?]+\.(\w+))(?:\?(\S+)?)?$/;
 
 	/**
 	 * Determines the default behavior for interrupting other currently playing instances with the same source, if the
