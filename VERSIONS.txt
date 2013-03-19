@@ -15,7 +15,7 @@ Version NEXT [Not Released]
 	Also renamed the "sendLoadComplete" method to "sendFileLoadEvent".
 - Fixed cleanup routine to happen before the Sound and instance events are dispatched, which caused issues if affecting
 	the sound immediately after receiving the event.
-
+- Corrected missing namespaces in SoundInstance overview.
 
 Version 0.4.0 [Feb 12, 2013]
 ************************************************************************************************************************

@@ -368,7 +368,7 @@ this.createjs = this.createjs || {};
 	 * for control by the user.
 	 *
 	 * <h4>Example</h4>
-	 *      Sound.play("myAssetPath/mySrcFile.mp3");
+	 *      createjs.Sound.play("myAssetPath/mySrcFile.mp3");
 	 *
 	 * A number of additional parameters provide a quick way to determine how a sound is played. Please see the Sound
 	 * API method {{#crossLink "Sound/play"}}{{/crossLink}} for a list of arguments.
@@ -379,7 +379,7 @@ this.createjs = this.createjs || {};
 	 * playback has completed, a simple call to the {{#crossLink "SoundInstance/play"}}{{/crossLink}} instance method
 	 * will rebuild the references the Sound class need to control it.
 	 *
-	 *      var myInstance = Sound.play("myAssetPath/mySrcFile.mp3");
+	 *      var myInstance = createjs.Sound.play("myAssetPath/mySrcFile.mp3");
 	 *      myInstance.addEventListener("complete", playAgain);
 	 *      function playAgain(event) {
 	 *          myInstance.play();
@@ -387,7 +387,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * Events are dispatched from the instance to notify when the sound has completed, looped, or when playback fails
 	 *
-	 *      var myInstance = Sound.play("myAssetPath/mySrcFile.mp3");
+	 *      var myInstance = createjs.Sound.play("myAssetPath/mySrcFile.mp3");
 	 *      myInstance.addEventListener("complete", playAgain);
 	 *      myInstance.addEventListener("loop", handleLoop);
 	 *      myInstance.addEventListener("playbackFailed", handleFailed);
