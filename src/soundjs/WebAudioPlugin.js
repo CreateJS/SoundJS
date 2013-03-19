@@ -82,7 +82,9 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.isSupported = function () {
-        if (location.protocol == "file:") { return false; }  // Web Audio requires XHR, which is not available locally
+		// check if this is some kind of mobile device, Web Audio works with local protocol under PhoneGap and it is unlikely someone is trying to run a local file
+		var isMobilePhoneGap = createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid || createjs.Sound.BrowserDetect.isBlackberry;
+		if (location.protocol == "file:" && !isMobilePhoneGap) { return false; }  // Web Audio requires XHR, which is not available locally
 		s.generateCapabilities();
 		if (s.context == null) {
 			return false;
@@ -274,7 +276,7 @@ this.createjs = this.createjs || {};
 		 */
 		handlePreloadComplete:function () {
 			//LM: I would recommend having the WebAudioLoader include an "event" in the onload, and properly binding this callback.
-			createjs.Sound.sendLoadComplete(this.src);  // fire event or callback on Sound
+			createjs.Sound.sendFileLoadEvent(this.src);  // fire event or callback on Sound
 			// note "this" will reference WebAudioLoader object
 		},
 
@@ -780,9 +782,9 @@ this.createjs = this.createjs || {};
 			if (this.onPlayInterrupted) {
 				this.onPlayInterrupted(this);
 			}
-			this.sendEvent("interrupted");
 			this.cleanUp();
 			this.paused = false;
+			this.sendEvent("interrupted");
 		},
 
 		// Playback has stalled, and therefore failed.
@@ -1138,11 +1140,11 @@ this.createjs = this.createjs || {};
 				return;
 			}
 			this.playState = createjs.Sound.PLAY_FINISHED;
+			this.cleanUp();
 			if (this.onComplete != null) {
 				this.onComplete(this);
 			}
 			this.sendEvent("complete");
-			this.cleanUp();
 		},
 
 		// Play has failed, which can happen for a variety of reasons.
@@ -1154,8 +1156,8 @@ this.createjs = this.createjs || {};
 			if (this.onPlayFailed != null) {
 				this.onPlayFailed(this);
 			}
-			this.sendEvent("failed");
 			this.cleanUp();
+			this.sendEvent("failed");
 		},
 
 		toString:function () {

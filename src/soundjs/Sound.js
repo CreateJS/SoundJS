@@ -54,7 +54,7 @@ this.createjs = this.createjs || {};
  * </ul>
  *
  * <h4>Feature Set Example</h4>
- *      createjs.Sound.addEventListener("loadComplete", createjs.proxy(this.loadHandler, this));
+ *      createjs.Sound.addEventListener("fileload", createjs.proxy(this.loadHandler, this));
  *      createjs.Sound.registerSound("path/to/mySound.mp3|path/to/mySound.ogg", "sound");
  *      function loadHandler(event) {
  *          // This is fired for each sound that is registered.
@@ -101,7 +101,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * <h4>Example</h4>
 	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashPlugin]);
-	 *      createjs.Sound.addEventListener("loadComplete", createjs.proxy(this.loadHandler, (this));
+	 *      createjs.Sound.addEventListener("fileload", createjs.proxy(this.loadHandler, (this));
 	 *      createjs.Sound.registerSound("path/to/mySound.mp3|path/to/mySound.ogg", "sound");
 	 *      function loadHandler(event) {
      *          // This is fired for each sound that is registered.
@@ -118,7 +118,7 @@ this.createjs = this.createjs || {};
 	 * Sound can be used as a plugin with PreloadJS to help preload audio properly. Audio preloaded with PreloadJS is
 	 * automatically registered with the Sound class. When audio is not preloaded, Sound will do an automatic internal
 	 * preload, and as a result, it may not play immediately the first time play is called. Use the
-	 * {{#crossLink "Sound/loadComplete"}}{{/crossLink}} event to determine when a sound has finished internally preloading.
+	 * {{#crossLink "Sound/fileload"}}{{/crossLink}} event to determine when a sound has finished internally preloading.
 	 * It is recommended that all audio is preloaded before it is played.
 	 *
 	 *      createjs.PreloadJS.installPlugin(createjs.Sound);
@@ -293,7 +293,7 @@ this.createjs = this.createjs || {};
 	 * @static
 	 * @protected
 	 */
-	s.FILE_PATTERN = /^(?:(\w+:)\/{2}(\w+(?:\.\w+)*\/?))?([/.]+?(?:[^?]+)?\/)?([^/?]+\.(\w+))(?:\?(\S+)?)?$/;
+	s.FILE_PATTERN = /^(?:(\w+:)\/{2}(\w+(?:\.\w+)*\/?))?([/.]*?(?:[^?]+)?\/)?((?:[^/?]+)\.(\w+))(?:\?(\S+)?)?$/;
 
 	/**
 	 * Determines the default behavior for interrupting other currently playing instances with the same source, if the
@@ -420,16 +420,23 @@ this.createjs = this.createjs || {};
 
 // Events
 	/**
+	 * This event that is fired when a file finishes loading internally. <b>Please use the "fileload" event instead.</b>
+	 * @event loadComplete
+	 * @deprecated In favor of the "fileload" event.
+	 * @since 0.4.0
+	 */
+
+	/**
 	 * This event that is fired when a file finishes loading internally. This event is fired for each loaded sound,
 	 * so any handler methods should look up the <code>event.src</code> to handle a particular sound.
-	 * @event loadComplete
+	 * @event fileload
 	 * @param {Object} target The object that dispatched the event.
 	 * @param {String} type The event type.
 	 * @param {String} src The source of the sound that was loaded. Note this will only return the loaded part of a
 	 * delimiter-separated source.
 	 * @param {String} [id] The id passed in when the sound was registered. If one was not provided, it will be null.
 	 * @param {Number|Object} [data] Any additional data associated with the item. If not provided, it will be undefined.
-	 * @since 0.4.0
+	 * @since 0.4.1
 	 */
 
 // Callbacks
@@ -437,19 +444,19 @@ this.createjs = this.createjs || {};
 	 * The callback that is fired when a file finishes loading internally.
 	 * @property onLoadComplete
 	 * @type {Function}
-	 * @deprecated In favour of the "loadComplete" event. Will be removed in a future version.
+	 * @deprecated In favour of the "fileload" event. Will be removed in a future version.
 	 * @since 0.4.0
 	 */
 	s.onLoadComplete = null;
 
 	/**
-	 * @method sendLoadComplete
+	 * @method sendFileLoadEvent
 	 * @param {String} src A sound file has completed loading, and should be dispatched.
 	 * @private
 	 * @static
-	 * @since 0.4.0
+	 * @since 0.4.1
 	 */
-	s.sendLoadComplete = function (src) {
+	s.sendFileLoadEvent = function (src) {
 		if (!s.preloadHash[src]) {
 			return;
 		}
@@ -457,13 +464,23 @@ this.createjs = this.createjs || {};
 			var item = s.preloadHash[src][i];
 			var event = {
 				target:this,
-				type:"loadComplete",
-				src:item.src, // OJR LM thinks this might be more consistent if it returned item like PreloadJS
+				type:"fileload",
+				src:item.src,
 				id:item.id,
 				data:item.data
 			};
 			s.preloadHash[src][i] = true;
-			s.onLoadComplete && s.onLoadComplete(event);
+			s.dispatchEvent(event);
+
+			// We still dispatch the deprecated events.
+			s.onLoadComplete && s.onLoadComplete(event); // Uses the new "type"
+			event = { // Use a new object to avoid references getting messed up.
+				target:this,
+				type:"loadComplete",
+				src:item.src,
+				id:item.id,
+				data:item.data
+			}
 			s.dispatchEvent(event);
 		}
 	}
@@ -671,9 +688,9 @@ this.createjs = this.createjs || {};
 		}
 
 		if (src instanceof Object) {
-			src = src.src;
 			id = src.id;
 			data = src.data;
+			src = src.src;
 			//OJR also do? preload = src.preload;
 		}
 		var details = s.parsePath(src, "sound", id, data);
@@ -727,7 +744,7 @@ this.createjs = this.createjs || {};
 			if (!s.preloadHash[details.src]) {
 				s.preloadHash[details.src] = [];
 			}  // we do this so we can store multiple id's and data if needed
-			s.preloadHash[details.src].push({src:src, id:id, data:data});  // keep this data so we can return it onLoadComplete
+			s.preloadHash[details.src].push({src:src, id:id, data:data});  // keep this data so we can return it fileload
 			if (s.preloadHash[details.src].length == 1) {
 				s.activePlugin.preload(details.src, loader)
 			}
@@ -747,7 +764,7 @@ this.createjs = this.createjs || {};
 	 *          {src:"assetPath/asset1.mp3|assetPath/asset1.ogg", id:"1", data:6},
 	 *          {src:"assetPath/asset2.mp3", id:"works"}
 	 *      ];
-	 *      createjs.Sound.addEventListener("loadComplete", doneLoading); // call doneLoading when each sound loads
+	 *      createjs.Sound.addEventListener("fileload", doneLoading); // call doneLoading when each sound loads
 	 *      createjs.Sound.registerManifest(manifest);
 	 *
 	 *
@@ -850,7 +867,7 @@ this.createjs = this.createjs || {};
 	 * constants on the Sound class.
 	 * @param {Number} [delay=0] The amount of time to delay the start of the audio in milliseconds.
 	 * @param {Number} [offset=0] The point to start the audio in milliseconds.
-	 * @param {Number} [loop=0] How many times the audio loops when it reaches the end of playback. The efault is 0 (no
+	 * @param {Number} [loop=0] How many times the audio loops when it reaches the end of playback. The default is 0 (no
 	 * loops), and -1 can be used for infinite playback.
 	 * @param {Number} [volume=1] The volume of the sound, between 0 and 1. Note that the master volume is applied
 	 * against the individual volume.

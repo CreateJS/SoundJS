@@ -329,7 +329,7 @@
             {id:"Cabin Boy", src:assetsPath + "U-CabinBoy3.mp3", type:"sound", data:1}
         ];
 
-        createjs.Sound.addEventListener("loadComplete", createjs.proxy(addSoundToList,this)); // add an event listener for when load is completed
+        createjs.Sound.addEventListener("fileload", createjs.proxy(addSoundToList,this)); // add an event listener for when load is completed
         createjs.Sound.registerManifest(manifest);
     }
 

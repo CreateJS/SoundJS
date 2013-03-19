@@ -113,7 +113,7 @@
                 {src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg", id:12}  //OJR would prefer a new sound rather than a copy
             ];
 
-            createjs.Sound.addEventListener("loadComplete", createjs.proxy(soundLoaded, this)); // add an event listener for when load is completed
+            createjs.Sound.addEventListener("fileload", createjs.proxy(soundLoaded, this)); // add an event listener for when load is completed
             createjs.Sound.registerManifest(manifest);
         }
 

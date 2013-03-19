@@ -69,16 +69,16 @@
             // NOTE the "|" character is used by Sound to separate source into distinct files, which allows you to provide multiple extensions for wider browser support
 
             //createjs.Sound.onLoadComplete = playSound;  // add a callback for when load is completed
-            createjs.Sound.addEventListener("loadComplete", createjs.proxy(playSound,this)); // add an event listener for when load is completed
+            createjs.Sound.addEventListener("fileload", playSound); // add an event listener for when load is completed
             createjs.Sound.registerSound(src);  // register sound, which preloads by default
 
-            displayStatus.innerText = "Waiting for load to complete.";  // letting the user know what's happening
+            displayStatus.innerHTML = "Waiting for load to complete.";  // letting the user know what's happening
         }
 
         function playSound(evt) {
             if (evt.src == src) {  // note that callback and event listener return the same event
                 soundInstance = createjs.Sound.play(src);  // start playing the sound we just loaded, storing the playing instance
-                displayStatus.innerText = "Playing source: " + evt.src;  // let the user know what we are playing
+                displayStatus.innerHTML = "Playing source: " + evt.src;  // let the user know what we are playing
             }
         }
 

@@ -230,7 +230,7 @@ this.createjs = this.createjs || {};
 		/**
 		 * A developer flag to output all flash events to the console (if it exists).  Used for debugging.
 		 *
-		 *      Sound.activePlugin.showOutput = true;
+		 *      createjs.Sound.activePlugin.showOutput = true;
 		 *
 		 * @property showOutput
 		 * @type {Boolean}
@@ -631,9 +631,9 @@ this.createjs = this.createjs || {};
 				this.onPlayInterrupted(this);
 			}
 			this.flash.interrupt(this.flashId);
-			this.sendEvent("interrupted");
 			this.cleanUp();
 			this.paused = false;
+			this.sendEvent("interrupted");
 		},
 
 		cleanUp:function () {
@@ -681,8 +681,8 @@ this.createjs = this.createjs || {};
 			if (this.onPlayFailed != null) {
 				this.onPlayFailed(this);
 			}
-			this.sendEvent("failed");
 			this.cleanUp();
+			this.sendEvent("failed");
 		},
 
 		pause:function () {
@@ -791,11 +791,11 @@ this.createjs = this.createjs || {};
 		 */
 		handleSoundFinished:function () {
 			this.playState = createjs.Sound.PLAY_FINISHED;
+			this.cleanUp();
 			if (this.onComplete != null) {
 				this.onComplete(this);
 			}
 			this.sendEvent("complete");
-			this.cleanUp();
 		},
 
 		/**
@@ -975,7 +975,7 @@ this.createjs = this.createjs || {};
 		handleComplete:function () {
 			this.progress = 1;
 			this.readyState = 4;
-			createjs.Sound.sendLoadComplete(this.src);  // fire event or callback on Sound // can't use onload callback because we need to pass the source
+			createjs.Sound.sendFileLoadEvent(this.src);  // fire event or callback on Sound // can't use onload callback because we need to pass the source
 			this.onload && this.onload();
 		},
 

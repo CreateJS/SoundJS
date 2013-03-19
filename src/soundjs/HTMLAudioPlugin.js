@@ -411,9 +411,9 @@ this.createjs = this.createjs || {};
 			if (this.onPlayInterrupted) {
 				this.onPlayInterrupted(this);
 			}
-			this.sendEvent("interrupted");
 			this.cleanUp();
 			this.paused = false;
+			this.sendEvent("interrupted");
 		},
 
 // Public API
@@ -460,8 +460,8 @@ this.createjs = this.createjs || {};
 			if (this.onPlayFailed != null) {
 				this.onPlayFailed(this);
 			}
-			this.sendEvent("failed");
 			this.cleanUp();  // OJR NOTE this will stop playback, and I think we should remove this and let the developer decide how to handle stalled instances
+			this.sendEvent("failed");
 		},
 
 		handleSoundReady:function (event) {
@@ -624,11 +624,11 @@ this.createjs = this.createjs || {};
 				return;
 			}
 			this.playState = createjs.Sound.PLAY_FINISHED;
+			this.cleanUp();
 			if (this.onComplete != null) {
 				this.onComplete(this);
 			}
 			this.sendEvent("complete");
-			this.cleanUp();
 		},
 
 		playFailed:function () {
@@ -639,8 +639,8 @@ this.createjs = this.createjs || {};
 			if (this.onPlayFailed != null) {
 				this.onPlayFailed(this);
 			}
-			this.sendEvent("failed");
 			this.cleanUp();
+			this.sendEvent("failed");
 		},
 
 		toString:function () {
@@ -755,7 +755,7 @@ this.createjs = this.createjs || {};
 		sendLoadedEvent:function (evt) {
 			this.tag.removeEventListener && this.tag.removeEventListener("canplaythrough", this.loadedHandler);  // cleanup and so we don't send the event more than once
 			this.tag.onreadystatechange = null;  // cleanup and so we don't send the event more than once
-			createjs.Sound.sendLoadComplete(this.src);  // fire event or callback on Sound
+			createjs.Sound.sendFileLoadEvent(this.src);  // fire event or callback on Sound
 		},
 
 		// used for debugging

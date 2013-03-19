@@ -2,14 +2,19 @@ Version NEXT [Not Released]
 ************************************************************************************************************************
 - Updated WebAudioPlugin to use a better panning model (equal power), which matches the sound quality of the other
 	plugins.
-- Fixed playback for secondary sounds in HTMLAudio Plugin that affected Firefox. An issue with durations on those files
-	still exists.
+- Fixed playback for secondary sounds in HTMLAudio Plugin that affected Firefox.
+- Fixed and issue with duration caused by the above playback issue for secondary sounds in HTMLAudioPlugin in Firefox.
 - Fixed issue where sound channels that had failed or were interrupted could not be used, resulting in less instances
 	available then expected.
 - Updated file validation RegExp. Supports double-byte characters, prevents partial matches, better
 	support for relative paths, improved matching of domains, and modified the "file name" match to
 	include the extension (file.mp3 instead of file). The match arguments have not changed otherwise.
 	Also used the "extended" argument to make the pattern more readable.
+- Added support for PhoneGap in WebAudioPlugin that allows it to be used on mobile devices.
+- Fixed naming of the fileload event (used to be "loadComplete"). The old event is still dispatched, but is deprecated.
+	Also renamed the "sendLoadComplete" method to "sendFileLoadEvent".
+- Fixed cleanup routine to happen before the Sound and instance events are dispatched, which caused issues if affecting
+	the sound immediately after receiving the event.
 
 
 Version 0.4.0 [Feb 12, 2013]

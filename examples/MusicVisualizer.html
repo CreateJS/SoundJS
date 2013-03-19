@@ -92,7 +92,7 @@
             stage.addChild(messageField);
             stage.update(); 	//update the stage to show text
 
-            createjs.Sound.addEventListener("loadComplete", createjs.proxy(handleLoad,this)); // add an event listener for when load is completed
+            createjs.Sound.addEventListener("fileload", createjs.proxy(handleLoad,this)); // add an event listener for when load is completed
             createjs.Sound.registerSound(src);  // register sound, which preloads by default
         }
 
