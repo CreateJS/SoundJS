@@ -16,6 +16,7 @@ Version NEXT [Not Released]
 - Fixed cleanup routine to happen before the Sound and instance events are dispatched, which caused issues if affecting
 	the sound immediately after receiving the event.
 - Corrected missing namespaces in SoundInstance overview.
+- Fixed playing sounds by ID that are preloaded using the Sound.registerSound method.
 
 Version 0.4.0 [Feb 12, 2013]
 ************************************************************************************************************************
