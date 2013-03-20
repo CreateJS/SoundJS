@@ -1,16 +1,11 @@
 (function () {
 
-	/**
-	 * Static class holding library specific information such as the version and buildDate of the library.
-	 *  The SoundJS class has been renamed {{#crossLink "Sound"}}{{/crossLink}}.  Please see {{#crossLink "Sound"}}{{/crossLink}}
-	 *  for information on using sound.
-	 * @class FlashPlugin
-	 **/
 	var o = this.createjs = this.createjs || {};
 	o = (o.FlashPlugin = o.FlashPlugin || {});
 
 	/**
 	 * The version string for this release.
+	 * @for FlashPlugin
 	 * @property version
 	 * @type String
 	 * @static
@@ -19,6 +14,7 @@
 
 	/**
 	 * The build date for this release in UTC format.
+	 * @for FlashPlugin
 	 * @property buildDate
 	 * @type String
 	 * @static

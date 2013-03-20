@@ -9,7 +9,6 @@ Version NEXT [Not Released]
 - Updated file validation RegExp. Supports double-byte characters, prevents partial matches, better
 	support for relative paths, improved matching of domains, and modified the "file name" match to
 	include the extension (file.mp3 instead of file). The match arguments have not changed otherwise.
-	Also used the "extended" argument to make the pattern more readable.
 - Added support for PhoneGap in WebAudioPlugin that allows it to be used on mobile devices.
 - Fixed naming of the fileload event (used to be "loadComplete"). The old event is still dispatched, but is deprecated.
 	Also renamed the "sendLoadComplete" method to "sendFileLoadEvent".
@@ -17,6 +16,7 @@ Version NEXT [Not Released]
 	the sound immediately after receiving the event.
 - Corrected missing namespaces in SoundInstance overview.
 - Fixed playing sounds by ID that are preloaded using the Sound.registerSound method.
+- Fixed documentation of FlashPlugin. Main description was broken.
 
 Version 0.4.0 [Feb 12, 2013]
 ************************************************************************************************************************
