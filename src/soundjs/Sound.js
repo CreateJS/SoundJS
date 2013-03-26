@@ -129,7 +129,9 @@ this.createjs = this.createjs || {};
 	 * muted all sounds, they will all play during this delay until the mute applies internally. This happens regardless of
 	 * when or how you apply the volume change, as the tag seems to need to play to apply it.</li>
      * <li>MP3 encoding will not always work for audio tags, particularly in Internet Explorer. We've found default
-	 * encoding with 64kbps works.</li></ul>
+	 * encoding with 64kbps works.</li>
+	 * <li>There is a limit to how many audio tags you can load and play at once, which appears to be determined by
+	 * hardware and browser settings.  See {{#crossLink "HTMLAudioPlugin.MAX_INSTANCES"}}{{/crossLink}} for a safe estimate.</li></ul>
 	 *
 	 * <b>iOS 6 limitations</b><br />
 	 * <ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event (touch).</li>
