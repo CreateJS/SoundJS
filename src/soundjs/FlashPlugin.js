@@ -50,6 +50,9 @@ this.createjs = this.createjs || {};
 	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
 	 *      // Adds FlashPlugin as a fallback if WebAudio and HTMLAudio do not work.
 	 *
+	 * Note that the SWF is embedded into a container DIV (with an id and classname of "SoundJSFlashContainer"), and
+	 * will have an id of "flashAudioContainer". The container DIV is positioned 1 pixel off-screen to the left to avoid
+	 * showing the 1x1 pixel white square.
 	 * @class FlashPlugin
 	 * @constructor
 	 */
@@ -156,6 +159,16 @@ this.createjs = this.createjs || {};
 		CONTAINER_ID:"flashAudioContainer",
 
 		/**
+		 * The id name of the DIV wrapper that contains the Flash content.
+		 * @property WRAPPER_ID
+		 * @type {String}
+		 * @default SoundJSFlashContainer
+		 * @protected
+		 * @since 0.4.1
+		 */
+		WRAPPER_ID:"SoundJSFlashContainer",
+
+		/**
 		 * An object that defines the capabilities of the plugin. Please see {{#crossLink "Sound/getCapabilities"}}{{/crossLink}}
 		 * for more information on plugin capabilities.
 		 * @property capabilities
@@ -253,10 +266,18 @@ this.createjs = this.createjs || {};
 			this.queuedInstances = [];
 
 			// Create DIV
+			var w = this.wrapper = document.createElement("div");
+			w.id = this.WRAPPER_ID;
+			w.style.position = "absolute";
+			w.style.marginLeft = "-1px";
+			w.className = this.WRAPPER_ID;
+			document.body.appendChild(w);
+
+			// Create Placeholder
 			var c = this.container = document.createElement("div");
 			c.id = this.CONTAINER_ID;
-			c.appendChild(document.createTextNode("Default Content Here"));
-			document.body.appendChild(c);
+			c.appendChild(document.createTextNode("SoundJS Flash Container"));
+			w.appendChild(c);
 
 			// Embed SWF
 			var val = swfobject.embedSWF(s.BASE_PATH + "FlashAudioPlugin.swf", this.CONTAINER_ID, "1", "1", //550", "400",

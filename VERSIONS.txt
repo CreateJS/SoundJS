@@ -1,9 +1,10 @@
 Version NEXT [Not Released]
 ************************************************************************************************************************
-- Updated WebAudioPlugin to use a better panning model (equal power), which matches the sound quality of the other
+- Updated Known Browser Limitations for IE9 to include information about the audio tag limit.
+- Updated WebAudioPlugin to use a specific panning model (equal power), which matches the sound quality of the other
 	plugins.
 - Fixed playback for secondary sounds in HTMLAudio Plugin that affected Firefox.
-- Fixed and issue with duration caused by the above playback issue for secondary sounds in HTMLAudioPlugin in Firefox.
+- Fixed an issue with duration caused by the above playback issue for secondary sounds in HTMLAudioPlugin in Firefox.
 - Fixed issue where sound channels that had failed or were interrupted could not be used, resulting in less instances
 	available then expected.
 - Updated file validation RegExp. Supports double-byte characters, prevents partial matches, better
@@ -17,6 +18,7 @@ Version NEXT [Not Released]
 - Corrected missing namespaces in SoundInstance overview.
 - Fixed playing sounds by ID that are preloaded using the Sound.registerSound method.
 - Fixed documentation of FlashPlugin. Main description was broken.
+- Moved embedded SWF into a container, and positioned it off-screen.
 
 Version 0.4.0 [Feb 12, 2013]
 ************************************************************************************************************************
