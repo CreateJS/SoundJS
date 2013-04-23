@@ -559,6 +559,19 @@ this.createjs = this.createjs || {};
 		sourceNode:null,
 
 		/**
+		 * NOTE this only exists as a <code>WebAudioPlugin</code> property and is only intended for use by advanced users.
+		 * sourceNodeNext is our audio source for the next loop, inserted in a look ahead approach to allow for smooth
+		 * looping. Connected to <code>gainNode</code>.
+		 * @property sourceNodeNext
+		 * @type {AudioSourceNode}
+		 * @default null
+		 * @protected
+		 * @since 0.4.1
+		 *
+		 */
+		sourceNodeNext:null,
+
+		/**
 		 * Determines if the audio is currently muted.
 		 * Use <code>getMute</code> and <code>setMute</code> to access.
 		 * @property muted
@@ -754,14 +767,16 @@ this.createjs = this.createjs || {};
 		cleanUp:function () {
 			// if playbackState is UNSCHEDULED_STATE, then noteON or noteGrainOn has not been called so calling noteOff would throw an error
 			if (this.sourceNode && this.sourceNode.playbackState != this.sourceNode.UNSCHEDULED_STATE) {
-				this.sourceNode.noteOff(0);  // OJR deprecated, replaced with stop()
-				this.sourceNode = null; // release reference so Web Audio can handle removing references and garbage collection
+				this.cleanUpAudioNode(this.sourceNode);
+				if (this.sourceNodeNext) {	// this is null unless we are looping
+					this.cleanUpAudioNode(this.sourceNodeNext);
+				}
 			}
 
 			if (this.panNode.numberOfOutputs != 0) {
 				this.panNode.disconnect(0);
 			}  // this works because we only have one connection, and it returns 0 if we've already disconnected it.
-			// OJR there appears to be a bug that this doesn't always work in webkit (Chrome and Safari). According to the documentation, this should work. // TODO test in safari
+			// OJR there appears to be a bug that this doesn't always work in webkit (Chrome and Safari). According to the documentation, this should work.
 
 			clearTimeout(this.delayTimeoutId); // clear timeout that plays delayed sound
 			clearTimeout(this.soundCompleteTimeout);  // clear timeout that triggers sound complete
@@ -770,6 +785,13 @@ this.createjs = this.createjs || {};
 				return;
 			}
 			createjs.Sound.playFinished(this);
+		},
+
+		cleanUpAudioNode: function(audioNode) {
+			audioNode.noteOff(0);	// OJR deprecated, replaced with stop()  // note this means the sourceNode cannot be reused and must be recreated
+			audioNode.disconnect(this.gainNode);
+			audioNode = null;	// release reference so Web Audio can handle removing references and garbage collection
+			return audioNode;
 		},
 
 		/**
@@ -801,7 +823,7 @@ this.createjs = this.createjs || {};
 				return;
 			}
 
-			if (this.offset > this.getDuration()) {
+			if ((this.offset*1000) > this.getDuration()) {	// converting offset to ms
 				this.playFailed();
 				return;
 			} else if (this.offset < 0) {  // may not need this check if noteGrainOn ignores negative values, this is not specified in the API http://www.w3.org/TR/webaudio/#AudioBufferSourceNode
@@ -813,18 +835,38 @@ this.createjs = this.createjs || {};
 
 			this.panNode.connect(this.owner.gainNode);  // this line can cause a memory leak.  Nodes need to be disconnected from the audioDestination or any sequence that leads to it.
 
+			var dur = this.owner.arrayBuffers[this.src].duration;
+			this.sourceNode = this.createAndPlayAudioNode((this.owner.context.currentTime - dur), this.offset);
+			this.duration = dur * 1000;	// NOTE *1000 because WebAudio reports everything in seconds but js uses milliseconds
+			this.startTime = this.sourceNode.startTime - this.offset;
+
+			this.soundCompleteTimeout = setTimeout(this.endedHandler, (dur - this.offset) * 1000);
+
+			if(this.remainingLoops != 0) {
+				this.sourceNodeNext = this.createAndPlayAudioNode(this.startTime, 0);
+			}
+		},
+
+		/**
+		 * Creates an audio node using the current src and context, and connects it to the gain node.
+		 * @method createAudioNode
+		 * @param {Number} startTime The time to add this to the web audio context, in seconds.  Defaults to context.currenTime.
+		 * @param {Number} [offset=0] The amount of time into the src audio to start playback, in seconds.
+		 * @return {audioNode}
+		 * @protected
+		 * @since 0.4.1
+		 */
+		createAndPlayAudioNode: function(startTime, offset) {
 			// WebAudio supports BufferSource, MediaElementSource, and MediaStreamSource.
 			// NOTE MediaElementSource requires different commands to play, pause, and stop because it uses audio tags.
 			// The same is assumed for MediaStreamSource, although it may share the same commands as MediaElementSource.
-			this.sourceNode = this.owner.context.createBufferSource();
-			this.sourceNode.buffer = this.owner.arrayBuffers[this.src];
-			this.duration = this.owner.arrayBuffers[this.src].duration * 1000;
-			this.sourceNode.connect(this.gainNode);
-
-			this.soundCompleteTimeout = setTimeout(this.endedHandler, (this.sourceNode.buffer.duration - this.offset) * 1000);  // NOTE *1000 because WebAudio reports everything in seconds but js uses milliseconds
-
-			this.startTime = this.owner.context.currentTime - this.offset;
-			this.sourceNode.noteGrainOn(0, this.offset, this.sourceNode.buffer.duration - this.offset);  // OJR deprecated in favor of start()
+			var audioNode = this.owner.context.createBufferSource();
+			audioNode.buffer = this.owner.arrayBuffers[this.src];
+			audioNode.connect(this.gainNode);
+			var currentTime = this.owner.context.currentTime;
+			audioNode.startTime = startTime + audioNode.buffer.duration;//currentTime + audioNode.buffer.duration - (currentTime - startTime);
+			audioNode.noteGrainOn(audioNode.startTime, offset, audioNode.buffer.duration - offset);  // OJR deprecated in favor of start()
+			return audioNode;
 		},
 
 		// Public API
@@ -902,7 +944,8 @@ this.createjs = this.createjs || {};
 				this.paused = true;
 
 				this.offset = this.owner.context.currentTime - this.startTime;  // this allows us to restart the sound at the same point in playback
-				this.sourceNode.noteOff(0);  // note this means the sourceNode cannot be reused and must be recreated  // OJR deprecated in favor of stop()
+				this.cleanUpAudioNode(this.sourceNode);
+				this.cleanUpAudioNode(this.sourceNodeNext);
 
 				if (this.panNode.numberOfOutputs != 0) {
 					this.panNode.disconnect();
@@ -1097,7 +1140,9 @@ this.createjs = this.createjs || {};
 			this.offset = value / 1000; // convert milliseconds to seconds
 
 			if (this.sourceNode && this.sourceNode.playbackState != this.sourceNode.UNSCHEDULED_STATE) {  // if playbackState is UNSCHEDULED_STATE, then noteON or noteGrainOn has not been called so calling noteOff would throw an error
-				this.sourceNode.noteOff(0);  // we need to stop this sound from continuing to play, as we need to recreate the sourceNode to change position  // OJR deprecated in favor of stop()
+				// we need to stop this sound from continuing to play, as we need to recreate the sourceNode to change position
+				this.cleanUpAudioNode(this.sourceNode);
+				this.cleanUpAudioNode(this.sourceNodeNext);
 				clearTimeout(this.soundCompleteTimeout);  // clear timeout that triggers sound complete
 			}  // NOTE we cannot just call cleanup because it also calls the Sound function playFinished which releases this instance in SoundChannel
 
@@ -1127,7 +1172,20 @@ this.createjs = this.createjs || {};
 			if (this.remainingLoops != 0) {
 				this.remainingLoops--;  // NOTE this introduces a theoretical limit on loops = float max size x 2 - 1
 
-				this.handleSoundReady(null);
+				// OJR we are using a look ahead approach to ensure smooth looping.  We add sourceNodeNext to the audio
+				// context so that it starts playing even if this callback is delayed.  This technique and the reasons for
+				// using it are described in greater detail here:  http://www.html5rocks.com/en/tutorials/audio/scheduling/
+				// NOTE the cost of this is that our audio loop may not always match the loop event timing precisely.
+				if(this.sourceNodeNext) { // this can be set to null, but this will likely never happen
+					this.cleanUpAudioNode(this.sourceNode);
+					this.sourceNode = this.sourceNodeNext;
+					this.startTime = this.sourceNode.startTime;
+					this.sourceNodeNext = this.createAndPlayAudioNode(this.startTime, 0);
+					this.soundCompleteTimeout = setTimeout(this.endedHandler, this.duration);
+				}
+				else {
+					this.handleSoundReady(null);
+				}
 
 				if (this.onLoop != null) {
 					this.onLoop(this);
