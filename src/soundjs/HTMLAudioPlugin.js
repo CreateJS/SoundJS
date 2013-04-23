@@ -125,6 +125,15 @@ this.createjs = this.createjs || {};
 	s.AUDIO_ENDED = "ended";
 
 	/**
+	 * Event constant for the "seeked" event for cleaner code.  We hijack this event for launching loop event.
+	 * @property AUDIO_SEEKED
+	 * @type {String}
+	 * @default seeked
+	 * @static
+	 */
+	s.AUDIO_SEEKED = "seeked";
+
+	/**
 	 * Event constant for the "error" event for cleaner code.
 	 * @property AUDIO_ERROR
 	 * @type {String}
@@ -373,6 +382,7 @@ this.createjs = this.createjs || {};
 		endedHandler:null,
 		readyHandler:null,
 		stalledHandler:null,
+		loopHandler:null,
 
 // Constructor
 		init:function (src, owner) {
@@ -382,6 +392,7 @@ this.createjs = this.createjs || {};
 			this.endedHandler = createjs.proxy(this.handleSoundComplete, this);
 			this.readyHandler = createjs.proxy(this.handleSoundReady, this);
 			this.stalledHandler = createjs.proxy(this.handleSoundStalled, this);
+			this.loopHandler = createjs.proxy(this.handleSoundLoop, this);
 		},
 
 		sendEvent:function (eventString) {
@@ -396,12 +407,13 @@ this.createjs = this.createjs || {};
 			var tag = this.tag;
 			if (tag != null) {
 				tag.pause();
+				tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
+				tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
+				tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
 				try {
 					tag.currentTime = 0;
 				} catch (e) {
 				} // Reset Position
-				tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
-				tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
 				TagPool.setInstance(this.src, tag);
 				this.tag = null;
 			}
@@ -493,6 +505,10 @@ this.createjs = this.createjs || {};
 				this.tag.currentTime = this.offset * 0.001;
 			}
 			if (this.remainingLoops == -1) {
+				this.tag.loop = true;
+			}
+			if(this.remainingLoops != 0) {
+				this.tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
 				this.tag.loop = true;
 			}
 			this.tag.play();
@@ -603,10 +619,14 @@ this.createjs = this.createjs || {};
 		setPosition:function (value) {
 			if (this.tag == null) {
 				this.offset = value
-			} else try {
-				this.tag.currentTime = value * 0.001;
-			} catch (error) { // Out of range
-				return false;
+			} else {
+				this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
+				try {
+					this.tag.currentTime = value * 0.001;
+				} catch (error) { // Out of range
+					return false;
+				}
+				this.tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
 			}
 			return true;
 		},
@@ -618,18 +638,6 @@ this.createjs = this.createjs || {};
 		handleSoundComplete:function (event) {
 			this.offset = 0;
 
-			if (this.remainingLoops != 0) {
-				this.remainingLoops--;
-
-				//try { this.tag.currentTime = 0; } catch(error) {}
-				this.tag.play();
-				if (this.onLoop != null) {
-					this.onLoop(this);
-				}
-				this.sendEvent("loop");
-				return;
-			}
-
 			if (window.createjs == null) {
 				return;
 			}
@@ -639,6 +647,24 @@ this.createjs = this.createjs || {};
 				this.onComplete(this);
 			}
 			this.sendEvent("complete");
+		},
+
+		// handles looping functionality
+		// NOTE with this approach audio will loop as reliably as the browser allows
+		// but we could end up sending the loop event after next loop playback begins
+		handleSoundLoop:function (event) {
+			this.offset = 0;
+
+			this.remainingLoops--;
+			if(this.remainingLoops == 0) {
+				this.tag.loop = false;
+				this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
+			}
+
+			if (this.onLoop != null) {
+				this.onLoop(this);
+			}
+			this.sendEvent("loop");
 		},
 
 		playFailed:function () {
