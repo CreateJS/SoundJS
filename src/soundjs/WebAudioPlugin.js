@@ -1,5 +1,5 @@
 /*
- * WebAudioPlugin for SoundJS
+ * WebAudioPlugin
  * Visit http://createjs.com/ for documentation, updates and examples.
  *
  *
@@ -36,7 +36,6 @@ this.createjs = this.createjs || {};
 
 (function () {
 
-    // TODO OJR replace deprecated WebAudio API calls with current values using lazyload style method where functions are replaced
 	/**
 	 * Play sounds using Web Audio in the browser. The WebAudio plugin has been successfully tested with:
 	 * <ul><li>Google Chrome, version 23+ on OS X and Windows</li>
@@ -54,7 +53,8 @@ this.createjs = this.createjs || {};
 	 *
 	 * <b>iOS 6 limitations</b><br />
 	 * <ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event (touch).</li>
-	 *
+	 *		<li>A bug exists that will distort uncached audio when a video element is present in the DOM.</li>
+	 * </ul>
 	 * @class WebAudioPlugin
 	 * @constructor
 	 * @since 0.4.0

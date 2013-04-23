@@ -1,5 +1,5 @@
 /*
- * FlashPlugin for SoundJS
+ * FlashPlugin
  * Visit http://createjs.com/ for documentation, updates and examples.
  *
  *
@@ -53,6 +53,12 @@ this.createjs = this.createjs || {};
 	 * Note that the SWF is embedded into a container DIV (with an id and classname of "SoundJSFlashContainer"), and
 	 * will have an id of "flashAudioContainer". The container DIV is positioned 1 pixel off-screen to the left to avoid
 	 * showing the 1x1 pixel white square.
+	 *
+	 * <h4>Known Browser and OS issues for HTML Audio</h4>
+	 * <b>All browsers</b><br />
+	 * <ul><li> There can be a delay in flash player starting playback of audio.  This has been most noticeable in Firefox.
+	 * Unfortunely this is an issue with the flash player and therefore cannot be addressed by SoundJS.</li></ul>
+	 *
 	 * @class FlashPlugin
 	 * @constructor
 	 */

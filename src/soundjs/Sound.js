@@ -135,14 +135,22 @@ this.createjs = this.createjs || {};
 	 *
 	 * <b>iOS 6 limitations</b><br />
 	 * <ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event (touch).</li>
-	 *      <li>Despite suggestions to the opposite, we have control over audio volume through our gain nodes.</li></ul>
+	 *      <li>Despite suggestions to the opposite, we have control over audio volume through our gain nodes.</li>
+	 *		<li>A bug exists that will distort uncached web audio when a video element is present in the DOM.</li>
+	 * </ul>
 	 * More details: http://stackoverflow.com/questions/12517000/no-sound-on-ios-6-web-audio-api
 	 *
-	 * <b>Android limitations</b><br />
-	 * <ul><li>Android chrome reports true when you run createjs.Sound.BrowserDetect.isChrome, but is a different browser
+	 * <b>Android HTML Audio limitations</b><br />
+	 * <ul><li>We have no control over audio volume. Only the user can set volume on their device.</li>
+	 *      <li>We can only play audio inside a user event (touch).  This currently means you cannot loop sound or use a delay.</li>
+ 	 * <b> Android Chrome 26.0.1410.58 specific limitations</b><br />
+	 * 		<li>Chrome reports true when you run createjs.Sound.BrowserDetect.isChrome, but is a different browser
 	 *      with different abilities</li>
-	 *      <li>We have no control over audio volume. Only the user can set volume on their device.</li>
-	 *      <li>We can only play audio inside a user event (touch).  This currently means you cannot loop sound.</li></ul>
+	 *      <li>Can only play 1 sound at a time.</li>
+	 *      <li>Sound is not cached.</li>
+	 *      <li>Sound can only be loaded in a touch event.</li>
+	 *      <li>There is a delay before a sound is played, presumably while the src is loaded.</li>
+	 * </ul>
 	 *
 	 * @class Sound
 	 * @static

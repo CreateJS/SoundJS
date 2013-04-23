@@ -1,5 +1,5 @@
 /*
- * HTMLAudioPlugin for SoundJS
+ * HTMLAudioPlugin
  * Visit http://createjs.com/ for documentation, updates and examples.
  *
  *
@@ -63,9 +63,17 @@ this.createjs = this.createjs || {};
 	 * have one &lt;audio&gt; tag, can not preload or autoplay the audio, can not cache the audio, and can not play the
 	 * audio except inside a user initiated event.
 	 *
-	 * <b>Android limitations</b><br />
-	 *      <li>We have no control over audio volume. Only the user can set volume on their device.</li>
-	 *      <li>We can only play audio inside a user event (touch).  This currently means you cannot loop sound.</li></ul>
+	 * <b>Android HTML Audio limitations</b><br />
+	 * <ul><li>We have no control over audio volume. Only the user can set volume on their device.</li>
+	 *      <li>We can only play audio inside a user event (touch).  This currently means you cannot loop sound or use a delay.</li>
+	 * <b> Android Chrome 26.0.1410.58 specific limitations</b><br />
+	 * 		<li>Chrome reports true when you run createjs.Sound.BrowserDetect.isChrome, but is a different browser
+	 *      with different abilities</li>
+	 *      <li>Can only play 1 sound at a time.</li>
+	 *      <li>Sound is not cached.</li>
+	 *      <li>Sound can only be loaded in a touch event.</li>
+	 *      <li>There is a delay before a sound is played, presumably while the src is loaded.</li>
+	 * </ul>
 	 *
 	 * See {{#crossLink "Sound"}}{{/crossLink}} for general notes on known issues.
 	 *
