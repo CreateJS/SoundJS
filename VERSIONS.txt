@@ -1,5 +1,10 @@
 Version NEXT [Not Released]
 ************************************************************************************************************************
+- HTMLAudioPlugin now using tag loop property to provide more reliable looping.
+- WebAudioPlugin added a look ahead approach to enable smooth looping.
+- Updated Known Browser Limitations for iOS6 to include info on web audio distortion bug when video element is present.
+- Updated Known Browser Limitations for Android, specifically HTML audio in Android Chrome.
+- Updated Known Browser Limitations to include info on audio being delayed in flash player in the browser.
 - Updated Known Browser Limitations for IE9 to include information about the audio tag limit.
 - Updated WebAudioPlugin to use a specific panning model (equal power), which matches the sound quality of the other
 	plugins.
