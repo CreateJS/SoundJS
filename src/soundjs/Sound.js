@@ -37,10 +37,10 @@ this.createjs = this.createjs || {};
  * to play sounds.
  *
  * To use SoundJS, use the public API on the {{#crossLink "Sound"}}{{/crossLink}} class. This API is for:
- * <ul><li>Installing Plugins</li>
+ * <ul><li>Installing audio playback Plugins</li>
  *      <li>Registering (and preloading) sounds</li>
- *      <li>Playing sounds</li>
- *      <li>Controlling all sounds volume, mute, and stopping everything</li>
+ *      <li>Creating and playing sounds</li>
+ *      <li>Master volume, mute, and stop controls for all sounds at once</li>
  * </ul>
  *
  * <b>Please note that as of version 0.4.0, the "SoundJS" object only provides version information. All APIs from
@@ -48,9 +48,9 @@ this.createjs = this.createjs || {};
  *
  * <b>Controlling Sounds</b><br />
  * Playing sounds creates {{#crossLink "SoundInstance"}}{{/crossLink}} instances, which can be controlled individually.
- * <ul><li>Pause, resume, and stop sounds</li>
+ * <ul><li>Pause, resume, seek, and stop sounds</li>
  *      <li>Control a sound's volume, mute, and pan</li>
- *      <li>Add events to sound instances to get notified when they finish, loop, or fail</li>
+ *      <li>Listen for events on sound instances to get notified when they finish, loop, or fail</li>
  * </ul>
  *
  * <h4>Feature Set Example</h4>
@@ -58,7 +58,7 @@ this.createjs = this.createjs || {};
  *      createjs.Sound.registerSound("path/to/mySound.mp3|path/to/mySound.ogg", "sound");
  *      function loadHandler(event) {
  *          // This is fired for each sound that is registered.
- *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use source.
+ *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use full sourcepath or event.src.
  *          instance.addEventListener("complete", createjs.proxy(this.handleComplete, this));
  *          instance.setVolume(0.5);
  *      }
@@ -80,15 +80,15 @@ this.createjs = this.createjs || {};
 	 *
 	 * <b>Registering and Preloading</b><br />
 	 * Before you can play a sound, it <b>must</b> be registered. You can do this with {{#crossLink "Sound/registerSound"}}{{/crossLink}},
-	 * or register multiple sounds using {{#crossLink "Sound/registerManifest"}}{{/crossLink}}. If you don't register
-	 * them immediately, they will be automatically registered if you try and play a sound using {{#crossLink "Sound/play"}}{{/crossLink}},
-	 * or if you create a stopped sound using {{#crossLink "Sound/createInstance"}}{{/crossLink}}. If you use
+	 * or register multiple sounds using {{#crossLink "Sound/registerManifest"}}{{/crossLink}}. If you don't register a
+	 * sound prior to attempting to play it using {{#crossLink "Sound/play"}}{{/crossLink}} or create it using {{#crossLink "Sound/createInstance"}}{{/crossLink}},
+	 * the sound source will be automatically registered but playback will fail as the source will not be ready. If you use
 	 * <a href="http://preloadjs.com" target="_blank">PreloadJS</a>, this is handled for you when the sound is
-	 * preloaded. It is recommended to preload sounds internally using the register functions or externally using
+	 * preloaded. It is recommended to preload sounds either internally using the register functions or externally using
 	 * PreloadJS so they are ready when you want to use them.
 	 *
 	 * <b>Playback</b><br />
-	 * To play a sound once its been registered and preloaded, use the {{#crossLink "Sound/play"}}{{/crossLink}} method.
+	 * To play a sound once it's been registered and preloaded, use the {{#crossLink "Sound/play"}}{{/crossLink}} method.
 	 * This method returns a {{#crossLink "SoundInstance"}}{{/crossLink}} which can be paused, resumed, muted, etc.
 	 * Please see the {{#crossLink "SoundInstance"}}{{/crossLink}} documentation for more on the instance control APIs.
 	 *
@@ -105,26 +105,28 @@ this.createjs = this.createjs || {};
 	 *      createjs.Sound.registerSound("path/to/mySound.mp3|path/to/mySound.ogg", "sound");
 	 *      function loadHandler(event) {
      *          // This is fired for each sound that is registered.
-     *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use source.
+     *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use full source path or event.src.
      *          instance.addEventListener("complete", createjs.proxy(this.handleComplete, this));
      *          instance.setVolume(0.5);
 	 *      }
 	 *
 	 * The maximum number of concurrently playing instances of the same sound can be specified in the "data" argument
-	 * of {{#crossLink "Sound/registerSound"}}{{/crossLink}}.
+	 * of {{#crossLink "Sound/registerSound"}}{{/crossLink}}.  Note that if not specified, the active plugin will apply
+	 * a default limit.  Currently HTMLAudioPlugin sets a default limit of 2, while WebAudioPlugin and FlashPlugin set a
+	 * default limit of 100.
 	 *
 	 *      createjs.Sound.registerSound("sound.mp3", "soundId", 4);
 	 *
 	 * Sound can be used as a plugin with PreloadJS to help preload audio properly. Audio preloaded with PreloadJS is
 	 * automatically registered with the Sound class. When audio is not preloaded, Sound will do an automatic internal
-	 * preload, and as a result, it may not play immediately the first time play is called. Use the
+	 * load. As a result, it may not play immediately the first time play is called. Use the
 	 * {{#crossLink "Sound/fileload"}}{{/crossLink}} event to determine when a sound has finished internally preloading.
 	 * It is recommended that all audio is preloaded before it is played.
 	 *
 	 *      createjs.PreloadJS.installPlugin(createjs.Sound);
 	 *
 	 * <h4>Known Browser and OS issues</h4>
-	 * <b>IE 9 html limitations</b><br />
+	 * <b>IE 9 HTML Audio limitations</b><br />
 	 * <ul><li>There is a delay in applying volume changes to tags that occurs once playback is started. So if you have
 	 * muted all sounds, they will all play during this delay until the mute applies internally. This happens regardless of
 	 * when or how you apply the volume change, as the tag seems to need to play to apply it.</li>
@@ -133,23 +135,27 @@ this.createjs = this.createjs || {};
 	 * <li>There is a limit to how many audio tags you can load and play at once, which appears to be determined by
 	 * hardware and browser settings.  See {{#crossLink "HTMLAudioPlugin.MAX_INSTANCES"}}{{/crossLink}} for a safe estimate.</li></ul>
 	 *
-	 * <b>iOS 6 limitations</b><br />
-	 * <ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event (touch).</li>
-	 *      <li>Despite suggestions to the opposite, we have control over audio volume through our gain nodes.</li>
-	 *		<li>A bug exists that will distort uncached web audio when a video element is present in the DOM.</li>
+	 * <b>iOS 6 Web Audio limitations</b><br />
+	 * <ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event
+	 * (touch/click).</li>
+	 * <li>Despite suggestions to the opposite, we have control over audio volume through our gain nodes.</li>
+	 * <li>A bug exists that will distort un-cached web audio when a video element is present in the DOM.</li>
+	 * <li>Note HTMLAudioPlugin is not supported on iOS by default.  See {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}
+	 * for more details.<li>
 	 * </ul>
-	 * More details: http://stackoverflow.com/questions/12517000/no-sound-on-ios-6-web-audio-api
 	 *
 	 * <b>Android HTML Audio limitations</b><br />
 	 * <ul><li>We have no control over audio volume. Only the user can set volume on their device.</li>
-	 *      <li>We can only play audio inside a user event (touch).  This currently means you cannot loop sound or use a delay.</li>
- 	 * <b> Android Chrome 26.0.1410.58 specific limitations</b><br />
-	 * 		<li>Chrome reports true when you run createjs.Sound.BrowserDetect.isChrome, but is a different browser
-	 *      with different abilities</li>
-	 *      <li>Can only play 1 sound at a time.</li>
-	 *      <li>Sound is not cached.</li>
-	 *      <li>Sound can only be loaded in a touch event.</li>
-	 *      <li>There is a delay before a sound is played, presumably while the src is loaded.</li>
+	 * <li>We can only play audio inside a user event (touch/click).  This currently means you cannot loop sound or use
+	 * a delay.</li></ul>
+	 *
+ 	 * <b>Android Chrome 26.0.1410.58 specific limitations</b><br />
+	 * <ul><li>Chrome reports true when you run createjs.Sound.BrowserDetect.isChrome, but is a different browser
+	 * with different abilities.</li>
+	 * <li>Can only play 1 sound at a time.</li>
+	 * <li>Sound is not cached.</li>
+	 * <li>Sound can only be loaded in a user initiated touch/click event.</li>
+	 * <li>There is a delay before a sound is played, presumably while the src is loaded.</li>
 	 * </ul>
 	 *
 	 * @class Sound
@@ -177,8 +183,9 @@ this.createjs = this.createjs || {};
 	 * @static
 	 * @type {Number}
 	 * @default 8000
+	 * @protected
 	 */
-	s.AUDIO_TIMEOUT = 8000; // TODO: This is not implemeneted  // OJR remove property?
+	s.AUDIO_TIMEOUT = 8000; // TODO: This is not implemeneted  // OJR remove property? doc'd as protected to remove from docs for now
 
 	/**
 	 * The interrupt value to interrupt any currently playing instance with the same source, if the maximum number of
@@ -211,7 +218,7 @@ this.createjs = this.createjs || {};
 	s.INTERRUPT_LATE = "late";
 
 	/**
-	 * The interrupt value to interrupt no currently playing instances with the same source, if the maximum number of
+	 * The interrupt value to not interrupt any currently playing instances with the same source, if the maximum number of
 	 * instances of the sound are already playing.
 	 * @property INTERRUPT_NONE
 	 * @type {String}
@@ -269,14 +276,14 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * A list of the default supported extensions that Sound will <i>try</i> to play. Plugins will check if the browser
-	 * can play these types, so modifying this list before a plugin is initialized will allow the plugins to try and
+	 * can play these types, so modifying this list before a plugin is initialized will allow the plugins to try to
 	 * support additional media types.
 	 *
 	 * NOTE this does not currently work for {{#crossLink "FlashPlugin"}}{{/crossLink}}.
 	 *
 	 * More details on file formats can be found at http://en.wikipedia.org/wiki/Audio_file_format. A very detailed
-	 * list of file formats can be found //http://www.fileinfo.com/filetypes/audio. A useful list of extensions for a
-	 * format can be found at http://html5doctor.com/html5-audio-the-state-of-play/
+	 * list of file formats can be found at http://www.fileinfo.com/filetypes/audio. A useful list of extensions for
+	 * each format can be found at http://html5doctor.com/html5-audio-the-state-of-play/
 	 * @property SUPPORTED_EXTENSIONS
 	 * @type {Array[String]}
 	 * @default ["mp3", "ogg", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"]
@@ -296,7 +303,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * The RegExp pattern to use to parse file URIs. This supports simple file names, as well as full domain URIs with
+	 * The RegExp pattern used to parse file URIs. This supports simple file names, as well as full domain URIs with
 	 * query strings. The resulting match is: protocol:$1 domain:$2 path:$3 file:$4 extension:$5 query:$6.
 	 * @property FILE_PATTERN
 	 * @type {RegExp}
@@ -308,7 +315,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Determines the default behavior for interrupting other currently playing instances with the same source, if the
 	 * maximum number of instances of the sound are already playing.  Currently the default is <code>Sound.INTERRUPT_NONE</code>
-	 * but this can be set and will change playback behavior accordingly.  This is only used if {{#crossLink "Sound/play"}}{{/crossLink}}
+	 * but this can be set and will change playback behavior accordingly.  This is only used when {{#crossLink "Sound/play"}}{{/crossLink}}
 	 * is called without passing a value for interrupt.
 	 * @property defaultInterruptBehavior
 	 * @type {String}
@@ -319,11 +326,11 @@ this.createjs = this.createjs || {};
 	s.defaultInterruptBehavior = s.INTERRUPT_NONE;  // OJR does s.INTERRUPT_ANY make more sense as default?  Needs game dev testing to see which case makes more sense.
 
 	/**
-	 * Used internally to assign unique IDs to each SoundInstance
+	 * Used internally to assign unique IDs to each SoundInstance.
 	 * @property lastID
 	 * @type {Number}
 	 * @static
-	 * @private
+	 * @protected
 	 */
 	s.lastId = 0,
 
@@ -345,62 +352,62 @@ this.createjs = this.createjs || {};
 	 * @type {Boolean}
 	 * @default false
 	 * @static
-	 * @private
+	 * @protected
 	 */
 	s.pluginsRegistered = false;
 
 	/**
-	 * The master volume value. Use {{#crossLink "Sound/getVolume"}}{{/crossLink}} and {{#crossLink "Sound/setVolume"}}{{/crossLink}}
-	 * to modify the volume of all audio.
+	 * The master volume value, which affects all sounds. Use {{#crossLink "Sound/getVolume"}}{{/crossLink}} and
+	 * {{#crossLink "Sound/setVolume"}}{{/crossLink}} to modify the volume of all audio.
 	 * @property masterVolume
 	 * @type {Number}
 	 * @default 1
-	 * @private
+	 * @protected
 	 * @since 0.4.0
 	 */
 	s.masterVolume = 1;
 
 	/**
-	 * The master mute value for Sound.  This is applies to all sound instances.  This value can be set through
-	 * {{#crossLink "Sound/setMute"}}{{/crossLink}} and accessed via {{#crossLink "Sound/getMute"}}{{/crossLink}}.
+	 * The master mute value, which affects all sounds.  This is applies to all sound instances.  This value can be set
+	 * through {{#crossLink "Sound/setMute"}}{{/crossLink}} and accessed via {{#crossLink "Sound/getMute"}}{{/crossLink}}.
 	 * @property masterMute
 	 * @type {Boolean}
 	 * @default false
-	 * @private
+	 * @protected
 	 * @static
 	 * @since 0.4.0
 	 */
 	s.masterMute = false;
 
 	/**
-	 * An array containing all currently playing instances. This helps Sound control the volume, mute, and playback of
+	 * An array containing all currently playing instances. This allows Sound to control the volume, mute, and playback of
 	 * all instances when using static APIs like {{#crossLink "Sound/stop"}}{{/crossLink}} and {{#crossLink "Sound/setVolume"}}{{/crossLink}}.
 	 * When an instance has finished playback, it gets removed via the {{#crossLink "Sound/finishedPlaying"}}{{/crossLink}}
 	 * method. If the user replays an instance, it gets added back in via the {{#crossLink "Sound/beginPlaying"}}{{/crossLink}}
 	 * method.
 	 * @property instances
 	 * @type {Array}
-	 * @private
+	 * @protected
 	 * @static
 	 */
 	s.instances = [];
 
 	/**
-	 * A hash lookup of sound sources via the corresponding ID.
+	 * An object hash storing sound sources via there corresponding ID.
 	 * @property idHash
 	 * @type {Object}
-	 * @private
+	 * @protected
 	 * @static
 	 */
 	s.idHash = {};
 
 	/**
-	 * A hash lookup of preloading sound sources via the parsed source that is passed to the plugin.  Contains the
+	 * An object hash that stores preloading sound sources via the parsed source that is passed to the plugin.  Contains the
 	 * source, id, and data that was passed in by the user.  Parsed sources can contain multiple instances of source, id,
 	 * and data.
 	 * @property preloadHash
 	 * @type {Object}
-	 * @private
+	 * @protected
 	 * @static
 	 */
 	s.preloadHash = {};
@@ -430,14 +437,14 @@ this.createjs = this.createjs || {};
 
 // Events
 	/**
-	 * This event that is fired when a file finishes loading internally. <b>Please use the "fileload" event instead.</b>
+	 * This event is fired when a file finishes loading internally. <b>Please use the "fileload" event instead.</b>
 	 * @event loadComplete
 	 * @deprecated In favor of the "fileload" event.
 	 * @since 0.4.0
 	 */
 
 	/**
-	 * This event that is fired when a file finishes loading internally. This event is fired for each loaded sound,
+	 * This event is fired when a file finishes loading internally. This event is fired for each loaded sound,
 	 * so any handler methods should look up the <code>event.src</code> to handle a particular sound.
 	 * @event fileload
 	 * @param {Object} target The object that dispatched the event.
@@ -451,7 +458,7 @@ this.createjs = this.createjs || {};
 
 // Callbacks
 	/**
-	 * The callback that is fired when a file finishes loading internally.
+	 * The callback that is fired when a file finishes loading internally.  This is fired for each loaded sound.
 	 * @property onLoadComplete
 	 * @type {Function}
 	 * @deprecated In favour of the "fileload" event. Will be removed in a future version.
@@ -460,9 +467,10 @@ this.createjs = this.createjs || {};
 	s.onLoadComplete = null;
 
 	/**
+	 * Used by external plugins to dispatch file load events.
 	 * @method sendFileLoadEvent
 	 * @param {String} src A sound file has completed loading, and should be dispatched.
-	 * @private
+	 * @protected
 	 * @static
 	 * @since 0.4.1
 	 */
@@ -483,7 +491,7 @@ this.createjs = this.createjs || {};
 			s.dispatchEvent(event);
 
 			// We still dispatch the deprecated events.
-			s.onLoadComplete && s.onLoadComplete(event); // Uses the new "type"
+			s.onLoadComplete && s.onLoadComplete(event); // Uses the "fileload" event type.
 			event = { // Use a new object to avoid references getting messed up.
 				target:this,
 				type:"loadComplete",
@@ -505,7 +513,7 @@ this.createjs = this.createjs || {};
 	 * <ul><li>callback: A preload callback that is fired when a file is added to PreloadJS, which provides
 	 *      Sound a mechanism to modify the load parameters, select the correct file format, register the sound, etc.</li>
 	 *      <li>types: A list of file types that are supported by Sound (currently supports "sound").</li>
-	 *      <li>extensions A list of file extensions that are supported by Sound (see Sound.SUPPORTED_EXTENSIONS).</li></ul>
+	 *      <li>extensions: A list of file extensions that are supported by Sound (see {{#crossLink "Sound.SUPPORTED_EXTENSIONS"}}{{/crossLink}}).</li></ul>
 	 * @static
 	 * @protected
 	 */
@@ -519,8 +527,8 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Register a Sound plugin. Plugins handle the actual playback of audio. The default plugins are
-	 * ({{#crossLink "WebAudioPlugin"}}{{/crossLink}} followed by the {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}),
-	 * and are installed if no other plugins are present when the user starts playback.
+	 * ({{#crossLink "WebAudioPlugin"}}{{/crossLink}} followed by {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}),
+	 * and are installed if no other plugins are present when the user attempts to start playback or register sound.
 	 * <h4>Example</h4>
 	 *      createjs.FlashPlugin.BASE_PATH = "../src/SoundJS/";
 	 *      createjs.Sound.registerPlugin(createjs.FlashPlugin);
@@ -570,13 +578,17 @@ this.createjs = this.createjs || {};
 	}
 
 	/**
-	 * Initialize the default plugins. This method is called when any audio is played before the user has registered
-	 * any plugins, and enables Sound to work without manual plugin setup. Currently, the default plugins are
-	 * {{#crossLink "WebAudioPlugin"}}{{/crossLink}} followed by {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}.
+	 * Initialize the default plugins. This method is automatically called when any audio is played or registered before
+	 * the user has manually registered plugins, and enables Sound to work without manual plugin setup. Currently, the
+	 * default plugins are {{#crossLink "WebAudioPlugin"}}{{/crossLink}} followed by {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}.
+	 *
+	 *  * <h4>Example</h4>
+	 *      if (!createjs.initializeDefaultPlugins()) { return; }
+	 *
 	 * @method initializeDefaultPlugins
 	 * @returns {Boolean} If a plugin is initialized (true) or not (false). If the browser does not have the
 	 * capabilities to initialize any available plugins, this will return false.
-	 * @private
+	 * @protected
 	 * @since 0.4.0
 	 */
 	s.initializeDefaultPlugins = function () {
@@ -594,6 +606,15 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Determines if Sound has been initialized, and a plugin has been activated.
+	 *
+	 * <h4>Example</h4>
+	 * This example sets up a Flash fallback, but only if there is no plugin specified yet.
+	 * 
+	 *      if (!createjs.Sound.isReady()) {
+	 *			createjs.FlashPlugin.BASE_PATH = "../src/SoundJS/";
+	 *      	createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
+	 *      }
+	 *
 	 * @method isReady
 	 * @return {Boolean} If Sound has initialized a plugin.
 	 * @static
@@ -633,6 +654,10 @@ this.createjs = this.createjs || {};
 	/**
 	 * Get a specific capability of the active plugin. See {{#crossLink "Sound/getCapabilities"}}{{/crossLink}} for a
 	 * full list of capabilities.
+	 *
+	 * <h4>Example</h4>
+	 *      var maxAudioInstances = createjs.Sound.getCapability("tracks");
+	 *
 	 * @method getCapability
 	 * @param {String} key The capability to retrieve
 	 * @return {Number|Boolean} The value of the capability.
@@ -671,12 +696,12 @@ this.createjs = this.createjs || {};
 	}
 
 	/**
-	 * Register a sound to playback in Sound. This is automatically called when using <a href="http://preloadjs.com" target="_blank">PreloadJS</a>,
-	 * however if you just wish to register a sound manually, this method will handle it. It is recommended to
-	 * register all sounds that need to be played back in order to properly prepare and preload them. Sound does
-	 * internal preloading when required.
+	 * Register an audio file for loading and future playback in Sound. This is automatically called when using
+	 * <a href="http://preloadjs.com" target="_blank">PreloadJS</a>.  It is recommended to register all sounds that
+	 * need to be played back in order to properly prepare and preload them. Sound does internal preloading when required.
 	 *
 	 * <h4>Example</h4>
+	 *      createjs.Sound.addEventListener("fileload", handleLoad); // add an event listener for when load is completed
 	 *      createjs.Sound.registerSound("myAudioPath/mySound.mp3|myAudioPath/mySound.ogg", "myID", 3);
 	 *
 	 * @method registerSound
@@ -754,19 +779,20 @@ this.createjs = this.createjs || {};
 			if (!s.preloadHash[details.src]) {
 				s.preloadHash[details.src] = [];
 			}  // we do this so we can store multiple id's and data if needed
-			s.preloadHash[details.src].push({src:src, id:id, data:data});  // keep this data so we can return it fileload
+			s.preloadHash[details.src].push({src:src, id:id, data:data});  // keep this data so we can return it in fileload event
 			if (s.preloadHash[details.src].length == 1) {
 				s.activePlugin.preload(details.src, loader)
 			}
-			;  // if already loaded once, don't load a second time  // OJR note this will disallow reloading a sound if loading fails or the source changes
+			// if already loaded once, don't load a second time  // OJR note this will disallow reloading a sound if loading fails or the source changes
 		}
 
 		return details;
 	}
 
 	/**
-	 * Register a manifest of sounds to playback in Sound. It is recommended to register all sounds that need to be
-	 * played back in order to properly prepare and preload them. Sound does internal preloading when required.
+	 * Register a manifest of audio files for loading and future playback in Sound. It is recommended to register all
+	 * sounds that need to be played back in order to properly prepare and preload them. Sound does internal preloading
+	 * when required.
 	 *
 	 * <h4>Example</h4>
 	 *      var manifest = [
@@ -774,9 +800,8 @@ this.createjs = this.createjs || {};
 	 *          {src:"assetPath/asset1.mp3|assetPath/asset1.ogg", id:"1", data:6},
 	 *          {src:"assetPath/asset2.mp3", id:"works"}
 	 *      ];
-	 *      createjs.Sound.addEventListener("fileload", doneLoading); // call doneLoading when each sound loads
+	 *      createjs.Sound.addEventListener("fileload", handleLoad); // call handleLoad when each sound loads
 	 *      createjs.Sound.registerManifest(manifest);
-	 *
 	 *
 	 * @method registerManifest
 	 * @param {Array} manifest An array of objects to load. Objects are expected to be in the format needed for
@@ -798,6 +823,13 @@ this.createjs = this.createjs || {};
 	/**
 	 * Check if a source has been loaded by internal preloaders. This is necessary to ensure that sounds that are
 	 * not completed preloading will not kick off a new internal preload if they are played.
+	 *
+	 * <h4>Example</h4>
+	 *     var mySound = "assetPath/asset0.mp3|assetPath/asset0.ogg";
+	 *     if(createjs.Sound.loadComplete(mySound) {
+	 *     	createjs.Sound.play(mySound);
+	 *     }
+	 *
 	 * @method loadComplete
 	 * @param {String} src The src or id that is being loaded.
 	 * @return {Boolean} If the src is already loaded.
@@ -860,23 +892,26 @@ this.createjs = this.createjs || {};
 	 * Play a sound and get a {{#crossLink "SoundInstance"}}{{/crossLink}} to control. If the sound fails to play, a
 	 * SoundInstance will still be returned, and have a playState of <code>Sound.PLAY_FAILED</code>. Note that even on
 	 * sounds with failed playback, you may still be able to call SoundInstance {{#crossLink "SoundInstance/play"}}{{/crossLink}},
-	 * since the failure could be due to lack of available channels. If there is no available plugin,
-	 * <code>Sound.defaultSoundInstance</code> will be returned, which will not play any audio, but will not generate
-	 * errors.
+	 * since the failure could be due to lack of available channels. If the src does not have a supported extension or
+	 * if there is no available plugin,<code>Sound.defaultSoundInstance</code> will be returned, which will not play any
+	 * audio, but will not generate errors.
 	 *
 	 * <h4>Example</h4>
+	 *      createjs.Sound.addEventListener("fileload", handleLoad);
 	 *      createjs.Sound.registerSound("myAudioPath/mySound.mp3", "myID", 3);
-	 *      // wait until load is complete
-	 *      createjs.Sound.play("myID");
-	 *      // alternately we could call the following
-	 *      var myInstance = createjs.Sound.play("myAudioPath/mySound.mp3", createjs.Sound.INTERRUPT_ANY, 0, 0, -1, 1, 0);
+	 *      function handleLoad(event) {
+	 *      	createjs.Sound.play("myID");
+	 *      	// alternately we could call the following
+	 *      	var myInstance = createjs.Sound.play("myAudioPath/mySound.mp3", createjs.Sound.INTERRUPT_ANY, 0, 0, -1, 1, 0);
+	 *      }
 	 *
 	 * @method play
 	 * @param {String} src The src or ID of the audio.
-	 * @param {String} [interrupt="none"] How to interrupt other instances of audio. Values are defined as <code>INTERRUPT_TYPE</code>
-	 * constants on the Sound class.
-	 * @param {Number} [delay=0] The amount of time to delay the start of the audio in milliseconds.
-	 * @param {Number} [offset=0] The point to start the audio in milliseconds.
+	 * @param {String} [interrupt="none"] How to interrupt any currently playing instances of audio with the same source,
+	 * if the maximum number of instances of the sound are already playing. Values are defined as <code>INTERRUPT_TYPE</code>
+	 * constants on the Sound class, with the default defined by {{#crossLink "Sound/defaultInterruptBehavior"}}{{/crossLink}}.
+	 * @param {Number} [delay=0] The amount of time to delay the start of audio playback, in milliseconds.
+	 * @param {Number} [offset=0] The offset from the start of the audio to begin playback, in milliseconds.
 	 * @param {Number} [loop=0] How many times the audio loops when it reaches the end of playback. The default is 0 (no
 	 * loops), and -1 can be used for infinite playback.
 	 * @param {Number} [volume=1] The volume of the sound, between 0 and 1. Note that the master volume is applied
@@ -897,37 +932,44 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Creates a {{#crossLink "SoundInstance"}}{{/crossLink}} using the passed in src. If the src does not have a
-	 * supported extension, a default SoundInstance will be returned that can be called safely but does nothing.
+	 * supported extension or if there is no available plugin, a <code>Sound.defaultSoundInstance</code> will be returned
+	 * that can be called safely but does nothing.
+	 *
+	 * <h4>Example</h4>
+	 *      var myInstance = null;
+	 *      createjs.Sound.addEventListener("fileload", handleLoad);
+	 *      createjs.Sound.registerSound("myAudioPath/mySound.mp3", "myID", 3);
+	 *      function handleLoad(event) {
+	 *      	myInstance = createjs.Sound.createInstance("myID");
+	 *      	// alternately we could call the following
+	 *      	myInstance = createjs.Sound.createInstance("myAudioPath/mySound.mp3");
+	 *      }
+	 *
 	 * @method createInstance
-	 * @param {String} src The src of the audio.
+	 * @param {String} src The src or ID of the audio.
 	 * @return {SoundInstance} A {{#crossLink "SoundInstance"}}{{/crossLink}} that can be controlled after it is created.
 	 * Unsupported extensions will return the default SoundInstance.
 	 * @since 0.4.0
 	 */
 	s.createInstance = function (src) {
-		//TODO this function appears to be causing a memory leak, and needs spike tested.
-		// OJR it is not EventDispatcher.  It appears to be var instance = s.activePlugin.create(src);  HTML makes sense because of the tag pool.  web audio is crashing though.
-		// in new SoundInstance
 		if (!s.initializeDefaultPlugins()) {
 			return s.defaultSoundInstance;
 		}
+
+		src = s.getSrcById(src);
 		var details = s.parsePath(src, "sound");
-		if (details) {
-			src = s.getSrcById(details.src);
-		} else {
-			src = s.getSrcById(src);
-		}
 
-		var dot = src.lastIndexOf(".");
-		var ext = src.slice(dot + 1);  // sound have format of "path+name . ext"
-		if (dot != -1 && s.SUPPORTED_EXTENSIONS.indexOf(ext) > -1) {  // we have an ext and it is one of our supported,Note this does not mean the plugin supports it.  // OJR consider changing to check against activePlugin.capabilities[ext]
+		var instance = null;
+		if (details != null) {
 			// make sure that we have a sound channel (sound is registered or previously played)
-			SoundChannel.create(src);
-
-			var instance = s.activePlugin.create(src);
-		} else var instance = Sound.defaultSoundInstance;  // the src is not supported, so give back a dummy instance.
-		// This can happen if PreloadJS fails because the plugin does not support the ext, and was passed an id which
-		// will not get added to the idHash.
+			SoundChannel.create(details.src);
+			instance = s.activePlugin.create(details.src);
+		} else {
+			// the src is not supported, so give back a dummy instance.
+			// This can happen if PreloadJS fails because the plugin does not support the ext, and was passed an id which
+			// will not get added to the idHash.
+			instance = Sound.defaultSoundInstance;
+		}
 
 		instance.uniqueId = s.lastId++;  // OJR moved this here so we can have multiple plugins active in theory
 
@@ -935,8 +977,13 @@ this.createjs = this.createjs || {};
 	}
 
 	/**
-	 * Set the master volume of Sound. The master volume is multiplied against each sound's individual volume.
-	 * To set individual sound volume, use SoundInstance {{#crossLink "SoundInstance/setVolume"}}{{/crossLink}} instead.
+	 * Set the master volume of Sound. The master volume is multiplied against each sound's individual volume.  For
+	 * example, if master volume is 0.5 and a sound's volume is 0.5, the resulting volume is 0.25. To set individual
+	 * sound volume, use SoundInstance {{#crossLink "SoundInstance/setVolume"}}{{/crossLink}} instead.
+	 *
+	 * <h4>Example</h4>
+	 *     createjs.Sound.setVolume(0.5);
+	 *
 	 * @method setVolume
 	 * @param {Number} value The master volume value. The acceptable range is 0-1.
 	 * @static
@@ -958,11 +1005,15 @@ this.createjs = this.createjs || {};
 	/**
 	 * Get the master volume of Sound. The master volume is multiplied against each sound's individual volume.
 	 * To get individual sound volume, use SoundInstance {{#crossLink "SoundInstance/getVolume"}}{{/crossLink}} instead.
+	 *
+	 * <h4>Example</h4>
+	 *     var masterVolume = createjs.Sound.getVolume();
+	 *
 	 * @method getVolume
 	 * @return {Number} The master volume, in a range of 0-1.
 	 * @static
 	 */
-	s.getVolume = function (value) {
+	s.getVolume = function () {
 		return s.masterVolume;
 	}
 
@@ -985,8 +1036,12 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Mute/Unmute all audio. Note that muted audio still plays at 0 volume. This global mute value is maintained
-	 * separately and will override, but not change the mute property of individual instances. To mute an individual
+	 * separately and when set will override, but not change the mute property of individual instances. To mute an individual
 	 * instance, use SoundInstance {{#crossLink "SoundInstance/setMute"}}{{/crossLink}} instead.
+	 *
+	 * <h4>Example</h4>
+	 *     createjs.Sound.setMute(true);
+	 *
 	 * @method setMute
 	 * @param {Boolean} value Whether the audio should be muted or not.
 	 * @return {Boolean} If the mute was set.
@@ -995,9 +1050,8 @@ this.createjs = this.createjs || {};
 	 */
 	s.setMute = function (value) {
 		if (value == null || value == undefined) {
-			return false
+			return false;
 		}
-		;
 
 		this.masterMute = value;
 		if (!this.activePlugin || !this.activePlugin.setMute || !this.activePlugin.setMute(value)) {
@@ -1012,6 +1066,10 @@ this.createjs = this.createjs || {};
 	/**
 	 * Returns the global mute value. To get the mute value of an individual instance, use SoundInstance
 	 * {{#crossLink "SoundInstance/getMute"}}{{/crossLink}} instead.
+	 *
+	 * <h4>Example</h4>
+	 *     var masterMute = createjs.Sound.getMute();
+	 *
 	 * @method getMute
 	 * @return {Boolean} The mute value of Sound.
 	 * @static
@@ -1022,15 +1080,19 @@ this.createjs = this.createjs || {};
 	}
 
 	/**
-	 * Stop all audio (global stop). Stopped audio is reset, and not paused. To play back audio that has been stopped,
+	 * Stop all audio (global stop). Stopped audio is reset, and not paused. To play audio that has been stopped,
 	 * call {{#crossLink "SoundInstance.play"}}{{/crossLink}}.
+	 *
+	 * <h4>Example</h4>
+	 *     createjs.Sound.stop();
+	 *
 	 * @method stop
 	 * @static
 	 */
 	s.stop = function () {
 		var instances = this.instances;
-		for (var i = instances.length; i > 0; i--) {
-			instances[i - 1].stop();  // NOTE stop removes instance from this.instances
+		for (var i = instances.length; i--; ) {
+			instances[i].stop();  // NOTE stop removes instance from this.instances
 		}
 	}
 
@@ -1081,6 +1143,7 @@ this.createjs = this.createjs || {};
 			}
 		} else {
 			//Note that we can't pass arguments to proxy OR setTimeout (IE only), so just wrap the function call.
+			// OJR WebAudio may want to handle this differently, so it might make sense to move this functionality into the plugins in the future
 			var delayTimeoutId = setTimeout(function () {
 				s.beginPlaying(instance, interrupt, offset, loop, volume, pan);
 			}, delay);

@@ -22,8 +22,10 @@ Version NEXT [Not Released]
 	the sound immediately after receiving the event.
 - Corrected missing namespaces in SoundInstance overview.
 - Fixed playing sounds by ID that are preloaded using the Sound.registerSound method.
+- Fixed path parsing in the createInstance method (thanks maljub01)
 - Fixed documentation of FlashPlugin. Main description was broken.
 - Moved embedded SWF into a container, and positioned it off-screen.
+- Added code samples, and did documentation pass.
 
 Version 0.4.0 [Feb 12, 2013]
 ************************************************************************************************************************
