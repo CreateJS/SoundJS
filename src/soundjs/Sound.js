@@ -911,16 +911,10 @@ this.createjs = this.createjs || {};
 		if (!s.initializeDefaultPlugins()) {
 			return s.defaultSoundInstance;
 		}
+		src = s.getSrcById(src);
 		var details = s.parsePath(src, "sound");
-		if (details) {
-			src = s.getSrcById(details.src);
-		} else {
-			src = s.getSrcById(src);
-		}
 
-		var dot = src.lastIndexOf(".");
-		var ext = src.slice(dot + 1);  // sound have format of "path+name . ext"
-		if (dot != -1 && s.SUPPORTED_EXTENSIONS.indexOf(ext) > -1) {  // we have an ext and it is one of our supported,Note this does not mean the plugin supports it.  // OJR consider changing to check against activePlugin.capabilities[ext]
+		if (details) {
 			// make sure that we have a sound channel (sound is registered or previously played)
 			SoundChannel.create(src);
 
