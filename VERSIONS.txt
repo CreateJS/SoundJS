@@ -26,6 +26,7 @@ Version NEXT [Not Released]
 - Fixed documentation of FlashPlugin. Main description was broken.
 - Moved embedded SWF into a container, and positioned it off-screen.
 - Added code samples, and did documentation pass.
+- Added support for playing an empty sound, which facilitates playback on mobile devices without user interaction
 
 Version 0.4.0 [Feb 12, 2013]
 ************************************************************************************************************************

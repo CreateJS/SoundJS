@@ -609,7 +609,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * <h4>Example</h4>
 	 * This example sets up a Flash fallback, but only if there is no plugin specified yet.
-	 * 
+	 *
 	 *      if (!createjs.Sound.isReady()) {
 	 *			createjs.FlashPlugin.BASE_PATH = "../src/SoundJS/";
 	 *      	createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
