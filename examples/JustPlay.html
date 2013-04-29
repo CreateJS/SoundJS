@@ -75,10 +75,10 @@
             displayStatus.innerHTML = "Waiting for load to complete.";  // letting the user know what's happening
         }
 
-        function playSound(evt) {
-            if (evt.src == src) {  // note that callback and event listener return the same event
-                soundInstance = createjs.Sound.play(src);  // start playing the sound we just loaded, storing the playing instance
-                displayStatus.innerHTML = "Playing source: " + evt.src;  // let the user know what we are playing
+        function playSound(event) {
+            if (event.src == src) {  // note that callback and event listener return the same event
+                soundInstance = createjs.Sound.play(event.src);  // start playing the sound we just loaded, storing the playing instance
+                displayStatus.innerHTML = "Playing source: " + event.src;  // let the user know what we are playing
             }
         }
 

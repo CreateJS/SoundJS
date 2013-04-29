@@ -144,7 +144,7 @@ this.createjs = this.createjs || {};
 		 * @type {Object}
 		 * @protected
 		 */
-		audioSources:null, // object hash that tells us if an audioSource has started loading
+		audioSources:null,
 
 		/**
 		 * The internal volume value of the plugin.
@@ -174,13 +174,7 @@ this.createjs = this.createjs || {};
 		 */
 		WRAPPER_ID:"SoundJSFlashContainer",
 
-		/**
-		 * An object that defines the capabilities of the plugin. Please see {{#crossLink "Sound/getCapabilities"}}{{/crossLink}}
-		 * for more information on plugin capabilities.
-		 * @property capabilities
-		 * @type {Object}
-		 * @protected
-		 */
+		// doc'd above
 		capabilities:null,
 
 // FlashPlugin Specifics
@@ -286,7 +280,7 @@ this.createjs = this.createjs || {};
 			w.appendChild(c);
 
 			// Embed SWF
-			var val = swfobject.embedSWF(s.BASE_PATH + "FlashAudioPlugin.swf", this.CONTAINER_ID, "1", "1", //550", "400",
+			var val = swfobject.embedSWF(s.BASE_PATH + "FlashAudioPlugin.swf", this.CONTAINER_ID, "1", "1",
 					"9.0.0", null, null, null, null,
 					createjs.proxy(this.handleSWFReady, this)
 			);
@@ -383,7 +377,7 @@ this.createjs = this.createjs || {};
 			try {
 				var instance = new SoundInstance(src, this, this.flash);
 				return instance;
-			} catch (err) {  // OJR why would this ever fail?
+			} catch (err) {
 				//console.log("Error: Please ensure you have permission to play audio from this location.", err);
 			}
 			return null;
@@ -410,9 +404,6 @@ this.createjs = this.createjs || {};
 			this.audioSources[src] = true;  // NOTE this does not mean preloading has started, just that it will
 			var loader = new SoundLoader(src, this, this.flash);
 			loader.load();  // this will handle if flash is not ready
-			/*if (!loader.load(src)) {  // NOTE this returns false if flash is not ready
-			 this.preloadInstances[src] = loader;
-			 }*/
 		},
 
 		/**
@@ -454,7 +445,7 @@ this.createjs = this.createjs || {};
 		 * Mute all sounds via the plugin.
 		 * @method setMute
 		 * @param {Boolean} value If all sound should be muted or not. Note that plugin-level muting just looks up
-		 * the mute value of Sound {{#crossLink "Sound/masterMute"}}{{/crossLink}}, so this property is not used here.
+		 * the mute value of Sound {{#crossLink "Sound/getMute"}}{{/crossLink}}, so this property is not used here.
 		 * @return {Boolean} If the mute call succeeds.
 		 * @since 0.4.0
 		 */
@@ -504,7 +495,8 @@ this.createjs = this.createjs || {};
 		},
 
 		/**
-		 * Used to output trace from Flash to the console.
+		 * Used to output traces from Flash to the console, if {{#crossLink "FlashPlugin/showOutput"}}{{/crossLink}} is
+		 * <code>true</code>.
 		 * @method flashLog
 		 * @param {String} data The information to be output.
 		 */
@@ -543,7 +535,7 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * Handles events from Flash and routes communication to a <code>SoundLoader</code> via the Flash ID. The method
-		 * and arguments and arguments from Flash are run directly on the sound loader.
+		 * and arguments from Flash are run directly on the sound loader.
 		 * @method handlePreloadEvent
 		 * @param {String} flashId Used to identify the loader instance.
 		 * @param {String} method Indicates the method to run.
@@ -786,9 +778,9 @@ this.createjs = this.createjs || {};
 		},
 
 		setPosition:function (value) {
-			this.offset = value;  //
+			this.offset = value;
 			this.flash && this.flashId && this.flash.setPosition(this.flashId, value);
-			return true;  // this is always true now, we either hold value internally to set later or set immediately
+			return true;
 		},
 
 		getDuration:function () {
@@ -859,7 +851,7 @@ this.createjs = this.createjs || {};
 	 * #class SoundLoader
 	 * @param {String} src The path to the sound
 	 * @param {Object} flash The flash instance that will do the preloading.
-	 * @private
+	 * @protected
 	 */
 	function SoundLoader(src, owner, flash) {
 		this.init(src, owner, flash);

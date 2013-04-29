@@ -39,8 +39,8 @@ this.createjs = this.createjs || {};
 	/**
 	 * Play sounds using HTML &lt;audio&gt; tags in the browser. This plugin is the second priority plugin installed
 	 * by default, after the {{#crossLink "WebAudioPlugin"}}{{/crossLink}}, which is supported on Chrome, Safari, and
-	 * iOS. This handles audio in all other modern browsers. For non-supported browsers, include and install the
-	 * {{#crossLink "FlashPlugin"}}{{/crossLink}}.
+	 * iOS. This handles audio in all other modern browsers. For older browsers that do not support html audio, include
+	 * and install the {{#crossLink "FlashPlugin"}}{{/crossLink}}.
 	 *
 	 * <h4>Known Browser and OS issues for HTML Audio</h4>
 	 * <b>All browsers</b><br />
@@ -59,19 +59,19 @@ this.createjs = this.createjs || {};
 	 * hardware and browser settings.  See {{#crossLink "HTMLAudioPlugin.MAX_INSTANCES"}}{{/crossLink}} for a safe estimate.</li></ul>
 	 *
 	 * <b>iOS 6 limitations</b><br />
-	 * Note it is recommended to use {{#crossLink "WebAudioPlugin"}}{{/crossLink}} for iOS (6+). HTML Audio can only
-	 * have one &lt;audio&gt; tag, can not preload or autoplay the audio, can not cache the audio, and can not play the
-	 * audio except inside a user initiated event.
+	 * Note it is recommended to use {{#crossLink "WebAudioPlugin"}}{{/crossLink}} for iOS (6+). HTML Audio is disabled by
+	 * default as it can only have one &lt;audio&gt; tag, can not preload or autoplay the audio, can not cache the audio,
+	 * and can not play the audio except inside a user initiated event.
 	 *
 	 * <b>Android HTML Audio limitations</b><br />
 	 * <ul><li>We have no control over audio volume. Only the user can set volume on their device.</li>
-	 *      <li>We can only play audio inside a user event (touch).  This currently means you cannot loop sound or use a delay.</li>
+	 *      <li>We can only play audio inside a user event (touch/click).  This currently means you cannot loop sound or use a delay.</li>
 	 * <b> Android Chrome 26.0.1410.58 specific limitations</b><br />
 	 * 		<li>Chrome reports true when you run createjs.Sound.BrowserDetect.isChrome, but is a different browser
-	 *      with different abilities</li>
+	 *      with different abilities.</li>
 	 *      <li>Can only play 1 sound at a time.</li>
 	 *      <li>Sound is not cached.</li>
-	 *      <li>Sound can only be loaded in a touch event.</li>
+	 *      <li>Sound can only be loaded in a user initiated touch/click event.</li>
 	 *      <li>There is a delay before a sound is played, presumably while the src is loaded.</li>
 	 * </ul>
 	 *
@@ -102,6 +102,7 @@ this.createjs = this.createjs || {};
 	 * of the available properties.
 	 * @property capabilities
 	 * @type {Object}
+	 * @protected
 	 * @static
 	 */
 	s.capabilities = null;
@@ -125,7 +126,7 @@ this.createjs = this.createjs || {};
 	s.AUDIO_ENDED = "ended";
 
 	/**
-	 * Event constant for the "seeked" event for cleaner code.  We hijack this event for launching loop event.
+	 * Event constant for the "seeked" event for cleaner code.  We utilize this event for maintaining loop events.
 	 * @property AUDIO_SEEKED
 	 * @type {String}
 	 * @default seeked
@@ -154,18 +155,18 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Determine if the plugin can be used in the current browser/OS. Note that HTML audio is available in most modern
-	 * browsers except iOS, where it is limited.
+	 * browsers, but is disabled in iOS because of its limitations.
 	 * @method isSupported
 	 * @return {Boolean} If the plugin can be initialized.
 	 * @static
 	 */
 	s.isSupported = function () {
+		// HTML audio can be enable on iOS by removing this if statement, but it is not recommended due to the limitations:
+		// iOS can only have a single <audio> instance, cannot preload or autoplay, cannot cache sound, and can only be
+		// played in response to a user event (click)
 		if (createjs.Sound.BrowserDetect.isIOS) {
 			return false;
 		}
-		// You can enable this plugin on iOS by removing this line, but it is not recommended due to the limitations:
-		// iOS can only have a single <audio> instance, cannot preload or autoplay, cannot cache sound, and can only be
-		// played in response to a user event (click)
 		s.generateCapabilities();
 		var t = s.tag;  // OJR do we still need this check, when cap will already be null if this is the case
 		if (t == null || s.capabilities == null) {
@@ -208,10 +209,7 @@ this.createjs = this.createjs || {};
 
 	var p = s.prototype = {
 
-		/**
-		 * The capabilities of the plugin, created by the {{#crossLink "HTMLAudioPlugin/generateCapabilities"}}{{/crossLink}}
-		 * method.
-		 */
+		// doc'd above
 		capabilities:null,
 
 		/**
@@ -228,7 +226,7 @@ this.createjs = this.createjs || {};
 		 * is registered using the {{#crossLink "Sound/register"}}{{/crossLink}} method.  This is only used if
 		 * a value is not provided.
 		 *
-		 * <b>NOTE this only exists as a limitation of HTML audio.</b>
+		 * <b>NOTE this property only exists as a limitation of HTML audio.</b>
 		 * @property defaultNumChannels
 		 * @type {Number}
 		 * @default 2
@@ -239,7 +237,7 @@ this.createjs = this.createjs || {};
 		/**
 		 * An initialization function run by the constructor
 		 * @method init
-		 * @private
+		 * @protected
 		 */
 		init:function () {
 			this.capabilities = s.capabilities;
@@ -698,7 +696,7 @@ this.createjs = this.createjs || {};
 	 * @param {String} src The source of the sound to load.
 	 * @param {HTMLAudioElement} tag The audio tag of the sound to load.
 	 * @constructor
-	 * @private
+	 * @protected
 	 * @since 0.4.0
 	 */
 	function HTMLAudioLoader(src, tag) {
@@ -726,7 +724,7 @@ this.createjs = this.createjs || {};
 		tag:null,
 
 		/**
-		 * An intervale used to give us progress.
+		 * An interval used to give us progress.
 		 * #property preloadTimer
 		 * @type {String}
 		 * @default null
@@ -809,7 +807,7 @@ this.createjs = this.createjs || {};
 	 * (Note: This seems to be a bug in Chrome)
 	 * #class TagPool
 	 * @param {String} src The source of the channel.
-	 * @private
+	 * @protected
 	 */
 	function TagPool(src) {
 		this.init(src);
@@ -819,7 +817,7 @@ this.createjs = this.createjs || {};
 	 * A hash lookup of each sound channel, indexed by the audio source.
 	 * #property tags
 	 * @static
-	 * @private
+	 * @protected
 	 */
 	TagPool.tags = {};
 
@@ -828,7 +826,7 @@ this.createjs = this.createjs || {};
 	 * #method get
 	 * @param {String} src The source file used by the audio tag.
 	 * @static
-	 * @private
+	 * @protected
 	 */
 	TagPool.get = function (src) {
 		var channel = TagPool.tags[src];
@@ -843,7 +841,7 @@ this.createjs = this.createjs || {};
 	 * #method getInstance
 	 * @param {String} src The source file used by the audio tag.
 	 * @static
-	 * @private
+	 * @protected
 	 */
 	TagPool.getInstance = function (src) {
 		var channel = TagPool.tags[src];
@@ -859,7 +857,7 @@ this.createjs = this.createjs || {};
 	 * @param {String} src The source file used by the audio tag.
 	 * @param {HTMLElement} tag Audio tag to set.
 	 * @static
-	 * @private
+	 * @protected
 	 */
 	TagPool.setInstance = function (src, tag) {
 		var channel = TagPool.tags[src];
@@ -875,7 +873,7 @@ this.createjs = this.createjs || {};
 		 * The source of the tag pool.
 		 * #property src
 		 * @type {String}
-		 * @private
+		 * @protected
 		 */
 		src:null,
 
@@ -885,7 +883,7 @@ this.createjs = this.createjs || {};
 		 * #property length
 		 * @type {Number}
 		 * @default 0
-		 * @private
+		 * @protected
 		 */
 		length:0,
 
@@ -894,7 +892,7 @@ this.createjs = this.createjs || {};
 		 * #property available
 		 * @type {Number}
 		 * @default 0
-		 * @private
+		 * @protected
 		 */
 		available:0,
 
@@ -902,7 +900,7 @@ this.createjs = this.createjs || {};
 		 * A list of all available tags in the pool.
 		 * #property tags
 		 * @type {Array}
-		 * @private
+		 * @protected
 		 */
 		tags:null,
 

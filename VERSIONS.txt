@@ -1,32 +1,37 @@
 Version NEXT [Not Released]
 ************************************************************************************************************************
-- HTMLAudioPlugin now using tag loop property to provide more reliable looping.
-- WebAudioPlugin added a look ahead approach to enable smooth looping.
-- Updated Known Browser Limitations for iOS6 to include info on web audio distortion bug when video element is present.
-- Updated Known Browser Limitations for Android, specifically HTML audio in Android Chrome.
-- Updated Known Browser Limitations to include info on audio being delayed in flash player in the browser.
-- Updated Known Browser Limitations for IE9 to include information about the audio tag limit.
-- Updated WebAudioPlugin to use a specific panning model (equal power), which matches the sound quality of the other
-	plugins.
-- Fixed playback for secondary sounds in HTMLAudio Plugin that affected Firefox.
-- Fixed an issue with duration caused by the above playback issue for secondary sounds in HTMLAudioPlugin in Firefox.
-- Fixed issue where sound channels that had failed or were interrupted could not be used, resulting in less instances
-	available then expected.
+- Added MobileSafe demo to show launching an "app" inside a touch event, enabling audio playback on mobile devices
+- Added playEmptySound() method, which facilitates playback on mobile devices without user interaction
+- HTMLAudioPlugin now using tag loop property to provide more reliable looping
+- WebAudioPlugin added a look ahead approach to enable smooth looping
+- Updated WebAudioPlugin to use a specific panning model (equal power). Matches the sound quality of the other plugins
+- Fixed playback for secondary sounds in HTMLAudio Plugin that affected Firefox
+- Fixed an issue with duration for secondary sounds in HTMLAudioPlugin in Firefox
+- Fixed issue where failed or interrupted sound channels could not be used, resulting in less instances available then
+	expected.
 - Updated file validation RegExp. Supports double-byte characters, prevents partial matches, better
 	support for relative paths, improved matching of domains, and modified the "file name" match to
 	include the extension (file.mp3 instead of file). The match arguments have not changed otherwise.
-- Added support for PhoneGap in WebAudioPlugin that allows it to be used on mobile devices.
-- Fixed naming of the fileload event (used to be "loadComplete"). The old event is still dispatched, but is deprecated.
-	Also renamed the "sendLoadComplete" method to "sendFileLoadEvent".
+- Added support for PhoneGap in WebAudioPlugin that allows it to be used on mobile devices
+- Fixed naming of the fileload event (used to be "loadComplete"). The old event is still dispatched, but is deprecated
+- Renamed the internal "sendLoadComplete" method to "sendFileLoadEvent"
 - Fixed cleanup routine to happen before the Sound and instance events are dispatched, which caused issues if affecting
 	the sound immediately after receiving the event.
-- Corrected missing namespaces in SoundInstance overview.
-- Fixed playing sounds by ID that are preloaded using the Sound.registerSound method.
+- Corrected missing namespaces in SoundInstance overview
+- Fixed playing sounds by ID that are preloaded using the Sound.registerSound() method
 - Fixed path parsing in the createInstance method (thanks maljub01)
-- Fixed documentation of FlashPlugin. Main description was broken.
-- Moved embedded SWF into a container, and positioned it off-screen.
-- Added code samples, and did documentation pass.
-- Added support for playing an empty sound, which facilitates playback on mobile devices without user interaction
+- Moved embedded SWF into a container, and positioned it off-screen
+- Fixed documentation:
+	* FlashPlugin: Main description caused FlashPlugin to not export correct documentation
+	* SoundInstance/setMute was documented as a duplicate of mute
+	* SoundInstance main example had incorrect event for "failed"
+	* Added code samples throughout
+	* Minor updates throughout documentation to formatting, wording, parameters, and private/protected
+- Updated browser limitations:
+	* iOS6: include info on web audio distortion bug when video element is present
+	* Android: issues with HTML audio in Android Chrome
+	* Flash: Audio delays when using the FlashPlugin
+	* IE9: Information on the audio tag limit.
 
 Version 0.4.0 [Feb 12, 2013]
 ************************************************************************************************************************

@@ -133,11 +133,10 @@
             var instance = createjs.Sound.play(target.id, createjs.Sound.INTERRUPT_NONE, 0, 0, false, 1);
             if (instance == null || instance.playState == createjs.Sound.PLAY_FAILED) { return; }
             target.className = "gridBox active";
-            instance.onComplete = function(instance) {
-                target.className = "gridBox";
-            }
-
-        }
+			instance.addEventListener ("complete", function(instance) {
+				target.className = "gridBox";
+			});
+		}
     </script>
 
 </body>
