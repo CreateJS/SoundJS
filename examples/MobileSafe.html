@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>SoundJS: Just Play</title>
+	<title>SoundJS: Mobile Safe</title>
 
 	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css" />
 </head>
@@ -14,7 +14,7 @@
 	</header>
 
 	<div class="content" id="content">
-		<h1 id="status">Startup.</h1>
+		<h1 id="status">Hello World.</h1>
 	</div>
 
 	<div id="error">
@@ -30,17 +30,21 @@
     <script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
 
     <script>
+		var displayMessage;		// the HTML element we use to display messages to the user
+
 		function init() {
 			if (window.top != window) {
 				document.getElementById("header").style.display = "none";
 			}
 
+			// store this off because walking the DOM to get the reference is expensive
+			displayMessage = document.getElementById("status");
+
 			// if this is on mobile, sounds need to be played inside of a touch event
 			if (createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid || createjs.Sound.BrowserDetect.isBlackberry) {
-				//wait for touch, then launch
-				//document.addEventListener("click", handleTouch, false);	// works on Android, does not work on iPad
-				document.getElementById("status").addEventListener("click", handleTouch, false);	// works on Android and iPad
-				document.getElementById("status").innerHTML = "Touch to Start";
+				//document.addEventListener("click", handleTouch, false);	// works on Android, does not work on iOS
+				displayMessage.addEventListener("click", handleTouch, false);	// works on Android and iPad
+				displayMessage.innerHTML = "Touch to Start";
 			}
 			else {
 				handleTouch(null);
@@ -49,11 +53,15 @@
 
 		// launch the app inside of this scope
 		function handleTouch(event) {
-			document.getElementById("status").removeEventListener("click", handleTouch, false);	// remove the listener
-			var thisApp = new myNameSpace.MyApp();	// launch the app
+			displayMessage.removeEventListener("click", handleTouch, false);
+			// launch the app by creating it
+			var thisApp = new myNameSpace.MyApp();
 		}
 
-		this.myNameSpace = this.myNameSpace || {};	// create a namespace for the application
+		// create a namespace for the application
+		this.myNameSpace = this.myNameSpace || {};
+
+		// this is a function closure
 		(function() {
 			// the application
 			function MyApp() {
@@ -64,13 +72,14 @@
 				src:null,            // the audio src we are trying to play
 				soundInstance:null,  // the soundInstance returned by Sound when we create or play a src
 				displayStatus:null,  // the HTML element we use to display messages to the user
+				loadProxy:null,
 
 				init: function () {
-					// store the DOM element so we do not have to keep looking it up
+					// store the DOM element so we do repeatedly pay the cost to look it up
 					this.displayStatus = document.getElementById("status");
 
 					// this does two things, it initializes the default plugins, and if that fails the if statement triggers and we display an error
-					// NOTE that WebAudioPlugin plays an empty sound when initialized, which activates web audio on iOS if played inside of a function with a touch event in it's callstack
+					// NOTE that WebAudioPlugin plays an empty sound when initialized, which activates web audio on iOS if played inside of a function with a touch event in its callstack
 					if (!createjs.Sound.initializeDefaultPlugins()) {
 						document.getElementById("error").style.display = "block";
 						document.getElementById("content").style.display = "none";
@@ -82,21 +91,24 @@
 					this.src = assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg";
 					// NOTE the "|" character is used by Sound to separate source into distinct files, which allows you to provide multiple extensions for wider browser support
 
-					createjs.Sound.addEventListener("fileload", createjs.proxy(this.playSound, this)); // add an event listener for when load is completed.
-					// NOTE createjs.proxy is used to apply scope so we stay within the touch scope
+					this.displayStatus.innerHTML = "Waiting for load to complete.";  // let the user know what's happening
+					// NOTE createjs.proxy is used to apply scope so we stay within the touch scope, allowing sound to play on mobile devices
+					this.loadProxy = createjs.proxy(this.handleLoad, this);
+					createjs.Sound.addEventListener("fileload", this.loadProxy); // add event listener for when load is completed.
 					createjs.Sound.registerSound(this.src);  // register sound, which preloads by default
 
-					this.displayStatus.innerHTML = "Waiting for load to complete.";  // letting the user know what's happening
 					return this;
 				},
 
 				// play a sound inside
-				playSound: function (event) {
+				handleLoad: function (event) {
 					this.soundInstance = createjs.Sound.play(event.src);	// start playback and store the soundInstance we are currently playing
 					this.displayStatus.innerHTML = "Playing source: " + event.src;  // let the user know what we are playing
+					createjs.Sound.removeEventListener("fileload", this.loadProxy);	// we only load 1 sound, so remove the listener
 				}
 			}
 
+			// add MyApp to myNameSpace
 			myNameSpace.MyApp = MyApp;
 		}());
 
