@@ -312,7 +312,7 @@ this.createjs = this.createjs || {};
 			for (var i = 0, l = this.queuedInstances.length; i < l; i++) {
 				this.flash.register(this.queuedInstances[i]);  // NOTE this flash function currently does nothing
 			}
-			this.queuedInstances = null;
+			this.queuedInstances = [];
 
 			// Associate flash instance with any preloadInstance that already exists.
 			for (var n in this.flashPreloadInstances) {
@@ -323,7 +323,7 @@ this.createjs = this.createjs || {};
 			for (var n in this.preloadInstances) {
 				this.preloadInstances[n].initialize(this.flash);
 			}
-			this.preloadInstances = null;
+			this.preloadInstances = {};
 
 			// Associate flash instance with any sound instance that has already been played.
 			for (var n in this.flashInstances) {
@@ -338,7 +338,6 @@ this.createjs = this.createjs || {};
 		 */
 		handleTimeout:function () {
 			//LM: Surface to user? AUDIO_FLASH_FAILED
-			// OJR we could dispatch an error event
 		},
 
 		/**
@@ -361,6 +360,39 @@ this.createjs = this.createjs || {};
 			return {
 				tag:tag
 			};
+		},
+
+
+		/**
+		 * Remove a sound added using {{#crossLink "FlashPlugin/register"}}{{/crossLink}}. Note this does not cancel a preload.
+		 * @method removeSound
+		 * @param {String} src The sound URI to unload.
+		 * @since 0.4.1
+		 */
+		removeSound:function (src) {
+			delete(this.audioSources[src]);
+			var i = this.queuedInstances.indexOf(src);
+			if(i != -1) {
+				this.queuedInstances.splice(i,1);
+			}
+			// NOTE sound cannot be removed from a swf
+		},
+
+		/**
+		 * Remove all sounds added using {{#crossLink "FlashPlugin/register"}}{{/crossLink}}. Note this does not cancel a preload.
+		 * @method removeAllSounds
+		 * @param {String} src The sound URI to unload.
+		 * @since 0.4.1
+		 */
+		removeAllSounds:function () {
+			this.audioSources = {};	// this drops all references, in theory freeing them for garbage collection
+			this.queuedInstances = [];
+
+			// OJR these may not be necessary, but are included for cleanup clarity.
+			this.flashInstances = {};
+			this.flashPreloadInstances = {};
+			this.preloadInstances = {};
+			// NOTE sound cannot be removed from a swf
 		},
 
 		/**

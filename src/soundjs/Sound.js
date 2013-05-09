@@ -125,6 +125,20 @@ this.createjs = this.createjs || {};
 	 *
 	 *      createjs.PreloadJS.installPlugin(createjs.Sound);
 	 *
+	 * <b>Mobile Safe Approach</b><br />
+	 * Mobile devices require sounds to be played inside of a user initiated event (touch/click) in varying degrees.
+	 * As of SoundJS 0.4.1, you can launch a site inside of a user initiated event and have audio playback work. To
+	 * enable as broadly as possible, the site needs to setup the Sound plugin in its initialization (for example via
+	 * <code>createjs.Sound.initializeDefaultPlugins();</code>), and all sounds need to be played in the scope of the
+	 * application.  See the MobileSafe demo for a working example.
+	 *
+	 * <h4>Example</h4>
+	 *     document.getElementById("status").addEventListener("click", handleTouch, false);    // works on Android and iPad
+	 *     function handleTouch(event) {
+	 *       document.getElementById("status").removeEventListener("click", handleTouch, false);    // remove the listener
+	 *       var thisApp = new myNameSpace.MyApp();    // launch the app
+	 *     }
+	 *
 	 * <h4>Known Browser and OS issues</h4>
 	 * <b>IE 9 HTML Audio limitations</b><br />
 	 * <ul><li>There is a delay in applying volume changes to tags that occurs once playback is started. So if you have
@@ -134,6 +148,9 @@ this.createjs = this.createjs || {};
 	 * encoding with 64kbps works.</li>
 	 * <li>There is a limit to how many audio tags you can load and play at once, which appears to be determined by
 	 * hardware and browser settings.  See {{#crossLink "HTMLAudioPlugin.MAX_INSTANCES"}}{{/crossLink}} for a safe estimate.</li></ul>
+	 *
+	 * <b>Safari limitations</b><br />
+	 * <ul><li>Safari requires Quicktime to be installed for audio playback.</li></ul>
 	 *
 	 * <b>iOS 6 Web Audio limitations</b><br />
 	 * <ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event
@@ -588,7 +605,6 @@ this.createjs = this.createjs || {};
 	 * @method initializeDefaultPlugins
 	 * @returns {Boolean} If a plugin is initialized (true) or not (false). If the browser does not have the
 	 * capabilities to initialize any available plugins, this will return false.
-	 * @protected
 	 * @since 0.4.0
 	 */
 	s.initializeDefaultPlugins = function () {
@@ -748,7 +764,7 @@ this.createjs = this.createjs || {};
 		}
 		var loader = s.activePlugin.register(details.src, numChannels);  // Note only HTML audio uses numChannels
 
-		if (loader != null) {
+		if (loader != null) {	// all plugins currently return a loader
 			if (loader.numChannels != null) {
 				numChannels = loader.numChannels;
 			} // currently only HTMLAudio returns this
@@ -764,15 +780,16 @@ this.createjs = this.createjs || {};
 			// If the loader returns a tag, return it instead for preloading.
 			if (loader.tag != null) {
 				details.tag = loader.tag;
-			}
-			else if (loader.src) {
+			} else if (loader.src) {
 				details.src = loader.src;
 			}
 			// If the loader returns a complete handler, pass it on to the prelaoder.
 			if (loader.completeHandler != null) {
 				details.completeHandler = loader.completeHandler;
 			}
-			details.type = loader.type;
+			if (loader.type) {
+				details.type = loader.type;
+			}
 		}
 
 		if (preload != false) {
@@ -818,6 +835,103 @@ this.createjs = this.createjs || {};
 			returnValues[i] = createjs.Sound.registerSound(manifest[i].src, manifest[i].id, manifest[i].data, manifest[i].preload)
 		}
 		return returnValues;
+	}
+
+	/**
+	 * Remove a sound that has been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
+	 * {{#crossLink "Sound/registerManifest"}}{{/crossLink}}.
+	 * Note this will stop playback on active instances playing this sound before deleting them.
+	 *
+	 * <h4>Example</h4>
+	 *      createjs.Sound.removeSound("myAudioPath/mySound.mp3|myAudioPath/mySound.ogg");
+	 *      createjs.Sound.removeSound("myID");
+	 *
+	 * @method removeSound
+	 * @param {String | Object} src The src or ID of the audio, or an Object with a "src" property
+	 * @return {Boolean} True if sound is successfully removed.
+	 * @static
+	 * @since 0.4.1
+	 */
+	s.removeSound = function(src) {
+		if (s.activePlugin == null) {
+			return false;
+		}
+
+		if (src instanceof Object) {
+			src = src.src;
+		}
+		src = s.getSrcById(src);
+		var details = s.parsePath(src);
+		if (details == null) {
+			return false;
+		}
+		src = details.src;
+
+		// remove src from idHash	// Note "for in" can be a slow operation
+		for(var prop in s.idHash){
+			if(s.idHash[prop] == src) {
+				delete(s.idHash[prop]);
+			}
+		}
+
+		// clear from SoundChannel, which also stops and deletes all instances
+		SoundChannel.remove(src);
+
+		// remove src from preloadHash	// Note "for in" can be a slow operation
+		delete(s.preloadHash[src]);
+
+		// activePlugin cleanup
+		s.activePlugin.removeSound(src);
+
+		return true;
+	}
+
+	/**
+	 * Remove a manifest of audio files that have been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
+	 * {{#crossLink "Sound/registerManifest"}}{{/crossLink}}.
+	 * Note this will stop playback on active instances playing this audio before deleting them.
+	 *
+	 * <h4>Example</h4>
+	 *      var manifest = [
+	 *          {src:"assetPath/asset0.mp3|assetPath/asset0.ogg", id:"example"}, // Note the Sound.DELIMITER
+	 *          {src:"assetPath/asset1.mp3|assetPath/asset1.ogg", id:"1", data:6},
+	 *          {src:"assetPath/asset2.mp3", id:"works"}
+	 *      ];
+	 *      createjs.Sound.removeManifest(manifest);
+	 *
+	 * @method removeManifest
+	 * @param {Array} manifest An array of objects to remove. Objects are expected to be in the format needed for
+	 * {{#crossLink "Sound/removeSound"}}{{/crossLink}}: <code>{srcOrID:srcURIorID}</code>
+	 * @return {Object} An array of Boolean values representing if the sounds with the same array index in manifest was
+	 * successfully removed.
+	 * @static
+	 * @since 0.4.1
+	 */
+	s.removeManifest = function (manifest) {
+		var returnValues = [];
+		for (var i = 0, l = manifest.length; i < l; i++) {
+			returnValues[i] = createjs.Sound.removeSound(manifest[i].src);
+		}
+		return returnValues;
+	}
+
+	/**
+	 * Remove all sounds that have been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
+	 * {{#crossLink "Sound/registerManifest"}}{{/crossLink}}.
+	 * Note this will stop playback on all active sound instances before deleting them.
+	 *
+	 * <h4>Example</h4>
+	 *     createjs.Sound.removeAllSounds();
+	 *
+	 * @method removeAllSounds
+	 * @static
+	 * @since 0.4.1
+	 */
+	s.removeAllSounds = function() {
+		s.idHash = {};
+		s.preloadHash = {};
+		SoundChannel.removeAll();
+		s.activePlugin.removeAllSounds();
 	}
 
 	/**
@@ -960,7 +1074,7 @@ this.createjs = this.createjs || {};
 		var details = s.parsePath(src, "sound");
 
 		var instance = null;
-		if (details != null) {
+		if (details != null && details.src != null) {
 			// make sure that we have a sound channel (sound is registered or previously played)
 			SoundChannel.create(details.src);
 			instance = s.activePlugin.create(details.src);
@@ -1304,12 +1418,38 @@ this.createjs = this.createjs || {};
 	 */
 	SoundChannel.create = function (src, max) {
 		var channel = SoundChannel.get(src);
-		//if (max == null) { max = -1; }  // no longer need this check
 		if (channel == null) {
 			SoundChannel.channels[src] = new SoundChannel(src, max);
 			return true;
 		}
 		return false;
+	}
+	/**
+	 * Delete a sound channel, stop and delete all related instances. Note that if the sound channel does not exist, this will fail.
+	 * #method remove
+	 * @param {String} src The source for the channel
+	 * @return {Boolean} If the channels were deleted.
+	 * @static
+	 */
+	SoundChannel.remove = function (src) {
+		var channel = SoundChannel.get(src);
+		if (channel == null) {
+			return false;
+		}
+		channel.removeAll();	// this stops and removes all active instances
+		delete(SoundChannel.channels[src]);
+		return true;
+	}
+	/**
+	 * Delete all sound channels, stop and delete all related instances.
+	 * #method removeAll
+	 * @static
+	 */
+	SoundChannel.removeAll = function () {
+		for(var channel in SoundChannel.channels) {
+			SoundChannel.channels[channel].removeAll();	// this stops and removes all active instances
+		}
+		SoundChannel.channels = {};
 	}
 	/**
 	 * Add an instance to a sound channel.
@@ -1344,7 +1484,7 @@ this.createjs = this.createjs || {};
 	}
 	/**
 	 * Get the maximum number of sounds you can have in a channel.
-	 * #method
+	 * #method maxPerChannel
 	 * @return {Number} The maximum number of sounds you can have in a channel.
 	 */
 	SoundChannel.maxPerChannel = function () {
@@ -1428,7 +1568,6 @@ this.createjs = this.createjs || {};
 			if (!this.getSlot(interrupt, instance)) {
 				return false;
 			}
-			;
 			this.instances.push(instance);
 			this.length++;
 			return true;
@@ -1449,6 +1588,16 @@ this.createjs = this.createjs || {};
 			this.instances.splice(index, 1);
 			this.length--;
 			return true;
+		},
+
+		/**
+		 * Stop playback and remove all instances from the channel.  Usually in response to a delete call.
+		 * #method removeAll
+		 */
+		removeAll:function () {
+			while(this.length) {
+				this.instances[this.length-1].stop();	// stop causes remove to be called, which decrements length
+			}
 		},
 
 		/**

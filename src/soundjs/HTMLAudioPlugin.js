@@ -58,6 +58,9 @@ this.createjs = this.createjs || {};
 	 * <li>There is a limit to how many audio tags you can load and play at once, which appears to be determined by
 	 * hardware and browser settings.  See {{#crossLink "HTMLAudioPlugin.MAX_INSTANCES"}}{{/crossLink}} for a safe estimate.</li></ul>
 	 *
+	 * <b>Safari limitations</b><br />
+	 * <ul><li>Safari requires Quicktime to be installed for audio playback.</li></ul>
+	 *
 	 * <b>iOS 6 limitations</b><br />
 	 * Note it is recommended to use {{#crossLink "WebAudioPlugin"}}{{/crossLink}} for iOS (6+). HTML Audio is disabled by
 	 * default as it can only have one &lt;audio&gt; tag, can not preload or autoplay the audio, can not cache the audio,
@@ -283,6 +286,28 @@ this.createjs = this.createjs || {};
 			//LM: Firefox fails when this the preload="none" for other tags, but it needs to be "none" to ensure PreloadJS works.
 			tag.src = src;
 			return tag;
+		},
+
+		/**
+		 * Remove a sound added using {{#crossLink "HTMLAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel a preload.
+		 * @method removeSound
+		 * @param {String} src The sound URI to unload.
+		 * @since 0.4.1
+		 */
+		removeSound:function (src) {
+			delete(this.audioSources[src]);
+			TagPool.remove(src);
+		},
+
+		/**
+		 * Remove all sounds added using {{#crossLink "HTMLAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel a preload.
+		 * @method removeAllSounds
+		 * @param {String} src The sound URI to unload.
+		 * @since 0.4.1
+		 */
+		removeAllSounds:function () {
+			this.audioSources = {};	// this drops all references, in theory freeing them for garbage collection
+			TagPool.removeAll();
 		},
 
 		/**
@@ -837,6 +862,35 @@ this.createjs = this.createjs || {};
 	}
 
 	/**
+	 * Delete a TagPool and all related tags. Note that if the TagPool does not exist, this will fail.
+	 * #method remove
+	 * @param {String} src The source for the tag
+	 * @return {Boolean} If the TagPool was deleted.
+	 * @static
+	 */
+	TagPool.remove = function (src) {
+		var channel = TagPool.tags[src];
+		if (channel == null) {
+			return false;
+		}
+		channel.removeAll();
+		delete(TagPool.tags[src]);
+		return true;
+	}
+
+	/**
+	 * Delete all TagPools and all related tags.
+	 * #method removeAll
+	 * @static
+	 */
+	TagPool.removeAll = function () {
+		for(var channel in TagPool.tags) {
+			TagPool.tags[channel].removeAll();	// this stops and removes all active instances
+		}
+		TagPool.tags = {};
+	}
+
+	/**
 	 * Get a tag instance. This is a shortcut method.
 	 * #method getInstance
 	 * @param {String} src The source file used by the audio tag.
@@ -919,6 +973,19 @@ this.createjs = this.createjs || {};
 			this.tags.push(tag);
 			this.length++;
 			this.available++;
+		},
+
+		/**
+		 * Remove all tags from the channel.  Usually in response to a delete call.
+		 * #method removeAll
+		 */
+		removeAll:function () {
+			// This may not be neccessary
+			while(this.length--) {
+				delete(this.tags[this.length]);	// NOTE that the audio playback is already stopped by this point
+			}
+			this.src = null;
+			this.tags = null;
 		},
 
 		/**

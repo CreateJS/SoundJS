@@ -288,10 +288,30 @@ this.createjs = this.createjs || {};
 		 * Remove a source from our preload list. Note this does not cancel a preload.
 		 * @method removeFromPreload
 		 * @param {String} src The sound URI to unload.
-		 * @return {Boolean}
+		 * @deprecated
 		 */
 		removeFromPreload:function (src) {
 			delete(this.arrayBuffers[src]);
+		},
+
+		/**
+		 * Remove a sound added using {{#crossLink "WebAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel a preload.
+		 * @method removeSound
+		 * @param {String} src The sound URI to unload.
+		 * @since 0.4.1
+		 */
+		removeSound:function (src) {
+			delete(this.arrayBuffers[src]);
+		},
+
+		/**
+		 * Remove all sounds added using {{#crossLink "WebAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel a preload.
+		 * @method removeAllSounds
+		 * @param {String} src The sound URI to unload.
+		 * @since 0.4.1
+		 */
+		removeAllSounds:function () {
+			this.arrayBuffers = {};
 		},
 
 		/**
@@ -1437,7 +1457,7 @@ this.createjs = this.createjs || {};
 		 * @protected
 		 */
 		handleError:function (evt) {
-			this.owner.removeFromPreload(this.src);
+			this.owner.removeSound(this.src);
 			this.onerror && this.onerror(evt);
 		},
 
