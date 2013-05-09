@@ -1,10 +1,12 @@
 Version NEXT [Not Released]
 ************************************************************************************************************************
+- Added removeSound, removeManifest, and removeAllSounds functions to Sound, to enable unloading of sounds.
 - Added MobileSafe demo to show launching an "app" inside a touch event, enabling audio playback on mobile devices
 - Added playEmptySound() method, which facilitates playback on mobile devices without user interaction
 - HTMLAudioPlugin now using tag loop property to provide more reliable looping
 - WebAudioPlugin added a look ahead approach to enable smooth looping
 - Updated WebAudioPlugin to use a specific panning model (equal power). Matches the sound quality of the other plugins
+- Fixed an issue that stopped WebAudioPlugin from loading sound files other than ogg, mp3, and wav with PreloadJS
 - Fixed playback for secondary sounds in HTMLAudio Plugin that affected Firefox
 - Fixed an issue with duration for secondary sounds in HTMLAudioPlugin in Firefox
 - Fixed issue where failed or interrupted sound channels could not be used, resulting in less instances available then
@@ -32,6 +34,7 @@ Version NEXT [Not Released]
 	* Android: issues with HTML audio in Android Chrome
 	* Flash: Audio delays when using the FlashPlugin
 	* IE9: Information on the audio tag limit.
+	* Safari: added info about requiring Quicktime for audio playback.
 
 Version 0.4.0 [Feb 12, 2013]
 ************************************************************************************************************************
@@ -77,7 +80,8 @@ Version 0.4.0 [Feb 12, 2013]
 - Fixed an issue with FlashPlugin that would cause a paused instance, once resumed, to not fire onComplete callback.
 - Fixed an issue in HTMLAudioPlugin that caused it to incorrectly return isSupported as true when it should be false
 - Better documentation throughout
-- Improved examples
+- Improved examples in documentation
+- Added tutorials: Basics, Mobile-safe approach, and SoundJS & PreloadJS.
 
 
 Version 0.3.0 [Aug 24, 2012]

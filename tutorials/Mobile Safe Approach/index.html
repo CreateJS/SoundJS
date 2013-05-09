@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>SoundJS Tutorial: Mobile Safe Approach</title>
+    <link href="../shared/tutorial.css" rel="stylesheet" type="text/css">
+    <script src="../shared/tutorial.js"></script>
+
+    <!-- SyntaxHighlighter-->
+    <script src="../shared/SyntaxHighlighter/shCore.js"></script>
+    <script src="../shared/SyntaxHighlighter/shBrushJScript.js"></script>
+    <script src="../shared/SyntaxHighlighter/shBrushXml.js"></script>
+    <link href="../shared/SyntaxHighlighter/shCore.css" rel="stylesheet" type="text/css">
+    <link href="../shared/SyntaxHighlighter/shThemeCreateJS.css" rel="stylesheet" type="text/css">
+</head>
+
+<body onLoad="initTutorial();">
+<article>
+<header>
+    <h1>SoundJS: Mobile Safe Approach</h1>
+    <p>
+        <strong>Synopsis:</strong> An approach to playing audio that also works on mobile devices<br>
+        <strong>Topics:</strong> sound, play, mobile safe approaches, best practices<br>
+        <strong>Target:</strong> SoundJS 0.4.0+
+    </p>
+</header>
+
+<section>
+    <header>
+        <h2>Introduction</h2>
+    </header>
+	<p>This tutorial will outline techniques for playing audio that work on the majority of devices and browsers, and
+		specifically allows playback on mobile devices (phones/tablets) where security limitations often cause problems.
+        It assumes you have read the <a href="../Basics%20and%20Best%20Practices/index.html" target="_blank">
+		Basics and Best Practices</a> tutorial and uses the HTML built with it as a starting point. The end result will
+		be similar to the <a href="https://github.com/CreateJS/SoundJS/blob/master/examples/MobileSafe.html" target="_blank">
+		MobileSafe.html example</a>. Your starting html document should look like this:
+    </p>
+	<textarea class="brush: js;" readonly>
+        &lt;!DOCTYPE html&gt;
+		&lt;html&gt;
+			&lt;head&gt;
+				&lt;title&gt;sample&lt;/title&gt;
+			&lt;/head&gt;
+
+			&lt;body onload="init()"&gt;
+				&lt;script src="http://code.createjs.com/soundjs-0.4.0.min.js"/&gt;
+
+				&lt;script&gt;
+					function init() {
+						if (!createjs.Sound.initializeDefaultPlugins()) {return;}
+						var audioPath = "../../examples/assets/";
+						var manifest = [
+							{id:"Music", src:audioPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+audioPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"},
+							{id:"Thunder", src:audioPath + "Thunder1.mp3|"+audioPath + "Thunder1.ogg"}
+						];
+
+						createjs.Sound.addEventListener("loadComplete", handleLoad);
+						createjs.Sound.registerManifest(manifest);
+					}
+
+					function handleLoad(event) {
+						createjs.Sound.play(event.src);
+					}
+				&lt;/script&gt;
+			&lt;/body&gt;
+		&lt;/html&gt;
+	</textarea>
+</section>
+
+<section>
+	<header>
+		<h2>Playing on Touch</h2>
+	</header>
+
+	<p>A limitation that most mobile devices share is requiring media playback to be launched by a user initiated event,
+		such as click, touch, or key press. Reportedly, this is to protect users from annoying sites and to prevent
+		sites from automatically using bandwidth for users with limited data plans. If all you need to do is
+		play audio in response to user interaction, then this is trivial. Just play each sound in a function that is
+        triggered by user events.
+	</p>
+
+	<p>
+		For our first example, we'll play audio in direct response to a user initiated touch event. This is simple to
+        execute, and works everywhere we've tested. First, we want add a message to our &lt;body&gt; before all the
+        scripts are loaded to give ourselves and anyone else using the code some feedback.
+	</p>
+	<textarea class="brush: js;" readonly>
+		&lt;body onload="init()"&gt;
+			&lt;h1 id="status"&gt;Hello World.&lt;/h1&gt;
+	</textarea>
+
+	<h3>Sending a Message</h3>
+	<p>
+		The next thing we do is get a JavaScript reference to the html message so we can alter it. We add a
+		variable <code>displayMessage</code> to our inline script, and inside of the init function use the DOM
+        method <code>getElementByID()</code> to assign it a value. It is a best practice to store off references to
+        the DOM that you plan to reuse because getting values from the DOM, indeed any form of walking the DOM, is
+        expensive.
+	</p>
+	<textarea class="brush: js;" readonly>
+		&lt;script&gt;
+			var displayMessage = null;
+
+			function init() {
+				displayMessage = document.getElementById("status");
+	</textarea>
+
+	<h3>Wait for Touch</h3>
+	<p>
+		Now we want to change our <code>handleLoad</code> function to add a click listener to our display message and
+        to update the message to suggest the user touch the screen. We add the click listener to the
+        <code>displayMessage</code> element and not right to the document because document click does not work on iOS
+        devices (iPhone, iPad, and iPod).
+	</p>
+	<textarea class="brush: js;" readonly>
+		function handleLoad(event) {
+			displayMessage.addEventListener("click", handleClick, false);
+			displayMessage.innerHTML = "Touch to Start";
+		}
+	</textarea>
+
+	<h3>Handle Click</h3>
+	<p>
+		You may have already noticed the <code>handleClick</code> function being passed with the click listener.
+        Unsurprisingly, we now want to create a <code>handleClick</code> function. In this function we will again update
+        the feedback message for the user, which can be especially useful when things are not working on mobile devices
+        with no error console. Next we play sounds using our old friend <a href="http://www.createjs.com/Docs/SoundJS/classes/Sound.html#method_play" target="_blank">
+		<code>Sound.play</code></a>. Remember back in the <a href=../Basics%20and%20Best%20Practices/">Basics tutorial</a>
+        when we passed in ids when registering our audio? Now is when that pays off. Instead of trying to remember the
+        big long audio path and name string, or store it off as a global variable, we can simple pass in the
+        easy-to-remember ids we set. Fabulous, easy, and readable!
+	</p>
+	<textarea class="brush: js;" readonly>
+		function handleClick(event) {
+			displayMessage.innerHTML = "Making some noise!";
+			createjs.Sound.play("Music");
+			createjs.Sound.play("Thunder");
+		}
+	</textarea>
+
+	<h3>Ready to Rock</h3>
+	<p>
+		And that's all there is to it, you can now make sound on mobile devices. However, this only works in response to
+        user events, so your code has to be geared towards responding to user initiated events. If that's all you need,
+        this is the easy way to do it.
+        </p>
+    <p><strong>Pro-tip:</strong> It's worth noting that as long as you have a user initiated event in your immediate
+        call stack, you can play sound. This helps lead to the next more flexible solution. This is what your code
+        should look like at this point.
+	</p>
+	<textarea class="brush: js;" readonly>
+		&lt;body onload="init()"&gt;
+		&lt;h1 id="status"&gt;Hello World.&lt;/h1&gt;
+
+		&lt;script src="http://code.createjs.com/soundjs-0.4.0.min.js"&gt;&lt;/script&gt;
+
+		&lt;script&gt;
+			var displayMessage = null;
+
+			function init() {
+				displayMessage = document.getElementById("status");
+
+				if (!createjs.Sound.initializeDefaultPlugins()) {return;}
+
+				var audioPath = "../../examples/assets/";
+				var manifest = [
+					{id:"Music", src:audioPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+audioPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"},
+					{id:"Thunder", src:audioPath + "Thunder1.mp3|"+audioPath + "Thunder1.ogg"}
+				];
+
+				createjs.Sound.addEventListener("loadComplete", handleLoad);
+				createjs.Sound.registerManifest(manifest);
+			}
+
+			function handleLoad(event) {
+				displayMessage.addEventListener("click", handleClick, false);
+				displayMessage.innerHTML = "Touch to Start";
+			}
+
+			function handleClick(event) {
+				displayMessage.innerHTML = "Making some noise!";
+				createjs.Sound.play("Music");
+				createjs.Sound.play("Thunder");
+			}
+
+		&lt;/script&gt;
+		&lt;/body&gt;
+	</textarea>
+
+</section>
+<section>
+	<header>
+		<h2>Playing After Touch</h2>
+	</header>
+	<p>
+		From this point on, things are going to get a little more complex. The payoff is that you will have an easier to
+		maintain codebase that will work virtually everywhere. As you now know, if you have a touch event in your call
+		stack, sounds will play on mobile devices. We are going to take advantage of this by launching our entire
+        application (the JavaScript code) from a touch event. You may be asking "can it really be that easy?" Well, no,
+        but that's why we have this tutorial!
+	</p>
+
+	<h3>Namespace and Closure</h3>
+	<p>
+		The first changes we want to make is to set up our code more like an application. If you are building something
+        more complex, hopefully you have already taken these steps.
+    </p>
+    <ol>
+        <li>create a namespace that wraps all your code</li>
+        <li>move the business logic into an "application" object</li>
+        <li>wrap the application object in a function closure</li>
+    </ol>
+    <p>Some of you might be thinking "Whoa! Namespace? Closure? Wait, what?" Don't worry, when you see the code it will
+        make more sense. And this is a good excuse to learn about namespaces and closures, both of which are useful in
+        JavaScript application development. Another best practice would be to move this code into it's own JavaScript
+        file to separate it from the HTML file, but also so it can be cached by browsers - but as stated previously,
+        inline code makes our demonstration easier. Please note that there are lots of ways to do namespacing, and
+        many different approaches to application formatting. The way we have advocated is inline with CreateJS coding
+        standards.</p>
+    <p>
+        After our code has been migrated, we need to change the syntax to make the functions members of our application.
+	</p>
+	<textarea class="brush: js;" readonly>
+		&lt;script&gt;
+			// use existing namespace object if it exists otherwise create namespace object
+			this.myNameSpace = this.myNameSpace || {};
+
+			// this is the function closure
+			(function() {
+				// this is the app object
+				function MyApp() {
+					this.init();
+				}
+
+				MyApp.prototype = {
+					// this is our relocated business code
+					displayMessage: null,
+
+					init: function() { /*existing code*/ },
+					handleLoad: function(event) { /*existing code*/ },
+					handleClick: function(event) { /*existing code*/ }
+				}
+
+				// add app object to namespace
+				myNameSpace.MyApp = MyApp;
+			}());
+		&lt;/script&gt;
+	</textarea>
+	<h3>Change Scope</h3>
+	<p>
+		Previously, our <code>displayMessage</code> variable and functions were global, declared on the window object.
+        Our scope has changed, because they are now part of the <code>MyApp</code> object, so we want to reference them
+        as object properties using <code>this</code> syntax. For example, instead of assigning a value to <code>displayMessage</code>,
+        we now assign a value to <code>this.displayMessage</code>.
+    </p>
+    <p>
+        We'll also add feedback to let users know when we are waiting for audio to load. We change <code>handleLoad</code>
+        to play the loaded sounds, and provide some feedback to the user about what we are playing. Note that for this
+        technique to work on iOS devices, you need to initialize the Sound plugins in the <code>init</code> function. We
+        no longer use the <code>handleClick</code> function in our new <code>MyApp</code> Object, so we remove it.
+	</p>
+	<textarea class="brush: js;" readonly>
+		function init() {
+			this.displayMessage = document.getElementById("status");
+
+			if (!createjs.Sound.initializeDefaultPlugins()) {return;}
+
+			var audioPath = "../../examples/assets/";
+			var manifest = [
+				{id:"Music", src:audioPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+audioPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"},
+				{id:"Thunder", src:audioPath + "Thunder1.mp3|"+audioPath + "Thunder1.ogg"}
+			];
+
+			this.displayMessage.innerHTML = "loading audio";
+			createjs.Sound.addEventListener("loadComplete", this.handleLoad);
+			createjs.Sound.registerManifest(manifest);
+		}
+
+		handleLoad: function(event) {
+			createjs.Sound.play(event.src);
+			this.displayMessage.innerHTML = "Playing " + event.src;
+		}
+	</textarea>
+
+	<h3>Launch App</h3>
+	<p>
+		Next, we make a new <code>init</code> function to kick off our app, which will still be called by our &lt;body&gt;
+        tag <code>onload</code> function. Our new kickoff code is going to launch the app inside of a click event.
+        Obviously, we will need to add a new <code>handleClick</code> function, which will remove the click listener and
+        start our app. Removing listeners when you don't plan to use them again is a best practice, and assists with
+        garbage collection in your application.
+	</p>
+	<textarea class="brush: js;" readonly>
+		&lt;script&gt;
+			var display;
+
+			function init() {
+				display = document.getElementById("status");
+				display.addEventListener("click", handleClick, false);
+				display.innerHTML = "Touch to Start";
+			}
+
+			function handleClick(event) {
+				display.removeEventListener("click", handleClick, false);
+				// create MyApp, which launches it
+				var myApp = new myNameSpace.MyApp();
+			}
+	</textarea>
+
+	<h3>Apply Application Scope</h3>
+	<p>
+		So now our application will be launch inside of a touch scope, which allows audio to play. We need to do one
+        more essential step: Currently, our <code>handleLoad</code> function is not called in the MyApp scope. That
+        means it will not have access to the MyApp object (this), and that the audio is not played inside of the touch
+        scope. We need this function to execute in our application scope to fix these problems, which we do using the
+        handy <code>createjs.proxy</code> method. This function uses <a href="https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/apply" target="_blank">
+		<code>Function.apply</code></a> to set the scope that a function executes in, which sets the "this" reference.
+        Function scope is a very important topic with JavaScript application development, so invest some time in
+        research if you want to understand it better.
+	</p>
+	<textarea class="brush: js;" readonly>
+		var loadProxyMethod = createjs.proxy(this.handleLoad, this);
+		createjs.Sound.addEventListener("loadComplete", loadProxyMethod);
+
+	</textarea>
+
+	<h3>Ready to Rock Everywhere</h3>
+	<p>
+		And that's all there is to it, you can now play audio on most mobile devices! If you already have an amazing
+		application using SoundJS that you want to work on mobile devices, you can just launch it inside of a touch
+        event and make sure sound playback is called in your application scope.
+    </p>
+    <p>
+		To improve this approach further, you can add browser agent sniffing to determine the browser and device you are
+		on, and only require a touch to start when on mobile devices. Adding some style to the user feedback message
+        would also be a nice touch. Your final code should look like the following:
+	</p>
+
+	<textarea class="brush: js;" readonly>
+		&lt;body onload="init()"&gt;
+			&lt;h1 id="status"&gt;Hello World.&lt;/h1&gt;
+
+			&lt;script src="http://code.createjs.com/soundjs-0.4.0.min.js"&gt;&lt;/script&gt;
+
+			&lt;script&gt;
+				var display;
+
+				function init() {
+					display = document.getElementById("status");
+					display.addEventListener("click", handleClick, false);
+					display.innerHTML = "Touch to Start";
+				}
+
+				function handleClick(event) {
+					display.removeEventListener("click", handleClick, false);
+					var myApp = new myNameSpace.MyApp();
+				}
+
+				this.myNameSpace = this.myNameSpace || {};
+				(function() {
+					function MyApp() {
+						this.init();
+					}
+
+					MyApp.prototype = {
+						displayMessage:null,
+
+						init: function() {
+							this.displayMessage = document.getElementById("status");
+
+							if (!createjs.Sound.initializeDefaultPlugins()) {return;}
+
+							var audioPath = "../../examples/assets/";
+							var manifest = [
+								{id:"Music", src:audioPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+audioPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"},
+								{id:"Thunder", src:audioPath + "Thunder1.mp3|"+audioPath + "Thunder1.ogg"}
+							];
+
+							this.displayMessage.innerHTML = "loading audio";
+							var loadProxy = createjs.proxy(this.handleLoad, this);
+							createjs.Sound.addEventListener("loadComplete", loadProxy);
+							createjs.Sound.registerManifest(manifest);
+						},
+
+						handleLoad: function(event) {
+							createjs.Sound.play(event.src);
+							this.displayMessage.innerHTML = "Playing " + event.src;
+						}
+					}
+
+					myNameSpace.MyApp = MyApp;
+				}());
+			&lt;/script&gt;
+		&lt;/body&gt;
+	</textarea>
+</section>
+
+<section>
+	<header>
+		<h2>Conclusion</h2>
+	</header>
+
+	<p>
+		This wraps up the tutorial on approaches you can use to play audio on the broadest possible range of devices and
+		browsers. The above example has been successfully tested on Mobile Safari and Android Chrome, Firefox, Opera,
+        and Stock Android browsers, as well as all major desktop browsers. Good places to learn more are the SoundJS
+		<a href="http://createjs.com/Docs/SoundJS" target="_blank">online documentation</a>
+		and	<a href="https://github.com/CreateJS/SoundJS/tree/master/examples" target="_blank">GitHub examples</a>.
+		A great place to get help or discuss SoundJS is the
+		<a href="http://community.createjs.com/discussions/soundjs" target="_blank">SoundJS Community page</a>.</p>
+    <p>
+        Hope that helps!
+	</p>
+
+	<section>
+		<header>
+			<h2>Related Links</h2>
+		</header>
+		<ol>
+			<li>Download CreateJS from the <a href="http://code.createjs.com" target="_blank">Adobe CDN</a>.</li>
+			<li>Get the SoundJS source code, including minified versions of SoundJS and FlashPlugin from <a href="http://github.com/CreateJS/SoundJS/" target="_blank">GitHub</a>.</li>
+			<li>Read more about SoundJS in the <a href="http://createjs.com/Docs/SoundJS" target="_blank">online docs</a> (also available in GitHub).</li>
+			<li>Get involved in active <a href="http://community.createjs.com/discussions/soundjs" target="_blank">community discussion</a>.</li>
+		</ol>
+	</section>
+
+	</article>
+</body>
+</html>

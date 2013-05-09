@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>sample</title>
+	</head>
+
+	<body onload="init()">
+		<h1 id="status">Hello World.</h1>
+
+		<script src="http://code.createjs.com/soundjs-0.4.0.min.js"></script>
+
+		<script>
+			var display;
+
+			function init() {
+				display = document.getElementById("status");
+				display.addEventListener("click", handleClick, false);
+				display.innerHTML = "Touch to Start";
+			}
+
+			function handleClick(event) {
+				display.removeEventListener("click", handleClick, false);
+				var myApp = new myNameSpace.MyApp();
+			}
+
+			this.myNameSpace = this.myNameSpace || {};
+			(function() {
+				// the application
+				function MyApp() {
+					this.init();
+				}
+
+				MyApp.prototype = {
+					displayMessage:null,
+
+					init: function() {
+						this.displayMessage = document.getElementById("status");
+
+						if (!createjs.Sound.initializeDefaultPlugins()) {return;}
+
+						var audioPath = "../../examples/assets/";
+						var manifest = [
+							{id:"Music", src:audioPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+audioPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"},
+							{id:"Thunder", src:audioPath + "Thunder1.mp3|"+audioPath + "Thunder1.ogg"}
+						];
+
+						this.displayMessage.innerHTML = "loading audio";
+						var loadProxy = createjs.proxy(this.handleLoad, this);
+						createjs.Sound.addEventListener("loadComplete", loadProxy);
+						createjs.Sound.registerManifest(manifest);
+					},
+
+					handleLoad: function(event) {
+						createjs.Sound.play(event.src);
+						this.displayMessage.innerHTML = "Playing " + event.src;
+					}
+				}
+
+				myNameSpace.MyApp = MyApp;
+			}());
+		</script>
+	</body>
+</html>

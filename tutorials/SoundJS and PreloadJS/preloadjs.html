@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>SoundJS demo: Using PreloadJS</title>
+	<link href="../shared/demo.css" rel="stylesheet" type="text/css">
+	<script src="../../lib/soundjs-NEXT.min.js"></script>
+	<script src="../../examples/assets/preloadjs-NEXT.min.js"></script>
+	<script>
+
+		function load() {
+            // Update the UI
+            document.getElementById("display").innerText = "Loading...";
+            document.getElementById("loadBtn").disabled = "disabled";
+
+            var queue = new createjs.LoadQueue();
+            queue.installPlugin(createjs.Sound);
+            queue.addEventListener("fileload", handleFileLoad);
+            queue.addEventListener("complete", handleComplete);
+            queue.loadManifest([
+                {id:"mySound", src:"../../examples/assets/M-GameBG.mp3|../../examples/assets/M-GameBG.ogg"},
+                {id:"mySound2", src:"../../examples/assets/Thunder1.mp3|../../examples/assets/Thunder1.ogg"}
+            ]);
+		}
+
+        function handleFileLoad(event) {
+            // Update the UI
+            document.getElementById("display").innerHTML += "<br/>Loaded: " + event.item.id
+                    + " using " + createjs.Sound.activePlugin.toString();
+            document.getElementById("stopBtn").disabled = "";
+
+            // Play the loaded sound
+            createjs.Sound.play(event.item.id);
+        }
+
+        function handleComplete(event) {
+            document.getElementById("display").innerHtml += "<br/>Loading Complete!";
+        }
+
+	</script>
+</head>
+<body>
+    <input id="loadBtn" type="button" value="Begin Loading" onclick="load()"/>
+    <input id="stopBtn" type="button" value="Stop Playing" onclick="createjs.Sound.stop();" disabled="disabled" />
+	<label id="display">Waiting for User Input. Click "Begin Loading".</label>
+</body>
+</html>

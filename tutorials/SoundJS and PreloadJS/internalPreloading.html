@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>SoundJS demo: Internal Preloading</title>
+	<link href="../shared/demo.css" rel="stylesheet" type="text/css">
+	<script src="../../lib/soundjs-NEXT.min.js"></script>
+	<script>
+
+		function load() {
+            // Update the UI
+            document.getElementById("display").innerText = "Loading...";
+            document.getElementById("loadBtn").disabled = "disabled";
+
+            // Load the sound
+            createjs.Sound.addEventListener("fileload", handleFileLoad);
+            createjs.Sound.registerSound({id:"mySound", src:"../../examples/assets/M-GameBG.mp3|../../examples/assets/M-GameBG.ogg"});
+		}
+
+        function handleFileLoad(event) {
+            // Update the UI
+            document.getElementById("display").innerHTML = "Loaded: " + event.id
+                    + " using " + createjs.Sound.activePlugin.toString();
+            document.getElementById("stopBtn").disabled = "";
+
+            // Play the loaded sound
+            createjs.Sound.play(event.id);
+        }
+	</script>
+</head>
+<body>
+    <input id="loadBtn" type="button" value="Begin Loading" onclick="load()"/>
+    <input id="stopBtn" type="button" value="Stop Playing" onclick="createjs.Sound.stop();" disabled="disabled" />
+	<label id="display">Waiting for User Input. Click "Begin Loading".</label>
+</body>
+</html>
