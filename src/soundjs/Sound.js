@@ -1595,8 +1595,9 @@ this.createjs = this.createjs || {};
 		 * #method removeAll
 		 */
 		removeAll:function () {
-			while(this.length) {
-				this.instances[this.length-1].stop();	// stop causes remove to be called, which decrements length
+			// Note that stop() removes the item from the list, but we don't want to assume that.
+			for (var i=this.length-1; i>=0; i--) {
+				this.instances[i].stop();
 			}
 		},
 

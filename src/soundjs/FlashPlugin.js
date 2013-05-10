@@ -312,7 +312,7 @@ this.createjs = this.createjs || {};
 			for (var i = 0, l = this.queuedInstances.length; i < l; i++) {
 				this.flash.register(this.queuedInstances[i]);  // NOTE this flash function currently does nothing
 			}
-			this.queuedInstances = [];
+			this.queuedInstances.length = 0;
 
 			// Associate flash instance with any preloadInstance that already exists.
 			for (var n in this.flashPreloadInstances) {
@@ -364,7 +364,8 @@ this.createjs = this.createjs || {};
 
 
 		/**
-		 * Remove a sound added using {{#crossLink "FlashPlugin/register"}}{{/crossLink}}. Note this does not cancel a preload.
+		 * Remove a sound added using {{#crossLink "FlashPlugin/register"}}{{/crossLink}}. Note this does not cancel a
+		 * preload.
 		 * @method removeSound
 		 * @param {String} src The sound URI to unload.
 		 * @since 0.4.1
@@ -386,7 +387,7 @@ this.createjs = this.createjs || {};
 		 */
 		removeAllSounds:function () {
 			this.audioSources = {};	// this drops all references, in theory freeing them for garbage collection
-			this.queuedInstances = [];
+			this.queuedInstances.length = 0;
 
 			// OJR these may not be necessary, but are included for cleanup clarity.
 			this.flashInstances = {};

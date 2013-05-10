@@ -289,7 +289,8 @@ this.createjs = this.createjs || {};
 		},
 
 		/**
-		 * Remove a sound added using {{#crossLink "HTMLAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel a preload.
+		 * Remove a sound added using {{#crossLink "HTMLAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel
+		 * a preload.
 		 * @method removeSound
 		 * @param {String} src The sound URI to unload.
 		 * @since 0.4.1
@@ -985,7 +986,7 @@ this.createjs = this.createjs || {};
 				delete(this.tags[this.length]);	// NOTE that the audio playback is already stopped by this point
 			}
 			this.src = null;
-			this.tags = null;
+			this.tags.length = 0;
 		},
 
 		/**
