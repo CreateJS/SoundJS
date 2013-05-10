@@ -96,3 +96,9 @@ code {
 A code, code A {
 	color: rgb(0, 0, 172);
 }
+
+.highlight {
+	background-color: rgba(250, 252, 255, 0.7);
+	margin: 0;
+	padding: 0.8em;
+}

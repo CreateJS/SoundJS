@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body onload="init()">
+	<script src="http://code.createjs.com/soundjs-0.4.0.min.js"></script>
+
+	<script>
+		function init() {
+			if (!createjs.Sound.initializeDefaultPlugins()) {return;}
+
+			var audioPath = "../assets/";
+			var manifest = [
+				{id:"Music", src:audioPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+audioPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"},
+				{id:"Thunder", src:audioPath + "Thunder1.mp3|"+audioPath + "Thunder1.ogg"}
+			];
+
+			createjs.Sound.addEventListener("loadComplete", handleLoad);
+			createjs.Sound.registerManifest(manifest);
+		}
+
+		function handleLoad(event) {
+			createjs.Sound.play(event.src);
+		}
+	</script>
+</body>
+</html>
