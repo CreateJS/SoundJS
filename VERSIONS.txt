@@ -1,4 +1,4 @@
-Version NEXT [Not Released]
+Version 0.4.1 [May 10, 2013]
 ************************************************************************************************************************
 - Added removeSound, removeManifest, and removeAllSounds functions to Sound, to enable unloading of sounds.
 - Added MobileSafe demo to show launching an "app" inside a touch event, enabling audio playback on mobile devices
