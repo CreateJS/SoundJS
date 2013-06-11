@@ -879,7 +879,7 @@ this.createjs = this.createjs || {};
 		}
 
 		// clear from SoundChannel, which also stops and deletes all instances
-		SoundChannel.remove(src);
+		SoundChannel.removeSrc(src);
 
 		// remove src from preloadHash	// Note "for in" can be a slow operation
 		delete(s.preloadHash[src]);
@@ -1435,7 +1435,7 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} If the channels were deleted.
 	 * @static
 	 */
-	SoundChannel.remove = function (src) {
+	SoundChannel.removeSrc = function (src) {
 		var channel = SoundChannel.get(src);
 		if (channel == null) {
 			return false;

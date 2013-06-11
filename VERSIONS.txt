@@ -1,3 +1,10 @@
+Version NEXT [Not released]
+************************************************************************************************************************
+- fixed an issue with Sound.removeSound not stopping audio with that src.
+- fixed an issue with pause and setPosition on audio files that are not looping, which would generate an error in
+	WebAudioPlugin.
+- fixed a bug with WebAudioPlugin that stopped SoundInstances from being reusable.
+
 Version 0.4.1 [May 10, 2013]
 ************************************************************************************************************************
 - Added removeSound, removeManifest, and removeAllSounds functions to Sound, to enable unloading of sounds.

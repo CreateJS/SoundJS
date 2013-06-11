@@ -822,10 +822,8 @@ this.createjs = this.createjs || {};
 		cleanUp:function () {
 			// if playbackState is UNSCHEDULED_STATE, then noteON or noteGrainOn has not been called so calling noteOff would throw an error
 			if (this.sourceNode && this.sourceNode.playbackState != this.sourceNode.UNSCHEDULED_STATE) {
-				this.cleanUpAudioNode(this.sourceNode);
-				if (this.sourceNodeNext) {	// this is null unless we are looping
-					this.cleanUpAudioNode(this.sourceNodeNext);
-				}
+				this.sourceNode = this.cleanUpAudioNode(this.sourceNode);
+				this.sourceNodeNext = this.cleanUpAudioNode(this.sourceNodeNext);
 			}
 
 			if (this.panNode.numberOfOutputs != 0) {
@@ -835,6 +833,8 @@ this.createjs = this.createjs || {};
 
 			clearTimeout(this.delayTimeoutId); // clear timeout that plays delayed sound
 			clearTimeout(this.soundCompleteTimeout);  // clear timeout that triggers sound complete
+
+			this.startTime = 0;	// This is used by getPosition
 
 			if (window.createjs == null) {
 				return;
@@ -850,9 +850,11 @@ this.createjs = this.createjs || {};
 		 * @since 0.4.1
 		 */
 		cleanUpAudioNode: function(audioNode) {
-			audioNode.noteOff(0);	// OJR deprecated, replaced with stop()  // note this means the sourceNode cannot be reused and must be recreated
-			audioNode.disconnect(this.gainNode);
-			audioNode = null;	// release reference so Web Audio can handle removing references and garbage collection
+			if(audioNode) {
+				audioNode.noteOff(0);	// OJR deprecated, replaced with stop()  // note this means the sourceNode cannot be reused and must be recreated
+				audioNode.disconnect(this.gainNode);
+				audioNode = null;	// release reference so Web Audio can handle removing references and garbage collection
+			}
 			return audioNode;
 		},
 
@@ -938,8 +940,8 @@ this.createjs = this.createjs || {};
 		 *
 		 * <h4>Example</h4>
 		 *
-		 *      var myInstance = createJS.Sound.createInstance(mySrc);
-		 *      myInstance.play(createJS.Sound.INTERRUPT_ANY);
+		 *      var myInstance = createjs.Sound.createInstance(mySrc);
+		 *      myInstance.play(createjs.Sound.INTERRUPT_ANY);
 		 *
 		 * @method play
 		 * @param {String} [interrupt=none] How this sound interrupts other instances with the same source. Interrupt values
@@ -1269,6 +1271,7 @@ this.createjs = this.createjs || {};
 		// called internally by soundCompleteTimeout in WebAudioPlugin
 		handleSoundComplete:function (event) {
 			this.offset = 0;  // have to set this as it can be set by pause during playback
+
 
 			if (this.remainingLoops != 0) {
 				this.remainingLoops--;  // NOTE this introduces a theoretical limit on loops = float max size x 2 - 1
