@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SoundJS: Sound Tween</title>
+
+	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css" />
+</head>
+
+<body onload="init()">
+
+	<header id="header" class="SoundJS">
+	    <h1><span class="text-product">Sound<strong>JS</strong></span> Sound Tween</h1>
+	    <p>This example shows how to tween volume and pan.</p>
+	</header>
+
+	<div class="content" id="content">
+		<div>
+			<a href="?type=normal">Web Audio with HTML Audio then Flash Fallbacks</a> | <a href="?type=html5">HTML Audio Only</a> | <a href="?type=flash">Flash Only</a>
+		</div>
+
+		<div class="plugin">
+			<p id="activePlugin">Active Plugin is</p>
+		</div>
+
+		<h1 id="status">Startup.</h1>
+
+		<canvas id="testCanvas" width="980" height="320"></canvas>
+	</div>
+
+
+	<div id="error">
+		<h1>Sorry!</h1>
+		<p>SoundJS is not currently supported in your browser.</p>
+		<p>Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
+			with the device and browser you are using.  Thank you.</p>
+	</div>
+
+    <div id="mobile">
+        <h1>Sorry!</h1>
+        <p>Mobile devices require sound to be played inside of user events, which this demo does not do.</p>
+        <p>Please <a href="http://github.com/CreateJS/SoundJS/issues" target="_blank">log a bug</a>
+            with the OS and browser if you see this on a device that is not mobile.  Thank you.</p>
+    </div>
+
+    <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
+    <script type="text/javascript" src="../src/soundjs/Sound.js"></script>
+    <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
+    <script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
+	<script type="text/javascript" src="../src/swfobject.js"></script>
+	<script type="text/javascript" src="../src/soundjs/FlashPlugin.js"></script>
+
+	<script type="text/javascript" src="./assets/easeljs-NEXT.min.js"></script> <!-- note tweenjs needs easeljs ticker -->
+	<script type="text/javascript" src="./assets/tweenjs-NEXT.min.js"></script>
+<!--
+	<script type="text/javascript" src="../../tweenjs/src/tweenjs/Tween.js"></script>
+-->
+
+    <script>
+		// Read the URL Params. We need to do this to determine the plugin mode.
+		var params = {};
+		var pieces = window.location.search.slice(1).split("&");
+		for (var i=0, l=pieces.length; i<l; i++) {
+			var parts = pieces[i].split("=");
+			params[parts[0]] = parts[1];
+		}
+
+        var src;            // the audio src we are trying to play
+        var soundInstance;  // the soundInstance returned by Sound when we create or play a src
+        var displayStatus;  // the HTML element we use to display messages to the user
+		var canvas;			// canvas that easeljs stage is drawing to
+		var stage;			// the easeljs stage
+		var tween;			// the tween we are applying to audio
+		var baseTime = 1000;// the baseTime we use for tweening
+
+		function init() {
+			createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
+			if (params.type == "flash") {
+				createjs.Sound.registerPlugins([createjs.FlashPlugin]);
+			} else if (params.type == "html5") {
+				createjs.Sound.registerPlugins([createjs.HTMLAudioPlugin]);
+			} else {
+				createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
+			}
+
+			if (!createjs.Sound.isReady()) {
+				document.getElementById("error").style.display = "block";
+				document.getElementById("content").style.display = "none";
+				return;
+			}
+
+			var pluginStatus = document.getElementById("activePlugin");
+			pluginStatus.innerHTML = "Active Plugin is " + createjs.Sound.activePlugin.toString();  // innerText does not work in FF
+
+            // check if we are on a mobile device, as these currently require us to launch sound inside of a user event
+            if (createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid) {  // || createjs.Sound.BrowserDetect.isBlackberry  OJR blackberry has not been tested yet
+                document.getElementById("mobile").style.display = "block";
+                document.getElementById("content").style.display = "none";
+                return;
+            }
+
+            // store the DOM element so we do not have to keep looking it up
+            displayStatus = document.getElementById("status");
+
+            // Create a single item to load.
+            var assetsPath = "assets/";
+            src = assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg";
+            // NOTE the "|" character is used by Sound to separate source into distinct files, which allows you to provide multiple extensions for wider browser support
+
+            createjs.Sound.addEventListener("fileload", playSound); // add an event listener for when load is completed
+            createjs.Sound.registerSound(src);  // register sound, which preloads by default
+
+            displayStatus.innerHTML = "Waiting for load to complete.";  // letting the user know what's happening
+		}
+
+        function playSound(event) {
+			soundInstance = createjs.Sound.play(event.src, createjs.Sound.INTERRUPT_ANY, 0, 0, -1, 0.5);  // start playing the sound we just loaded, storing the playing instance
+			displayStatus.innerHTML = "Playing source: " + event.src;  // let the user know what we are playing
+			initVisuals();
+			initSoundTween();
+        }
+
+		function initSoundTween() {
+			displayStatus.innerHTML = "Volume Down: 0.1";
+			tween = createjs.Tween.get(soundInstance, {loop: true})
+					.to({volume:0.1}, 3*baseTime)
+					.wait(baseTime).call(setMessage, ["Volume Up: 0.5"])
+					.to({volume:0.5}, 3*baseTime)
+					.wait(baseTime).call(setMessage, ["Volume Up: 1.0"])
+					.to({volume:1.0}, 3*baseTime)
+					.wait(baseTime).call(setMessage, ["Volume Down: 0.5"])
+					.to({volume:0.5}, 3*baseTime)
+					.wait(baseTime).call(setMessage, ["Pan Right: 1.0"])
+					.to({pan: 1}, 3*baseTime)
+					.wait(baseTime).call(setMessage, ["Pan Center: 0.0"])
+					.to({pan: 0}, 3*baseTime)
+					.wait(baseTime).call(setMessage, ["Pan Left: -1.0"])
+					.to({pan: -1}, 3*baseTime)
+					.wait(baseTime).call(setMessage, ["Pan Center: 0.0"])
+					.to({pan: 0}, 3*baseTime)
+					.wait(baseTime).call(setMessage, ["Volume Down: 0.1, Pan Left: -1.0"])
+					.to({pan: -1, volume: 0.1}, 3*baseTime)
+					.wait(baseTime).call(setMessage, ["Volume Up: 1.0, Pan Right: 1.0"])
+					.to({pan: 1, volume: 1}, 6*baseTime)
+					.wait(baseTime).call(setMessage, ["Volume Down: 0.5, Pan Center: 0.0"])
+					.to({pan: 0, volume: 0.5}, 3*baseTime)
+					.wait(baseTime).call(setMessage, ["Volume Down: 0.1"]);
+		}
+
+		function setMessage(message) {
+			displayStatus.innerHTML = message;
+		}
+
+		function initVisuals() {
+			canvas = document.getElementById("testCanvas");
+			stage = new createjs.Stage(canvas);
+			stage.autoClear = true;
+
+			var ball = drawBall();
+			stage.addChild(ball);
+			createjs.Ticker.addEventListener("tick", stage);
+
+			var t = createjs.Tween.get(ball, {loop:true})
+					.to({scaleX:0.1, scaleY:0.1, y:canvas.height - 5.5}, 3*baseTime)
+					.wait(baseTime)
+					.to({scaleX:1, scaleY:1, y:canvas.height-55}, 3*baseTime)
+					.wait(baseTime)
+					.to({scaleX:2, scaleY:2, y:canvas.height-110}, 3*baseTime)
+					.wait(baseTime)
+					.to({scaleX:1, scaleY:1, y:canvas.height-55}, 3*baseTime)
+					.wait(baseTime)
+					.to({x:canvas.width - 55, rotation:360}, 3*baseTime)
+					.wait(baseTime)
+					.to({x:canvas.width / 2, rotation:0}, 3*baseTime)
+					.wait(baseTime)
+					.to({x:55, rotation:-360}, 3*baseTime)
+					.wait(baseTime)
+					.to({x:canvas.width / 2, rotation:0}, 3*baseTime)
+					.wait(baseTime)
+					.to({x:5.5, rotation:-360, scaleX:0.1, scaleY:0.1, y:canvas.height-5.5}, 3*baseTime)
+					.wait(baseTime)
+					.to({x:canvas.width - 110, rotation:360, scaleX:2, scaleY:2, y:canvas.height-110}, 6*baseTime)
+					.wait(baseTime)
+					.to({x:canvas.width / 2, rotation:0, scaleX:1, scaleY:1, y:canvas.height-55}, 3*baseTime)
+					.wait(baseTime);
+		}
+
+		function drawBall() {
+			var ball = new createjs.Shape();
+			ball.graphics.setStrokeStyle(5, 'round', 'round');
+			ball.graphics.beginStroke(('#000000'));
+			ball.graphics.beginFill("#FF0000").drawCircle(0,0,50);
+			ball.graphics.endStroke();
+			ball.graphics.endFill();
+			ball.graphics.setStrokeStyle(1, 'round', 'round');
+			ball.graphics.beginStroke(('#000000'));
+			ball.graphics.moveTo(0,0);
+			ball.graphics.lineTo(0,50);
+
+			ball.graphics.endStroke();
+			ball.x = canvas.width / 2;
+			ball.y = canvas.height - 55;
+			return ball;
+		}
+	</script>
+
+</body>
+</html>

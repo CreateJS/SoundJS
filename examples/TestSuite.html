@@ -319,18 +319,18 @@
 
         var assetsPath = "./assets/";
         var manifest = [
-            {id:"Music", src:assetsPath + "M-GameBG.mp3", data:2},
-            {id:"Humm (mp3)", src:assetsPath + "Humm.mp3"},
-            {id:"Humm (ogg)", src:assetsPath + "Humm.ogg"},
-            {id:"Thunder", src:assetsPath + "Thunder1.mp3|"+assetsPath + "Thunder1.ogg", data:3},
-            {id:"Tone wobble", src:assetsPath + "ToneWobble.mp3|"+assetsPath + "ToneWobble.ogg", type:"sound", data:1},
-            {id:"Rat Damage", src:assetsPath + "R-Damage.mp3", type:"sound"},
-            {id:"Seagull Damage", src:assetsPath + "S-Damage.mp3", type:"sound"},
-            {id:"Cabin Boy", src:assetsPath + "U-CabinBoy3.mp3", type:"sound", data:1}
+            {id:"Music", src:"M-GameBG.mp3", data:2},
+            {id:"Humm (mp3)", src:"Humm.mp3"},
+            {id:"Humm (ogg)", src:"Humm.ogg"},
+            {id:"Thunder", src:"Thunder1.mp3|Thunder1.ogg", data:3},
+            {id:"Tone wobble", src:"ToneWobble.mp3|ToneWobble.ogg", type:"sound", data:1},
+            {id:"Rat Damage", src:"R-Damage.mp3", type:"sound"},
+            {id:"Seagull Damage", src:"S-Damage.mp3", type:"sound"},
+            {id:"Cabin Boy", src:"U-CabinBoy3.mp3", type:"sound", data:1}
         ];
 
         createjs.Sound.addEventListener("fileload", createjs.proxy(addSoundToList,this)); // add an event listener for when load is completed
-        createjs.Sound.registerManifest(manifest);
+        createjs.Sound.registerManifest(manifest, assetsPath);
     }
 
     function addSoundToList(event) {

@@ -96,25 +96,25 @@
             document.getElementById("loader").className = "loader";
             var assetsPath = "assets/";
             var manifest = [
-                {src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg", id:1},
-                {src:assetsPath+"Game-Spawn.mp3|"+assetsPath+"Game-Spawn.ogg", id:2},
-                {src:assetsPath+"Game-Shot.mp3|"+assetsPath+"Game-Shot.ogg", id:3},
+                {src:"Game-Break.mp3|Game-Break.ogg", id:1},
+                {src:"Game-Spawn.mp3|Game-Spawn.ogg", id:2},
+                {src:"Game-Shot.mp3|Game-Shot.ogg", id:3},
 
-                {src:assetsPath+"GU-StealDaisy.mp3|"+assetsPath+"GU-StealDaisy.ogg", id:4},
-                {src:assetsPath+"Humm.mp3|"+assetsPath+"Humm.ogg", id:5},
-                {src:assetsPath+"R-Damage.mp3|"+assetsPath+"R-Damage.ogg", id:6},
+                {src:"GU-StealDaisy.mp3|GU-StealDaisy.ogg", id:4},
+                {src:"Humm.mp3|Humm.ogg", id:5},
+                {src:"R-Damage.mp3|R-Damage.ogg", id:6},
 
-                {src:assetsPath+"Thunder1.mp3|"+assetsPath+"Thunder1.ogg", id:7},
-                {src:assetsPath+"S-Damage.mp3|"+assetsPath+"S-Damage.ogg", id:8},
-                {src:assetsPath+"U-CabinBoy3.mp3|"+assetsPath+"U-CabinBoy3.ogg", id:9},
+                {src:"Thunder1.mp3|Thunder1.ogg", id:7},
+                {src:"S-Damage.mp3|S-Damage.ogg", id:8},
+                {src:"U-CabinBoy3.mp3|U-CabinBoy3.ogg", id:9},
 
-                {src:assetsPath+"ToneWobble.mp3|"+assetsPath+"ToneWobble.ogg", id:10},
-                {src:assetsPath+"Game-Death.mp3|"+assetsPath+"Game-Death.ogg", id:11},
-                {src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg", id:12}  //OJR would prefer a new sound rather than a copy
+                {src:"ToneWobble.mp3|ToneWobble.ogg", id:10},
+                {src:"Game-Death.mp3|Game-Death.ogg", id:11},
+                {src:"Game-Break.mp3|Game-Break.ogg", id:12}  //OJR would prefer a new sound rather than a copy
             ];
 
             createjs.Sound.addEventListener("fileload", createjs.proxy(soundLoaded, this)); // add an event listener for when load is completed
-            createjs.Sound.registerManifest(manifest);
+            createjs.Sound.registerManifest(manifest, assetsPath);
         }
 
         function soundLoaded(event) {

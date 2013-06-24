@@ -237,6 +237,9 @@ this.createjs = this.createjs || {};
 		 */
 		defaultNumChannels:2,
 
+		// Proxies, make removing listeners easier.
+		loadedHandler:null,
+
 		/**
 		 * An initialization function run by the constructor
 		 * @method init
@@ -266,10 +269,42 @@ this.createjs = this.createjs || {};
 				tag = this.createTag(src);
 				channel.add(tag);
 			}
+
+			tag.id = src;	// co-opting id as we need a way to store original src in case it is changed before loading
+			this.loadedHandler = createjs.proxy(this.handleTagLoad, this);  // we need this bind to be able to remove event listeners
+			tag.addEventListener && tag.addEventListener("canplaythrough", this.loadedHandler);
+			if(tag.onreadystatechange == null) {
+				tag.onreadystatechange = this.loadedHandler;
+			} else {
+				var f = tag.onreadystatechange;
+				// OJR will this lose scope?
+				tag.onreadystatechange = function() {
+					f();
+					this.loadedHandler();
+				}
+			}
+
 			return {
 				tag:tag, // Return one instance for preloading purposes
 				numChannels:l  // The default number of channels to make for this Sound or the passed in value
 			};
+		},
+
+		/**
+		 * Checks if src was changed on tag used to create instances in TagPool before loading
+		 * Currently PreloadJS does this when a basePath is set, so we are replicating that behavior for internal preloading.
+		 * @method handleTagLoad
+		 * @param event
+		 * @protected
+		 */
+		handleTagLoad:function(event) {
+			// cleanup and so we don't send the event more than once
+			event.target.removeEventListener && event.target.removeEventListener("canplaythrough", this.loadedHandler);
+			event.target.onreadystatechange = null;
+
+			if (event.target.src == event.target.id) { return; }
+			// else src has changed before loading, and we need to make the change to TagPool because we pre create tags
+			TagPool.checkSrc(event.target.id);
 		},
 
 		/**
@@ -322,6 +357,7 @@ this.createjs = this.createjs || {};
 			if (!this.isPreloadStarted(src)) {
 				var channel = TagPool.get(src);
 				var tag = this.createTag(src);
+				tag.id = src;
 				channel.add(tag);
 				this.preload(src, {tag:tag});
 			}
@@ -345,10 +381,12 @@ this.createjs = this.createjs || {};
 		 * @method preload
 		 * @param {String} src The sound URI to load.
 		 * @param {Object} instance An object containing a tag property that is an HTML audio tag used to load src.
+		 * @param {String} basePath A file path to prepend to the src.
 		 * @since 0.4.0
 		 */
-		preload:function (src, instance) {
+		preload:function (src, instance, basePath) {
 			this.audioSources[src] = true;
+			if(basePath != null) {instance.tag.src = basePath + src;}
 			new HTMLAudioLoader(src, instance.tag);
 		},
 
@@ -376,7 +414,16 @@ this.createjs = this.createjs || {};
 		loaded:false,
 		offset:0,
 		delay:0,
-		volume:1,
+		_volume: 1,
+		get volume() {
+			return this._volume;
+		},
+		set volume(value) {
+			if (Number(value) == null) {return;}
+			value = Math.max(0, Math.min(1, value));
+			this._volume = value;
+			this.updateVolume();
+		},
 		pan:0,
 		duration:0,
 		remainingLoops:0,
@@ -574,18 +621,13 @@ this.createjs = this.createjs || {};
 		},
 
 		setVolume:function (value) {
-			if (Number(value) == null) {
-				return false;
-			}
-			value = Math.max(0, Math.min(1, value));
 			this.volume = value;
-			this.updateVolume();
 			return true;
 		},
 
 		updateVolume:function () {
 			if (this.tag != null) {
-				var newVolume = (this.muted || createjs.Sound.masterMute) ? 0 : this.volume * createjs.Sound.masterVolume;
+				var newVolume = (this.muted || createjs.Sound.masterMute) ? 0 : this._volume * createjs.Sound.masterVolume;
 				if (newVolume != this.tag.volume) {
 					this.tag.volume = newVolume;
 				}
@@ -774,10 +816,19 @@ this.createjs = this.createjs || {};
 			// Note that canplaythrough callback doesn't work in Chrome, we have to use the event.
 			this.loadedHandler = createjs.proxy(this.sendLoadedEvent, this);  // we need this bind to be able to remove event listeners
 			this.tag.addEventListener && this.tag.addEventListener("canplaythrough", this.loadedHandler);
-			this.tag.onreadystatechange = createjs.proxy(this.sendLoadedEvent, this);  // OJR not 100% sure we need this, just copied from PreloadJS
+			if(this.tag.onreadystatechange == null) {
+				this.tag.onreadystatechange = createjs.proxy(this.sendLoadedEvent, this);  // OJR not 100% sure we need this, just copied from PreloadJS
+			} else {
+				var f = this.tag.onreadystatechange;
+				this.tag.onreadystatechange = function() {
+					f();
+					this.tag.onreadystatechange = createjs.proxy(this.sendLoadedEvent, this);  // OJR not 100% sure we need this, just copied from PreloadJS
+				}
+			}
+
 
 			this.tag.preload = "auto";
-			this.tag.src = src;
+			//this.tag.src = src;
 			this.tag.load();
 
 		},
@@ -922,6 +973,23 @@ this.createjs = this.createjs || {};
 		return channel.set(tag);
 	}
 
+	/**
+	 * A function to check if src has changed in the loaded audio tag.
+	 * This is required because PreloadJS appends a basePath to the src before loading.
+	 * Note this is currently only called when a change is detected
+	 * #method checkSrc
+	 * @param src the unaltered src that is used to store the channel.
+	 * @static
+	 * @protected
+	 */
+	TagPool.checkSrc = function (src) {
+		var channel = TagPool.tags[src];
+		if (channel == null) {
+			return null;
+		}
+		channel.checkSrcChange();
+	}
+
 	TagPool.prototype = {
 
 		/**
@@ -1017,6 +1085,20 @@ this.createjs = this.createjs || {};
 				this.tags.push(tag);
 			}
 			this.available = this.tags.length;
+		},
+
+		/**
+		 * Make sure the src of all other tags is correct after load.
+		 * This is needed because PreloadJS appends a basePath to src before loading.
+		 * #method checkSrcChange
+		 */
+		checkSrcChange:function () {
+			// the last tag always has the latest src after loading
+			var i = this.length-1;
+			var newSrc = this.tags[i].src;
+			while(i--) {
+				this.tags[i].src = newSrc;
+			}
 		},
 
 		toString:function () {

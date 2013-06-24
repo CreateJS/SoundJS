@@ -91,12 +91,12 @@
             // set up our manifest of assets to load
             var assetsPath = "assets/";
             var manifest = [
-                {src:assetsPath+"Game-Break.mp3|"+assetsPath+"Game-Break.ogg", id:"0"},
-                {src:assetsPath+"Game-Spawn.mp3|"+assetsPath+"Game-Spawn.ogg", id:"1"},
-                {src:assetsPath+"Game-Shot.mp3|"+assetsPath+"Game-Shot.ogg", id:"2"},
-                {src:assetsPath+"Thunder1.mp3|"+assetsPath+"Thunder1.ogg", id:"3"},
-                {src:assetsPath+"Game-Death.mp3|"+assetsPath+"Game-Death.ogg", id:"4"},
-                {src:assetsPath+"GU-StealDaisy.mp3|"+assetsPath+"GU-StealDaisy.ogg", id:"bounce", data:soundInstanceLimit}
+                {src:"Game-Break.mp3|Game-Break.ogg", id:"0"},
+                {src:"Game-Spawn.mp3|Game-Spawn.ogg", id:"1"},
+                {src:"Game-Shot.mp3|Game-Shot.ogg", id:"2"},
+                {src:"Thunder1.mp3|Thunder1.ogg", id:"3"},
+                {src:"Game-Death.mp3|Game-Death.ogg", id:"4"},
+                {src:"GU-StealDaisy.mp3|GU-StealDaisy.ogg", id:"bounce", data:soundInstanceLimit}
             ]
 
             // Instantiate a queue to preload our assets
@@ -105,7 +105,7 @@
             queue.addEventListener("complete", loadComplete);
             queue.addEventListener("error",handleFileError);
             queue.addEventListener("progress",handleProgress);
-            queue.loadManifest(manifest);
+            queue.loadManifest(manifest, true, assetsPath);
         }
 
         // show progress so the user knows something is happening during preload

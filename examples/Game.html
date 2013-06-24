@@ -136,18 +136,18 @@
         // begin loading content (only sounds to load)
         var assetsPath = "assets/";
         manifest = [
-            {id:"begin", src:assetsPath+"Game-Spawn.mp3|" +assetsPath+"Game-Spawn.ogg"},
-            {id:"break", src:assetsPath+"Game-Break.mp3|" +assetsPath+"Game-Break.ogg", data:6},
-            {id:"death", src:assetsPath+"Game-Death.mp3|" +assetsPath+"Game-Death.ogg"},
-            {id:"laser", src:assetsPath+"Game-Shot.mp3|" +assetsPath+"Game-Shot.ogg", data:6},
-            {id:"music", src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|" +assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"}
+            {id:"begin", src:"Game-Spawn.mp3|Game-Spawn.ogg"},
+            {id:"break", src:"Game-Break.mp3|Game-Break.ogg", data:6},
+            {id:"death", src:"Game-Death.mp3|Game-Death.ogg"},
+            {id:"laser", src:"Game-Shot.mp3|Game-Shot.ogg", data:6},
+            {id:"music", src:"18-machinae_supremacy-lord_krutors_dominion.mp3|18-machinae_supremacy-lord_krutors_dominion.ogg"}
         ];
 
         preload = new createjs.LoadQueue();
         preload.installPlugin(createjs.Sound);
         preload.addEventListener("complete", doneLoading);
         preload.addEventListener("progress", updateLoading);
-        preload.loadManifest(manifest);
+        preload.loadManifest(manifest, true, assetsPath);
     }
 
     function updateLoading(event) {

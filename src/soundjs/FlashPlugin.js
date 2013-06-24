@@ -408,7 +408,7 @@ this.createjs = this.createjs || {};
 			}
 
 			try {
-				var instance = new SoundInstance(src, this, this.flash);
+				var instance = new SoundInstance(src, this, this.flash, this.audioSources[src]);
 				return instance;
 			} catch (err) {
 				//console.log("Error: Please ensure you have permission to play audio from this location.", err);
@@ -432,11 +432,24 @@ this.createjs = this.createjs || {};
 		 * @method preload
 		 * @param {String} src The path to the Sound
 		 * @param {Object} instance Not used in this plugin.
+		 * @param {String} basePath A file path to prepend to the src.
 		 */
-		preload:function (src, instance) {
+		preload:function (src, instance, basePath) {
 			this.audioSources[src] = true;  // NOTE this does not mean preloading has started, just that it will
 			var loader = new SoundLoader(src, this, this.flash);
+			if (basePath != null) {loader.src = basePath + src;}
 			loader.load();  // this will handle if flash is not ready
+		},
+
+		/**
+		 * Registers loaded source files to handle src being changed before loading.
+		 * This occurs when there is a basePath added (by PreloadJS or internal Preloading.
+		 * @param loadSrc
+		 * @param src
+		 * @protected
+		 */
+		registerLoadedSrc: function(loadSrc, src) {
+			this.audioSources[src] = loadSrc;
 		},
 
 		/**
@@ -626,21 +639,40 @@ this.createjs = this.createjs || {};
 
 // NOTE documentation for this class can be found online or in WebAudioPlugin.SoundInstance
 // NOTE audio control is shuttled to a flash player instance via the flash reference.
-	function SoundInstance(src, owner, flash) {
-		this.init(src, owner, flash);
+	function SoundInstance(src, owner, flash, flashSrc) {
+		this.init(src, owner, flash, flashSrc);
 	}
 
 	var p = SoundInstance.prototype = {
 
 		src:null,
+		flashSrc:null,	// because loaded src in flash can be different due to basePath appending
 		uniqueId:-1,
 		owner:null,
 		capabilities:null,
 		flash:null,
 		flashId:null, // To communicate with Flash
 		loop:0,
-		volume:1,
-		pan:0,
+		_volume: 1,
+		get volume() {
+			return this._volume;
+		},
+		set volume(value) {
+			if (Number(value) == null) {return;}
+			value = Math.max(0, Math.min(1, value));
+			this._volume = value;
+			return this.flash.setVolume(this.flashId, value)
+		},
+		_pan: 0,
+		get pan() {
+			return this._pan;
+		},
+		set pan(value) {
+			if (Number(value)==null) {return;}
+			value = Math.max(-1, Math.min(1, value));	// force pan to stay in the -1 to 1 range
+			this._pan = value;
+			return this.flash.setPan(this.flashId, value);
+		},
 		offset:0, // used for setPosition on a stopped instance
 		duration:0,
 		delayTimeoutId:null,
@@ -665,8 +697,9 @@ this.createjs = this.createjs || {};
 		onPlaySucceeded:null,
 
 // Constructor
-		init:function (src, owner, flash) {
+		init:function (src, owner, flash, flashSrc) {
 			this.src = src;
+			this.flashSrc = flashSrc;
 			this.owner = owner;
 			this.flash = flash;
 		},
@@ -708,7 +741,7 @@ this.createjs = this.createjs || {};
 
 			this.offset = offset;
 
-			this.flashId = this.flash.playSound(this.src, offset, loop, volume, pan);
+			this.flashId = this.flash.playSound(this.flashSrc, offset, loop, volume, pan);
 			if (this.flashId == null) {
 				if (this.onPlayFailed != null) {
 					this.onPlayFailed(this);
@@ -764,12 +797,7 @@ this.createjs = this.createjs || {};
 		},
 
 		setVolume:function (value) {
-			if (Number(value) == null) {
-				return false;
-			}
-			value = Math.max(0, Math.min(1, value));
 			this.volume = value;
-			return this.flash.setVolume(this.flashId, value)
 		},
 
 		getVolume:function () {
@@ -796,7 +824,6 @@ this.createjs = this.createjs || {};
 
 		setPan:function (value) {
 			this.pan = value;
-			return this.flash.setPan(this.flashId, value);
 		},
 
 		getPosition:function () {
@@ -907,6 +934,13 @@ this.createjs = this.createjs || {};
 		src:null,
 
 		/**
+		 * The original src, before being altered with basePath possibly by PreloadJS
+		 * #property src
+		 * @type {String}
+		 */
+		originalSrc:null,
+
+		/**
 		 * ID used to facilitate communication with flash.
 		 * #property flashId
 		 * @type {String}
@@ -969,6 +1003,7 @@ this.createjs = this.createjs || {};
 		// constructor
 		init:function (src, owner, flash) {
 			this.src = src;
+			this.originalSrc = src;
 			this.owner = owner;
 			this.flash = flash;
 		},
@@ -1027,7 +1062,9 @@ this.createjs = this.createjs || {};
 		handleComplete:function () {
 			this.progress = 1;
 			this.readyState = 4;
-			createjs.Sound.sendFileLoadEvent(this.src);  // fire event or callback on Sound // can't use onload callback because we need to pass the source
+			this.owner.registerLoadedSrc(this.src, this.originalSrc);
+			//this.src = this.originalSrc;
+			createjs.Sound.sendFileLoadEvent(this.originalSrc);  // fire event or callback on Sound // can't use onload callback because we need to pass the source
 			this.onload && this.onload();
 		},
 

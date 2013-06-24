@@ -1,5 +1,7 @@
 Version NEXT [Not released]
 ************************************************************************************************************************
+- implement basePath support for local loading and with PreloadJS
+- added getter/setter to volume and pan of SoundInstance, to allow tweening.
 - fixed an issue with Sound.removeSound not stopping audio with that src.
 - fixed an issue with pause and setPosition on audio files that are not looping, which would generate an error in
 	WebAudioPlugin.

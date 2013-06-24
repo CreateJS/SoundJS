@@ -195,6 +195,7 @@ this.createjs = this.createjs || {};
 		 * @default 1
 		 * @protected
 		 */
+		// TODO refactor Sound.js so we can use getter setter for volume
 		volume:1,
 
 		/**
@@ -340,12 +341,14 @@ this.createjs = this.createjs || {};
 		 * @method preload
 		 * @param {String} src The sound URI to load.
 		 * @param {Object} instance Not used in this plugin.
+		 * @param {String} basePath A file path to prepend to the src.
 		 * @protected
 		 */
-		preload:function (src, instance) {
+		preload:function (src, instance, basePath) {
 			this.arrayBuffers[src] = true;
 			var loader = new WebAudioLoader(src, this);
 			loader.onload = this.handlePreloadComplete;
+			if (basePath != null) {loader.src = basePath+loader.src;}
 			loader.load();
 		},
 
@@ -519,24 +522,47 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * The volume of the sound, between 0 and 1.
-		 * Use <code>getVolume</code> and <code>setVolume</code> to access.
+		 * Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower and Opera versions 11.50 or lower
+		 *
+		 * The actual output volume of a sound can be calculated using:
+		 * <code>myInstance.volume() * createjs.Sound.getVolume();</code>
+		 *
 		 * @property volume
 		 * @type {Number}
-		 * @default 0
-		 * @protected
+		 * @default 1
 		 */
-		volume:1,
+		_volume: 1,
+		get volume() {
+			return this._volume;
+		},
+		set volume(value) {
+			if (Number(value) == null) {return false}
+			value = Math.max(0, Math.min(1, value));
+			this._volume = value;
+			this.updateVolume();
+		},
 
 		/**
 		 * The pan of the sound, between -1 (left) and 1 (right). Note that pan does not work for HTML Audio.
-		 * Use <code>getPan</code> and <code>setPan</code> to access.
+		 * Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower and Opera versions 11.50 or lower
+		 * Note in WebAudioPlugin this only gives us the "x" value of what is actually 3D audio.
+		 *
 		 * @property pan
 		 * @type {Number}
 		 * @default 0
-		 * @protected
 		 */
-		pan:0,
+		_pan: 0,
+		get pan() {
+			return this._pan;
+		},
+		set pan(value) {
+			if (!this.owner.capabilities.panning || Number(value) == null) {return false;}
 
+			value = Math.max(-1, Math.min(1, value));	// force pan to stay in the -1 to 1 range
+			// Note that panning in WebAudioPlugin can support 3D audio, but our implementation does not.
+			this._pan = value;  // Unfortunately panner does not give us a way to access this after it is set http://www.w3.org/TR/webaudio/#AudioPannerNode
+			this.panNode.setPosition(value, 0, -0.5);  // z need to be -0.5 otherwise the sound only plays in left, right, or center
+		},
 
 		/**
 		 * The length of the audio clip, in milliseconds.
@@ -1075,14 +1101,10 @@ this.createjs = this.createjs || {};
 		 * @method setVolume
 		 * @param value The volume to set, between 0 and 1.
 		 * @return {Boolean} If the setVolume call succeeds.
+		 * @deprecated in favor of setter
 		 */
 		setVolume:function (value) {
-			if (Number(value) == null) {
-				return false;
-			}
-			value = Math.max(0, Math.min(1, value));
 			this.volume = value;
-			this.updateVolume();
 			return true;  // This is always true because even if the volume is not updated, the value is set
 		},
 
@@ -1094,7 +1116,7 @@ this.createjs = this.createjs || {};
 		 * @protected
 		 */
 		updateVolume:function () {
-			var newVolume = this.muted ? 0 : this.volume;
+			var newVolume = this.muted ? 0 : this._volume;
 			if (newVolume != this.gainNode.gain.value) {
 				this.gainNode.gain.value = newVolume;
 				return true;
@@ -1108,6 +1130,7 @@ this.createjs = this.createjs || {};
 		 *
 		 * @method getVolume
 		 * @return The current volume of the sound instance.
+		 * @deprecated in favor of getter
 		 */
 		getVolume:function () {
 			return this.volume;
@@ -1176,16 +1199,11 @@ this.createjs = this.createjs || {};
 		 * @method setPan
 		 * @param {Number} value The pan value, between -1 (left) and 1 (right).
 		 * @return {Number} If the setPan call succeeds.
+		 * @deprecated in favor of setter
 		 */
 		setPan:function (value) {
-			if (this.owner.capabilities.panning) {
-				// OJR consider putting in value check to make sure it stays in -1 to 1 bound
-				// Note that panning in WebAudioPlugin can support 3D audio, but our implementation does not.
-				this.panNode.setPosition(value, 0, -0.5);  // z need to be -0.5 otherwise the sound only plays in left, right, or center
-				this.pan = value;  // Unfortunately panner does not give us a way to access this after it is set http://www.w3.org/TR/webaudio/#AudioPannerNode
-			} else {
-				return false;
-			}
+			this.pan = value;  // Unfortunately panner does not give us a way to access this after it is set http://www.w3.org/TR/webaudio/#AudioPannerNode
+			if(this.pan != value) {return false;}
 		},
 
 		/**
@@ -1198,6 +1216,7 @@ this.createjs = this.createjs || {};
 		 *
 		 * @method getPan
 		 * @return {Number} The value of the pan, between -1 (left) and 1 (right).
+		 * @deprecated in favor of getter.
 		 */
 		getPan:function () {
 			return this.pan;
@@ -1360,6 +1379,13 @@ this.createjs = this.createjs || {};
 		src:null,
 
 		/**
+		 * The original source of the sound, before it is altered with a basePath.
+		 * #property src
+		 * @type {String}
+		 */
+		originalSrc:null,
+
+		/**
 		 * The decoded AudioBuffer array that is returned when loading is complete.
 		 * #property result
 		 * @type {AudioBuffer}
@@ -1393,6 +1419,7 @@ this.createjs = this.createjs || {};
 		// constructor
 		init:function (src, owner) {
 			this.src = src;
+			this.originalSrc = src;
 			this.owner = owner;
 		},
 
@@ -1403,6 +1430,7 @@ this.createjs = this.createjs || {};
 		 */
 		load:function (src) {
 			if (src != null) {
+				// TODO does this need to set this.originalSrc
 				this.src = src;
 			}
 
@@ -1450,6 +1478,7 @@ this.createjs = this.createjs || {};
 		handleAudioDecoded:function (decodedAudio) {
 			this.progress = 1;
 			this.result = decodedAudio;
+			this.src = this.originalSrc;
 			this.owner.addPreloadResults(this.src, this.result);
 			this.onload && this.onload();
 		},
