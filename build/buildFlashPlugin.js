@@ -258,9 +258,9 @@ function buildSourceTask(completeHandler)
 			file_args
                 ).concat(
                     ["--js_output_file", tmp_file]
-                );
+                ).concat(["--language_in", "ECMASCRIPT5"]);
     } else if (format == "PRETTY_PRINT") {
-        cmd = [ "java", "-jar", GOOGLE_CLOSURE_PATH ].concat(file_args).concat(["--js_output_file", tmp_file]).concat(["--formatting", "PRETTY_PRINT"]).concat(["--compilation_level", "WHITESPACE_ONLY"]);	
+        cmd = [ "java", "-jar", GOOGLE_CLOSURE_PATH ].concat(file_args).concat(["--js_output_file", tmp_file]).concat(["--formatting", "PRETTY_PRINT"]).concat(["--compilation_level", "WHITESPACE_ONLY"]).concat(["--language_in", "ECMASCRIPT5"]);	
     } 
 		
 	CHILD_PROCESS.exec(
