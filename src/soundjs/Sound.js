@@ -353,7 +353,7 @@ this.createjs = this.createjs || {};
 	 * @static
 	 * @protected
 	 */
-	s.lastId = 0,
+	s.lastId = 0;
 
 	/**
 	 * The currently active plugin. If this is null, then no plugin could be initialized. If no plugin was specified,
