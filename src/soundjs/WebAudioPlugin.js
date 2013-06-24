@@ -525,7 +525,7 @@ this.createjs = this.createjs || {};
 		 * Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower and Opera versions 11.50 or lower
 		 *
 		 * The actual output volume of a sound can be calculated using:
-		 * <code>myInstance.volume() * createjs.Sound.getVolume();</code>
+		 * <code>myInstance.volume * createjs.Sound.getVolume();</code>
 		 *
 		 * @property volume
 		 * @type {Number}
