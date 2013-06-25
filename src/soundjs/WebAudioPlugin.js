@@ -87,13 +87,37 @@ this.createjs = this.createjs || {};
 	s.isSupported = function () {
 		// check if this is some kind of mobile device, Web Audio works with local protocol under PhoneGap and it is unlikely someone is trying to run a local file
 		var isMobilePhoneGap = createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid || createjs.Sound.BrowserDetect.isBlackberry;
-		if (location.protocol == "file:" && !isMobilePhoneGap) { return false; }  // Web Audio requires XHR, which is not available locally
+	    // phonegap check first, so we don't do a unneeded XHR call
+	    if (location.protocol == "file:" && !(isMobilePhoneGap || isFileXhrSupported()) { return false; } // Web Audio requires XHR, which is not available locally
 		s.generateCapabilities();
 		if (s.context == null) {
 			return false;
 		}
 		return true;
 	};
+	
+	/**
+	 * Perform a dummy XHR request to this javascript file and return on its succes.
+	 */
+	function isFileXhrSupported() {
+	    // it's much easier to detect when something goes wrong, so let's start optimisticaly
+	    var supported = true;
+	
+	    var xhr = new XMLHttpRequest();
+	    xhr.open('GET', 'file://WebAudioPlugin.js', false); // this file will always exist (synchronous call)
+	    xhr.onerror = function() { supported = false; }; // cause irrelevant
+	    // with security turned off, we can get empty succes results, which is actually a failed read (status code 0?)
+	    xhr.onload = function() { supported = (this.status == 200) || (this.status == 0 && this.response != ''); };
+	    
+	    try {
+	        xhr.send();
+	    } catch (error) {
+	        // catch errors in cases where the onerror is passed by
+	        supported = false;
+	    }
+	    
+	    return supported;
+	}
 
 	/**
 	 * Determine the capabilities of the plugin. Used internally. Please see the Sound API {{#crossLink "Sound/getCapabilities"}}{{/crossLink}}
