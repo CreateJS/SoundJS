@@ -5,6 +5,7 @@ Version NEXT [Not released]
 - Changed WebAudioPlugin to test if XHR is available for local files rather than assuming it is not.
 - implement basePath support for local loading and with PreloadJS
 - added getter/setter to volume and pan of SoundInstance, to allow tweening.
+- added polyfil for Array.indexOf to allow IE8 support
 - fixed an issue with Sound.removeSound not stopping audio with that src.
 - fixed an issue with pause and setPosition on audio files that are not looping, which would generate an error in
 	WebAudioPlugin.
