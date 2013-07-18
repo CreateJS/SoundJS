@@ -87,13 +87,47 @@ this.createjs = this.createjs || {};
 	s.isSupported = function () {
 		// check if this is some kind of mobile device, Web Audio works with local protocol under PhoneGap and it is unlikely someone is trying to run a local file
 		var isMobilePhoneGap = createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid || createjs.Sound.BrowserDetect.isBlackberry;
-		if (location.protocol == "file:" && !isMobilePhoneGap) { return false; }  // Web Audio requires XHR, which is not available locally
+		// OJR isMobile may be redundant with isFileXHRSupported available.  Consider removing.
+		if (location.protocol == "file:" && !isMobilePhoneGap && !this.isFileXHRSupported()) { return false; }  // Web Audio requires XHR, which is not usually available locally
 		s.generateCapabilities();
 		if (s.context == null) {
 			return false;
 		}
 		return true;
 	};
+
+	/**
+	 * Determine if XHR is supported, which is necessary for web audio.
+	 * @method isFileXHRSupported
+	 * @return {Boolean} If XHR is supported.
+	 * @since 0.4.2
+	 * @protected
+	 * @static
+	 */
+	s.isFileXHRSupported = function() {
+		// it's much easier to detect when something goes wrong, so let's start optimisticaly
+		var supported = true;
+
+		var xhr = new XMLHttpRequest();
+		try {
+			xhr.open("GET", "fail.fail", false); // loading non-existant file triggers 404 only if it could load (synchronous call)
+		} catch (error) {
+			// catch errors in cases where the onerror is passed by
+			supported = false;
+			return supported;
+		}
+		xhr.onerror = function() { supported = false; }; // cause irrelevant
+		// with security turned off, we can get empty success results, which is actually a failed read (status code 0?)
+		xhr.onload = function() { supported = this.status == 404 || (this.status == 200 || (this.status == 0 && this.response != "")); };
+		try {
+			xhr.send();
+		} catch (error) {
+			// catch errors in cases where the onerror is passed by
+			supported = false;
+		}
+
+		return supported;
+	}
 
 	/**
 	 * Determine the capabilities of the plugin. Used internally. Please see the Sound API {{#crossLink "Sound/getCapabilities"}}{{/crossLink}}

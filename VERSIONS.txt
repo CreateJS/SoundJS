@@ -2,6 +2,7 @@ Version NEXT [Not released]
 ************************************************************************************************************************
 - added enableIOS property to HTMLAudioPlugin,allowing advanced users to enable HTMLAudioPlugin on iOS (not recommended).
 - Overloaded play call in Sound and SoundInstance to allow options to be passed in as an object, ie play("music", {loop: -1, volume: 0.5})
+- Changed WebAudioPlugin to test if XHR is available for local files rather than assuming it is not.
 - implement basePath support for local loading and with PreloadJS
 - added getter/setter to volume and pan of SoundInstance, to allow tweening.
 - fixed an issue with Sound.removeSound not stopping audio with that src.
