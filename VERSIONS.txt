@@ -1,5 +1,6 @@
 Version NEXT [Not released]
 ************************************************************************************************************************
+- added enableIOS property to HTMLAudioPlugin,allowing advanced users to enable HTMLAudioPlugin on iOS (not recommended).
 - implement basePath support for local loading and with PreloadJS
 - added getter/setter to volume and pan of SoundInstance, to allow tweening.
 - fixed an issue with Sound.removeSound not stopping audio with that src.

@@ -157,6 +157,21 @@ this.createjs = this.createjs || {};
 
 
 	/**
+	 * Allows users to enable HTML audio on IOS, which is disabled by default.
+	 * Note this needs to be set before HTMLAudioPlugin is registered with SoundJS.
+	 * This is not recommend because of severe limitations on IOS devices including:
+	 * <li>it can only have one &lt;audio&gt; tag</li>
+	 * <li>can not preload or autoplay the audio</li>
+	 * <li>can not cache the audio</li>
+	 * <li>can not play the audio except inside a user initiated event</li>
+	 *
+	 * @property enableIOS
+	 * @type {Boolean}
+	 * @default false
+	 */
+	s.enableIOS = false;
+
+	/**
 	 * Determine if the plugin can be used in the current browser/OS. Note that HTML audio is available in most modern
 	 * browsers, but is disabled in iOS because of its limitations.
 	 * @method isSupported
@@ -167,7 +182,7 @@ this.createjs = this.createjs || {};
 		// HTML audio can be enable on iOS by removing this if statement, but it is not recommended due to the limitations:
 		// iOS can only have a single <audio> instance, cannot preload or autoplay, cannot cache sound, and can only be
 		// played in response to a user event (click)
-		if (createjs.Sound.BrowserDetect.isIOS) {
+		if (createjs.Sound.BrowserDetect.isIOS && !s.enableIOS) {
 			return false;
 		}
 		s.generateCapabilities();
