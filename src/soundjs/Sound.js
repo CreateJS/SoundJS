@@ -1029,13 +1029,18 @@ this.createjs = this.createjs || {};
 	 *      	createjs.Sound.play("myID");
 	 *      	// alternately we could call the following
 	 *      	var myInstance = createjs.Sound.play("myAudioPath/mySound.mp3", createjs.Sound.INTERRUPT_ANY, 0, 0, -1, 1, 0);
+	 *      	// another alternative is to pass in just the options we want to set inside of an object
+	 *      	var myInstance = createjs.Sound.play("myAudioPath/mySound.mp3", {interrupt: createjs.Sound.INTERRUPT_ANY, loop:-1});
 	 *      }
 	 *
 	 * @method play
 	 * @param {String} src The src or ID of the audio.
-	 * @param {String} [interrupt="none"] How to interrupt any currently playing instances of audio with the same source,
+	 * @param {String | Object} [interrupt="none"|options] How to interrupt any currently playing instances of audio with the same source,
 	 * if the maximum number of instances of the sound are already playing. Values are defined as <code>INTERRUPT_TYPE</code>
 	 * constants on the Sound class, with the default defined by {{#crossLink "Sound/defaultInterruptBehavior"}}{{/crossLink}}.
+	 * <br /><strong>OR</strong><br />
+	 * This parameter can be an object that contains any or all optional properties by name, including: interrupt,
+	 * delay, offset, loop, volume, and pan (see the above code sample).
 	 * @param {Number} [delay=0] The amount of time to delay the start of audio playback, in milliseconds.
 	 * @param {Number} [offset=0] The offset from the start of the audio to begin playback, in milliseconds.
 	 * @param {Number} [loop=0] How many times the audio loops when it reaches the end of playback. The default is 0 (no
@@ -1231,8 +1236,12 @@ this.createjs = this.createjs || {};
 	 * control delays.
 	 * @method playInstance
 	 * @param {SoundInstance} instance The {{#crossLink "SoundInstance"}}{{/crossLink}} to start playing.
-	 * @param {String} [interrupt=none] How this sound interrupts other instances with the same source.  Defaults to
-	 * <code>Sound.INTERRUPT_NONE</code>. All interrupt values are defined as <code>INTERRUPT_TYPE</code>constants on Sound.
+	 * @param {String | Object} [interrupt="none"|options] How to interrupt any currently playing instances of audio with the same source,
+	 * if the maximum number of instances of the sound are already playing. Values are defined as <code>INTERRUPT_TYPE</code>
+	 * constants on the Sound class, with the default defined by {{#crossLink "Sound/defaultInterruptBehavior"}}{{/crossLink}}.
+	 * <br /><strong>OR</strong><br />
+	 * This parameter can be an object that contains any or all optional properties by name, including: interrupt,
+	 * delay, offset, loop, volume, and pan (see the above code sample).
 	 * @param {Number} [delay=0] Time in milliseconds before playback begins.
 	 * @param {Number} [offset=instance.offset] Time into the sound to begin playback in milliseconds.  Defaults to the
 	 * current value on the instance.
@@ -1245,22 +1254,20 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.playInstance = function (instance, interrupt, delay, offset, loop, volume, pan) {
+		if (interrupt instanceof Object) {
+			delay = interrupt.delay;
+			offset = interrupt.offset;
+			loop = interrupt.loop;
+			volume = interrupt.volume;
+			pan = interrupt.pan;
+		}
+
 		interrupt = interrupt || s.defaultInterruptBehavior;
-		if (delay == null) {
-			delay = 0;
-		}
-		if (offset == null) {
-			offset = instance.getPosition();
-		}
-		if (loop == null) {
-			loop = 0;
-		}
-		if (volume == null) {
-			volume = instance.getVolume();
-		}
-		if (pan == null) {
-			pan = instance.getPan();
-		}
+		if (delay == null) {delay = 0;}
+		if (offset == null) {offset = instance.getPosition();}
+		if (loop == null) {loop = 0;}
+		if (volume == null) {volume = instance.volume;}
+		if (pan == null) {pan = instance.pan;}
 
 		if (delay == 0) {
 			var ok = s.beginPlaying(instance, interrupt, offset, loop, volume, pan);
