@@ -654,25 +654,7 @@ this.createjs = this.createjs || {};
 		flashId:null, // To communicate with Flash
 		loop:0,
 		_volume: 1,
-		get volume() {
-			return this._volume;
-		},
-		set volume(value) {
-			if (Number(value) == null) {return;}
-			value = Math.max(0, Math.min(1, value));
-			this._volume = value;
-			return this.flash.setVolume(this.flashId, value)
-		},
 		_pan: 0,
-		get pan() {
-			return this._pan;
-		},
-		set pan(value) {
-			if (Number(value)==null) {return;}
-			value = Math.max(-1, Math.min(1, value));	// force pan to stay in the -1 to 1 range
-			this._pan = value;
-			return this.flash.setPan(this.flashId, value);
-		},
 		offset:0, // used for setPosition on a stopped instance
 		duration:0,
 		delayTimeoutId:null,
@@ -796,12 +778,16 @@ this.createjs = this.createjs || {};
 			return ok;
 		},
 
+		// leaving functionality in so IE8 will work
 		setVolume:function (value) {
-			this.volume = value;
+			if (Number(value) == null) {return;}
+			value = Math.max(0, Math.min(1, value));
+			this._volume = value;
+			return this.flash.setVolume(this.flashId, value)
 		},
 
 		getVolume:function () {
-			return this.volume;
+			return this._volume;
 		},
 
 		mute:function (value) {
@@ -819,11 +805,15 @@ this.createjs = this.createjs || {};
 		},
 
 		getPan:function () {
-			return this.pan;
+			return this._pan;
 		},
 
+		// duplicating functionality to support IE8
 		setPan:function (value) {
-			this.pan = value;
+			if (Number(value)==null) {return;}
+			value = Math.max(-1, Math.min(1, value));	// force pan to stay in the -1 to 1 range
+			this._pan = value;
+			return this.flash.setPan(this.flashId, value);
 		},
 
 		getPosition:function () {
@@ -893,6 +883,34 @@ this.createjs = this.createjs || {};
 			return "[FlashPlugin SoundInstance]"
 		}
 
+	}
+
+	// IE8 has Object.defineProperty, but only for DOM objects, so if check fails
+	try {
+		Object.defineProperty(p, "volume", {
+			get: function() {
+				return this._volume;
+			},
+			set: function(value) {
+				if (Number(value) == null) {return;}
+				value = Math.max(0, Math.min(1, value));
+				this._volume = value;
+				return this.flash.setVolume(this.flashId, value)
+			}
+		});
+		Object.defineProperty(p, "pan", {
+			get: function() {
+				return this._pan;
+			},
+			set: function(value) {
+				if (Number(value)==null) {return;}
+				value = Math.max(-1, Math.min(1, value));	// force pan to stay in the -1 to 1 range
+				this._pan = value;
+				return this.flash.setPan(this.flashId, value);
+			}
+		});
+	} catch (e) {
+		// dispatch message or error?
 	}
 
 	// Note this is for SoundInstance above.

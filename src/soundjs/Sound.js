@@ -60,7 +60,7 @@ this.createjs = this.createjs || {};
  *          // This is fired for each sound that is registered.
  *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use full sourcepath or event.src.
  *          instance.addEventListener("complete", createjs.proxy(this.handleComplete, this));
- *          instance.setVolume(0.5);
+ *          instance.volume = 0.5;
  *      }
  *
  * <h4>Browser Support</h4>
@@ -111,7 +111,7 @@ this.createjs = this.createjs || {};
      *          // This is fired for each sound that is registered.
      *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use full source path or event.src.
      *          instance.addEventListener("complete", createjs.proxy(this.handleComplete, this));
-     *          instance.setVolume(0.5);
+     *          instance.volume = 0.5;
 	 *      }
 	 *
 	 * The maximum number of concurrently playing instances of the same sound can be specified in the "data" argument
@@ -1130,7 +1130,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Get the master volume of Sound. The master volume is multiplied against each sound's individual volume.
-	 * To get individual sound volume, use SoundInstance {{#crossLink "SoundInstance/getVolume"}}{{/crossLink}} instead.
+	 * To get individual sound volume, use SoundInstance {{#crossLink "SoundInstance/volume"}}{{/crossLink}} instead.
 	 *
 	 * <h4>Example</h4>
 	 *     var masterVolume = createjs.Sound.getVolume();

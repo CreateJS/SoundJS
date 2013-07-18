@@ -530,6 +530,7 @@ this.createjs = this.createjs || {};
 			// Reset this instance.
 			this.offset = offset;
 			this.volume = volume;
+			this.pan = pan;	// not pan has no effect
 			this.updateVolume();  // note this will set for mute and masterMute
 			this.remainingLoops = loop;
 

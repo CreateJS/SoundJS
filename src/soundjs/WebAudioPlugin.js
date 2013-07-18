@@ -522,7 +522,8 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * The volume of the sound, between 0 and 1.
-		 * Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower and Opera versions 11.50 or lower
+		 * Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower and Opera versions 11.50 or lower,
+		 * and Internet Explorer 8 or lower.  Instead use {{#crossLink "SoundInstance/setVolume"}}{{/crossLink}} and {{#crossLink "SoundInstance/getVolume"}}{{/crossLink}}.
 		 *
 		 * The actual output volume of a sound can be calculated using:
 		 * <code>myInstance.volume * createjs.Sound.getVolume();</code>
@@ -544,7 +545,8 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * The pan of the sound, between -1 (left) and 1 (right). Note that pan does not work for HTML Audio.
-		 * Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower and Opera versions 11.50 or lower
+		 * Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower, Opera versions 11.50 or lower,
+		 * and Internet Explorer 8 or lower.  Instead use {{#crossLink "SoundInstance/setPan"}}{{/crossLink}} and {{#crossLink "SoundInstance/getPan"}}{{/crossLink}}.
 		 * Note in WebAudioPlugin this only gives us the "x" value of what is actually 3D audio.
 		 *
 		 * @property pan
@@ -1005,8 +1007,8 @@ this.createjs = this.createjs || {};
 
 			this.offset = offset / 1000;  //convert ms to sec
 			this.remainingLoops = loop;
-			this.setVolume(volume);
-			this.setPan(pan);
+			this.volume = volume;
+			this.pan = pan;
 
 			if (this.owner.isPreloadComplete(this.src)) {
 				this.handleSoundReady(null);
@@ -1089,6 +1091,7 @@ this.createjs = this.createjs || {};
 		},
 
 		/**
+		 * NOTE that you can set volume directly, and setVolume remains to allow support for IE8 with FlashPlugin.
 		 * Set the volume of the instance. You can retrieve the volume using {{#crossLink "SoundInstance/getVolume"}}{{/crossLink}}.
 		 *
 		 * <h4>Example</h4>
@@ -1101,7 +1104,6 @@ this.createjs = this.createjs || {};
 		 * @method setVolume
 		 * @param value The volume to set, between 0 and 1.
 		 * @return {Boolean} If the setVolume call succeeds.
-		 * @deprecated in favor of setter
 		 */
 		setVolume:function (value) {
 			this.volume = value;
@@ -1125,12 +1127,13 @@ this.createjs = this.createjs || {};
 		},
 
 		/**
+ 		 * NOTE that you can get volume directly, and getVolume remains to allow support for IE8 with FlashPlugin.
+		 *
 		 * Get the volume of the instance. The actual output volume of a sound can be calculated using:
 		 * <code>myInstance.getVolume() * createjs.Sound.getVolume();</code>
 		 *
 		 * @method getVolume
 		 * @return The current volume of the sound instance.
-		 * @deprecated in favor of getter
 		 */
 		getVolume:function () {
 			return this.volume;
@@ -1188,6 +1191,8 @@ this.createjs = this.createjs || {};
 		},
 
 		/**
+		 * NOTE that you can set pan directly, and getPan remains to allow support for IE8 with FlashPlugin.
+		 *
 		 * Set the left(-1)/right(+1) pan of the instance. Note that {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}} does not
 		 * support panning, and only simple left/right panning has been implemented for {{#crossLink "WebAudioPlugin"}}{{/crossLink}}.
 		 * The default pan value is 0 (center).
@@ -1199,7 +1204,6 @@ this.createjs = this.createjs || {};
 		 * @method setPan
 		 * @param {Number} value The pan value, between -1 (left) and 1 (right).
 		 * @return {Number} If the setPan call succeeds.
-		 * @deprecated in favor of setter
 		 */
 		setPan:function (value) {
 			this.pan = value;  // Unfortunately panner does not give us a way to access this after it is set http://www.w3.org/TR/webaudio/#AudioPannerNode
@@ -1207,6 +1211,8 @@ this.createjs = this.createjs || {};
 		},
 
 		/**
+		 * NOTE that you can get volume directly, and getPan remains to allow support for IE8 with FlashPlugin.
+		 *
 		 * Get the left/right pan of the instance. Note in WebAudioPlugin this only gives us the "x" value of what is
 		 * actually 3D audio.
 		 *
@@ -1216,7 +1222,6 @@ this.createjs = this.createjs || {};
 		 *
 		 * @method getPan
 		 * @return {Number} The value of the pan, between -1 (left) and 1 (right).
-		 * @deprecated in favor of getter.
 		 */
 		getPan:function () {
 			return this.pan;
