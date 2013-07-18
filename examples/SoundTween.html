@@ -64,13 +64,14 @@
 			params[parts[0]] = parts[1];
 		}
 
-        var src;            // the audio src we are trying to play
-        var soundInstance;  // the soundInstance returned by Sound when we create or play a src
-        var displayStatus;  // the HTML element we use to display messages to the user
-		var canvas;			// canvas that easeljs stage is drawing to
-		var stage;			// the easeljs stage
-		var tween;			// the tween we are applying to audio
-		var baseTime = 1000;// the baseTime we use for tweening
+        var src;	            // the audio src we are trying to play
+        var soundInstance; 		// the soundInstance returned by Sound when we create or play a src
+        var displayStatus;  	// the HTML element we use to display messages to the user
+		var canvas;				// canvas that easeljs stage is drawing to
+		var stage;				// the easeljs stage
+		var tween;				// the tween we are applying to audio
+		var baseTime = 1000;	// the baseTime we use for tweening
+		var volume, pan;		// 2 easeljs shapes to represent these values
 
 		function init() {
 			createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
@@ -103,26 +104,25 @@
 
             // Create a single item to load.
             var assetsPath = "assets/";
-            src = assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg";
+            src = assetsPath+"M-GameBG.mp3|"+assetsPath+"M-GameBG.ogg";
             // NOTE the "|" character is used by Sound to separate source into distinct files, which allows you to provide multiple extensions for wider browser support
 
             createjs.Sound.addEventListener("fileload", playSound); // add an event listener for when load is completed
             createjs.Sound.registerSound(src);  // register sound, which preloads by default
 
-            displayStatus.innerHTML = "Waiting for load to complete.";  // letting the user know what's happening
+            setMessage("Waiting for load to complete.");  // letting the user know what's happening
 		}
 
         function playSound(event) {
-			soundInstance = createjs.Sound.play(event.src, createjs.Sound.INTERRUPT_ANY, 0, 0, -1, 0.5);  // start playing the sound we just loaded, storing the playing instance
-			displayStatus.innerHTML = "Playing source: " + event.src;  // let the user know what we are playing
+			soundInstance = createjs.Sound.play(event.src, {loop:-1, volume:0.5});  // start playing the sound we just loaded, storing the playing instance
 			initVisuals();
 			initSoundTween();
         }
 
 		function initSoundTween() {
-			displayStatus.innerHTML = "Volume Down: 0.1";
+			setMessage("Volume Down: 0.0");
 			tween = createjs.Tween.get(soundInstance, {loop: true})
-					.to({volume:0.1}, 3*baseTime)
+					.to({volume:0.0}, 3*baseTime)
 					.wait(baseTime).call(setMessage, ["Volume Up: 0.5"])
 					.to({volume:0.5}, 3*baseTime)
 					.wait(baseTime).call(setMessage, ["Volume Up: 1.0"])
@@ -137,13 +137,13 @@
 					.to({pan: -1}, 3*baseTime)
 					.wait(baseTime).call(setMessage, ["Pan Center: 0.0"])
 					.to({pan: 0}, 3*baseTime)
-					.wait(baseTime).call(setMessage, ["Volume Down: 0.1, Pan Left: -1.0"])
-					.to({pan: -1, volume: 0.1}, 3*baseTime)
+					.wait(baseTime).call(setMessage, ["Volume Down: 0.0, Pan Left: -1.0"])
+					.to({pan: -1, volume: 0.0}, 3*baseTime)
 					.wait(baseTime).call(setMessage, ["Volume Up: 1.0, Pan Right: 1.0"])
 					.to({pan: 1, volume: 1}, 6*baseTime)
 					.wait(baseTime).call(setMessage, ["Volume Down: 0.5, Pan Center: 0.0"])
 					.to({pan: 0, volume: 0.5}, 3*baseTime)
-					.wait(baseTime).call(setMessage, ["Volume Down: 0.1"]);
+					.wait(baseTime).call(setMessage, ["Volume Down: 0.0"]);
 		}
 
 		function setMessage(message) {
@@ -155,52 +155,53 @@
 			stage = new createjs.Stage(canvas);
 			stage.autoClear = true;
 
-			var ball = drawBall();
-			stage.addChild(ball);
-			createjs.Ticker.addEventListener("tick", stage);
+			volume = drawDial();
+			volume.x = canvas.width / 3;
+			var t = new createjs.Text("Volume", "20px Arial", "black");
+			t.textAlign = "center";
+			t.x = volume.x;
+			t.y = canvas.height / 2 - 70;
+			t.textBaseline = "alphabetic";
+			stage.addChild(volume);
+			stage.addChild(t);
 
-			var t = createjs.Tween.get(ball, {loop:true})
-					.to({scaleX:0.1, scaleY:0.1, y:canvas.height - 5.5}, 3*baseTime)
-					.wait(baseTime)
-					.to({scaleX:1, scaleY:1, y:canvas.height-55}, 3*baseTime)
-					.wait(baseTime)
-					.to({scaleX:2, scaleY:2, y:canvas.height-110}, 3*baseTime)
-					.wait(baseTime)
-					.to({scaleX:1, scaleY:1, y:canvas.height-55}, 3*baseTime)
-					.wait(baseTime)
-					.to({x:canvas.width - 55, rotation:360}, 3*baseTime)
-					.wait(baseTime)
-					.to({x:canvas.width / 2, rotation:0}, 3*baseTime)
-					.wait(baseTime)
-					.to({x:55, rotation:-360}, 3*baseTime)
-					.wait(baseTime)
-					.to({x:canvas.width / 2, rotation:0}, 3*baseTime)
-					.wait(baseTime)
-					.to({x:5.5, rotation:-360, scaleX:0.1, scaleY:0.1, y:canvas.height-5.5}, 3*baseTime)
-					.wait(baseTime)
-					.to({x:canvas.width - 110, rotation:360, scaleX:2, scaleY:2, y:canvas.height-110}, 6*baseTime)
-					.wait(baseTime)
-					.to({x:canvas.width / 2, rotation:0, scaleX:1, scaleY:1, y:canvas.height-55}, 3*baseTime)
-					.wait(baseTime);
+			pan = drawDial();
+			pan.x = canvas.width * 2 / 3;
+			var t = new createjs.Text("Pan", "20px Arial", "black");
+			t.textAlign = "center";
+			t.x = pan.x;
+			t.y = canvas.height / 2 - 70;
+			t.textBaseline = "alphabetic";
+			stage.addChild(pan);
+			stage.addChild(t);
+
+			createjs.Ticker.addEventListener("tick", handleTick);
 		}
 
-		function drawBall() {
-			var ball = new createjs.Shape();
-			ball.graphics.setStrokeStyle(5, 'round', 'round');
-			ball.graphics.beginStroke(('#000000'));
-			ball.graphics.beginFill("#FF0000").drawCircle(0,0,50);
-			ball.graphics.endStroke();
-			ball.graphics.endFill();
-			ball.graphics.setStrokeStyle(1, 'round', 'round');
-			ball.graphics.beginStroke(('#000000'));
-			ball.graphics.moveTo(0,0);
-			ball.graphics.lineTo(0,50);
+		function drawDial() {
+			var s = new createjs.Shape();
+			s.graphics.setStrokeStyle(5, 'round', 'round');
+			s.graphics.beginStroke(('#000000'));
+			s.graphics.beginFill("#777").drawCircle(0,0,50);
+			s.graphics.endStroke();
+			s.graphics.endFill();
+			s.graphics.setStrokeStyle(1, 'round', 'round');
+			s.graphics.beginStroke(('#000000'));
+			s.graphics.moveTo(0,0);
+			s.graphics.lineTo(0,-50);
 
-			ball.graphics.endStroke();
-			ball.x = canvas.width / 2;
-			ball.y = canvas.height - 55;
-			return ball;
+			s.graphics.endStroke();
+			s.y = canvas.height / 2;
+			return s;
 		}
+
+		function handleTick() {
+			volume.rotation = (soundInstance.volume - 0.5) * 270;
+			pan.rotation = soundInstance.pan * 135;
+
+			stage.update();
+		}
+
 	</script>
 
 </body>

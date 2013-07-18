@@ -76,8 +76,8 @@
                 document.getElementById("header").style.display = "none";
             }
 
+			createjs.FlashPlugin.BASE_PATH = "../src/soundjs/"; // Initialize the base path from this document to the Flash Plugin
             if (params.type == "flash") {
-                createjs.FlashPlugin.BASE_PATH = "../src/soundjs/"; // Initialize the base path from this document to the Flash Plugin
                 createjs.Sound.registerPlugins([createjs.FlashPlugin]);
             } else if (params.type == "html5") {
                 createjs.Sound.registerPlugins([createjs.HTMLAudioPlugin]);

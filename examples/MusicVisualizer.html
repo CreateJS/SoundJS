@@ -142,7 +142,7 @@
             stage.removeChild(messageField);
 
             // start playing the sound we just loaded, looping indefinitely
-            soundInstance = createjs.Sound.play(src, null, null, 0, -1);
+            soundInstance = createjs.Sound.play(src, {loop:-1});
 
             // testing function that allows a quick stop
             /*stage.addEventListener("stagemousedown", function(){

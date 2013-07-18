@@ -168,7 +168,7 @@
         messageField.text = "Welcome:  Click to play";
 
         // start the music
-        createjs.Sound.play("music", createjs.Sound.INTERRUPT_NONE, 0, 0, -1, 0.4);
+        createjs.Sound.play("music", {interrupt:createjs.Sound.INTERRUPT_NONE, loop:-1, volume:0.4});
 
         watchRestart();
     }
@@ -350,7 +350,7 @@
                     bulletStream[bullet].active = false;
 
                     // play sound
-                    createjs.Sound.play("break", createjs.Sound.INTERUPT_LATE, 0, 0.8);
+                    createjs.Sound.play("break", {interrupt: createjs.Sound.INTERUPT_LATE, offset:0.8});
                 }
             }
         }
