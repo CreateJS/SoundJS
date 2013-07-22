@@ -68,7 +68,7 @@ this.createjs = this.createjs || {};
 	var s = WebAudioPlugin;
 
 	/**
-	 * The capabilities of the plugin. This is generated via the <code>"WebAudioPlugin/generateCapabilities</code>
+	 * The capabilities of the plugin. This is generated via the {{#crossLink "WebAudioPlugin/generateCapabilities:method"}}{{/crossLink}}
 	 * method and is used internally.
 	 * @property capabilities
 	 * @type {Object}
@@ -286,7 +286,7 @@ this.createjs = this.createjs || {};
 		dynamicsCompressorNode:null,
 
 		/**
-		 * A GainNode for controlling master volume. It is connected to <code>dynamicsCompressorNode</code>.
+		 * A GainNode for controlling master volume. It is connected to {{#crossLink "WebAudioPlugin/dynamicsCompressorNode:property"}}{{/crossLink}}.
 		 * @property gainNode
 		 * @type {AudioGainNode}
 		 */
@@ -545,7 +545,7 @@ this.createjs = this.createjs || {};
 		src:null,
 
 		/**
-		 * The unique ID of the instance. This is set by <code>Sound</code>.
+		 * The unique ID of the instance. This is set by {{#crossLink "Sound"}}{{/crossLink}}.
 		 * @property uniqueId
 		 * @type {String} | Number
 		 * @default -1
@@ -553,7 +553,7 @@ this.createjs = this.createjs || {};
 		uniqueId:-1,
 
 		/**
-		 * The play state of the sound. Play states are defined as constants on <code>Sound</code>.
+		 * The play state of the sound. Play states are defined as constants on {{#crossLink "Sound"}}{{/crossLink}}.
 		 * @property playState
 		 * @type {String}
 		 * @default null
@@ -582,7 +582,7 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * The time in milliseconds before the sound starts.
-		 * Note this is handled by <code>Sound</code>.
+		 * Note this is handled by {{#crossLink "Sound"}}{{/crossLink}}.
 		 * @property delay
 		 * @type {Number}
 		 * @default 0
@@ -639,7 +639,7 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * The length of the audio clip, in milliseconds.
-		 * Use <code>getDuration</code> to access.
+		 * Use {{#crossLink "SoundInstance/getDuration:method"}}{{/crossLink}} to access.
 		 * @property pan
 		 * @type {Number}
 		 * @default 0
@@ -657,8 +657,8 @@ this.createjs = this.createjs || {};
 		remainingLoops:0,
 
 		/**
-		 * A Timout created by <code>Sound</code> when this SoundInstance is played with a delay. This allows SoundInstance
-		 * to remove the delay if stop or pause or cleanup are called before playback begins.
+		 * A Timeout created by {{#crossLink "Sound"}}{{/crossLink}} when this SoundInstance is played with a delay.
+		 * This allows SoundInstance to remove the delay if stop or pause or cleanup are called before playback begins.
 		 * @property delayTimeoutId
 		 * @type {timeoutVariable}
 		 * @default null
@@ -679,8 +679,8 @@ this.createjs = this.createjs || {};
 		soundCompleteTimeout:null,
 
 		/**
-		 * NOTE this only exists as a <code>WebAudioPlugin</code> property and is only intended for use by advanced users.
-		 * A panNode allowing left and right audio channel panning only. Connected to our <code>WebAudioPlugin.gainNode</code>
+		 * NOTE this only exists as a {{#crossLink "WebAudioPlugin"}}{{/crossLink}} property and is only intended for use by advanced users.
+		 * A panNode allowing left and right audio channel panning only. Connected to our {{#crossLink "WebAudioPlugin/gainNode"}}{{/crossLink}}
 		 * that sequences to <code>context.destination</code>.
 		 * @property panNode
 		 * @type {AudioPannerNode}
@@ -690,8 +690,8 @@ this.createjs = this.createjs || {};
 		panNode:null,
 
 		/**
-		 * NOTE this only exists as a <code>WebAudioPlugin</code> property and is only intended for use by advanced users.
-		 * GainNode for controlling <code>SoundInstance</code> volume. Connected to <code>panNode</code>.
+		 * NOTE this only exists as a {{#crossLink "WebAudioPlugin"}}{{/crossLink}} property and is only intended for use by advanced users.
+		 * GainNode for controlling <code>SoundInstance</code> volume. Connected to {{#crossLink "SoundInstance/panNode:property"}}{{/crossLink}}.
 		 * @property gainNode
 		 * @type {AudioGainNode}
 		 * @default null
@@ -701,8 +701,8 @@ this.createjs = this.createjs || {};
 		gainNode:null,
 
 		/**
-		 * NOTE this only exists as a <code>WebAudioPlugin</code> property and is only intended for use by advanced users.
-		 * sourceNode is the audio source. Connected to <code>gainNode</code>.
+		 * NOTE this only exists as a {{#crossLink "WebAudioPlugin"}}{{/crossLink}} property and is only intended for use by advanced users.
+		 * sourceNode is the audio source. Connected to {{#crossLink "SoundInstance/gainNode:property"}}{{/crossLink}}.
 		 * @property sourceNode
 		 * @type {AudioSourceNode}
 		 * @default null
@@ -712,9 +712,9 @@ this.createjs = this.createjs || {};
 		sourceNode:null,
 
 		/**
-		 * NOTE this only exists as a <code>WebAudioPlugin</code> property and is only intended for use by advanced users.
+		 * NOTE this only exists as a {{#crossLink "WebAudioPlugin"}}{{/crossLink}} property and is only intended for use by advanced users.
 		 * sourceNodeNext is the audio source for the next loop, inserted in a look ahead approach to allow for smooth
-		 * looping. Connected to <code>gainNode</code>.
+		 * looping. Connected to {{#crossLink "SoundInstance/gainNode:property"}}{{/crossLink}}.
 		 * @property sourceNodeNext
 		 * @type {AudioSourceNode}
 		 * @default null
@@ -726,7 +726,7 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * Determines if the audio is currently muted.
-		 * Use <code>getMute</code> and <code>setMute</code> to access.
+		 * Use {{#crossLink "SoundInstance/getMute:method"}}{{/crossLink}} and {{#crossLink "SoundInstance/setMute:method"}}{{/crossLink}} to access.
 		 * @property muted
 		 * @type {Boolean}
 		 * @default false
@@ -736,7 +736,7 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * Determines if the audio is currently paused.
-		 * Use <code>pause()</code> and <code>resume()</code> to set.
+		 * Use {{#crossLink "SoundInstance/pause:method"}}{{/crossLink}} and {{#crossLink "SoundInstance/resume:method"}}{{/crossLink}} to set.
 		 * @property paused
 		 * @type {Boolean}
 		 * @default false
@@ -822,55 +822,49 @@ this.createjs = this.createjs || {};
 		 * @since 0.4.0
 		 */
 
-// Callbacks
+		//TODO: Deprecated
 		/**
-		 * The callback that is fired when a sound is ready to play.
+		 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "SoundInstance/ready:event"}}{{/crossLink}}
+		 * event.
 		 * @property onReady
 		 * @type {Function}
-		 * @deprecated In favor of the "ready" event. Will be removed in a future version.
+		 * @deprecated Use addEventListener and the "ready" event.
 		 */
-		onReady:null,
-
 		/**
-		 * The callback that is fired when playback has started successfully.
+		 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "SoundInstance/succeeded:event"}}{{/crossLink}}
+		 * event.
 		 * @property onPlaySucceeded
 		 * @type {Function}
-		 * @deprecated In favour of the "succeeded" event. Will be removed in a future version.
+		 * @deprecated Use addEventListener and the "succeeded" event.
 		 */
-		onPlaySucceeded:null,
-
 		/**
-		 * The callback that is fired when a sound has been interrupted.
+		 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "SoundInstance/interrupted:event"}}{{/crossLink}}
+		 * event.
 		 * @property onPlayInterrupted
 		 * @type {Function}
-		 * @deprecated Deprecated in favor of the "interrupted" event. Will be removed in a future version.
+		 * @deprecated Use addEventListener and the "interrupted" event.
 		 */
-		onPlayInterrupted:null,
-
 		/**
-		 * The callback that is fired when a sound has failed to start.
+		 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "SoundInstance/failed:event"}}{{/crossLink}}
+		 * event.
 		 * @property onPlayFailed
 		 * @type {Function}
-		 * @deprecated In favor of the "failed" event. Will be removed in a future version.
+		 * @deprecated Use addEventListener and the "failed" event.
 		 */
-		onPlayFailed:null,
-
 		/**
-		 * The callback that is fired when a sound has completed playback.
+		 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "SoundInstance/complete:event"}}{{/crossLink}}
+		 * event.
 		 * @property onComplete
 		 * @type {Function}
-		 * @deprecated In favor of the "complete" event. Will be removed in a future version.
+		 * @deprecated Use addEventListener and the "complete" event.
 		 */
-		onComplete:null,
-
 		/**
-		 * The callback that is fired when a sound has completed playback, but has loops remaining.
+		 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "SoundInstance/loop:event"}}{{/crossLink}}
+		 * event.
 		 * @property onLoop
 		 * @type {Function}
-		 * @deprecated In favor of the "loop" event. Will be removed in a future version.
+		 * @deprecated Use addEventListener and the "loop" event.
 		 */
-		onLoop:null,
-
 
 		/**
 		 * A helper method that dispatches all events for SoundInstance.
@@ -879,10 +873,7 @@ this.createjs = this.createjs || {};
 		 * @protected
 		 */
 		sendEvent:function (type) {
-			var event = {
-				target:this,
-				type:type
-			};
+			var event = new createjs.Event(type);
 			this.dispatchEvent(event);
 		},
 
@@ -964,9 +955,6 @@ this.createjs = this.createjs || {};
 		 */
 		interrupt:function () {
 			this.playState = createjs.Sound.PLAY_INTERRUPTED;
-			if (this.onPlayInterrupted) {
-				this.onPlayInterrupted(this);
-			}
 			this.cleanUp();
 			this.paused = false;
 			this.sendEvent("interrupted");
@@ -974,9 +962,6 @@ this.createjs = this.createjs || {};
 
 		// Playback has stalled, and therefore failed.
 		handleSoundStalled:function (event) {
-			if (this.onPlayFailed != null) {
-				this.onPlayFailed(this);
-			}
 			this.sendEvent("failed");
 		},
 
@@ -1088,7 +1073,6 @@ this.createjs = this.createjs || {};
 
 			if (this.owner.isPreloadComplete(this.src)) {
 				this.handleSoundReady(null);
-				this.onPlaySucceeded && this.onPlaySucceeded(this);
 				this.sendEvent("succeeded");
 				return 1;
 			} else {
@@ -1391,9 +1375,6 @@ this.createjs = this.createjs || {};
 					this.handleSoundReady(null);
 				}
 
-				if (this.onLoop != null) {
-					this.onLoop(this);
-				}
 				this.sendEvent("loop");
 				return;
 			}
@@ -1403,9 +1384,6 @@ this.createjs = this.createjs || {};
 			}
 			this.playState = createjs.Sound.PLAY_FINISHED;
 			this.cleanUp();
-			if (this.onComplete != null) {
-				this.onComplete(this);
-			}
 			this.sendEvent("complete");
 		},
 
@@ -1415,9 +1393,6 @@ this.createjs = this.createjs || {};
 				return;
 			}
 			this.playState = createjs.Sound.PLAY_FAILED;
-			if (this.onPlayFailed != null) {
-				this.onPlayFailed(this);
-			}
 			this.cleanUp();
 			this.sendEvent("failed");
 		},
@@ -1527,6 +1502,9 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * The loader has reported progress.
+		 *
+		 * <strong>Note</strong>: this is not a public API, but is used to allow preloaders to subscribe to load
+		 * progress as if this is an HTML audio tag. This reason is why this still uses a callback instead of an event.
 		 * #method handleProgress
 		 * @param {Number} loaded The loaded amount.
 		 * @param {Number} total The total amount.
@@ -1534,10 +1512,7 @@ this.createjs = this.createjs || {};
 		 */
 		handleProgress:function (loaded, total) {
 			this.progress = loaded / total;
-			if (this.onprogress == null) {
-				return;
-			}
-			this.onprogress({loaded:loaded, total:total, progress:this.progress});
+			this.onprogress != null && this.onprogress({loaded:loaded, total:total, progress:this.progress});
 		},
 
 		/**

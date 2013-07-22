@@ -42,8 +42,8 @@ this.createjs = this.createjs || {};
 	 * plugin is recommended to be included if sound support is required in older browsers such as IE8.
 	 *
 	 * This plugin requires FlashAudioPlugin.swf and swfObject.js (which is compiled
-	 * into the minified FlashPlugin-X.X.X.min.js file. You must ensure that <code>FlashPlugin.BASE_PATH</code> is
-	 * set when using this plugin, so that the script can find the swf.
+	 * into the minified FlashPlugin-X.X.X.min.js file. You must ensure that {{#crossLink "FlashPlugin/BASE_PATH:property"}}{{/crossLink}}
+	 * is set when using this plugin, so that the script can find the swf.
 	 *
 	 * <h4>Example</h4>
 	 *      createjs.FlashPlugin.BASE_PATH = "../src/SoundJS/";
@@ -694,9 +694,6 @@ this.createjs = this.createjs || {};
 
 		interrupt:function () {
 			this.playState = createjs.Sound.PLAY_INTERRUPTED;
-			if (this.onPlayInterrupted != null) {
-				this.onPlayInterrupted(this);
-			}
 			this.flash.interrupt(this.flashId);
 			this.cleanUp();
 			this.paused = false;
@@ -725,9 +722,6 @@ this.createjs = this.createjs || {};
 
 			this.flashId = this.flash.playSound(this.flashSrc, offset, loop, volume, pan);
 			if (this.flashId == null) {
-				if (this.onPlayFailed != null) {
-					this.onPlayFailed(this);
-				}
 				this.cleanUp();
 				return false;
 			}
@@ -738,16 +732,12 @@ this.createjs = this.createjs || {};
 			}
 			this.playState = createjs.Sound.PLAY_SUCCEEDED;
 			this.owner.registerSoundInstance(this.flashId, this);
-			this.onPlaySucceeded && this.onPlaySucceeded(this);
 			this.sendEvent("succeeded");
 			return true;
 		},
 
 		playFailed:function () {
 			this.playState = createjs.Sound.PLAY_FAILED;
-			if (this.onPlayFailed != null) {
-				this.onPlayFailed(this);
-			}
 			this.cleanUp();
 			this.sendEvent("failed");
 		},
@@ -845,11 +835,8 @@ this.createjs = this.createjs || {};
 		},
 
 // Flash callbacks, only exist in FlashPlugin
-		sendEvent:function (eventString) {
-			var event = {
-				target:this,
-				type:eventString
-			};
+		sendEvent:function (type) {
+			var event = new createjs.Event(type);
 			this.dispatchEvent(event);
 		},
 
@@ -861,9 +848,6 @@ this.createjs = this.createjs || {};
 		handleSoundFinished:function () {
 			this.playState = createjs.Sound.PLAY_FINISHED;
 			this.cleanUp();
-			if (this.onComplete != null) {
-				this.onComplete(this);
-			}
 			this.sendEvent("complete");
 		},
 
@@ -873,9 +857,6 @@ this.createjs = this.createjs || {};
 		 * @protected
 		 */
 		handleSoundLoop:function () {
-			if (this.onLoop != null) {
-				this.onLoop(this);
-			}
 			this.sendEvent("loop");
 		},
 
@@ -1064,6 +1045,9 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * Receive progress from Flash and pass it to callback.
+		 *
+		 * <strong>Note</strong>: this is not a public API, but is used to allow preloaders to subscribe to load
+		 * progress as if this is an HTML audio tag. This reason is why this still uses a callback instead of an event.
 		 * #method handleProgress
 		 * @param {Number} loaded Amount loaded
 		 * @param {Number} total Total amount to be loaded.

@@ -481,11 +481,8 @@ this.createjs = this.createjs || {};
 			this.loopHandler = createjs.proxy(this.handleSoundLoop, this);
 		},
 
-		sendEvent:function (eventString) {
-			var event = {
-				target:this,
-				type:eventString
-			};
+		sendEvent:function (type) {
+			var event = new createjs.Event(type);
 			this.dispatchEvent(event);
 		},
 
@@ -516,9 +513,6 @@ this.createjs = this.createjs || {};
 				return;
 			}
 			this.playState = createjs.Sound.PLAY_INTERRUPTED;
-			if (this.onPlayInterrupted) {
-				this.onPlayInterrupted(this);
-			}
 			this.cleanUp();
 			this.paused = false;
 			this.sendEvent("interrupted");
@@ -558,7 +552,6 @@ this.createjs = this.createjs || {};
 				this.handleSoundReady(null);
 			}
 
-			this.onPlaySucceeded && this.onPlaySucceeded(this);
 			this.sendEvent("succeeded");
 			return 1;
 		},
@@ -566,9 +559,6 @@ this.createjs = this.createjs || {};
 		// Note: Sounds stall when trying to begin playback of a new audio instance when the existing instances
 		//  has not loaded yet. This doesn't mean the sound will not play.
 		handleSoundStalled:function (event) {
-			if (this.onPlayFailed != null) {
-				this.onPlayFailed(this);
-			}
 			this.cleanUp();  // OJR NOTE this will stop playback, and I think we should remove this and let the developer decide how to handle stalled instances
 			this.sendEvent("failed");
 		},
@@ -725,9 +715,6 @@ this.createjs = this.createjs || {};
 			}
 			this.playState = createjs.Sound.PLAY_FINISHED;
 			this.cleanUp();
-			if (this.onComplete != null) {
-				this.onComplete(this);
-			}
 			this.sendEvent("complete");
 		},
 
@@ -742,10 +729,6 @@ this.createjs = this.createjs || {};
 				this.tag.loop = false;
 				this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
 			}
-
-			if (this.onLoop != null) {
-				this.onLoop(this);
-			}
 			this.sendEvent("loop");
 		},
 
@@ -754,9 +737,6 @@ this.createjs = this.createjs || {};
 				return;
 			}
 			this.playState = createjs.Sound.PLAY_FAILED;
-			if (this.onPlayFailed != null) {
-				this.onPlayFailed(this);
-			}
 			this.cleanUp();
 			this.sendEvent("failed");
 		},

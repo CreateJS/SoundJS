@@ -335,7 +335,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Determines the default behavior for interrupting other currently playing instances with the same source, if the
-	 * maximum number of instances of the sound are already playing.  Currently the default is <code>Sound.INTERRUPT_NONE</code>
+	 * maximum number of instances of the sound are already playing.  Currently the default is {{#crossLink "Sound/INTERRUPT_NONE:property"}}{{/crossLink}}
 	 * but this can be set and will change playback behavior accordingly.  This is only used when {{#crossLink "Sound/play"}}{{/crossLink}}
 	 * is called without passing a value for interrupt.
 	 * @property defaultInterruptBehavior
@@ -458,13 +458,6 @@ this.createjs = this.createjs || {};
 
 // Events
 	/**
-	 * This event is fired when a file finishes loading internally. <b>Please use the "fileload" event instead.</b>
-	 * @event loadComplete
-	 * @deprecated In favor of the "fileload" event.
-	 * @since 0.4.0
-	 */
-
-	/**
 	 * This event is fired when a file finishes loading internally. This event is fired for each loaded sound,
 	 * so any handler methods should look up the <code>event.src</code> to handle a particular sound.
 	 * @event fileload
@@ -477,15 +470,15 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 
-// Callbacks
+	//TODO: Deprecated
 	/**
-	 * The callback that is fired when a file finishes loading internally.  This is fired for each loaded sound.
+	 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "Sound/fileload:event"}}{{/crossLink}}
+	 * event.
 	 * @property onLoadComplete
 	 * @type {Function}
-	 * @deprecated In favour of the "fileload" event. Will be removed in a future version.
+	 * @deprecated Use addEventListener and the fileload event.
 	 * @since 0.4.0
 	 */
-	s.onLoadComplete = null;
 
 	/**
 	 * Used by external plugins to dispatch file load events.
@@ -501,25 +494,15 @@ this.createjs = this.createjs || {};
 		}
 		for (var i = 0, l = s.preloadHash[src].length; i < l; i++) {
 			var item = s.preloadHash[src][i];
-			var event = {
-				target:this,
-				type:"fileload",
-				src:item.src,
-				id:item.id,
-				data:item.data
-			};
 			s.preloadHash[src][i] = true;
-			s.dispatchEvent(event);
 
-			// We still dispatch the deprecated events.
-			s.onLoadComplete && s.onLoadComplete(event); // Uses the "fileload" event type.
-			event = { // Use a new object to avoid references getting messed up.
-				target:this,
-				type:"loadComplete",
-				src:item.src,
-				id:item.id,
-				data:item.data
-			}
+			if (!s.hasEventListener("fileload")) { continue; }
+
+			var event = new createjs.Event("fileload");
+			event.src = item.src,
+			event.id = item.id,
+			event.data = item.data
+
 			s.dispatchEvent(event);
 		}
 	}
@@ -953,7 +936,7 @@ this.createjs = this.createjs || {};
 	 * <h4>Example</h4>
 	 *     var mySound = "assetPath/asset0.mp3|assetPath/asset0.ogg";
 	 *     if(createjs.Sound.loadComplete(mySound) {
-	 *     	createjs.Sound.play(mySound);
+	 *         createjs.Sound.play(mySound);
 	 *     }
 	 *
 	 * @method loadComplete
@@ -973,7 +956,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Parse the path of a sound, usually from a manifest item. Manifest items support single file paths, as well as
-	 * composite paths using <code>Sound.DELIMITER</code>, which defaults to "|". The first path supported by the
+	 * composite paths using {{#crossLink "Sound/DELIMITER:property"}}{{/crossLink}}, which defaults to "|". The first path supported by the
 	 * current browser/plugin will be used.
 	 * @method parsePath
 	 * @param {String} value The path to an audio source.
@@ -981,8 +964,8 @@ this.createjs = this.createjs || {};
 	 * @param {String} [id] The user-specified sound ID. This may be null, in which case the src will be used instead.
 	 * @param {Number | String | Boolean | Object} [data] Arbitrary data appended to the sound, usually denoting the
 	 * number of channels for the sound. This method doesn't currently do anything with the data property.
-	 * @return {Object} A formatted object that can be registered with the <code>Sound.activePlugin</code> and returned
-	 * to a preloader like <a href="http://preloadjs.com" target="_blank">PreloadJS</a>.
+	 * @return {Object} A formatted object that can be registered with the {{#crossLink "Sound/activePlugin:property"}}{{/crossLink}}
+	 * and returned to a preloader like <a href="http://preloadjs.com" target="_blank">PreloadJS</a>.
 	 * @protected
 	 */
 	s.parsePath = function (value, type, id, data) {
@@ -1016,11 +999,11 @@ this.createjs = this.createjs || {};
 	 --------------- */
 	/**
 	 * Play a sound and get a {{#crossLink "SoundInstance"}}{{/crossLink}} to control. If the sound fails to play, a
-	 * SoundInstance will still be returned, and have a playState of <code>Sound.PLAY_FAILED</code>. Note that even on
-	 * sounds with failed playback, you may still be able to call SoundInstance {{#crossLink "SoundInstance/play"}}{{/crossLink}},
+	 * SoundInstance will still be returned, and have a playState of {{#crossLink "Sound/PLAY_FAILED:property"}}{{/crossLink}}.
+	 * Note that even on sounds with failed playback, you may still be able to call SoundInstance {{#crossLink "SoundInstance/play"}}{{/crossLink}},
 	 * since the failure could be due to lack of available channels. If the src does not have a supported extension or
-	 * if there is no available plugin,<code>Sound.defaultSoundInstance</code> will be returned, which will not play any
-	 * audio, but will not generate errors.
+	 * if there is no available plugin, {{#crossLink "Sound/defaultSoundInstance:property"}}{{/crossLink}} will be
+	 * returned, which will not play any audio, but will not generate errors.
 	 *
 	 * <h4>Example</h4>
 	 *      createjs.Sound.addEventListener("fileload", handleLoad);
@@ -1037,7 +1020,7 @@ this.createjs = this.createjs || {};
 	 * @param {String} src The src or ID of the audio.
 	 * @param {String | Object} [interrupt="none"|options] How to interrupt any currently playing instances of audio with the same source,
 	 * if the maximum number of instances of the sound are already playing. Values are defined as <code>INTERRUPT_TYPE</code>
-	 * constants on the Sound class, with the default defined by {{#crossLink "Sound/defaultInterruptBehavior"}}{{/crossLink}}.
+	 * constants on the Sound class, with the default defined by {{#crossLink "Sound/defaultInterruptBehavior:property"}}{{/crossLink}}.
 	 * <br /><strong>OR</strong><br />
 	 * This parameter can be an object that contains any or all optional properties by name, including: interrupt,
 	 * delay, offset, loop, volume, and pan (see the above code sample).
@@ -1063,8 +1046,8 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Creates a {{#crossLink "SoundInstance"}}{{/crossLink}} using the passed in src. If the src does not have a
-	 * supported extension or if there is no available plugin, a <code>Sound.defaultSoundInstance</code> will be returned
-	 * that can be called safely but does nothing.
+	 * supported extension or if there is no available plugin, a {{#crossLink "Sound/defaultSoundInstance:property"}}{{/crossLink}}
+	 * will be returned that can be called safely but does nothing.
 	 *
 	 * <h4>Example</h4>
 	 *      var myInstance = null;
@@ -1293,7 +1276,8 @@ this.createjs = this.createjs || {};
 	 * @method beginPlaying
 	 * @param {SoundInstance} instance A {{#crossLink "SoundInstance"}}{{/crossLink}} to begin playback.
 	 * @param {String} [interrupt=none] How this sound interrupts other instances with the same source. Defaults to
-	 * <code>Sound.INTERRUPT_NONE</code>. Interrupts are defined as <code>INTERRUPT_TYPE</code> constants on Sound.
+	 * {{#crossLink "Sound/INTERRUPT_NONE:property"}}{{/crossLink}}. Interrupts are defined as <code>INTERRUPT_TYPE</code>
+	 * constants on Sound.
 	 * @param {Number} [offset] Time in milliseconds into the sound to begin playback.  Defaults to the current value on
 	 * the instance.
 	 * @param {Number} [loop=0] The number of times to loop the audio. Use 0 for no loops, and -1 for an infinite loop.
