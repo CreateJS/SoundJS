@@ -158,6 +158,9 @@ this.createjs = this.createjs || {};
 			return null;
 		}
 
+		// this handles if only deprecated calls are supported
+		s.compatibilitySetUp();
+
 		// playing this inside of a touch event will enable audio on iOS, which starts muted
 		s.playEmptySound();
 
@@ -185,9 +188,35 @@ this.createjs = this.createjs || {};
 		// set up AudioNodes that all of our source audio will connect to
 		s.dynamicsCompressorNode = s.context.createDynamicsCompressor();
 		s.dynamicsCompressorNode.connect(s.context.destination);
-		s.gainNode = s.context.createGainNode();  // OJR deprecated, replaced with createGain
+		s.gainNode = s.context.createGain();
 		s.gainNode.connect(s.dynamicsCompressorNode);
 	};
+
+	/**
+	 * Set up compatibility if only deprecated web audio calls are supported.
+	 * See http://www.w3.org/TR/webaudio/#DeprecationNotes
+	 * Needed so we can support new browsers that don't support deprecated calls (Firefox) as well as old browsers that
+	 * don't support new calls.
+	 *
+	 * @method compatibilitySetUp
+	 * @protected
+	 * @since 0.4.2
+	 */
+	s.compatibilitySetUp = function() {
+		//assume that if one new call is supported, they all are
+		if (s.context.createGain) { return; }
+
+		// simple name change, functionality the same
+		s.context.createGain = s.context.createGainNode;
+
+		// source node, add to prototype
+		var audioNode = s.context.createBufferSource();
+		audioNode.__proto__.start = audioNode.__proto__.noteGrainOn;	// note that noteGrainOn requires all 3 parameters
+		audioNode.__proto__.stop = audioNode.__proto__.noteOff;
+
+		// panningModel
+		this.panningModel = 0;
+	}
 
 	/**
 	 * Plays an empty sound in the web audio context.  This is used to enable web audio on iOS devices, as they
@@ -214,7 +243,7 @@ this.createjs = this.createjs || {};
 		source.connect(this.context.destination);
 
 		// play the file
-		source.noteOn(0);
+		source.start(0, 0, 0);
 	};
 
 
@@ -239,6 +268,14 @@ this.createjs = this.createjs || {};
 		 * @type {AudioContext}
 		 */
 		context:null,
+
+		/**
+		 * Value to set panning model to equal power for SoundInstance.  Can be "equalpower" or 0 depending on browser implementation.
+		 * @property panningModel
+		 * @type {Number / String}
+		 * @protected
+		 */
+		panningModel:"equalpower",
 
 		/**
 		 * A DynamicsCompressorNode, which is used to improve sound quality and prevent audio distortion according to
@@ -862,9 +899,9 @@ this.createjs = this.createjs || {};
 			this.src = src;
 
 			this.panNode = this.owner.context.createPanner();  // TODO test how this affects when we have mono audio
-            this.panNode.panningModel = 0;  // OJR deprecated in favor of "equalpower"
+            this.panNode.panningModel = this.owner.panningModel;
 
-			this.gainNode = this.owner.context.createGainNode();  // OJR deprecated in favor of context.createGain
+			this.gainNode = this.owner.context.createGain();
 			this.gainNode.connect(this.panNode);
 
 			if (this.owner.isPreloadComplete(this.src)) {
@@ -882,7 +919,7 @@ this.createjs = this.createjs || {};
 		 * @protected
 		 */
 		cleanUp:function () {
-			// if playbackState is UNSCHEDULED_STATE, then noteON or noteGrainOn has not been called so calling noteOff would throw an error
+			// if playbackState is UNSCHEDULED_STATE, then play has not been called so calling stop would throw an error
 			if (this.sourceNode && this.sourceNode.playbackState != this.sourceNode.UNSCHEDULED_STATE) {
 				this.sourceNode = this.cleanUpAudioNode(this.sourceNode);
 				this.sourceNodeNext = this.cleanUpAudioNode(this.sourceNodeNext);
@@ -913,7 +950,7 @@ this.createjs = this.createjs || {};
 		 */
 		cleanUpAudioNode: function(audioNode) {
 			if(audioNode) {
-				audioNode.noteOff(0);	// OJR deprecated, replaced with stop()  // note this means the sourceNode cannot be reused and must be recreated
+				audioNode.stop(0);
 				audioNode.disconnect(this.gainNode);
 				audioNode = null;	// release reference so Web Audio can handle removing references and garbage collection
 			}
@@ -952,7 +989,7 @@ this.createjs = this.createjs || {};
 			if ((this.offset*1000) > this.getDuration()) {	// converting offset to ms
 				this.playFailed();
 				return;
-			} else if (this.offset < 0) {  // may not need this check if noteGrainOn ignores negative values, this is not specified in the API http://www.w3.org/TR/webaudio/#AudioBufferSourceNode
+			} else if (this.offset < 0) {  // may not need this check if play ignores negative values, this is not specified in the API http://www.w3.org/TR/webaudio/#AudioBufferSourceNode
 				this.offset = 0;
 			}
 
@@ -991,7 +1028,7 @@ this.createjs = this.createjs || {};
 			audioNode.connect(this.gainNode);
 			var currentTime = this.owner.context.currentTime;
 			audioNode.startTime = startTime + audioNode.buffer.duration;	//currentTime + audioNode.buffer.duration - (currentTime - startTime);
-			audioNode.noteGrainOn(audioNode.startTime, offset, audioNode.buffer.duration - offset);  // OJR deprecated in favor of start()
+			audioNode.start(audioNode.startTime, offset, audioNode.buffer.duration - offset);  // OJR deprecated in favor of start()
 			return audioNode;
 		},
 
@@ -1300,7 +1337,7 @@ this.createjs = this.createjs || {};
 		setPosition:function (value) {
 			this.offset = value / 1000; // convert milliseconds to seconds
 
-			if (this.sourceNode && this.sourceNode.playbackState != this.sourceNode.UNSCHEDULED_STATE) {  // if playbackState is UNSCHEDULED_STATE, then noteON or noteGrainOn has not been called so calling noteOff would throw an error
+			if (this.sourceNode && this.sourceNode.playbackState != this.sourceNode.UNSCHEDULED_STATE) {  // if playbackState is UNSCHEDULED_STATE, then play has not been called so calling stop would throw an error
 				// we need to stop this sound from continuing to play, as we need to recreate the sourceNode to change position
 				this.cleanUpAudioNode(this.sourceNode);
 				this.cleanUpAudioNode(this.sourceNodeNext);
