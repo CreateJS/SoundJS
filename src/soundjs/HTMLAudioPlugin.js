@@ -649,12 +649,6 @@ this.createjs = this.createjs || {};
 			return this.volume;
 		},
 
-		mute:function (isMuted) {
-			this.muted = isMuted;
-			this.updateVolume();
-			return true;
-		},
-
 		setMasterMute:function (isMuted) {
 			this.updateVolume();
 			return true;

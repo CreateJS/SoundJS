@@ -172,7 +172,7 @@ this.createjs = this.createjs || {};
 	 * <li>We can only play audio inside a user event (touch/click).  This currently means you cannot loop sound or use
 	 * a delay.</li></ul>
 	 *
- 	 * <b>Android Chrome 26.0.1410.58 specific limitations</b><br />
+ 	 * <b>Android HTML Audio Chrome 26.0.1410.58+ specific limitations</b><br />
 	 * <ul><li>Chrome reports true when you run createjs.Sound.BrowserDetect.isChrome, but is a different browser
 	 * with different abilities.</li>
 	 * <li>Can only play 1 sound at a time.</li>
@@ -1134,21 +1134,12 @@ this.createjs = this.createjs || {};
 	}
 
 	/**
-	 * Mute/Unmute all audio. Please see {{#crossLink "Sound/setMute"}}{{/crossLink}}.
+	 * REMOVED. Please see {{#crossLink "Sound/setMute"}}{{/crossLink}}.
 	 * @method mute
 	 * @param {Boolean} value Whether the audio should be muted or not.
 	 * @static
 	 * @deprecated This function has been deprecated. Please use setMute instead.
 	 */
-	s.mute = function (value) {
-		this.masterMute = value;
-		if (!this.activePlugin || !this.activePlugin.setMute || !this.activePlugin.setMute(value)) {
-			var instances = this.instances;
-			for (var i = 0, l = instances.length; i < l; i++) {
-				instances[i].setMasterMute(value);
-			}
-		}
-	}
 
 	/**
 	 * Mute/Unmute all audio. Note that muted audio still plays at 0 volume. This global mute value is maintained
@@ -1333,16 +1324,14 @@ this.createjs = this.createjs || {};
 	 */
 	s.playFinished = function (instance) {
 		SoundChannel.remove(instance);
-		var index = this.instances.indexOf(instance);
+		var index = createjs.indexOf(this.instances, instance);
 		if (index > -1) {
 			this.instances.splice(index, 1);
 		}
 	}
 
 	/**
-	 * A function proxy for Sound methods. By default, JavaScript methods do not maintain scope, so passing a
-	 * method as a callback will result in the method getting called in the scope of the caller. Using a proxy
-	 * ensures that the method gets called in the correct scope.
+	 * REMOVED.  Please use createjs.proxy instead
 	 * @method proxy
 	 * @param {Function} method The function to call
 	 * @param {Object} scope The scope to call the method name on

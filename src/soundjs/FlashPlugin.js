@@ -782,11 +782,6 @@ this.createjs = this.createjs || {};
 			return this._volume;
 		},
 
-		mute:function (value) {
-			this.muted = value;
-			return value ? this.flash.muteSound(this.flashId) : this.flash.unmuteSound(this.flashId);
-		},
-
 		setMute:function (value) {
 			this.muted = value;
 			return value ? this.flash.muteSound(this.flashId) : this.flash.unmuteSound(this.flashId);

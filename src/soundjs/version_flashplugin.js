@@ -1,7 +1,11 @@
+/**
+ * @module SoundJS
+ */
+this.createjs = this.createjs || {};
+
 (function () {
 
-	var o = this.createjs = this.createjs || {};
-	o = (o.FlashPlugin = o.FlashPlugin || {});
+	var s = createjs.FlashPlugin = createjs.FlashPlugin || {};
 
 	/**
 	 * The version string for this release.

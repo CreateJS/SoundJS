@@ -50,14 +50,14 @@ this.createjs = this.createjs || {};
 	 * releases.  To change plugin priority, check out the Sound API {{#crossLink "Sound/registerPlugins"}}{{/crossLink}} method.
 
 	 * <h4>Known Browser and OS issues for Web Audio Plugin</h4>
-	 * <b>Webkit (Chrome and Safari)</b><br />
+	 * <b>Webkit (Chrome and Safari)</b>
 	 * <ul><li>AudioNode.disconnect does not always seem to work.  This can cause the file size to grow over time if you
-	 * are playing a lot of audio files.</li>
+	 * are playing a lot of audio files.</li></ul>
 	 *
-	 * <b>iOS 6 limitations</b><br />
-	 * <ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event (touch/click).</li>
-	 *      <li>Despite suggestions to the opposite, we have relative control over audio volume through the gain nodes.</li>
-	 *		<li>A bug exists that will distort uncached audio when a video element is present in the DOM.</li>
+	 * <b>iOS 6 limitations</b>
+	 * 	<ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event (touch/click).</li>
+	 *  <li>Despite suggestions to the opposite, we have relative control over audio volume through the gain nodes.</li>
+	 *	<li>A bug exists that will distort uncached audio when a video element is present in the DOM.</li>
 	 * </ul>
 	 * @class WebAudioPlugin
 	 * @constructor
@@ -223,7 +223,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Plays an empty sound in the web audio context.  This is used to enable web audio on iOS devices, as they
 	 * require the first sound to be played inside of a user initiated event (touch/click).  This is called when
-	 * {{#crossLink "WebAudioPlugin"}}{{/crossLink}} is initialized (by {{#crossLink "Sound/initializeDefaultPlugins"}}{{/crossLink}}
+	 * {{#crossLink "WebAudioPlugin"}}{{/crossLink}} is initialized (by Sound {{#crossLink "Sound/initializeDefaultPlugins"}}{{/crossLink}}
 	 * for example).
 	 *
 	 * <h4>Example</h4>
@@ -682,7 +682,7 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * NOTE this only exists as a {{#crossLink "WebAudioPlugin"}}{{/crossLink}} property and is only intended for use by advanced users.
-		 * A panNode allowing left and right audio channel panning only. Connected to our {{#crossLink "WebAudioPlugin/gainNode"}}{{/crossLink}}
+		 * A panNode allowing left and right audio channel panning only. Connected to our WebAudioPlugin {{#crossLink "WebAudioPlugin/gainNode:property"}}{{/crossLink}}
 		 * that sequences to <code>context.destination</code>.
 		 * @property panNode
 		 * @type {AudioPannerNode}
@@ -1202,17 +1202,12 @@ this.createjs = this.createjs || {};
 		},
 
 		/**
-		 * Mute and unmute the sound. <strong>Please use {{#crossLink "SoundInstance/setMute"}}{{/crossLink}} instead</strong>.
+		 * REMOVED. <strong>Please use {{#crossLink "SoundInstance/setMute"}}{{/crossLink}} instead</strong>.
 		 * @method mute
 		 * @param {Boolean} value If the sound should be muted or not.
 		 * @return {Boolean} If the mute call succeeds.
 		 * @deprecated This method has been replaced by setMute.
 		 */
-		mute:function (value) {
-			this.muted = value;
-			this.updateVolume();
-			return true;
-		},
 
 		/**
 		 * Mute and unmute the sound. Muted sounds will still play at 0 volume. Note that an unmuted sound may still be

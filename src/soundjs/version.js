@@ -1,6 +1,7 @@
 /**
  * @module SoundJS
  */
+this.createjs = this.createjs || {};
 
 (function () {
 
@@ -10,8 +11,7 @@
 	 * for information on using sound.
 	 * @class SoundJS
 	 **/
-	var o = this.createjs = this.createjs || {};
-	o = (o.SoundJS = o.SoundJS || {});
+	var s = createjs.SoundJS = createjs.SoundJS || {};
 
 	/**
 	 * The version string for this release.
@@ -19,7 +19,7 @@
 	 * @type String
 	 * @static
 	 **/
-	o.version = /*version*/"NEXT"; // injected by build process
+	s.version = /*version*/"NEXT"; // injected by build process
 
 	/**
 	 * The build date for this release in UTC format.
@@ -27,6 +27,6 @@
 	 * @type String
 	 * @static
 	 **/
-	o.buildDate = /*date*/"Mon, 22 Jul 2013 22:30:40 GMT"; // injected by build process
+	s.buildDate = /*date*/"Fri, 02 Aug 2013 18:40:16 GMT"; // injected by build process
 
 })();
