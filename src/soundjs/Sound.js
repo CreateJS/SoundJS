@@ -985,7 +985,7 @@ this.createjs = this.createjs || {};
 			var name = match[4];
 			var ext = match[5];
 
-			if (c[ext] && s.SUPPORTED_EXTENSIONS.indexOf(ext) > -1) {
+			if (c[ext] && createjs.indexOf(s.SUPPORTED_EXTENSIONS, ext) > -1) {
 				ret.name = name;
 				ret.src = sound;
 				ret.extension = ext;
@@ -1288,7 +1288,7 @@ this.createjs = this.createjs || {};
 		var result = instance.beginPlaying(offset, loop, volume, pan);
 		if (!result) {
 			//LM: Should we remove this from the SoundChannel (see finishedPlaying)
-			var index = this.instances.indexOf(instance);
+			var index = createjs.indexOf(this.instances, instance);
 			if (index > -1) {
 				this.instances.splice(index, 1);
 			}
@@ -1339,37 +1339,8 @@ this.createjs = this.createjs || {};
 	 * @static
 	 * @deprecated Deprecated in favor of createjs.proxy.
 	 */
-	s.proxy = function (method, scope) {
-		return function () {
-			return method.apply(scope, arguments);
-		}
-	}
 
 	createjs.Sound = Sound;
-
-	/**
-	 * A function proxy for Sound methods. By default, JavaScript methods do not maintain scope, so passing a
-	 * method as a callback will result in the method getting called in the scope of the caller. Using a proxy
-	 * ensures that the method gets called in the correct scope.
-	 * Note arguments can be passed that will be applied to the function when it is called.
-	 *
-	 * <h4>Example<h4>
-	 *     myObject.myCallback = createjs.proxy(myHandler, this, arg1, arg2);
-	 *
-	 * #method proxy
-	 * @param {Function} method The function to call
-	 * @param {Object} scope The scope to call the method name on
-	 * @param {mixed} [arg] * Arguments that are appended to the callback for additional params.
-	 * @protected
-	 * @static
-	 */
-	createjs.proxy = function (method, scope) {
-		var aArgs = Array.prototype.slice.call(arguments, 2);
-		return function () {
-			return method.apply(scope, Array.prototype.slice.call(arguments, 0).concat(aArgs));
-		};
-	}
-
 
 	/**
 	 * An internal class that manages the number of active {{#crossLink "SoundInstance"}}{{/crossLink}} instances for
@@ -1575,7 +1546,7 @@ this.createjs = this.createjs || {};
 		 * return false.
 		 */
 		remove:function (instance) {
-			var index = this.instances.indexOf(instance);
+			var index = createjs.indexOf(this.instances, instance);
 			if (index == -1) {
 				return false;
 			}
@@ -1670,6 +1641,13 @@ this.createjs = this.createjs || {};
 
 	Sound.defaultSoundInstance = new SoundInstance();
 
+	//TODO: Moved to createjs/utils/Proxy.js. Deprecate on next version.
+	if (createjs.proxy == null) {
+		createjs.proxy = function() {
+			throw("Proxy has been moved to an external file, and must be included separately.");
+		}
+	}
+
 
 	/**
 	 * An additional module to determine the current browser, version, operating system, and other environment
@@ -1690,50 +1668,16 @@ this.createjs = this.createjs || {};
 
 	BrowserDetect.init = function () {
 		var agent = navigator.userAgent;
-		BrowserDetect.isFirefox = (agent.indexOf("Firefox") > -1);
+		BrowserDetect.isFirefox = (createjs.indexOf(agent, "Firefox") > -1);
 		BrowserDetect.isOpera = (window.opera != null);
-		BrowserDetect.isChrome = (agent.indexOf("Chrome") > -1);  // NOTE that Chrome on Android returns true but is a completely different browser with different abilities
-		BrowserDetect.isIOS = agent.indexOf("iPod") > -1 || agent.indexOf("iPhone") > -1 || agent.indexOf("iPad") > -1;
-		BrowserDetect.isAndroid = (agent.indexOf("Android") > -1);
-		BrowserDetect.isBlackberry = (agent.indexOf("Blackberry") > -1);
+		BrowserDetect.isChrome = (createjs.indexOf(agent, "Chrome") > -1);  // NOTE that Chrome on Android returns true but is a completely different browser with different abilities
+		BrowserDetect.isIOS = createjs.indexOf(agent, "iPod") > -1 || createjs.indexOf(agent, "iPhone") > -1 || createjs.indexOf(agent, "iPad") > -1;
+		BrowserDetect.isAndroid = (createjs.indexOf(agent, "Android") > -1);
+		BrowserDetect.isBlackberry = (createjs.indexOf(agent, "Blackberry") > -1);
 	}
 
 	BrowserDetect.init();
 
 	createjs.Sound.BrowserDetect = BrowserDetect;
-
-	// Patch for IE7 and 8 that don't have indexOf
-	// https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/indexOf
-	if (!Array.prototype.indexOf) {
-		Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
-			if (this == null) {
-				throw new TypeError();
-			}
-			var t = Object(this);
-			var len = t.length >>> 0;
-			if (len === 0) {
-				return -1;
-			}
-			var n = 0;
-			if (arguments.length > 1) {
-				n = Number(arguments[1]);
-				if (n != n) { // shortcut for verifying if it's NaN
-					n = 0;
-				} else if (n != 0 && n != Infinity && n != -Infinity) {
-					n = (n > 0 || -1) * Math.floor(Math.abs(n));
-				}
-			}
-			if (n >= len) {
-				return -1;
-			}
-			var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-			for (; k < len; k++) {
-				if (k in t && t[k] === searchElement) {
-					return k;
-				}
-			}
-			return -1;
-		}
-	}
 
 }());

@@ -374,7 +374,7 @@ this.createjs = this.createjs || {};
 		 */
 		removeSound:function (src) {
 			delete(this.audioSources[src]);
-			var i = this.queuedInstances.indexOf(src);
+			var i = createjs.indexOf(this.queuedInstances, src);
 			if(i != -1) {
 				this.queuedInstances.splice(i,1);
 			}
@@ -671,14 +671,6 @@ this.createjs = this.createjs || {};
 		dispatchEvent:null,
 		hasEventListener:null,
 		_listeners:null,
-
-// Callbacks
-		onComplete:null,
-		onLoop:null,
-		onReady:null,
-		onPlayFailed:null,
-		onPlayInterrupted:null,
-		onPlaySucceeded:null,
 
 // Constructor
 		init:function (src, owner, flash, flashSrc) {

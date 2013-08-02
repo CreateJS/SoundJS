@@ -458,14 +458,6 @@ this.createjs = this.createjs || {};
 		hasEventListener:null,
 		_listeners:null,
 
-// Callbacks
-		onComplete:null,
-		onLoop:null,
-		onReady:null,
-		onPlayFailed:null,
-		onPlayInterrupted:null,
-		onPlaySucceeded:null,
-
 		// Proxies, make removing listeners easier.
 		endedHandler:null,
 		readyHandler:null,
@@ -1072,7 +1064,7 @@ this.createjs = this.createjs || {};
 		 * @param {HTMLAudioElement} tag HTML audio tag
 		 */
 		set:function (tag) {
-			var index = this.tags.indexOf(tag);
+			var index = createjs.indexOf(this.tags, tag);
 			if (index == -1) {
 				this.tags.push(tag);
 			}
@@ -1086,7 +1078,8 @@ this.createjs = this.createjs || {};
 		 */
 		checkSrcChange:function () {
 			// the last tag always has the latest src after loading
-			var i = this.length-1;
+			//var i = this.length-1;	// this breaks in Firefox because it is not correctly removing an event listener
+			var i = this.tags.length - 1;
 			var newSrc = this.tags[i].src;
 			while(i--) {
 				this.tags[i].src = newSrc;

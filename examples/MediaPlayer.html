@@ -121,8 +121,13 @@
             with the device and browser you are using.  Thank you.</p>
     </div>
 
-    <script type="text/javascript" src="../src/easeljs/events/Event.js"></script>
-    <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
+	<!-- utility libraries required by SoundJS -->
+	<script type="text/javascript" src="../src/createjs/utils/Proxy.js"></script>
+	<script type="text/javascript" src="../src/createjs/utils/IndexOf.js"></script>
+	<script type="text/javascript" src="../src/createjs/events/Event.js"></script>
+	<script type="text/javascript" src="../src/createjs/events/EventDispatcher.js"></script>
+
+	<!-- SoundJS libraries -->
     <script type="text/javascript" src="../src/soundjs/Sound.js"></script>
     <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
     <script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
@@ -132,6 +137,7 @@
     <!-- We also provide hosted minified versions of all CreateJS libraries.
         http://code.createjs.com -->
 
+	<!-- other libraries -->
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 
     <script type="text/javascript">

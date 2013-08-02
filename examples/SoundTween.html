@@ -42,19 +42,22 @@
             with the OS and browser if you see this on a device that is not mobile.  Thank you.</p>
     </div>
 
-    <script type="text/javascript" src="../src/easeljs/events/Event.js"></script>
-    <script type="text/javascript" src="../src/easeljs/events/EventDispatcher.js"></script>
+	<!-- utility libraries required by SoundJS -->
+	<script type="text/javascript" src="../src/createjs/utils/Proxy.js"></script>
+	<script type="text/javascript" src="../src/createjs/utils/IndexOf.js"></script>
+	<script type="text/javascript" src="../src/createjs/events/Event.js"></script>
+	<script type="text/javascript" src="../src/createjs/events/EventDispatcher.js"></script>
+
+	<!-- other libraries -->
+	<script type="text/javascript" src="./assets/easeljs-NEXT.min.js"></script> <!-- note tweenjs needs easeljs ticker -->
+	<script type="text/javascript" src="./assets/tweenjs-NEXT.min.js"></script>
+
+	<!-- SoundJS libraries -->
     <script type="text/javascript" src="../src/soundjs/Sound.js"></script>
     <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
     <script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
 	<script type="text/javascript" src="../src/swfobject.js"></script>
 	<script type="text/javascript" src="../src/soundjs/FlashPlugin.js"></script>
-
-	<script type="text/javascript" src="./assets/easeljs-NEXT.min.js"></script> <!-- note tweenjs needs easeljs ticker -->
-	<script type="text/javascript" src="./assets/tweenjs-NEXT.min.js"></script>
-<!--
-	<script type="text/javascript" src="../../tweenjs/src/tweenjs/Tween.js"></script>
--->
 
     <script>
 		// Read the URL Params. We need to do this to determine the plugin mode.
