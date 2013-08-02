@@ -36,6 +36,8 @@ this.createjs = this.createjs || {};
 
 (function () {
 
+	"use strict";
+
 	/**
 	 * Play sounds using HTML &lt;audio&gt; tags in the browser. This plugin is the second priority plugin installed
 	 * by default, after the {{#crossLink "WebAudioPlugin"}}{{/crossLink}}, which is supported on Chrome, Safari, and

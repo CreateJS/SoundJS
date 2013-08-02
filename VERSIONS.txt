@@ -5,6 +5,7 @@ CRITICAL (may break existing content):
 - updated EventDispatcher with latest bubbling model, and the Event class
 
 *****
+- implemented "use strict" mode
 - updated WebAudioPlugin to handle new calls and deprecated calls (http://www.w3.org/TR/webaudio/#DeprecationNotes).
 - added enableIOS property to HTMLAudioPlugin,allowing advanced users to enable HTMLAudioPlugin on iOS (not recommended).
 - Overloaded play call in Sound and SoundInstance to allow options to be passed in as an object,

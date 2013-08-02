@@ -36,6 +36,8 @@ this.createjs = this.createjs || {};
 
 (function () {
 
+	"use strict";
+
 	/**
 	 * Play sounds using a Flash instance. This plugin is not used by default, and must be registered manually in
 	 * {{#crossLink "Sound"}}{{/crossLink}} using the {{#crossLink "Sound/registerPlugins"}}{{/crossLink}} method. This

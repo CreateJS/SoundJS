@@ -36,6 +36,8 @@ this.createjs = this.createjs || {};
 
 (function () {
 
+	"use strict";
+
 	/**
 	 * Play sounds using Web Audio in the browser. The WebAudio plugin has been successfully tested with:
 	 * <ul><li>Google Chrome, version 23+ on OS X and Windows</li>

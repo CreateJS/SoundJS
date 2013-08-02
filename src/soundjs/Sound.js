@@ -73,6 +73,8 @@ this.createjs = this.createjs || {};
 
 (function () {
 
+	"use strict";
+
 	//TODO: Interface to validate plugins and throw warnings
 	//TODO: Determine if methods exist on a plugin before calling  // OJR this is only an issue if something breaks or user changes something
 	//TODO: Interface to validate instances and throw warnings
