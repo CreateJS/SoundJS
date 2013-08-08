@@ -1465,161 +1465,159 @@ this.createjs = this.createjs || {};
 		return SoundChannel.channels[src];
 	}
 
-	var p = SoundChannel.prototype = {
+	var p = SoundChannel.prototype;
 
-		/**
-		 * The source of the channel.
-		 * #property src
-		 * @type {String}
-		 */
-		src:null,
+	/**
+	 * The source of the channel.
+	 * #property src
+	 * @type {String}
+	 */
+	p.src = null;
 
-		/**
-		 * The maximum number of instances in this channel.  -1 indicates no limit
-		 * #property max
-		 * @type {Number}
-		 */
-		max:null,
+	/**
+	 * The maximum number of instances in this channel.  -1 indicates no limit
+	 * #property max
+	 * @type {Number}
+	 */
+	p.max = null;
 
-		/**
-		 * The default value to set for max, if it isn't passed in.  Also used if -1 is passed.
-		 * #property maxDefault
-		 * @type {Number}
-		 * @default 100
-		 * @since 0.4.0
-		 */
-		maxDefault:100,
+	/**
+	 * The default value to set for max, if it isn't passed in.  Also used if -1 is passed.
+	 * #property maxDefault
+	 * @type {Number}
+	 * @default 100
+	 * @since 0.4.0
+	 */
+	p.maxDefault = 100;
 
-		/**
-		 * The current number of active instances.
-		 * #property length
-		 * @type {Number}
-		 */
-		length:0,
+	/**
+	 * The current number of active instances.
+	 * #property length
+	 * @type {Number}
+	 */
+	p.length = 0;
 
-		/**
-		 * Initialize the channel.
-		 * #method init
-		 * @param {String} src The source of the channel
-		 * @param {Number} max The maximum number of instances in the channel
-		 * @protected
-		 */
-		init:function (src, max) {
-			this.src = src;
-			this.max = max || this.maxDefault;
-			if (this.max == -1) {
-				this.max == this.maxDefault;
-			}
-			this.instances = [];
-		},
+	/**
+	 * Initialize the channel.
+	 * #method init
+	 * @param {String} src The source of the channel
+	 * @param {Number} max The maximum number of instances in the channel
+	 * @protected
+	 */
+	p.init = function (src, max) {
+		this.src = src;
+		this.max = max || this.maxDefault;
+		if (this.max == -1) {
+			this.max == this.maxDefault;
+		}
+		this.instances = [];
+	};
 
-		/**
-		 * Get an instance by index.
-		 * #method get
-		 * @param {Number} index The index to return.
-		 * @return {SoundInstance} The SoundInstance at a specific instance.
-		 */
-		get:function (index) {
-			return this.instances[index];
-		},
+	/**
+	 * Get an instance by index.
+	 * #method get
+	 * @param {Number} index The index to return.
+	 * @return {SoundInstance} The SoundInstance at a specific instance.
+	 */
+	p.get = function (index) {
+		return this.instances[index];
+	};
 
-		/**
-		 * Add a new instance to the channel.
-		 * #method add
-		 * @param {SoundInstance} instance The instance to add.
-		 * @return {Boolean} The success of the method call. If the channel is full, it will return false.
-		 */
-		add:function (instance, interrupt) {
-			if (!this.getSlot(interrupt, instance)) {
-				return false;
-			}
-			this.instances.push(instance);
-			this.length++;
-			return true;
-		},
-
-		/**
-		 * Remove an instance from the channel, either when it has finished playing, or it has been interrupted.
-		 * #method remove
-		 * @param {SoundInstance} instance The instance to remove
-		 * @return {Boolean} The success of the remove call. If the instance is not found in this channel, it will
-		 * return false.
-		 */
-		remove:function (instance) {
-			var index = createjs.indexOf(this.instances, instance);
-			if (index == -1) {
-				return false;
-			}
-			this.instances.splice(index, 1);
-			this.length--;
-			return true;
-		},
-
-		/**
-		 * Stop playback and remove all instances from the channel.  Usually in response to a delete call.
-		 * #method removeAll
-		 */
-		removeAll:function () {
-			// Note that stop() removes the item from the list, but we don't want to assume that.
-			for (var i=this.length-1; i>=0; i--) {
-				this.instances[i].stop();
-			}
-		},
-
-		/**
-		 * Get an available slot depending on interrupt value and if slots are available.
-		 * #method getSlot
-		 * @param {String} interrupt The interrupt value to use.
-		 * @param {SoundInstance} instance The sound instance that will go in the channel if successful.
-		 * @return {Boolean} Determines if there is an available slot. Depending on the interrupt mode, if there are no slots,
-		 * an existing SoundInstance may be interrupted. If there are no slots, this method returns false.
-		 */
-		getSlot:function (interrupt, instance) {
-			var target, replacement;
-
-			for (var i = 0, l = this.max; i < l; i++) {
-				target = this.get(i);
-
-				// Available Space
-				if (target == null) {
-					return true;
-				} else if (interrupt == Sound.INTERRUPT_NONE && target.playState != Sound.PLAY_FINISHED) {
-					continue;
-				}
-
-				// First replacement candidate
-				if (i == 0) {
-					replacement = target;
-					continue;
-				}
-
-				// Audio is complete or not playing
-				if (target.playState == Sound.PLAY_FINISHED ||
-						target.playState == Sound.PLAY_INTERRUPTED ||
-						target.playState == Sound.PLAY_FAILED) {
-					replacement = target;
-
-					// Audio is a better candidate than the current target, according to playhead
-				} else if (
-						(interrupt == Sound.INTERRUPT_EARLY && target.getPosition() < replacement.getPosition()) ||
-								(interrupt == Sound.INTERRUPT_LATE && target.getPosition() > replacement.getPosition())) {
-					replacement = target;
-				}
-			}
-
-			if (replacement != null) {
-				replacement.interrupt();
-				this.remove(replacement);
-				return true;
-			}
+	/**
+	 * Add a new instance to the channel.
+	 * #method add
+	 * @param {SoundInstance} instance The instance to add.
+	 * @return {Boolean} The success of the method call. If the channel is full, it will return false.
+	 */
+	p.add = function (instance, interrupt) {
+		if (!this.getSlot(interrupt, instance)) {
 			return false;
-		},
+		}
+		this.instances.push(instance);
+		this.length++;
+		return true;
+	};
 
-		toString:function () {
-			return "[Sound SoundChannel]";
+	/**
+	 * Remove an instance from the channel, either when it has finished playing, or it has been interrupted.
+	 * #method remove
+	 * @param {SoundInstance} instance The instance to remove
+	 * @return {Boolean} The success of the remove call. If the instance is not found in this channel, it will
+	 * return false.
+	 */
+	p.remove = function (instance) {
+		var index = createjs.indexOf(this.instances, instance);
+		if (index == -1) {
+			return false;
+		}
+		this.instances.splice(index, 1);
+		this.length--;
+		return true;
+	};
+
+	/**
+	 * Stop playback and remove all instances from the channel.  Usually in response to a delete call.
+	 * #method removeAll
+	 */
+	p.removeAll = function () {
+		// Note that stop() removes the item from the list, but we don't want to assume that.
+		for (var i=this.length-1; i>=0; i--) {
+			this.instances[i].stop();
+		}
+	};
+
+	/**
+	 * Get an available slot depending on interrupt value and if slots are available.
+	 * #method getSlot
+	 * @param {String} interrupt The interrupt value to use.
+	 * @param {SoundInstance} instance The sound instance that will go in the channel if successful.
+	 * @return {Boolean} Determines if there is an available slot. Depending on the interrupt mode, if there are no slots,
+	 * an existing SoundInstance may be interrupted. If there are no slots, this method returns false.
+	 */
+	p.getSlot = function (interrupt, instance) {
+		var target, replacement;
+
+		for (var i = 0, l = this.max; i < l; i++) {
+			target = this.get(i);
+
+			// Available Space
+			if (target == null) {
+				return true;
+			} else if (interrupt == Sound.INTERRUPT_NONE && target.playState != Sound.PLAY_FINISHED) {
+				continue;
+			}
+
+			// First replacement candidate
+			if (i == 0) {
+				replacement = target;
+				continue;
+			}
+
+			// Audio is complete or not playing
+			if (target.playState == Sound.PLAY_FINISHED ||
+					target.playState == Sound.PLAY_INTERRUPTED ||
+					target.playState == Sound.PLAY_FAILED) {
+				replacement = target;
+
+				// Audio is a better candidate than the current target, according to playhead
+			} else if (
+					(interrupt == Sound.INTERRUPT_EARLY && target.getPosition() < replacement.getPosition()) ||
+							(interrupt == Sound.INTERRUPT_LATE && target.getPosition() > replacement.getPosition())) {
+				replacement = target;
+			}
 		}
 
-	}
+		if (replacement != null) {
+			replacement.interrupt();
+			this.remove(replacement);
+			return true;
+		}
+		return false;
+	};
+
+	p.toString = function () {
+		return "[Sound SoundChannel]";
+	};
 
 	// do not add SoundChannel to namespace
 

@@ -102,7 +102,7 @@ this.createjs = this.createjs || {};
 	s.MAX_INSTANCES = 30;
 
 	/**
-	 * The capabilities of the plugin. This is generated via the the SoundInstance {{#crossLink "TMLAudioPlugin/generateCapabilities"}}{{/crossLink}}
+	 * The capabilities of the plugin. This is generated via the the SoundInstance {{#crossLink "HTMLAudioPlugin/generateCapabilities"}}{{/crossLink}}
 	 * method. Please see the Sound {{#crossLink "Sound/getCapabilities"}}{{/crossLink}} method for an overview of all
 	 * of the available properties.
 	 * @property capabilities
@@ -227,640 +227,651 @@ this.createjs = this.createjs || {};
 		}  // OJR another way to do this might be canPlayType:"m4a", codex: mp4
 	}
 
-	var p = s.prototype = {
+	var p = HTMLAudioPlugin.prototype;
 
-		// doc'd above
-		capabilities:null,
+	// doc'd above
+	p.capabilities = null;
 
-		/**
-		 * Object hash indexed by the source of each file to indicate if an audio source is loaded, or loading.
-		 * @property audioSources
-		 * @type {Object}
-		 * @protected
-		 * @since 0.4.0
-		 */
-		audioSources:null,
+	/**
+	 * Object hash indexed by the source of each file to indicate if an audio source is loaded, or loading.
+	 * @property audioSources
+	 * @type {Object}
+	 * @protected
+	 * @since 0.4.0
+	 */
+	p.audioSources = null;
 
-		/**
-		 * The default number of instances to allow.  Passed back to {{#crossLink "Sound"}}{{/crossLink}} when a source
-		 * is registered using the {{#crossLink "Sound/register"}}{{/crossLink}} method.  This is only used if
-		 * a value is not provided.
-		 *
-		 * <b>NOTE this property only exists as a limitation of HTML audio.</b>
-		 * @property defaultNumChannels
-		 * @type {Number}
-		 * @default 2
-		 * @since 0.4.0
-		 */
-		defaultNumChannels:2,
+	/**
+	 * The default number of instances to allow.  Passed back to {{#crossLink "Sound"}}{{/crossLink}} when a source
+	 * is registered using the {{#crossLink "Sound/register"}}{{/crossLink}} method.  This is only used if
+	 * a value is not provided.
+	 *
+	 * <b>NOTE this property only exists as a limitation of HTML audio.</b>
+	 * @property defaultNumChannels
+	 * @type {Number}
+	 * @default 2
+	 * @since 0.4.0
+	 */
+	p.defaultNumChannels = 2;
 
-		// Proxies, make removing listeners easier.
-		loadedHandler:null,
+	// Proxies, make removing listeners easier.
+	p.loadedHandler = null;
 
-		/**
-		 * An initialization function run by the constructor
-		 * @method init
-		 * @protected
-		 */
-		init:function () {
-			this.capabilities = s.capabilities;
-			this.audioSources = {};
-		},
+	/**
+	 * An initialization function run by the constructor
+	 * @method init
+	 * @protected
+	 */
+	p.init = function () {
+		this.capabilities = s.capabilities;
+		this.audioSources = {};
+	};
 
-		/**
-		 * Pre-register a sound instance when preloading/setup. This is called by {{#crossLink "Sound"}}{{/crossLink}}.
-		 * Note that this provides an object containing a tag used for preloading purposes, which
-		 * <a href="http://preloadjs.com">PreloadJS</a> can use to assist with preloading.
-		 * @method register
-		 * @param {String} src The source of the audio
-		 * @param {Number} instances The number of concurrently playing instances to allow for the channel at any time.
-		 * @return {Object} A result object, containing a tag for preloading purposes and a numChannels value for internally
-		 * controlling how many instances of a source can be played by default.
-		 */
-		register:function (src, instances) {
-			this.audioSources[src] = true;  // Note this does not mean preloading has started
-			var channel = TagPool.get(src);
-			var tag = null;
-			var l = instances || this.defaultNumChannels;
-			for (var i = 0; i < l; i++) {  // OJR should we be enforcing s.MAX_INSTANCES here?  Does the chrome bug still exist, or can we change this code?
-				tag = this.createTag(src);
-				channel.add(tag);
-			}
-
-			tag.id = src;	// co-opting id as we need a way to store original src in case it is changed before loading
-			this.loadedHandler = createjs.proxy(this.handleTagLoad, this);  // we need this bind to be able to remove event listeners
-			tag.addEventListener && tag.addEventListener("canplaythrough", this.loadedHandler);
-			if(tag.onreadystatechange == null) {
-				tag.onreadystatechange = this.loadedHandler;
-			} else {
-				var f = tag.onreadystatechange;
-				// OJR will this lose scope?
-				tag.onreadystatechange = function() {
-					f();
-					this.loadedHandler();
-				}
-			}
-
-			return {
-				tag:tag, // Return one instance for preloading purposes
-				numChannels:l  // The default number of channels to make for this Sound or the passed in value
-			};
-		},
-
-		/**
-		 * Checks if src was changed on tag used to create instances in TagPool before loading
-		 * Currently PreloadJS does this when a basePath is set, so we are replicating that behavior for internal preloading.
-		 * @method handleTagLoad
-		 * @param event
-		 * @protected
-		 */
-		handleTagLoad:function(event) {
-			// cleanup and so we don't send the event more than once
-			event.target.removeEventListener && event.target.removeEventListener("canplaythrough", this.loadedHandler);
-			event.target.onreadystatechange = null;
-
-			if (event.target.src == event.target.id) { return; }
-			// else src has changed before loading, and we need to make the change to TagPool because we pre create tags
-			TagPool.checkSrc(event.target.id);
-		},
-
-		/**
-		 * Create an HTML audio tag.
-		 * @method createTag
-		 * @param {String} src The source file to set for the audio tag.
-		 * @return {HTMLElement} Returns an HTML audio tag.
-		 * @protected
-		 */
-		createTag:function (src) {
-			var tag = document.createElement("audio");
-			tag.autoplay = false;
-			tag.preload = "none";
-			//LM: Firefox fails when this the preload="none" for other tags, but it needs to be "none" to ensure PreloadJS works.
-			tag.src = src;
-			return tag;
-		},
-
-		/**
-		 * Remove a sound added using {{#crossLink "HTMLAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel
-		 * a preload.
-		 * @method removeSound
-		 * @param {String} src The sound URI to unload.
-		 * @since 0.4.1
-		 */
-		removeSound:function (src) {
-			delete(this.audioSources[src]);
-			TagPool.remove(src);
-		},
-
-		/**
-		 * Remove all sounds added using {{#crossLink "HTMLAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel a preload.
-		 * @method removeAllSounds
-		 * @param {String} src The sound URI to unload.
-		 * @since 0.4.1
-		 */
-		removeAllSounds:function () {
-			this.audioSources = {};	// this drops all references, in theory freeing them for garbage collection
-			TagPool.removeAll();
-		},
-
-		/**
-		 * Create a sound instance. If the sound has not been preloaded, it is internally preloaded here.
-		 * @method create
-		 * @param {String} src The sound source to use.
-		 * @return {SoundInstance} A sound instance for playback and control.
-		 */
-		create:function (src) {
-			// if this sound has not be registered, create a tag and preload it
-			if (!this.isPreloadStarted(src)) {
-				var channel = TagPool.get(src);
-				var tag = this.createTag(src);
-				tag.id = src;
-				channel.add(tag);
-				this.preload(src, {tag:tag});
-			}
-
-			return new SoundInstance(src, this);
-		},
-
-		/**
-		 * Checks if preloading has started for a specific source.
-		 * @method isPreloadStarted
-		 * @param {String} src The sound URI to check.
-		 * @return {Boolean} If the preload has started.
-		 * @since 0.4.0
-		 */
-		isPreloadStarted:function (src) {
-			return (this.audioSources[src] != null);
-		},
-
-		/**
-		 * Internally preload a sound.
-		 * @method preload
-		 * @param {String} src The sound URI to load.
-		 * @param {Object} instance An object containing a tag property that is an HTML audio tag used to load src.
-		 * @param {String} basePath A file path to prepend to the src.
-		 * @since 0.4.0
-		 */
-		preload:function (src, instance, basePath) {
-			this.audioSources[src] = true;
-			if(basePath != null) {instance.tag.src = basePath + src;}
-			new HTMLAudioLoader(src, instance.tag);
-		},
-
-		toString:function () {
-			return "[HTMLAudioPlugin]";
+	/**
+	 * Pre-register a sound instance when preloading/setup. This is called by {{#crossLink "Sound"}}{{/crossLink}}.
+	 * Note that this provides an object containing a tag used for preloading purposes, which
+	 * <a href="http://preloadjs.com">PreloadJS</a> can use to assist with preloading.
+	 * @method register
+	 * @param {String} src The source of the audio
+	 * @param {Number} instances The number of concurrently playing instances to allow for the channel at any time.
+	 * @return {Object} A result object, containing a tag for preloading purposes and a numChannels value for internally
+	 * controlling how many instances of a source can be played by default.
+	 */
+	p.register = function (src, instances) {
+		this.audioSources[src] = true;  // Note this does not mean preloading has started
+		var channel = createjs.HTMLAudioPlugin.TagPool.get(src);
+		var tag = null;
+		var l = instances || this.defaultNumChannels;
+		for (var i = 0; i < l; i++) {  // OJR should we be enforcing s.MAX_INSTANCES here?  Does the chrome bug still exist, or can we change this code?
+			tag = this.createTag(src);
+			channel.add(tag);
 		}
 
-	}
+		tag.id = src;	// co-opting id as we need a way to store original src in case it is changed before loading
+		this.loadedHandler = createjs.proxy(this.handleTagLoad, this);  // we need this bind to be able to remove event listeners
+		tag.addEventListener && tag.addEventListener("canplaythrough", this.loadedHandler);
+		if(tag.onreadystatechange == null) {
+			tag.onreadystatechange = this.loadedHandler;
+		} else {
+			var f = tag.onreadystatechange;
+			// OJR will this lose scope?
+			tag.onreadystatechange = function() {
+				f();
+				this.loadedHandler();
+			}
+		}
+
+		return {
+			tag:tag, // Return one instance for preloading purposes
+			numChannels:l  // The default number of channels to make for this Sound or the passed in value
+		};
+	};
+
+	/**
+	 * Checks if src was changed on tag used to create instances in TagPool before loading
+	 * Currently PreloadJS does this when a basePath is set, so we are replicating that behavior for internal preloading.
+	 * @method handleTagLoad
+	 * @param event
+	 * @protected
+	 */
+	p.handleTagLoad = function(event) {
+		// cleanup and so we don't send the event more than once
+		event.target.removeEventListener && event.target.removeEventListener("canplaythrough", this.loadedHandler);
+		event.target.onreadystatechange = null;
+
+		if (event.target.src == event.target.id) { return; }
+		// else src has changed before loading, and we need to make the change to TagPool because we pre create tags
+		createjs.HTMLAudioPlugin.TagPool.checkSrc(event.target.id);
+	};
+
+	/**
+	 * Create an HTML audio tag.
+	 * @method createTag
+	 * @param {String} src The source file to set for the audio tag.
+	 * @return {HTMLElement} Returns an HTML audio tag.
+	 * @protected
+	 */
+	p.createTag = function (src) {
+		var tag = document.createElement("audio");
+		tag.autoplay = false;
+		tag.preload = "none";
+		//LM: Firefox fails when this the preload="none" for other tags, but it needs to be "none" to ensure PreloadJS works.
+		tag.src = src;
+		return tag;
+	};
+
+	/**
+	 * Remove a sound added using {{#crossLink "HTMLAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel
+	 * a preload.
+	 * @method removeSound
+	 * @param {String} src The sound URI to unload.
+	 * @since 0.4.1
+	 */
+	p.removeSound = function (src) {
+		delete(this.audioSources[src]);
+		createjs.HTMLAudioPlugin.TagPool.remove(src);
+	};
+
+	/**
+	 * Remove all sounds added using {{#crossLink "HTMLAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel a preload.
+	 * @method removeAllSounds
+	 * @param {String} src The sound URI to unload.
+	 * @since 0.4.1
+	 */
+	p.removeAllSounds = function () {
+		this.audioSources = {};	// this drops all references, in theory freeing them for garbage collection
+		createjs.HTMLAudioPlugin.TagPool.removeAll();
+	};
+
+	/**
+	 * Create a sound instance. If the sound has not been preloaded, it is internally preloaded here.
+	 * @method create
+	 * @param {String} src The sound source to use.
+	 * @return {SoundInstance} A sound instance for playback and control.
+	 */
+	p.create = function (src) {
+		// if this sound has not be registered, create a tag and preload it
+		if (!this.isPreloadStarted(src)) {
+			var channel = createjs.HTMLAudioPlugin.TagPool.get(src);
+			var tag = this.createTag(src);
+			tag.id = src;
+			channel.add(tag);
+			this.preload(src, {tag:tag});
+		}
+
+		return new createjs.HTMLAudioPlugin.SoundInstance(src, this);
+	};
+
+	/**
+	 * Checks if preloading has started for a specific source.
+	 * @method isPreloadStarted
+	 * @param {String} src The sound URI to check.
+	 * @return {Boolean} If the preload has started.
+	 * @since 0.4.0
+	 */
+	p.isPreloadStarted = function (src) {
+		return (this.audioSources[src] != null);
+	};
+
+	/**
+	 * Internally preload a sound.
+	 * @method preload
+	 * @param {String} src The sound URI to load.
+	 * @param {Object} instance An object containing a tag property that is an HTML audio tag used to load src.
+	 * @param {String} basePath A file path to prepend to the src.
+	 * @since 0.4.0
+	 */
+	p.preload = function (src, instance, basePath) {
+		this.audioSources[src] = true;
+		if(basePath != null) {instance.tag.src = basePath + src;}
+		new createjs.HTMLAudioPlugin.Loader(src, instance.tag);
+	};
+
+	p.toString = function () {
+		return "[HTMLAudioPlugin]";
+	};
 
 	createjs.HTMLAudioPlugin = HTMLAudioPlugin;
+}());
 
 
-// NOTE Documentation for the SoundInstance class in WebAudioPlugin file. Each plugin generates a SoundInstance that
-// follows the same interface.
+(function () {
+
+	"use strict";
+
+	// NOTE Documentation for the SoundInstance class in WebAudioPlugin file. Each plugin generates a SoundInstance that
+	// follows the same interface.
 	function SoundInstance(src, owner) {
 		this.init(src, owner);
 	}
 
-	var p = SoundInstance.prototype = {
+	var p = SoundInstance.prototype;
 
-		src:null,
-		uniqueId:-1,
-		playState:null,
-		owner:null,
-		loaded:false,
-		offset:0,
-		delay:0,
-		_volume: 1,
-		get volume() {
+	p.src = null,
+	p.uniqueId = -1;
+	p.playState = null;
+	p.owner = null;
+	p.loaded = false;
+	p.offset = 0;
+	p.delay = 0;
+	p._volume =  1;
+	Object.defineProperty(p, "volume", {
+		get: function() {
 			return this._volume;
 		},
-		set volume(value) {
+		set: function(value) {
 			if (Number(value) == null) {return;}
 			value = Math.max(0, Math.min(1, value));
 			this._volume = value;
 			this.updateVolume();
-		},
-		pan:0,
-		duration:0,
-		remainingLoops:0,
-		delayTimeoutId:null,
-		tag:null,
-		muted:false,
-		paused:false,
+		}
+	});
+	p.pan = 0;
+	p.duration = 0;
+	p.remainingLoops = 0;
+	p.delayTimeoutId = null;
+	p.tag = null;
+	p.muted = false;
+	p.paused = false;
 
 // mix-ins:
-		// EventDispatcher methods:
-		addEventListener:null,
-		removeEventListener:null,
-		removeAllEventListeners:null,
-		dispatchEvent:null,
-		hasEventListener:null,
-		_listeners:null,
+	// EventDispatcher methods:
+	p.addEventListener = null;
+	p.removeEventListener = null;
+	p.removeAllEventListeners = null;
+	p.dispatchEvent = null;
+	p.hasEventListener = null;
+	p._listeners = null;
 
-		// Proxies, make removing listeners easier.
-		endedHandler:null,
-		readyHandler:null,
-		stalledHandler:null,
-		loopHandler:null,
+	// Proxies, make removing listeners easier.
+	p.endedHandler = null;
+	p.readyHandler = null;
+	p.stalledHandler = null;
+	p.loopHandler = null;
 
 // Constructor
-		init:function (src, owner) {
-			this.src = src;
-			this.owner = owner;
+	p.init = function (src, owner) {
+		this.src = src;
+		this.owner = owner;
 
-			this.endedHandler = createjs.proxy(this.handleSoundComplete, this);
-			this.readyHandler = createjs.proxy(this.handleSoundReady, this);
-			this.stalledHandler = createjs.proxy(this.handleSoundStalled, this);
-			this.loopHandler = createjs.proxy(this.handleSoundLoop, this);
-		},
+		this.endedHandler = createjs.proxy(this.handleSoundComplete, this);
+		this.readyHandler = createjs.proxy(this.handleSoundReady, this);
+		this.stalledHandler = createjs.proxy(this.handleSoundStalled, this);
+		this.loopHandler = createjs.proxy(this.handleSoundLoop, this);
+	};
 
-		sendEvent:function (type) {
-			var event = new createjs.Event(type);
-			this.dispatchEvent(event);
-		},
+	p.sendEvent = function (type) {
+		var event = new createjs.Event(type);
+		this.dispatchEvent(event);
+	};
 
-		cleanUp:function () {
-			var tag = this.tag;
-			if (tag != null) {
-				tag.pause();
-				tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
-				tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
-				tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
-				try {
-					tag.currentTime = 0;
-				} catch (e) {
-				} // Reset Position
-				TagPool.setInstance(this.src, tag);
-				this.tag = null;
-			}
-
-			clearTimeout(this.delayTimeoutId);
-			if (window.createjs == null) {
-				return;
-			}
-			createjs.Sound.playFinished(this);
-		},
-
-		interrupt:function () {
-			if (this.tag == null) {
-				return;
-			}
-			this.playState = createjs.Sound.PLAY_INTERRUPTED;
-			this.cleanUp();
-			this.paused = false;
-			this.sendEvent("interrupted");
-		},
-
-// Public API
-		play:function (interrupt, delay, offset, loop, volume, pan) {
-			this.cleanUp(); //LM: Is this redundant?
-			createjs.Sound.playInstance(this, interrupt, delay, offset, loop, volume, pan);
-		},
-
-		beginPlaying:function (offset, loop, volume, pan) {
-			if (window.createjs == null) {
-				return -1;
-			}
-			var tag = this.tag = TagPool.getInstance(this.src);
-			if (tag == null) {
-				this.playFailed();
-				return -1;
-			}
-
-			tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
-
-			// Reset this instance.
-			this.offset = offset;
-			this.volume = volume;
-			this.pan = pan;	// not pan has no effect
-			this.updateVolume();  // note this will set for mute and masterMute
-			this.remainingLoops = loop;
-
-			if (tag.readyState !== 4) {
-				tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
-				tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_STALLED, this.stalledHandler, false);
-				tag.preload = "auto"; // This is necessary for Firefox, as it won't ever "load" until this is set.
-				tag.load();
-			} else {
-				this.handleSoundReady(null);
-			}
-
-			this.sendEvent("succeeded");
-			return 1;
-		},
-
-		// Note: Sounds stall when trying to begin playback of a new audio instance when the existing instances
-		//  has not loaded yet. This doesn't mean the sound will not play.
-		handleSoundStalled:function (event) {
-			this.cleanUp();  // OJR NOTE this will stop playback, and I think we should remove this and let the developer decide how to handle stalled instances
-			this.sendEvent("failed");
-		},
-
-		handleSoundReady:function (event) {
-			if (window.createjs == null) {
-				return;
-			}
-
-            // OJR would like a cleaner way to do this in init, discuss with LM
-            this.duration = this.tag.duration * 1000;  // need this for setPosition on stopped sounds
-
-			this.playState = createjs.Sound.PLAY_SUCCEEDED;
-			this.paused = false;
-			this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
-
-			if (this.offset >= this.getDuration()) {
-				this.playFailed();  // OJR: throw error?
-				return;
-			} else if (this.offset > 0) {
-				this.tag.currentTime = this.offset * 0.001;
-			}
-			if (this.remainingLoops == -1) {
-				this.tag.loop = true;
-			}
-			if(this.remainingLoops != 0) {
-				this.tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
-				this.tag.loop = true;
-			}
-			this.tag.play();
-		},
-
-		pause:function () {
-			if (!this.paused && this.playState == createjs.Sound.PLAY_SUCCEEDED && this.tag != null) {
-				this.paused = true;
-				// Note: when paused by user, we hold a reference to our tag. We do not release it until stopped.
-				this.tag.pause();
-
-				clearTimeout(this.delayTimeoutId);
-
-				return true;
-			}
-			return false;
-		},
-
-		resume:function () {
-			if (!this.paused || this.tag == null) {
-				return false;
-			}
-			this.paused = false;
-			this.tag.play();
-			return true;
-		},
-
-		stop:function () {
-			this.offset = 0;
-			this.pause();
-			this.playState = createjs.Sound.PLAY_FINISHED;
-			this.cleanUp();
-			return true;
-		},
-
-		setMasterVolume:function (value) {
-			this.updateVolume();
-			return true;
-		},
-
-		setVolume:function (value) {
-			this.volume = value;
-			return true;
-		},
-
-		updateVolume:function () {
-			if (this.tag != null) {
-				var newVolume = (this.muted || createjs.Sound.masterMute) ? 0 : this._volume * createjs.Sound.masterVolume;
-				if (newVolume != this.tag.volume) {
-					this.tag.volume = newVolume;
-				}
-				return true;
-			} else {
-				return false;
-			}
-		},
-
-		getVolume:function (value) {
-			return this.volume;
-		},
-
-		setMasterMute:function (isMuted) {
-			this.updateVolume();
-			return true;
-		},
-
-		setMute:function (isMuted) {
-			if (isMuted == null || isMuted == undefined) {
-				return false
-			}
-			;
-
-			this.muted = isMuted;
-			this.updateVolume();
-			return true;
-		},
-
-		getMute:function () {
-			return this.muted;
-		},
-
-		setPan:function (value) {
-			return false;
-		}, // Can not set pan in HTML
-
-		getPan:function () {
-			return 0;
-		},
-
-		getPosition:function () {
-			if (this.tag == null) {
-				return this.offset;
-			}
-			return this.tag.currentTime * 1000;
-		},
-
-		setPosition:function (value) {
-			if (this.tag == null) {
-				this.offset = value
-			} else {
-				this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
-				try {
-					this.tag.currentTime = value * 0.001;
-				} catch (error) { // Out of range
-					return false;
-				}
-				this.tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
-			}
-			return true;
-		},
-
-		getDuration:function () {  // NOTE this will always return 0 until sound has been played.
-			return this.duration;
-		},
-
-		handleSoundComplete:function (event) {
-			this.offset = 0;
-
-			if (window.createjs == null) {
-				return;
-			}
-			this.playState = createjs.Sound.PLAY_FINISHED;
-			this.cleanUp();
-			this.sendEvent("complete");
-		},
-
-		// handles looping functionality
-		// NOTE with this approach audio will loop as reliably as the browser allows
-		// but we could end up sending the loop event after next loop playback begins
-		handleSoundLoop:function (event) {
-			this.offset = 0;
-
-			this.remainingLoops--;
-			if(this.remainingLoops == 0) {
-				this.tag.loop = false;
-				this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
-			}
-			this.sendEvent("loop");
-		},
-
-		playFailed:function () {
-			if (window.createjs == null) {
-				return;
-			}
-			this.playState = createjs.Sound.PLAY_FAILED;
-			this.cleanUp();
-			this.sendEvent("failed");
-		},
-
-		toString:function () {
-			return "[HTMLAudioPlugin SoundInstance]";
+	p.cleanUp = function () {
+		var tag = this.tag;
+		if (tag != null) {
+			tag.pause();
+			tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
+			tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
+			tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
+			try {
+				tag.currentTime = 0;
+			} catch (e) {
+			} // Reset Position
+			createjs.HTMLAudioPlugin.TagPool.setInstance(this.src, tag);
+			this.tag = null;
 		}
 
-	}
+		clearTimeout(this.delayTimeoutId);
+		if (window.createjs == null) {
+			return;
+		}
+		createjs.Sound.playFinished(this);
+	};
+
+	p.interrupt = function () {
+		if (this.tag == null) {
+			return;
+		}
+		this.playState = createjs.Sound.PLAY_INTERRUPTED;
+		this.cleanUp();
+		this.paused = false;
+		this.sendEvent("interrupted");
+	};
+
+// Public API
+	p.play = function (interrupt, delay, offset, loop, volume, pan) {
+		this.cleanUp(); //LM: Is this redundant?
+		createjs.Sound.playInstance(this, interrupt, delay, offset, loop, volume, pan);
+	};
+
+	p.beginPlaying = function (offset, loop, volume, pan) {
+		if (window.createjs == null) {
+			return -1;
+		}
+		var tag = this.tag = createjs.HTMLAudioPlugin.TagPool.getInstance(this.src);
+		if (tag == null) {
+			this.playFailed();
+			return -1;
+		}
+
+		tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
+
+		// Reset this instance.
+		this.offset = offset;
+		this.volume = volume;
+		this.pan = pan;	// not pan has no effect
+		this.updateVolume();  // note this will set for mute and masterMute
+		this.remainingLoops = loop;
+
+		if (tag.readyState !== 4) {
+			tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
+			tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_STALLED, this.stalledHandler, false);
+			tag.preload = "auto"; // This is necessary for Firefox, as it won't ever "load" until this is set.
+			tag.load();
+		} else {
+			this.handleSoundReady(null);
+		}
+
+		this.sendEvent("succeeded");
+		return 1;
+	};
+
+	// Note: Sounds stall when trying to begin playback of a new audio instance when the existing instances
+	//  has not loaded yet. This doesn't mean the sound will not play.
+	p.handleSoundStalled = function (event) {
+		this.cleanUp();  // OJR NOTE this will stop playback, and I think we should remove this and let the developer decide how to handle stalled instances
+		this.sendEvent("failed");
+	};
+
+	p.handleSoundReady = function (event) {
+		if (window.createjs == null) {
+			return;
+		}
+
+		// OJR would like a cleaner way to do this in init, discuss with LM
+		this.duration = this.tag.duration * 1000;  // need this for setPosition on stopped sounds
+
+		this.playState = createjs.Sound.PLAY_SUCCEEDED;
+		this.paused = false;
+		this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
+
+		if (this.offset >= this.getDuration()) {
+			this.playFailed();  // OJR: throw error?
+			return;
+		} else if (this.offset > 0) {
+			this.tag.currentTime = this.offset * 0.001;
+		}
+		if (this.remainingLoops == -1) {
+			this.tag.loop = true;
+		}
+		if(this.remainingLoops != 0) {
+			this.tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
+			this.tag.loop = true;
+		}
+		this.tag.play();
+	};
+
+	p.pause = function () {
+		if (!this.paused && this.playState == createjs.Sound.PLAY_SUCCEEDED && this.tag != null) {
+			this.paused = true;
+			// Note: when paused by user, we hold a reference to our tag. We do not release it until stopped.
+			this.tag.pause();
+
+			clearTimeout(this.delayTimeoutId);
+
+			return true;
+		}
+		return false;
+	};
+
+	p.resume = function () {
+		if (!this.paused || this.tag == null) {
+			return false;
+		}
+		this.paused = false;
+		this.tag.play();
+		return true;
+	};
+
+	p.stop = function () {
+		this.offset = 0;
+		this.pause();
+		this.playState = createjs.Sound.PLAY_FINISHED;
+		this.cleanUp();
+		return true;
+	};
+
+	p.setMasterVolume = function (value) {
+		this.updateVolume();
+		return true;
+	};
+
+	p.setVolume = function (value) {
+		this.volume = value;
+		return true;
+	};
+
+	p.updateVolume = function () {
+		if (this.tag != null) {
+			var newVolume = (this.muted || createjs.Sound.masterMute) ? 0 : this._volume * createjs.Sound.masterVolume;
+			if (newVolume != this.tag.volume) {
+				this.tag.volume = newVolume;
+			}
+			return true;
+		} else {
+			return false;
+		}
+	};
+
+	p.getVolume = function (value) {
+		return this.volume;
+	};
+
+	p.setMasterMute = function (isMuted) {
+		this.updateVolume();
+		return true;
+	};
+
+	p.setMute = function (isMuted) {
+		if (isMuted == null || isMuted == undefined) {
+			return false;
+		}
+
+		this.muted = isMuted;
+		this.updateVolume();
+		return true;
+	};
+
+	p.getMute = function () {
+		return this.muted;
+	};
+
+	// Can not set pan in HTML
+	p.setPan = function (value) {
+		return false;
+	};
+
+	p.getPan = function () {
+		return 0;
+	};
+
+	p.getPosition = function () {
+		if (this.tag == null) {
+			return this.offset;
+		}
+		return this.tag.currentTime * 1000;
+	};
+
+	p.setPosition = function (value) {
+		if (this.tag == null) {
+			this.offset = value
+		} else {
+			this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
+			try {
+				this.tag.currentTime = value * 0.001;
+			} catch (error) { // Out of range
+				return false;
+			}
+			this.tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
+		}
+		return true;
+	};
+
+	p.getDuration = function () {  // NOTE this will always return 0 until sound has been played.
+		return this.duration;
+	};
+
+	p.handleSoundComplete = function (event) {
+		this.offset = 0;
+
+		if (window.createjs == null) {
+			return;
+		}
+		this.playState = createjs.Sound.PLAY_FINISHED;
+		this.cleanUp();
+		this.sendEvent("complete");
+	};
+
+	// handles looping functionality
+	// NOTE with this approach audio will loop as reliably as the browser allows
+	// but we could end up sending the loop event after next loop playback begins
+	p.handleSoundLoop = function (event) {
+		this.offset = 0;
+
+		this.remainingLoops--;
+		if(this.remainingLoops == 0) {
+			this.tag.loop = false;
+			this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
+		}
+		this.sendEvent("loop");
+	};
+
+	p.playFailed = function () {
+		if (window.createjs == null) {
+			return;
+		}
+		this.playState = createjs.Sound.PLAY_FAILED;
+		this.cleanUp();
+		this.sendEvent("failed");
+	};
+
+	p.toString = function () {
+		return "[HTMLAudioPlugin SoundInstance]";
+	};
 
 	createjs.EventDispatcher.initialize(SoundInstance.prototype);
 
-	// Do not add SoundInstance to namespace.
+	createjs.HTMLAudioPlugin.SoundInstance = SoundInstance;
 
+}());
+
+
+(function () {
+
+	"use strict";
 
 	/**
 	 * An internal helper class that preloads html audio via HTMLAudioElement tags. Note that PreloadJS will NOT use
 	 * this load class like it does Flash and WebAudio plugins.
 	 * Note that this class and its methods are not documented properly to avoid generating HTML documentation.
-	 * #class HTMLAudioLoader
+	 * #class Loader
 	 * @param {String} src The source of the sound to load.
 	 * @param {HTMLAudioElement} tag The audio tag of the sound to load.
 	 * @constructor
 	 * @protected
 	 * @since 0.4.0
 	 */
-	function HTMLAudioLoader(src, tag) {
+	function Loader(src, tag) {
 		this.init(src, tag);
 	}
 
-	HTMLAudioLoader.prototype = {
+	var p = Loader.prototype;
 
-		/**
-		 * The source to be loaded.
-		 * #property src
-		 * @type {String}
-		 * @default null
-		 * @protected
-		 */
-		src:null,
+	/**
+	 * The source to be loaded.
+	 * #property src
+	 * @type {String}
+	 * @default null
+	 * @protected
+	 */
+	p.src = null;
 
-		/**
-		 * The tag to load the source with / into.
-		 * #property tag
-		 * @type {AudioTag}
-		 * @default null
-		 * @protected
-		 */
-		tag:null,
+	/**
+	 * The tag to load the source with / into.
+	 * #property tag
+	 * @type {AudioTag}
+	 * @default null
+	 * @protected
+	 */
+	p.tag = null;
 
-		/**
-		 * An interval used to give us progress.
-		 * #property preloadTimer
-		 * @type {String}
-		 * @default null
-		 * @protected
-		 */
-		preloadTimer:null,
+	/**
+	 * An interval used to give us progress.
+	 * #property preloadTimer
+	 * @type {String}
+	 * @default null
+	 * @protected
+	 */
+	p.preloadTimer = null;
 
-		// Proxies, make removing listeners easier.
-		loadedHandler:null,
+	// Proxies, make removing listeners easier.
+	p.loadedHandler = null;
 
-		// constructor
-		init:function (src, tag) {
-			this.src = src;
-			this.tag = tag;
+	// constructor
+	p.init = function (src, tag) {
+		this.src = src;
+		this.tag = tag;
 
-			this.preloadTimer = setInterval(createjs.proxy(this.preloadTick, this), 200);
+		this.preloadTimer = setInterval(createjs.proxy(this.preloadTick, this), 200);
 
-
-			// This will tell us when audio is buffered enough to play through, but not when its loaded.
-			// The tag doesn't keep loading in Chrome once enough has buffered, and we have decided that behaviour is sufficient.
-			// Note that canplaythrough callback doesn't work in Chrome, we have to use the event.
-			this.loadedHandler = createjs.proxy(this.sendLoadedEvent, this);  // we need this bind to be able to remove event listeners
-			this.tag.addEventListener && this.tag.addEventListener("canplaythrough", this.loadedHandler);
-			if(this.tag.onreadystatechange == null) {
+		// This will tell us when audio is buffered enough to play through, but not when its loaded.
+		// The tag doesn't keep loading in Chrome once enough has buffered, and we have decided that behaviour is sufficient.
+		// Note that canplaythrough callback doesn't work in Chrome, we have to use the event.
+		this.loadedHandler = createjs.proxy(this.sendLoadedEvent, this);  // we need this bind to be able to remove event listeners
+		this.tag.addEventListener && this.tag.addEventListener("canplaythrough", this.loadedHandler);
+		if(this.tag.onreadystatechange == null) {
+			this.tag.onreadystatechange = createjs.proxy(this.sendLoadedEvent, this);  // OJR not 100% sure we need this, just copied from PreloadJS
+		} else {
+			var f = this.tag.onreadystatechange;
+			this.tag.onreadystatechange = function() {
+				f();
 				this.tag.onreadystatechange = createjs.proxy(this.sendLoadedEvent, this);  // OJR not 100% sure we need this, just copied from PreloadJS
-			} else {
-				var f = this.tag.onreadystatechange;
-				this.tag.onreadystatechange = function() {
-					f();
-					this.tag.onreadystatechange = createjs.proxy(this.sendLoadedEvent, this);  // OJR not 100% sure we need this, just copied from PreloadJS
-				}
 			}
-
-
-			this.tag.preload = "auto";
-			//this.tag.src = src;
-			this.tag.load();
-
-		},
-
-		/**
-		 * Allows us to have preloading progress and tell when its done.
-		 * #method preloadTick
-		 * @protected
-		 */
-		preloadTick:function () {
-			var buffered = this.tag.buffered;
-			var duration = this.tag.duration;
-
-			if (buffered.length > 0) {
-				if (buffered.end(0) >= duration - 1) {
-					this.handleTagLoaded();
-				}
-			}
-		},
-
-		/**
-		 * Internal handler for when a tag is loaded.
-		 * #method handleTagLoaded
-		 * @protected
-		 */
-		handleTagLoaded:function () {
-			clearInterval(this.preloadTimer);
-		},
-
-		/**
-		 * Communicates back to Sound that a load is complete.
-		 * #method sendLoadedEvent
-		 * @param {Object} evt The load Event
-		 */
-		sendLoadedEvent:function (evt) {
-			this.tag.removeEventListener && this.tag.removeEventListener("canplaythrough", this.loadedHandler);  // cleanup and so we don't send the event more than once
-			this.tag.onreadystatechange = null;  // cleanup and so we don't send the event more than once
-			createjs.Sound.sendFileLoadEvent(this.src);  // fire event or callback on Sound
-		},
-
-		// used for debugging
-		toString:function () {
-			return "[HTMLAudioPlugin HTMLAudioLoader]";
 		}
+
+		this.tag.preload = "auto";
+		//this.tag.src = src;
+		this.tag.load();
+	};
+
+	/**
+	 * Allows us to have preloading progress and tell when its done.
+	 * #method preloadTick
+	 * @protected
+	 */
+	p.preloadTick = function () {
+		var buffered = this.tag.buffered;
+		var duration = this.tag.duration;
+
+		if (buffered.length > 0) {
+			if (buffered.end(0) >= duration - 1) {
+				this.handleTagLoaded();
+			}
+		}
+	};
+
+	/**
+	 * Internal handler for when a tag is loaded.
+	 * #method handleTagLoaded
+	 * @protected
+	 */
+	p.handleTagLoaded = function () {
+		clearInterval(this.preloadTimer);
+	};
+
+	/**
+	 * Communicates back to Sound that a load is complete.
+	 * #method sendLoadedEvent
+	 * @param {Object} evt The load Event
+	 */
+	p.sendLoadedEvent = function (evt) {
+		this.tag.removeEventListener && this.tag.removeEventListener("canplaythrough", this.loadedHandler);  // cleanup and so we don't send the event more than once
+		this.tag.onreadystatechange = null;  // cleanup and so we don't send the event more than once
+		createjs.Sound.sendFileLoadEvent(this.src);  // fire event or callback on Sound
+	};
+
+	// used for debugging
+	p.toString = function () {
+		return "[HTMLAudioPlugin Loader]";
 	}
 
-	// Do not add HTMLAudioLoader to namespace
+	createjs.HTMLAudioPlugin.Loader = Loader;
 
+}());
+
+
+(function () {
+
+	"use strict";
 
 	/**
 	 * The TagPool is an object pool for HTMLAudio tag instances. In Chrome, we have to pre-create the number of HTML
@@ -874,13 +885,15 @@ this.createjs = this.createjs || {};
 		this.init(src);
 	}
 
+	var s = TagPool;
+
 	/**
 	 * A hash lookup of each sound channel, indexed by the audio source.
 	 * #property tags
 	 * @static
 	 * @protected
 	 */
-	TagPool.tags = {};
+	s.tags = {};
 
 	/**
 	 * Get a tag pool. If the pool doesn't exist, create it.
@@ -889,10 +902,10 @@ this.createjs = this.createjs || {};
 	 * @static
 	 * @protected
 	 */
-	TagPool.get = function (src) {
-		var channel = TagPool.tags[src];
+	s.get = function (src) {
+		var channel = s.tags[src];
 		if (channel == null) {
-			channel = TagPool.tags[src] = new TagPool(src);
+			channel = s.tags[src] = new TagPool(src);
 		}
 		return channel;
 	}
@@ -904,13 +917,13 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} If the TagPool was deleted.
 	 * @static
 	 */
-	TagPool.remove = function (src) {
-		var channel = TagPool.tags[src];
+	s.remove = function (src) {
+		var channel = s.tags[src];
 		if (channel == null) {
 			return false;
 		}
 		channel.removeAll();
-		delete(TagPool.tags[src]);
+		delete(s.tags[src]);
 		return true;
 	}
 
@@ -919,11 +932,11 @@ this.createjs = this.createjs || {};
 	 * #method removeAll
 	 * @static
 	 */
-	TagPool.removeAll = function () {
-		for(var channel in TagPool.tags) {
-			TagPool.tags[channel].removeAll();	// this stops and removes all active instances
+	s.removeAll = function () {
+		for(var channel in s.tags) {
+			s.tags[channel].removeAll();	// this stops and removes all active instances
 		}
-		TagPool.tags = {};
+		s.tags = {};
 	}
 
 	/**
@@ -933,8 +946,8 @@ this.createjs = this.createjs || {};
 	 * @static
 	 * @protected
 	 */
-	TagPool.getInstance = function (src) {
-		var channel = TagPool.tags[src];
+	s.getInstance = function (src) {
+		var channel = s.tags[src];
 		if (channel == null) {
 			return null;
 		}
@@ -949,8 +962,8 @@ this.createjs = this.createjs || {};
 	 * @static
 	 * @protected
 	 */
-	TagPool.setInstance = function (src, tag) {
-		var channel = TagPool.tags[src];
+	s.setInstance = function (src, tag) {
+		var channel = s.tags[src];
 		if (channel == null) {
 			return null;
 		}
@@ -966,132 +979,130 @@ this.createjs = this.createjs || {};
 	 * @static
 	 * @protected
 	 */
-	TagPool.checkSrc = function (src) {
-		var channel = TagPool.tags[src];
+	s.checkSrc = function (src) {
+		var channel = s.tags[src];
 		if (channel == null) {
 			return null;
 		}
 		channel.checkSrcChange();
 	}
 
-	TagPool.prototype = {
+	var p = TagPool.prototype;
 
-		/**
-		 * The source of the tag pool.
-		 * #property src
-		 * @type {String}
-		 * @protected
-		 */
-		src:null,
+	/**
+	 * The source of the tag pool.
+	 * #property src
+	 * @type {String}
+	 * @protected
+	 */
+	p.src = null;
 
-		/**
-		 * The total number of HTMLAudio tags in this pool. This is the maximum number of instance of a certain sound
-		 * that can play at one time.
-		 * #property length
-		 * @type {Number}
-		 * @default 0
-		 * @protected
-		 */
-		length:0,
+	/**
+	 * The total number of HTMLAudio tags in this pool. This is the maximum number of instance of a certain sound
+	 * that can play at one time.
+	 * #property length
+	 * @type {Number}
+	 * @default 0
+	 * @protected
+	 */
+	p.length = 0;
 
-		/**
-		 * The number of unused HTMLAudio tags.
-		 * #property available
-		 * @type {Number}
-		 * @default 0
-		 * @protected
-		 */
-		available:0,
+	/**
+	 * The number of unused HTMLAudio tags.
+	 * #property available
+	 * @type {Number}
+	 * @default 0
+	 * @protected
+	 */
+	p.available = 0;
 
-		/**
-		 * A list of all available tags in the pool.
-		 * #property tags
-		 * @type {Array}
-		 * @protected
-		 */
-		tags:null,
+	/**
+	 * A list of all available tags in the pool.
+	 * #property tags
+	 * @type {Array}
+	 * @protected
+	 */
+	p.tags = null;
 
-		// constructor
-		init:function (src) {
-			this.src = src;
-			this.tags = [];
-		},
+	// constructor
+	p.init = function (src) {
+		this.src = src;
+		this.tags = [];
+	};
 
-		/**
-		 * Add an HTMLAudio tag into the pool.
-		 * #method add
-		 * @param {HTMLAudioElement} tag A tag to be used for playback.
-		 */
-		add:function (tag) {
-			this.tags.push(tag);
-			this.length++;
-			this.available++;
-		},
+	/**
+	 * Add an HTMLAudio tag into the pool.
+	 * #method add
+	 * @param {HTMLAudioElement} tag A tag to be used for playback.
+	 */
+	p.add = function (tag) {
+		this.tags.push(tag);
+		this.length++;
+		this.available++;
+	};
 
-		/**
-		 * Remove all tags from the channel.  Usually in response to a delete call.
-		 * #method removeAll
-		 */
-		removeAll:function () {
-			// This may not be neccessary
-			while(this.length--) {
-				delete(this.tags[this.length]);	// NOTE that the audio playback is already stopped by this point
-			}
-			this.src = null;
-			this.tags.length = 0;
-		},
-
-		/**
-		 * Get an HTMLAudioElement for immediate playback. This takes it out of the pool.
-		 * #method get
-		 * @return {HTMLAudioElement} An HTML audio tag.
-		 */
-		get:function () {
-			if (this.tags.length == 0) {
-				return null;
-			}
-			this.available = this.tags.length;
-			var tag = this.tags.pop();
-			if (tag.parentNode == null) {
-				document.body.appendChild(tag);
-			}
-			return tag;
-		},
-
-		/**
-		 * Put an HTMLAudioElement back in the pool for use.
-		 * #method set
-		 * @param {HTMLAudioElement} tag HTML audio tag
-		 */
-		set:function (tag) {
-			var index = createjs.indexOf(this.tags, tag);
-			if (index == -1) {
-				this.tags.push(tag);
-			}
-			this.available = this.tags.length;
-		},
-
-		/**
-		 * Make sure the src of all other tags is correct after load.
-		 * This is needed because PreloadJS appends a basePath to src before loading.
-		 * #method checkSrcChange
-		 */
-		checkSrcChange:function () {
-			// the last tag always has the latest src after loading
-			//var i = this.length-1;	// this breaks in Firefox because it is not correctly removing an event listener
-			var i = this.tags.length - 1;
-			var newSrc = this.tags[i].src;
-			while(i--) {
-				this.tags[i].src = newSrc;
-			}
-		},
-
-		toString:function () {
-			return "[HTMLAudioPlugin TagPool]";
+	/**
+	 * Remove all tags from the channel.  Usually in response to a delete call.
+	 * #method removeAll
+	 */
+	p.removeAll = function () {
+		// This may not be neccessary
+		while(this.length--) {
+			delete(this.tags[this.length]);	// NOTE that the audio playback is already stopped by this point
 		}
+		this.src = null;
+		this.tags.length = 0;
+	};
 
+	/**
+	 * Get an HTMLAudioElement for immediate playback. This takes it out of the pool.
+	 * #method get
+	 * @return {HTMLAudioElement} An HTML audio tag.
+	 */
+	p.get = function () {
+		if (this.tags.length == 0) {
+			return null;
+		}
+		this.available = this.tags.length;
+		var tag = this.tags.pop();
+		if (tag.parentNode == null) {
+			document.body.appendChild(tag);
+		}
+		return tag;
+	};
+
+	/**
+	 * Put an HTMLAudioElement back in the pool for use.
+	 * #method set
+	 * @param {HTMLAudioElement} tag HTML audio tag
+	 */
+	p.set = function (tag) {
+		var index = createjs.indexOf(this.tags, tag);
+		if (index == -1) {
+			this.tags.push(tag);
+		}
+		this.available = this.tags.length;
+	};
+
+	/**
+	 * Make sure the src of all other tags is correct after load.
+	 * This is needed because PreloadJS appends a basePath to src before loading.
+	 * #method checkSrcChange
+	 */
+	p.checkSrcChange = function () {
+		// the last tag always has the latest src after loading
+		//var i = this.length-1;	// this breaks in Firefox because it is not correctly removing an event listener
+		var i = this.tags.length - 1;
+		var newSrc = this.tags[i].src;
+		while(i--) {
+			this.tags[i].src = newSrc;
+		}
+	};
+
+	p.toString = function () {
+		return "[HTMLAudioPlugin TagPool]";
 	}
 
-	// do not add TagPool to namespace
+	createjs.HTMLAudioPlugin.TagPool = TagPool;
 
 }());

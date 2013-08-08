@@ -5,6 +5,8 @@ CRITICAL (may break existing content):
 - updated EventDispatcher with latest bubbling model, and the Event class
 
 *****
+- altered all libraries to use defined object properties instead of object literal notation.
+- namespaced all sub apis to related plugin, ie createjs.WebAudioPlugin.SoundInstance
 - implemented createjs Utils
 - implemented "use strict" mode
 - removed deprecated methods and properties, doc'd as removed.
