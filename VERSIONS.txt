@@ -23,6 +23,7 @@ CRITICAL (may break existing content):
 	WebAudioPlugin.
 - fixed a bug with WebAudioPlugin that stopped SoundInstances from being reusable.
 - fixed an issue with EventDispatcher when adding the same listener to an event twice
+- Updated the build process to use NodeJS & Grunt.js. Please refer to the readme in the build folder.
 
 Version 0.4.1 [May 10, 2013]
 ************************************************************************************************************************

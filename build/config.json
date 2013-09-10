@@ -1,23 +1,22 @@
 {
-	"config_soundjs":{
-		"SOURCE_FILES":[
-			"/../src/createjs/events/Event.js",
-			"/../src/createjs/events/EventDispatcher.js",
-			"/../src/createjs/utils/IndexOf.js",
-			"/../src/createjs/utils/Proxy.js",
-			"/../src/soundjs/Sound.js",
-			"/../src/soundjs/WebAudioPlugin.js",
-			"/../src/soundjs/HTMLAudioPlugin.js",
-			"/../src/soundjs/version.js"
-		],
-		"JS_FILE_NAME":"soundjs-%VERSION%.min.js",
-		"PROJECT_NAME":"SoundJS",
-		"PROJECT_URL":"http://createjs.com/",
-		"DOCS_DIR_NAME":"_docs-%VERSION%",
-		"DOCS_FILE_NAME":".zip",
-		"OUTPUT_DIR_NAME":"/output",
-		"TEMPLATE_DIR_PATH":"/template",
-		"TMP_DIR_NAME":"/tmp",
-		"GOOGLE_CLOSURE_PATH":"/../tools/google-closure/compiler.jar"
-	}
+	"source": [
+		"../src/soundjs/version.js",
+
+		"../src/createjs/events/EventDispatcher.js",
+		"../src/createjs/events/Event.js",
+		"../src/createjs/utils/IndexOf.js",
+		"../src/createjs/utils/Proxy.js",
+
+		"../src/soundjs/Sound.js",
+		"../src/soundjs/WebAudioPlugin.js",
+		"../src/soundjs/HTMLAudioPlugin.js"
+	],
+
+	"flashplugin_source": [
+		"../src/swfobject.js",
+        "../src/soundjs/FlashPlugin.js",
+        "../src/soundjs/version_flashplugin.js"
+	],
+
+	"docs_out_path":"./output/SoundJSDocs/"
 }
