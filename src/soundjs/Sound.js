@@ -1665,13 +1665,13 @@ this.createjs = this.createjs || {};
 	}
 
 	BrowserDetect.init = function () {
-		var agent = navigator.userAgent;
-		BrowserDetect.isFirefox = (createjs.indexOf(agent, "Firefox") > -1);
+		var agent = window.navigator.userAgent;
+		BrowserDetect.isFirefox = (agent.indexOf("Firefox") > -1);
 		BrowserDetect.isOpera = (window.opera != null);
-		BrowserDetect.isChrome = (createjs.indexOf(agent, "Chrome") > -1);  // NOTE that Chrome on Android returns true but is a completely different browser with different abilities
-		BrowserDetect.isIOS = createjs.indexOf(agent, "iPod") > -1 || createjs.indexOf(agent, "iPhone") > -1 || createjs.indexOf(agent, "iPad") > -1;
-		BrowserDetect.isAndroid = (createjs.indexOf(agent, "Android") > -1);
-		BrowserDetect.isBlackberry = (createjs.indexOf(agent, "Blackberry") > -1);
+		BrowserDetect.isChrome = (agent.indexOf("Chrome") > -1);  // NOTE that Chrome on Android returns true but is a completely different browser with different abilities
+		BrowserDetect.isIOS = agent.indexOf("iPod") > -1 || agent.indexOf("iPhone") > -1 || agent.indexOf("iPad") > -1;
+		BrowserDetect.isAndroid = (agent.indexOf("Android") > -1);
+		BrowserDetect.isBlackberry = (agent.indexOf("Blackberry") > -1);
 	}
 
 	BrowserDetect.init();
