@@ -718,8 +718,9 @@ this.createjs = this.createjs || {};
 	 * @param {Boolean} [preload=true] If the sound should be internally preloaded so that it can be played back
 	 * without an external preloader.
 	 * @param {string} basePath Set a path that will be prepending to src for loading.
-	 * @return {Object} An object with the modified values that were passed in, which defines the sound. Returns false
-	 * if the source cannot be parsed.
+	 * @return {Object} An object with the modified values that were passed in, which defines the sound.
+	 * Returns false if the source cannot be parsed or no plugins can be initialized.
+	 * Returns true if the source is already loaded.
 	 * @static
 	 * @since 0.4.0
 	 */
@@ -727,7 +728,6 @@ this.createjs = this.createjs || {};
 		if (!s.initializeDefaultPlugins()) {
 			return false;
 		}
-
 
 		if (src instanceof Object) {
 			basePath = id;	//this assumes preload will not be passed in as a property // OJR check if arguments == 3
@@ -746,7 +746,7 @@ this.createjs = this.createjs || {};
 			s.idHash[id] = details.src;
 		}
 
-		var numChannels = null; // null will set all SoundChannel to set this to it's internal maxDefault
+		var numChannels = null; // null tells SoundChannel to set this to it's internal maxDefault
 		if (data != null) {
 			if (!isNaN(data.channels)) {
 				numChannels = parseInt(data.channels);
@@ -791,10 +791,13 @@ this.createjs = this.createjs || {};
 			}  // we do this so we can store multiple id's and data if needed
 			s.preloadHash[details.src].push({src:src, id:id, data:data});  // keep this data so we can return it in fileload event
 			if (s.preloadHash[details.src].length == 1) {
+				// if already loaded once, don't load a second time  // OJR note this will disallow reloading a sound if loading fails or the source changes
 				if (basePath == null) {basePath = "";}
 				s.activePlugin.preload(details.src, loader, basePath);
+			} else {
+				// if src already loaded successfully, return true
+				if (s.preloadHash[details.src][0] == true) {return true;}
 			}
-			// if already loaded once, don't load a second time  // OJR note this will disallow reloading a sound if loading fails or the source changes
 		}
 
 		return details;
@@ -819,8 +822,9 @@ this.createjs = this.createjs || {};
 	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}}: <code>{src:srcURI, id:ID, data:Data, preload:UseInternalPreloader}</code>
 	 * with "id", "data", and "preload" being optional.
 	 * @param {string} basePath Set a path that will be prepending to each src when loading.
-	 * @return {Object} An array of objects with the modified values that were passed in, which defines each sound. It
-	 * will return false for any values that the source cannot be parsed.
+	 * @return {Object} An array of objects with the modified values that were passed in, which defines each sound.
+	 * Like registerSound, it will return false for any values that the source cannot be parsed or if no plugins can be initialized.
+	 * Also, it will returns true for any values that the source is already loaded.
 	 * @static
 	 * @since 0.4.0
 	 */
