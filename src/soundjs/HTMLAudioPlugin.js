@@ -67,7 +67,7 @@ this.createjs = this.createjs || {};
 	 * Note it is recommended to use {{#crossLink "WebAudioPlugin"}}{{/crossLink}} for iOS (6+). HTML Audio is disabled by
 	 * default as it can only have one &lt;audio&gt; tag, can not preload or autoplay the audio, can not cache the audio,
 	 * and can not play the audio except inside a user initiated event.
-	 *
+	 *<br /><br />
 	 * <b>Android HTML Audio limitations</b><br />
 	 * <ul><li>We have no control over audio volume. Only the user can set volume on their device.</li>
 	 *      <li>We can only play audio inside a user event (touch/click).  This currently means you cannot loop sound or use a delay.</li>

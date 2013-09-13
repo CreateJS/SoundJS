@@ -53,7 +53,7 @@ this.createjs = this.createjs || {};
 	 * <b>Webkit (Chrome and Safari)</b>
 	 * <ul><li>AudioNode.disconnect does not always seem to work.  This can cause the file size to grow over time if you
 	 * are playing a lot of audio files.</li></ul>
-	 *
+	 * <br />
 	 * <b>iOS 6 limitations</b>
 	 * 	<ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event (touch/click).</li>
 	 *  <li>Despite suggestions to the opposite, we have relative control over audio volume through the gain nodes.</li>
