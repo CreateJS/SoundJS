@@ -1,6 +1,4 @@
-## We use grunt (http://gruntjs.com/) to manage our build process.
-
-If you previously used an older process, you may want to clean up the node_modules and output folders.
+## SoundJS uses [Grunt](http://gruntjs.com/) to manage the build process.
 
 ## To use
 
@@ -8,21 +6,20 @@ If you previously used an older process, you may want to clean up the node_modul
 
 Node (0.10.x or greater is required):
 
-   # check the version
-   node -v
+	# check the version
+	node -v
 
-If your node is out of date, install the latest from:
-http://nodejs.org/
+If your node is out of date, install the latest from [NodeJS.org](http://nodejs.org/)
 
 After node is setup, install the other dependencies:
 
-   # Install the grunt command line utility
-   sudo npm install grunt-cli -g
+	# Install the grunt command line utility
+	sudo npm install grunt-cli -g
 
-   # Install all the dependencies for this project.
-   npm install
+	 # Install all the dependencies for this project.
+	npm install
 
-### Setup
+# Setup
 
 You'll need to change the default settings to suit your work environment.
 We have 2 config files:
@@ -37,7 +34,7 @@ Please adjust these settings to match your environment. All paths can either be 
 ### Building
 To export a release build for this library run:
 
-   grunt build
+	grunt build
 
 This command will:
 
@@ -49,16 +46,23 @@ This command will:
 * Copy the built js file to ../lib
 * Copy All examples from ../examples to config.examples_out_path
 
-To build the NEXT version run:
+**NEXT version**
 
-grunt next
+The same process as above, but uses "NEXT" as the version. This is used to generate minified builds with the latest source between tags.
 
-Does the exact same process as above but uses NEXT as the version.
+	grunt next
+
+**Combined File**
+
+The same as the NEXT process, but will not minify the source code. All code formatting and comments are left intact.
+
+	grunt combine
 
 
 ### All commands
 
-grunt build -  Build everything based on the version in package.json
-grunt next - Build everything using the NEXT version.
-grunt docs - Build only the docs
-grunt uglify - Create the Easel and MovieClip min files. (Will use NEXT as the version)
+* grunt build -  Build everything based on the version in package.json
+* grunt next - Build everything using the NEXT version.
+* grunt combine - Build a NEXT version, but leave comments and formatting intact.
+* grunt docs - Build only the docs
+* grunt uglify - Create the SoundJS and FlashPlugin min files. (Will use NEXT as the version)
