@@ -31,17 +31,18 @@
             with the OS and browser if you see this on a device that is not mobile.  Thank you.</p>
     </div>
 
-	<!-- utility libraries required by SoundJS -->
+	<!-- Note: All SoundJS classes are listed here: -->
 	<script type="text/javascript" src="../src/createjs/utils/Proxy.js"></script>
 	<script type="text/javascript" src="../src/createjs/utils/IndexOf.js"></script>
-    <script type="text/javascript" src="../src/createjs/events/Event.js"></script>
-    <script type="text/javascript" src="../src/createjs/events/EventDispatcher.js"></script>
-
-	<!-- SoundJS libraries -->
+	<script type="text/javascript" src="../src/createjs/events/Event.js"></script>
+	<script type="text/javascript" src="../src/createjs/events/EventDispatcher.js"></script>
     <script type="text/javascript" src="../src/soundjs/Sound.js"></script>
     <script type="text/javascript" src="../src/soundjs/WebAudioPlugin.js"></script>
     <script type="text/javascript" src="../src/soundjs/HTMLAudioPlugin.js"></script>
 
+	<!-- We also provide hosted minified versions of all CreateJS libraries.
+     http://code.createjs.com -->
+	
     <script>
         var src;            // the audio src we are trying to play
         var soundInstance;  // the soundInstance returned by Sound when we create or play a src
@@ -60,7 +61,7 @@
             }
 
             // check if we are on a mobile device, as these currently require us to launch sound inside of a user event
-            if (createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid) {  // || createjs.Sound.BrowserDetect.isBlackberry  OJR blackberry has not been tested yet
+            if (createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid) {  // || createjs.Sound.BrowserDetect.isBlackberry  // OJR blackberry has not been tested yet
                 document.getElementById("mobile").style.display = "block";
                 document.getElementById("content").style.display = "none";
                 return;
