@@ -2,34 +2,33 @@
 
 ## To use
 
+Note that this requires a familiarity with using the command line. The example commands shown are for use with the OSX Terminal.
+
 ### Install dependencies
 
-Node (0.10.x or greater is required):
+Node (0.10.2 or greater is required):
 
-	# check the version
+	# check the version via the command line
 	node -v
 
-If your node is out of date, install the latest from [NodeJS.org](http://nodejs.org/)
+If your Node install is out of date, get the latest from [NodeJS.org](http://nodejs.org/)
 
-After node is setup, install the other dependencies:
+After node is setup, install the other dependencies. You may want to familiarize yourself with the Node Packager Manager (NPM) before proceeding.
 
-	# Install the grunt command line utility
+	# Install the grunt command line utility globally
 	sudo npm install grunt-cli -g
 
-	 # Install all the dependencies for this project.
+	# Change to the build directory, which contains package.json
+	cd /path/to/libraryName/build/
+
+	# Install all the dependencies from package.json
 	npm install
 
 # Setup
 
-You'll need to change the default settings to suit your work environment.
-We have 2 config files:
+You can change the default settings to suit your local work environment by overriding them in a "config.local.json" file in the build directory. All paths can either be relative to the build folder, or absolute paths.
 
-* config.json - Is meant to be in git and pushed to all developers.
-* config.local.json - Is added to .gitignore and and only for your local setup (any settings in here will override those in config.json)
-
-Please adjust these settings to match your environment. All paths can either be relative from the build folder, or absolute paths.
-
-* docs_out_path - Location of the created YUIdocs. (Will be in your CreateJS.com/Docs/ folder)
+* docs_out_path - Location of the uncompressed generated docs.
 
 ### Building
 To export a release build for this library run:
@@ -38,17 +37,14 @@ To export a release build for this library run:
 
 This command will:
 
-* Update the version.js file(s).
-* Create the {PROJECT_NAME}-{VERSION}.min.js file
-* Compile the docs to config.docs_out_path
-* Create a zip file of the docs/
-* Copy the docs zip to ../docs
-* Copy the built js file to ../lib
-* Copy All examples from ../examples to config.examples_out_path
+* Update the version.js file(s) with the current date and version number from config
+* Create the {PROJECT_NAME}-{VERSION}.min.js file, and move it to ../lib
+* Generate the documentation in the docs_out_path from config
+* Create a zip file of the documentation and move it to ../docs
 
 **NEXT version**
 
-The same process as above, but uses "NEXT" as the version. This is used to generate minified builds with the latest source between tags.
+The same process as above, but uses "NEXT" as the version. This is used to generate minified builds with the latest source between release versions.
 
 	grunt next
 
@@ -65,4 +61,4 @@ The same as the NEXT process, but will not minify the source code. All code form
 * grunt next - Build everything using the NEXT version.
 * grunt combine - Build a NEXT version, but leave comments and formatting intact.
 * grunt docs - Build only the docs
-* grunt uglify - Create the SoundJS and FlashPlugin min files. (Will use NEXT as the version)
+* grunt uglify - Create the PreloadJS min file. (Will use NEXT as the version)
