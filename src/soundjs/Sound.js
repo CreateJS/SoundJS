@@ -155,6 +155,11 @@ this.createjs = this.createjs || {};
 	 * <li>There is a limit to how many audio tags you can load and play at once, which appears to be determined by
 	 * hardware and browser settings.  See {{#crossLink "HTMLAudioPlugin.MAX_INSTANCES"}}{{/crossLink}} for a safe estimate.</li></ul>
 	 *
+	 * <b>Firefox 25 Web Audio limitations</b>
+	 * <ul><li>mp3 audio files do not load properly on all windows machines, reported
+	 * <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=929969" target="_blank">here</a>. </br>
+	 * For this reason it is recommended to pass ogg file first until this bug is resolved, if possible.</li></ul>
+
 	 * <b>Safari limitations</b><br />
 	 * <ul><li>Safari requires Quicktime to be installed for audio playback.</li></ul>
 	 *
@@ -172,14 +177,6 @@ this.createjs = this.createjs || {};
 	 * <li>We can only play audio inside a user event (touch/click).  This currently means you cannot loop sound or use
 	 * a delay.</li></ul>
 	 *
- 	 * <b>Android HTML Audio Chrome 26.0.1410.58+ specific limitations</b><br />
-	 * <ul><li>Chrome reports true when you run createjs.Sound.BrowserDetect.isChrome, but is a different browser
-	 * with different abilities.</li>
-	 * <li>Can only play 1 sound at a time.</li>
-	 * <li>Sound is not cached.</li>
-	 * <li>Sound can only be loaded in a user initiated touch/click event.</li>
-	 * <li>There is a delay before a sound is played, presumably while the src is loaded.</li>
-	 * </ul>
 	 *
 	 * @class Sound
 	 * @static

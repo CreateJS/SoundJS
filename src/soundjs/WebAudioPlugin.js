@@ -50,6 +50,11 @@ this.createjs = this.createjs || {};
 	 * releases.  To change plugin priority, check out the Sound API {{#crossLink "Sound/registerPlugins"}}{{/crossLink}} method.
 
 	 * <h4>Known Browser and OS issues for Web Audio Plugin</h4>
+	 * <b>Firefox 25</b>
+	 * <ul><li>mp3 audio files do not load properly on all windows machines, reported
+	 * <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=929969" target="_blank">here</a>. </br>
+	 * For this reason it is recommended to pass ogg file first until this bug is resolved, if possible.</li></ul>
+	 * <br />
 	 * <b>Webkit (Chrome and Safari)</b>
 	 * <ul><li>AudioNode.disconnect does not always seem to work.  This can cause the file size to grow over time if you
 	 * are playing a lot of audio files.</li></ul>
