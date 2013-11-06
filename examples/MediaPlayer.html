@@ -156,7 +156,7 @@
 
             document.getElementById("loader").className = "loader";
             var assetPath = "assets/";
-            var src = assetPath+"M-GameBG.mp3|"+assetPath+"M-GameBG.ogg";
+            var src = assetPath+"M-GameBG.ogg|"+assetPath+"M-GameBG.mp3";
 
             createjs.Sound.addEventListener("fileload", createjs.proxy(handleLoadComplete,this)); // add an event listener for when load is completed
             createjs.Sound.registerSound(src, "music");

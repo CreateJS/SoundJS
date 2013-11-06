@@ -110,7 +110,7 @@
 
             // Create a single item to load.
             var assetsPath = "assets/";
-            src = assetsPath+"M-GameBG.mp3|"+assetsPath+"M-GameBG.ogg";
+            src = assetsPath+"M-GameBG.ogg|"+assetsPath+"M-GameBG.mp3";
             // NOTE the "|" character is used by Sound to separate source into distinct files, which allows you to provide multiple extensions for wider browser support
 
             createjs.Sound.addEventListener("fileload", playSound); // add an event listener for when load is completed
