@@ -435,17 +435,22 @@ this.createjs = this.createjs || {};
 	p.offset = 0;
 	p.delay = 0;
 	p._volume =  1;
-	Object.defineProperty(p, "volume", {
-		get: function() {
-			return this._volume;
-		},
-		set: function(value) {
-			if (Number(value) == null) {return;}
-			value = Math.max(0, Math.min(1, value));
-			this._volume = value;
-			this.updateVolume();
-		}
-	});
+	// IE8 has Object.defineProperty, but only for DOM objects, so check if fails to suppress errors
+	try {
+		Object.defineProperty(p, "volume", {
+			get: function() {
+				return this._volume;
+			},
+			set: function(value) {
+				if (Number(value) == null) {return;}
+				value = Math.max(0, Math.min(1, value));
+				this._volume = value;
+				this.updateVolume();
+			}
+		});
+	} catch (e) {
+		// dispatch message or error?
+	};
 	p.pan = 0;
 	p.duration = 0;
 	p.remainingLoops = 0;

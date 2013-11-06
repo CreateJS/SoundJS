@@ -608,7 +608,9 @@ this.createjs = this.createjs || {};
 	 * @default 1
 	 */
 	p._volume =  1;
-	Object.defineProperty(p, "volume", {
+	// IE8 has Object.defineProperty, but only for DOM objects, so check if fails to suppress errors
+	try {
+		Object.defineProperty(p, "volume", {
 		get: function() {
 			return this._volume;
 		},
@@ -618,7 +620,10 @@ this.createjs = this.createjs || {};
 			this._volume = value;
 			this.updateVolume();
 		}
-	});
+		});
+	} catch (e) {
+		// dispatch message or error?
+	};
 
 	/**
 	 * The pan of the sound, between -1 (left) and 1 (right). Note that pan does not work for HTML Audio.
@@ -631,21 +636,27 @@ this.createjs = this.createjs || {};
 	 * @default 0
 	 */
 	p._pan =  0;
-	Object.defineProperty(p, "pan", {
-		get: function() {
-			return this._pan;
-		},
-		set: function(value) {
-			if (!this.owner.capabilities.panning || Number(value) == null) {return false;}
+	// IE8 has Object.defineProperty, but only for DOM objects, so check if fails to suppress errors
+	try {
+		Object.defineProperty(p, "pan", {
+			get: function() {
+				return this._pan;
+			},
+			set: function(value) {
+				if (!this.owner.capabilities.panning || Number(value) == null) {return false;}
 
-			value = Math.max(-1, Math.min(1, value));	// force pan to stay in the -1 to 1 range
-			// Note that panning in WebAudioPlugin can support 3D audio, but our implementation does not.
-			this._pan = value;  // Unfortunately panner does not give us a way to access this after it is set http://www.w3.org/TR/webaudio/#AudioPannerNode
-			this.panNode.setPosition(value, 0, -0.5);  // z need to be -0.5 otherwise the sound only plays in left, right, or center
-		}
-	});
+				value = Math.max(-1, Math.min(1, value));	// force pan to stay in the -1 to 1 range
+				// Note that panning in WebAudioPlugin can support 3D audio, but our implementation does not.
+				this._pan = value;  // Unfortunately panner does not give us a way to access this after it is set http://www.w3.org/TR/webaudio/#AudioPannerNode
+				this.panNode.setPosition(value, 0, -0.5);  // z need to be -0.5 otherwise the sound only plays in left, right, or center
+			}
+		});
+	} catch (e) {
+		// dispatch message or error?
+	};
 
-	/**
+
+/**
 	 * The length of the audio clip, in milliseconds.
 	 * Use {{#crossLink "SoundInstance/getDuration:method"}}{{/crossLink}} to access.
 	 * @property pan

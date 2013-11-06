@@ -1,3 +1,7 @@
+Version NEXT
+************************************************************************************************************************
+- suppressing errors in WebAudioPlugin and HTMLAudioPlugin in old browsers that do not properly support object.defineProperty
+
 Version 0.5.0 [September 25, 2013]
 ************************************************************************************************************************
 CRITICAL (may break existing content):
