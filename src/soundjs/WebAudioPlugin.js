@@ -160,7 +160,7 @@ this.createjs = this.createjs || {};
 			return null;
 		}
 
-		// this handles if only deprecated calls are supported
+		// this handles if only deprecated Web Audio API calls are supported
 		s.compatibilitySetUp();
 
 		// playing this inside of a touch event will enable audio on iOS, which starts muted
@@ -699,18 +699,8 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE this only exists as a {{#crossLink "WebAudioPlugin"}}{{/crossLink}} property and is only intended for use by advanced users.
-	 * A panNode allowing left and right audio channel panning only. Connected to our WebAudioPlugin {{#crossLink "WebAudioPlugin/gainNode:property"}}{{/crossLink}}
+	 * GainNode for controlling <code>SoundInstance</code> volume. Connected to the WebAudioPlugin {{#crossLink "WebAudioPlugin/gainNode:property"}}{{/crossLink}}
 	 * that sequences to <code>context.destination</code>.
-	 * @property panNode
-	 * @type {AudioPannerNode}
-	 * @default null
-	 * @since 0.4.0
-	 */
-	p.panNode = null;
-
-	/**
-	 * NOTE this only exists as a {{#crossLink "WebAudioPlugin"}}{{/crossLink}} property and is only intended for use by advanced users.
-	 * GainNode for controlling <code>SoundInstance</code> volume. Connected to {{#crossLink "SoundInstance/panNode:property"}}{{/crossLink}}.
 	 * @property gainNode
 	 * @type {AudioGainNode}
 	 * @default null
@@ -721,9 +711,19 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE this only exists as a {{#crossLink "WebAudioPlugin"}}{{/crossLink}} property and is only intended for use by advanced users.
+	 * A panNode allowing left and right audio channel panning only. Connected to SoundInstance {{#crossLink "SoundInstance/gainNode:property"}}{{/crossLink}}.
+	 * @property panNode
+	 * @type {AudioPannerNode}
+	 * @default null
+	 * @since 0.4.0
+	 */
+	p.panNode = null;
+
+	/**
+	 * NOTE this only exists as a {{#crossLink "WebAudioPlugin"}}{{/crossLink}} property and is only intended for use by advanced users.
 	 * sourceNode is the audio source. Connected to {{#crossLink "SoundInstance/gainNode:property"}}{{/crossLink}}.
 	 * @property sourceNode
-	 * @type {AudioSourceNode}
+	 * @type {AudioNode}
 	 * @default null
 	 * @since 0.4.0
 	 *
@@ -735,7 +735,7 @@ this.createjs = this.createjs || {};
 	 * sourceNodeNext is the audio source for the next loop, inserted in a look ahead approach to allow for smooth
 	 * looping. Connected to {{#crossLink "SoundInstance/gainNode:property"}}{{/crossLink}}.
 	 * @property sourceNodeNext
-	 * @type {AudioSourceNode}
+	 * @type {AudioNode}
 	 * @default null
 	 * @protected
 	 * @since 0.4.1
@@ -908,11 +908,11 @@ this.createjs = this.createjs || {};
 		this.owner = owner;
 		this.src = src;
 
-		this.panNode = this.owner.context.createPanner();  // TODO test how this affects when we have mono audio
-		this.panNode.panningModel = this.owner.panningModel;
-
 		this.gainNode = this.owner.context.createGain();
-		this.gainNode.connect(this.panNode);
+
+		this.panNode = this.owner.context.createPanner();  //TODO test how this affects when we have mono audio
+		this.panNode.panningModel = this.owner.panningModel;
+		this.panNode.connect(this.gainNode);
 
 		if (this.owner.isPreloadComplete(this.src)) {
 			this.duration = this.owner.arrayBuffers[this.src].duration * 1000;
@@ -929,14 +929,13 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p.cleanUp = function () {
-		// if playbackState is UNSCHEDULED_STATE, then play has not been called so calling stop would throw an error
-		if (this.sourceNode && this.sourceNode.playbackState != this.sourceNode.UNSCHEDULED_STATE) {
+		if (this.sourceNode && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
 			this.sourceNode = this.cleanUpAudioNode(this.sourceNode);
 			this.sourceNodeNext = this.cleanUpAudioNode(this.sourceNodeNext);
 		}
 
-		if (this.panNode.numberOfOutputs != 0) {
-			this.panNode.disconnect(0);
+		if (this.gainNode.numberOfOutputs != 0) {
+			this.gainNode.disconnect(0);
 		}  // this works because we only have one connection, and it returns 0 if we've already disconnected it.
 		// OJR there appears to be a bug that this doesn't always work in webkit (Chrome and Safari). According to the documentation, this should work.
 
@@ -961,7 +960,7 @@ this.createjs = this.createjs || {};
 	p.cleanUpAudioNode = function(audioNode) {
 		if(audioNode) {
 			audioNode.stop(0);
-			audioNode.disconnect(this.gainNode);
+			audioNode.disconnect(this.panNode);
 			audioNode = null;	// release reference so Web Audio can handle removing references and garbage collection
 		}
 		return audioNode;
@@ -973,8 +972,8 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p.interrupt = function () {
-		this.playState = createjs.Sound.PLAY_INTERRUPTED;
 		this.cleanUp();
+		this.playState = createjs.Sound.PLAY_INTERRUPTED;
 		this.paused = false;
 		this.sendEvent("interrupted");
 	};
@@ -1000,7 +999,7 @@ this.createjs = this.createjs || {};
 		this.playState = createjs.Sound.PLAY_SUCCEEDED;
 		this.paused = false;
 
-		this.panNode.connect(this.owner.gainNode);  // this line can cause a memory leak.  Nodes need to be disconnected from the audioDestination or any sequence that leads to it.
+		this.gainNode.connect(this.owner.gainNode);  // this line can cause a memory leak.  Nodes need to be disconnected from the audioDestination or any sequence that leads to it.
 
 		var dur = this.owner.arrayBuffers[this.src].duration;
 		this.sourceNode = this.createAndPlayAudioNode((this.owner.context.currentTime - dur), this.offset);
@@ -1029,10 +1028,10 @@ this.createjs = this.createjs || {};
 		// The same is assumed for MediaStreamSource, although it may share the same commands as MediaElementSource.
 		var audioNode = this.owner.context.createBufferSource();
 		audioNode.buffer = this.owner.arrayBuffers[this.src];
-		audioNode.connect(this.gainNode);
+		audioNode.connect(this.panNode);
 		var currentTime = this.owner.context.currentTime;
 		audioNode.startTime = startTime + audioNode.buffer.duration;	//currentTime + audioNode.buffer.duration - (currentTime - startTime);
-		audioNode.start(audioNode.startTime, offset, audioNode.buffer.duration - offset);  // OJR deprecated in favor of start()
+		audioNode.start(audioNode.startTime, offset, audioNode.buffer.duration - offset);
 		return audioNode;
 	};
 
@@ -1119,8 +1118,8 @@ this.createjs = this.createjs || {};
 			this.cleanUpAudioNode(this.sourceNode);
 			this.cleanUpAudioNode(this.sourceNodeNext);
 
-			if (this.panNode.numberOfOutputs != 0) {
-				this.panNode.disconnect();
+			if (this.gainNode.numberOfOutputs != 0) {
+				this.gainNode.disconnect();
 			}  // this works because we only have one connection, and it returns 0 if we've already disconnected it.
 
 			clearTimeout(this.delayTimeoutId); // clear timeout that plays delayed sound
@@ -1163,8 +1162,8 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} If the stop call succeeds.
 	 */
 	p.stop = function () {
-		this.playState = createjs.Sound.PLAY_FINISHED;
 		this.cleanUp();
+		this.playState = createjs.Sound.PLAY_FINISHED;
 		this.offset = 0;  // set audio to start at the beginning
 		return true;
 	};
@@ -1335,7 +1334,7 @@ this.createjs = this.createjs || {};
 	p.setPosition = function (value) {
 		this.offset = value / 1000; // convert milliseconds to seconds
 
-		if (this.sourceNode && this.sourceNode.playbackState != this.sourceNode.UNSCHEDULED_STATE) {  // if playbackState is UNSCHEDULED_STATE, then play has not been called so calling stop would throw an error
+		if (this.sourceNode && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
 			// we need to stop this sound from continuing to play, as we need to recreate the sourceNode to change position
 			this.cleanUpAudioNode(this.sourceNode);
 			this.cleanUpAudioNode(this.sourceNodeNext);
@@ -1396,8 +1395,8 @@ this.createjs = this.createjs || {};
 		if (window.createjs == null) {
 			return;
 		}
-		this.playState = createjs.Sound.PLAY_FINISHED;
 		this.cleanUp();
+		this.playState = createjs.Sound.PLAY_FINISHED;
 		this.sendEvent("complete");
 	};
 
@@ -1406,8 +1405,8 @@ this.createjs = this.createjs || {};
 		if (window.createjs == null) {
 			return;
 		}
-		this.playState = createjs.Sound.PLAY_FAILED;
 		this.cleanUp();
+		this.playState = createjs.Sound.PLAY_FAILED;
 		this.sendEvent("failed");
 	};
 
