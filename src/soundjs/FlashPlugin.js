@@ -129,8 +129,9 @@ this.createjs = this.createjs || {};
 			ogg:false,
 			mpeg:true,
 			wav:true,
-			m4a:true,
-			mp4:true,
+			// our current implementation cannot support mp4 http://forums.adobe.com/thread/825408
+			m4a:false,
+			mp4:false,
 			aiff:false, // not listed in player but is Supported by Flash so this may be true
 			wma:false,
 			mid:false
