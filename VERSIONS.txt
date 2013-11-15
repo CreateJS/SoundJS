@@ -1,9 +1,10 @@
-Version NEXT
+Version 0.5.1 [November 15, 2013]
 ************************************************************************************************************************
 - suppressing errors in WebAudioPlugin and HTMLAudioPlugin in old browsers that do not properly support object.defineProperty
 - changes to WebAudioPlugin to allow it to work with lasted working draft of Web Audio API
 - WebAudioPlugin changed SoundInstance node order to SourceNode -> PanNode -> GainNode --> context.destination to get
   around firefox bug https://bugzilla.mozilla.org/show_bug.cgi?id=933304
+
 
 Version 0.5.0 [September 25, 2013]
 ************************************************************************************************************************
