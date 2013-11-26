@@ -9,6 +9,9 @@
 	import flash.events.IOErrorEvent;
 	import flash.events.ErrorEvent;
 	import flash.utils.Dictionary;
+	import flash.system.Security;
+	
+	Security.allowDomain('*');
 	
 	public class FlashAudioPlugin extends Sprite {
 		

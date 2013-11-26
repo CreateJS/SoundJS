@@ -284,7 +284,7 @@ this.createjs = this.createjs || {};
 
 			// Embed SWF
 			var val = swfobject.embedSWF(s.BASE_PATH + "FlashAudioPlugin.swf", this.CONTAINER_ID, "1", "1",
-					"9.0.0", null, null, null, null,
+					"9.0.0", null, null, {"AllowScriptAccess" : "always"}, null,
 					createjs.proxy(this.handleSWFReady, this)
 			);
 
