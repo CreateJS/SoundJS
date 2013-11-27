@@ -867,6 +867,7 @@ this.createjs = this.createjs || {};
 		if (details == null) {
 			return false;
 		}
+		if (basePath != null) {details.src = basePath + details.src;}
 		src = details.src;
 
 		// remove src from idHash	// Note "for in" can be a slow operation
