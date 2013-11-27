@@ -504,7 +504,7 @@ this.createjs = this.createjs || {};
 
 			s.dispatchEvent(event);
 		}
-	}
+	};
 
 	/**
 	 * Get the preload rules to allow Sound to be used as a plugin by <a href="http://preloadjs.com" target="_blank">PreloadJS</a>.
@@ -555,7 +555,7 @@ this.createjs = this.createjs || {};
 			return true;
 		}
 		return false;
-	}
+	};
 
 	/**
 	 * Register a list of Sound plugins, in order of precedence. To register a single plugin, use
@@ -578,7 +578,7 @@ this.createjs = this.createjs || {};
 			}
 		}
 		return false;
-	}
+	};
 
 	/**
 	 * Initialize the default plugins. This method is automatically called when any audio is played or registered before
@@ -604,7 +604,7 @@ this.createjs = this.createjs || {};
 			return true;
 		}
 		return false;
-	}
+	};
 
 	/**
 	 * Determines if Sound has been initialized, and a plugin has been activated.
@@ -623,7 +623,7 @@ this.createjs = this.createjs || {};
 	 */
 	s.isReady = function () {
 		return (s.activePlugin != null);
-	}
+	};
 
 	/**
 	 * Get the active plugins capabilities, which help determine if a plugin can be used in the current environment,
@@ -651,7 +651,7 @@ this.createjs = this.createjs || {};
 			return null;
 		}
 		return s.activePlugin.capabilities;
-	}
+	};
 
 	/**
 	 * Get a specific capability of the active plugin. See {{#crossLink "Sound/getCapabilities"}}{{/crossLink}} for a
@@ -671,7 +671,7 @@ this.createjs = this.createjs || {};
 			return null;
 		}
 		return s.activePlugin.capabilities[key];
-	}
+	};
 
 	/**
 	 * Process manifest items from <a href="http://preloadjs.com" target="_blank">PreloadJS</a>. This method is intended
@@ -801,7 +801,7 @@ this.createjs = this.createjs || {};
 		}
 
 		return details;
-	}
+	};
 
 	/**
 	 * Register a manifest of audio files for loading and future playback in Sound. It is recommended to register all
@@ -835,7 +835,7 @@ this.createjs = this.createjs || {};
 			returnValues[i] = createjs.Sound.registerSound(manifest[i].src, manifest[i].id, manifest[i].data, manifest[i].preload, basePath);
 		}
 		return returnValues;
-	}
+	};
 
 	/**
 	 * Remove a sound that has been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
@@ -886,7 +886,7 @@ this.createjs = this.createjs || {};
 		s.activePlugin.removeSound(src);
 
 		return true;
-	}
+	};
 
 	/**
 	 * Remove a manifest of audio files that have been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
@@ -917,7 +917,7 @@ this.createjs = this.createjs || {};
 			returnValues[i] = createjs.Sound.removeSound(manifest[i].src, basePath);
 		}
 		return returnValues;
-	}
+	};
 
 	/**
 	 * Remove all sounds that have been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
@@ -936,14 +936,14 @@ this.createjs = this.createjs || {};
 		s.preloadHash = {};
 		SoundChannel.removeAll();
 		s.activePlugin.removeAllSounds();
-	}
+	};
 
 	/**
 	 * Check if a source has been loaded by internal preloaders. This is necessary to ensure that sounds that are
 	 * not completed preloading will not kick off a new internal preload if they are played.
 	 *
 	 * <h4>Example</h4>
-	 *     var mySound = "assetPath/asset0.mp3|assetPath/asset0.ogg";
+	 *     var mySound = "assetPath/asset0.ogg";
 	 *     if(createjs.Sound.loadComplete(mySound) {
 	 *         createjs.Sound.play(mySound);
 	 *     }
@@ -954,19 +954,24 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	s.loadComplete = function (src) {
-		var details = s.parsePath(src, "sound");
+		if (s.alternateExtensions.length) {
+			var details = s.parsePath2(src, "sound");
+		} else {
+			var details = s.parsePath(src, "sound");
+		}
 		if (details) {
 			src = s.getSrcById(details.src);
 		} else {
 			src = s.getSrcById(src);
 		}
 		return (s.preloadHash[src][0] == true);  // src only loads once, so if it's true for the first it's true for all
-	}
+	};
 
 	/**
 	 * Parse the path of a sound, usually from a manifest item. Manifest items support single file paths, as well as
 	 * composite paths using {{#crossLink "Sound/DELIMITER:property"}}{{/crossLink}}, which defaults to "|". The first path supported by the
 	 * current browser/plugin will be used.
+	 * NOTE the "|" approach is deprecated and will be removed in the next version
 	 * @method parsePath
 	 * @param {String} value The path to an audio source.
 	 * @param {String} [type] The type of path. This will typically be "sound" or null.
@@ -1000,7 +1005,7 @@ this.createjs = this.createjs || {};
 			}
 		}
 		return null;
-	}
+	};
 
 
 	/* ---------------
@@ -1051,7 +1056,7 @@ this.createjs = this.createjs || {};
 			instance.playFailed();
 		}
 		return instance;
-	}
+	};
 
 	/**
 	 * Creates a {{#crossLink "SoundInstance"}}{{/crossLink}} using the passed in src. If the src does not have a
@@ -1097,7 +1102,7 @@ this.createjs = this.createjs || {};
 		instance.uniqueId = s.lastId++;  // OJR moved this here so we can have multiple plugins active in theory
 
 		return instance;
-	}
+	};
 
 	/**
 	 * Set the master volume of Sound. The master volume is multiplied against each sound's individual volume.  For
@@ -1123,7 +1128,7 @@ this.createjs = this.createjs || {};
 				instances[i].setMasterVolume(value);
 			}
 		}
-	}
+	};
 
 	/**
 	 * Get the master volume of Sound. The master volume is multiplied against each sound's individual volume.
@@ -1138,7 +1143,7 @@ this.createjs = this.createjs || {};
 	 */
 	s.getVolume = function () {
 		return s.masterVolume;
-	}
+	};
 
 	/**
 	 * REMOVED. Please see {{#crossLink "Sound/setMute"}}{{/crossLink}}.
@@ -1191,7 +1196,7 @@ this.createjs = this.createjs || {};
 	 */
 	s.getMute = function () {
 		return this.masterMute;
-	}
+	};
 
 	/**
 	 * Stop all audio (global stop). Stopped audio is reset, and not paused. To play audio that has been stopped,
@@ -1208,7 +1213,7 @@ this.createjs = this.createjs || {};
 		for (var i = instances.length; i--; ) {
 			instances[i].stop();  // NOTE stop removes instance from this.instances
 		}
-	}
+	};
 
 
 	/* ---------------
@@ -1269,7 +1274,7 @@ this.createjs = this.createjs || {};
 		this.instances.push(instance);
 
 		return true;
-	}
+	};
 
 	/**
 	 * Begin playback. This is called immediately or after delay by {{#crossLink "Sound/playInstance"}}{{/crossLink}}.
@@ -1302,7 +1307,7 @@ this.createjs = this.createjs || {};
 			return false;
 		}
 		return true;
-	}
+	};
 
 	/**
 	 * Get the source of a sound via the ID passed in with a register call. If no ID is found the value is returned
@@ -1318,7 +1323,7 @@ this.createjs = this.createjs || {};
 			return value;
 		}
 		return s.idHash[value];
-	}
+	};
 
 	/**
 	 * A sound has completed playback, been interrupted, failed, or been stopped. This method removes the instance from
@@ -1335,7 +1340,7 @@ this.createjs = this.createjs || {};
 		if (index > -1) {
 			this.instances.splice(index, 1);
 		}
-	}
+	};
 
 	/**
 	 * REMOVED.  Please use createjs.proxy instead
@@ -1395,7 +1400,7 @@ this.createjs = this.createjs || {};
 			return true;
 		}
 		return false;
-	}
+	};
 	/**
 	 * Delete a sound channel, stop and delete all related instances. Note that if the sound channel does not exist, this will fail.
 	 * #method remove
@@ -1411,7 +1416,7 @@ this.createjs = this.createjs || {};
 		channel.removeAll();	// this stops and removes all active instances
 		delete(SoundChannel.channels[src]);
 		return true;
-	}
+	};
 	/**
 	 * Delete all sound channels, stop and delete all related instances.
 	 * #method removeAll
@@ -1422,7 +1427,7 @@ this.createjs = this.createjs || {};
 			SoundChannel.channels[channel].removeAll();	// this stops and removes all active instances
 		}
 		SoundChannel.channels = {};
-	}
+	};
 	/**
 	 * Add an instance to a sound channel.
 	 * #method add
@@ -1438,7 +1443,7 @@ this.createjs = this.createjs || {};
 			return false;
 		}
 		return channel.add(instance, interrupt);
-	}
+	};
 	/**
 	 * Remove an instance from the channel.
 	 * #method remove
@@ -1453,7 +1458,7 @@ this.createjs = this.createjs || {};
 		}
 		channel.remove(instance);
 		return true;
-	}
+	};
 	/**
 	 * Get the maximum number of sounds you can have in a channel.
 	 * #method maxPerChannel
@@ -1461,7 +1466,7 @@ this.createjs = this.createjs || {};
 	 */
 	SoundChannel.maxPerChannel = function () {
 		return p.maxDefault;
-	}
+	};
 	/**
 	 * Get a channel instance by its src.
 	 * #method get
@@ -1470,7 +1475,7 @@ this.createjs = this.createjs || {};
 	 */
 	SoundChannel.get = function (src) {
 		return SoundChannel.channels[src];
-	}
+	};
 
 	var p = SoundChannel.prototype;
 
@@ -1679,7 +1684,7 @@ this.createjs = this.createjs || {};
 		BrowserDetect.isIOS = agent.indexOf("iPod") > -1 || agent.indexOf("iPhone") > -1 || agent.indexOf("iPad") > -1;
 		BrowserDetect.isAndroid = (agent.indexOf("Android") > -1);
 		BrowserDetect.isBlackberry = (agent.indexOf("Blackberry") > -1);
-	}
+	};
 
 	BrowserDetect.init();
 

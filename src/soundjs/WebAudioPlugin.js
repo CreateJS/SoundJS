@@ -73,6 +73,7 @@ this.createjs = this.createjs || {};
 		this.init();
 	}
 
+
 	var s = WebAudioPlugin;
 
 	/**
@@ -135,7 +136,7 @@ this.createjs = this.createjs || {};
 		}
 
 		return supported;
-	}
+	};
 
 	/**
 	 * Determine the capabilities of the plugin. Used internally. Please see the Sound API {{#crossLink "Sound/getCapabilities"}}{{/crossLink}}
@@ -224,7 +225,7 @@ this.createjs = this.createjs || {};
 
 		// panningModel
 		this.panningModel = 0;
-	}
+	};
 
 	/**
 	 * Plays an empty sound in the web audio context.  This is used to enable web audio on iOS devices, as they
