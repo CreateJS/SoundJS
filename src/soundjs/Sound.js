@@ -524,9 +524,9 @@ this.createjs = this.createjs || {};
 			if (!s.hasEventListener("fileload")) { continue; }
 
 			var event = new createjs.Event("fileload");
-			event.src = item.src,
-			event.id = item.id,
-			event.data = item.data
+			event.src = item.src;
+			event.id = item.id;
+			event.data = item.data;
 
 			s.dispatchEvent(event);
 		}
@@ -552,24 +552,39 @@ this.createjs = this.createjs || {};
 			types:["sound"],
 			extensions:s.SUPPORTED_EXTENSIONS
 		};
-	}
+	};
+
+	/**
+	 * Deprecated in favor of {{#crossLink "Sound/registerPlugins"}}{{/crossLink}} with a single argument.
+	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin]);
+	 *
+	 * @method registerPlugin
+	 * @param {Object} plugin The plugin class to install.
+	 * @return {Boolean} Whether the plugin was successfully initialized.
+	 * @static
+	 * @deprecated
+	 */
+	s.registerPlugin = function (plugin) {
+		return s._registerPlugin(plugin);
+	};
 
 	/**
 	 * Register a Sound plugin. Plugins handle the actual playback of audio. The default plugins are
 	 * ({{#crossLink "WebAudioPlugin"}}{{/crossLink}} followed by {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}),
 	 * and are installed if no other plugins are present when the user attempts to start playback or register sound.
 	 * <h4>Example</h4>
-	 *      createjs.Sound.registerPlugin(createjs.FlashPlugin);
 	 *      createjs.FlashPlugin.swfPath = "../src/SoundJS/";
+	 *      createjs.Sound._registerPlugin(createjs.FlashPlugin);
 	 *
 	 * To register multiple plugins, use {{#crossLink "Sound/registerPlugins"}}{{/crossLink}}.
 	 *
-	 * @method registerPlugin
+	 * @method _registerPlugin
 	 * @param {Object} plugin The plugin class to install.
 	 * @return {Boolean} Whether the plugin was successfully initialized.
 	 * @static
+	 * @private
 	 */
-	s.registerPlugin = function (plugin) {
+	s._registerPlugin = function (plugin) {
 		s.pluginsRegistered = true;
 		if (plugin == null) {
 			return false;
@@ -584,8 +599,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Register a list of Sound plugins, in order of precedence. To register a single plugin, use
-	 * {{#crossLink "Sound/registerPlugin"}}{{/crossLink}}.
+	 * Register a list of Sound plugins, in order of precedence. To register a single plugin, pass a single element in the array.
 	 *
 	 * <h4>Example</h4>
 	 *      createjs.FlashPlugin.swfPath = "../src/SoundJS/";
@@ -599,7 +613,7 @@ this.createjs = this.createjs || {};
 	s.registerPlugins = function (plugins) {
 		for (var i = 0, l = plugins.length; i < l; i++) {
 			var plugin = plugins[i];
-			if (s.registerPlugin(plugin)) {
+			if (s._registerPlugin(plugin)) {
 				return true;
 			}
 		}
