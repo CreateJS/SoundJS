@@ -54,8 +54,9 @@ this.createjs = this.createjs || {};
  * </ul>
  *
  * <h4>Feature Set Example</h4>
+ *      createjs.Sound.alternateExtensions = ["mp3"];
  *      createjs.Sound.addEventListener("fileload", createjs.proxy(this.loadHandler, this));
- *      createjs.Sound.registerSound("path/to/mySound.mp3|path/to/mySound.ogg", "sound");
+ *      createjs.Sound.registerSound("path/to/mySound.ogg", "sound");
  *      function loadHandler(event) {
  *          // This is fired for each sound that is registered.
  *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use full sourcepath or event.src.
@@ -107,8 +108,9 @@ this.createjs = this.createjs || {};
 	 *
 	 * <h4>Example</h4>
 	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashPlugin]);
+	 *      createjs.Sound.alternateExtensions = ["mp3"];
 	 *      createjs.Sound.addEventListener("fileload", createjs.proxy(this.loadHandler, (this));
-	 *      createjs.Sound.registerSound("path/to/mySound.mp3|path/to/mySound.ogg", "sound");
+	 *      createjs.Sound.registerSound("path/to/mySound.ogg", "sound");
 	 *      function loadHandler(event) {
      *          // This is fired for each sound that is registered.
      *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use full source path or event.src.
@@ -189,11 +191,14 @@ this.createjs = this.createjs || {};
 	var s = Sound;
 
 	/**
+	 * This approach has is being replaced by {{#crossLink "Sound/alternateExtensions:property"}}{{/crossLink}}, and
+	 * support will be removed in the next version.
 	 * The character (or characters) that are used to split multiple paths from an audio source.
 	 * @property DELIMITER
 	 * @type {String}
 	 * @default |
 	 * @static
+	 * @deprecated
 	 */
 	s.DELIMITER = "|";
 
@@ -346,6 +351,28 @@ this.createjs = this.createjs || {};
 	s.defaultInterruptBehavior = s.INTERRUPT_NONE;  // OJR does s.INTERRUPT_ANY make more sense as default?  Needs game dev testing to see which case makes more sense.
 
 	/**
+	 * An array of extensions to attempt to use when loading sound, if the default is unsupported by the active plugin.
+	 * These are applied in order, so if you try to Load Thunder.ogg in a browser that does not support ogg, and your
+	 * extensions array is ["mp3", "m4a", "wav"] it will check mp3 support, then m4a, then wav. These audio files need
+	 * to exist in the same location.
+	 *
+	 * <h4>Example</h4>
+	 *      var manifest = [
+	 *          {src:"asset0.ogg", id:"example"},
+	 *      ];
+	 * 		createjs.Sound.alternateExtensions = ["mp3"];	// now if ogg is not supported, SoundJS will try asset0.mp3
+	 *      createjs.Sound.addEventListener("fileload", handleLoad); // call handleLoad when each sound loads
+	 *      createjs.Sound.registerManifest(manifest, assetPath);
+	 *
+	 * Note that regardless of which file is loaded, you can create and play instances using the id or the same
+	 * assetPath + src passed for loading.
+	 * @property alternateExtensions
+	 * @type {Array}
+	 * @since 0.5.2
+	 */
+	s.alternateExtensions = [];
+
+	/**
 	 * Used internally to assign unique IDs to each SoundInstance.
 	 * @property lastID
 	 * @type {Number}
@@ -462,8 +489,7 @@ this.createjs = this.createjs || {};
 	 * @event fileload
 	 * @param {Object} target The object that dispatched the event.
 	 * @param {String} type The event type.
-	 * @param {String} src The source of the sound that was loaded. Note this will only return the loaded part of a
-	 * delimiter-separated source.
+	 * @param {String} src The source of the sound that was loaded.
 	 * @param {String} [id] The id passed in when the sound was registered. If one was not provided, it will be null.
 	 * @param {Number|Object} [data] Any additional data associated with the item. If not provided, it will be undefined.
 	 * @since 0.4.1
@@ -706,11 +732,12 @@ this.createjs = this.createjs || {};
 	 * need to be played back in order to properly prepare and preload them. Sound does internal preloading when required.
 	 *
 	 * <h4>Example</h4>
+	 *      createjs.Sound.alternateExtensions = ["mp3"];
 	 *      createjs.Sound.addEventListener("fileload", handleLoad); // add an event listener for when load is completed
-	 *      createjs.Sound.registerSound("myAudioPath/mySound.mp3|myAudioPath/mySound.ogg", "myID", 3);
+	 *      createjs.Sound.registerSound("myAudioPath/mySound.ogg", "myID", 3);
 	 *
 	 * @method registerSound
-	 * @param {String | Object} src The source or an Objects with a "src" property
+	 * @param {String | Object} src The source or an Object with a "src" property
 	 * @param {String} [id] An id specified by the user to play the sound later.
 	 * @param {Number | Object} [data] Data associated with the item. Sound uses the data parameter as the number of
 	 * channels for an audio instance, however a "channels" property can be appended to the data object if it is used
@@ -737,7 +764,13 @@ this.createjs = this.createjs || {};
 			data = src.data;
 			src = src.src;
 		}
-		var details = s.parsePath(src, "sound", id, data);
+
+		// branch to different parse based on alternate formats setting
+		if (s.alternateExtensions.length) {
+			var details = s.parsePath2(src, "sound", id, data);
+		} else {
+			var details = s.parsePath(src, "sound", id, data);
+		}
 		if (details == null) {
 			return false;
 		}
@@ -810,10 +843,11 @@ this.createjs = this.createjs || {};
 	 *
 	 * <h4>Example</h4>
 	 *      var manifest = [
-	 *          {src:"asset0.mp3|asset0.ogg", id:"example"}, // Note the Sound.DELIMITER '|'
-	 *          {src:"asset1.mp3|asset1.ogg", id:"1", data:6},
+	 *          {src:"asset0.ogg", id:"example"},
+	 *          {src:"asset1.ogg", id:"1", data:6},
 	 *          {src:"asset2.mp3", id:"works"}
 	 *      ];
+	 *      createjs.Sound.alternateExtensions = ["mp3"];	// if the passed extension is not supported, try this extension
 	 *      createjs.Sound.addEventListener("fileload", handleLoad); // call handleLoad when each sound loads
 	 *      createjs.Sound.registerManifest(manifest, assetPath);
 	 *
@@ -844,7 +878,7 @@ this.createjs = this.createjs || {};
 	 * Note if you passed in a basePath, you need to prepend it to the src here.
 	 *
 	 * <h4>Example</h4>
-	 *      createjs.Sound.removeSound("myAudioPath/mySound.mp3|myAudioPath/mySound.ogg");
+	 *      createjs.Sound.removeSound("myAudioBasePath/mySound.ogg");
 	 *      createjs.Sound.removeSound("myID");
 	 *
 	 * @method removeSound
@@ -863,7 +897,12 @@ this.createjs = this.createjs || {};
 			src = src.src;
 		}
 		src = s.getSrcById(src);
-		var details = s.parsePath(src);
+
+		if (s.alternateExtensions.length) {
+			var details = s.parsePath2(src);
+		} else {
+			var details = s.parsePath(src);
+		}
 		if (details == null) {
 			return false;
 		}
@@ -880,7 +919,7 @@ this.createjs = this.createjs || {};
 		// clear from SoundChannel, which also stops and deletes all instances
 		SoundChannel.removeSrc(src);
 
-		// remove src from preloadHash	// Note "for in" can be a slow operation
+		// remove src from preloadHash
 		delete(s.preloadHash[src]);
 
 		// activePlugin cleanup
@@ -897,11 +936,11 @@ this.createjs = this.createjs || {};
 	 *
 	 * <h4>Example</h4>
 	 *      var manifest = [
-	 *          {src:"asset0.mp3|asset0.ogg", id:"example"}, // Note the Sound.DELIMITER '|'
-	 *          {src:"asset1.mp3|asset1.ogg", id:"1", data:6},
+	 *          {src:"asset0.ogg", id:"example"},
+	 *          {src:"asset1.ogg", id:"1", data:6},
 	 *          {src:"asset2.mp3", id:"works"}
 	 *      ];
-	 *      createjs.Sound.removeManifest(manifest);
+	 *      createjs.Sound.removeManifest(manifest, assetPath);
 	 *
 	 * @method removeManifest
 	 * @param {Array} manifest An array of objects to remove. Objects are expected to be in the format needed for
@@ -1008,6 +1047,31 @@ this.createjs = this.createjs || {};
 		return null;
 	};
 
+	// new approach, when old approach is deprecated this will become parsePath
+	s.parsePath2 = function (value, type, id, data) {
+		if (typeof(value) != "string") {value = value.toString();}
+
+		var match = value.match(s.FILE_PATTERN);
+		if (match == null) {
+			return false;
+		}
+		var name = match[4];
+		var ext = match[5];
+
+		var c = s.getCapabilities();
+		var i = 0;
+		while (!c[ext]) {
+			ext = s.alternateExtensions[i++];
+			if (i > s.alternateExtensions.length) { return null;}	// no extensions are supported
+		}
+
+		value = value.replace("."+match[5], "."+ext);
+		var ret = {type:type || "sound", id:id, data:data};
+		ret.name = name;
+		ret.src = value;
+		ret.extension = ext;
+		return ret;
+	};
 
 	/* ---------------
 	 Static API.
@@ -1086,7 +1150,12 @@ this.createjs = this.createjs || {};
 		}
 
 		src = s.getSrcById(src);
-		var details = s.parsePath(src, "sound");
+
+		if (s.alternateExtensions.length) {
+			var details = s.parsePath2(src, "sound");
+		} else {
+			var details = s.parsePath(src, "sound");
+		}
 
 		var instance = null;
 		if (details != null && details.src != null) {
