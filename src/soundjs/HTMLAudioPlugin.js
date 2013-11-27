@@ -40,9 +40,8 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Play sounds using HTML &lt;audio&gt; tags in the browser. This plugin is the second priority plugin installed
-	 * by default, after the {{#crossLink "WebAudioPlugin"}}{{/crossLink}}, which is supported on Chrome, Safari, and
-	 * iOS. This handles audio in all other modern browsers. For older browsers that do not support html audio, include
-	 * and install the {{#crossLink "FlashPlugin"}}{{/crossLink}}.
+	 * by default, after the {{#crossLink "WebAudioPlugin"}}{{/crossLink}}.  For older browsers that do not support html
+	 * audio, include and install the {{#crossLink "FlashPlugin"}}{{/crossLink}}.
 	 *
 	 * <h4>Known Browser and OS issues for HTML Audio</h4>
 	 * <b>All browsers</b><br />

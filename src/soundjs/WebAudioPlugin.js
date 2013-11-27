@@ -43,6 +43,7 @@ this.createjs = this.createjs || {};
 	 * <ul><li>Google Chrome, version 23+ on OS X and Windows</li>
 	 *      <li>Safari 6+ on OS X</li>
 	 *      <li>Mobile Safari on iOS 6+</li>
+	 *      <li>Firefox 25+ on OS X, Windows, and Fx OS</li>
 	 * </ul>
 	 *
 	 * The WebAudioPlugin is currently the default plugin, and will be used anywhere that it is supported. Currently
