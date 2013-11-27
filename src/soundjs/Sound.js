@@ -210,7 +210,7 @@ this.createjs = this.createjs || {};
 	 * @default 8000
 	 * @protected
 	 */
-	s.AUDIO_TIMEOUT = 8000; // TODO: This is not implemeneted  // OJR remove property? doc'd as protected to remove from docs for now
+	s.AUDIO_TIMEOUT = 8000; // TODO: This is not implemented  // OJR remove property? doc'd as protected to remove from docs for now
 
 	/**
 	 * The interrupt value to interrupt any currently playing instance with the same source, if the maximum number of
@@ -313,7 +313,7 @@ this.createjs = this.createjs || {};
 	 * @type {Array[String]}
 	 * @default ["mp3", "ogg", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"]
 	 */
-	s.SUPPORTED_EXTENSIONS = ["mp3", "ogg", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"];  // OJR does not currently support FlashPlugin
+	s.SUPPORTED_EXTENSIONS = ["mp3", "ogg", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"];  // OJR FlashPlugin does not currently support
 
 	/**
 	 * Some extensions use another type of extension support to play (one of them is a codex).  This allows you to map
@@ -588,7 +588,7 @@ this.createjs = this.createjs || {};
 	 * {{#crossLink "Sound/registerPlugin"}}{{/crossLink}}.
 	 *
 	 * <h4>Example</h4>
-	 *      createjs.FlashPlugin.BASE_PATH = "../src/SoundJS/";
+	 *      createjs.FlashPlugin.swfPath = "../src/SoundJS/";
 	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
 	 *
 	 * @method registerPlugins
@@ -639,7 +639,7 @@ this.createjs = this.createjs || {};
 	 * This example sets up a Flash fallback, but only if there is no plugin specified yet.
 	 *
 	 *      if (!createjs.Sound.isReady()) {
-	 *			createjs.FlashPlugin.BASE_PATH = "../src/SoundJS/";
+	 *			createjs.FlashPlugin.swfPath = "../src/SoundJS/";
 	 *      	createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
 	 *      }
 	 *
