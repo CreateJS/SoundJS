@@ -535,14 +535,14 @@ this.createjs = this.createjs || {};
 	 * @class SoundInstance
 	 * @param {String} src The path to and file name of the sound.
 	 * @param {Object} owner The plugin instance that created this SoundInstance.
-	 * @uses EventDispatcher
+	 * @extends EventDispatcher
 	 * @constructor
 	 */
 	function SoundInstance(src, owner) {
 		this.init(src, owner);
 	}
 
-	var p = SoundInstance.prototype;
+	var p = SoundInstance.prototype = new createjs.EventDispatcher();
 
 	/**
 	 * The source of the sound.
@@ -778,15 +778,6 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	p.startTime = 0;
-
-// mix-ins:
-	// EventDispatcher methods:
-	p.addEventListener = null;
-	p.removeEventListener = null;
-	p.removeAllEventListeners = null;
-	p.dispatchEvent = null;
-	p.hasEventListener = null;
-	p._listeners = null;
 
 	// Proxies, make removing listeners easier.
 	p.endedHandler = null;
@@ -1418,9 +1409,6 @@ this.createjs = this.createjs || {};
 	p.toString = function () {
 		return "[WebAudioPlugin SoundInstance]";
 	};
-
-	// This is for the above SoundInstance.
-	createjs.EventDispatcher.initialize(SoundInstance.prototype); // inject EventDispatcher methods.
 
 	createjs.WebAudioPlugin.SoundInstance = SoundInstance;
 }());

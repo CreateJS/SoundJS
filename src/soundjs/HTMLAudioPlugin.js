@@ -425,7 +425,7 @@ this.createjs = this.createjs || {};
 		this.init(src, owner);
 	}
 
-	var p = SoundInstance.prototype;
+	var p = SoundInstance.prototype = new createjs.EventDispatcher();
 
 	p.src = null,
 	p.uniqueId = -1;
@@ -458,15 +458,6 @@ this.createjs = this.createjs || {};
 	p.tag = null;
 	p.muted = false;
 	p.paused = false;
-
-// mix-ins:
-	// EventDispatcher methods:
-	p.addEventListener = null;
-	p.removeEventListener = null;
-	p.removeAllEventListeners = null;
-	p.dispatchEvent = null;
-	p.hasEventListener = null;
-	p._listeners = null;
 
 	// Proxies, make removing listeners easier.
 	p.endedHandler = null;
@@ -742,8 +733,6 @@ this.createjs = this.createjs || {};
 	p.toString = function () {
 		return "[HTMLAudioPlugin SoundInstance]";
 	};
-
-	createjs.EventDispatcher.initialize(SoundInstance.prototype);
 
 	createjs.HTMLAudioPlugin.SoundInstance = SoundInstance;
 

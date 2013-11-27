@@ -666,7 +666,7 @@ this.createjs = this.createjs || {};
 		this.init(src, owner, flash, flashSrc);
 	}
 
-	var p = SoundInstance.prototype;
+	var p = SoundInstance.prototype = new createjs.EventDispatcher();
 
 	p.src = null;
 	p.flashSrc = null;	// because loaded src in flash can be different due to basePath appending
@@ -711,15 +711,6 @@ this.createjs = this.createjs || {};
 	} catch (e) {
 		// dispatch message or error?
 	};
-
-// mix-ins:
-	// EventDispatcher methods:
-	p.addEventListener = null;
-	p.removeEventListener = null;
-	p.removeAllEventListeners = null;
-	p.dispatchEvent = null;
-	p.hasEventListener = null;
-	p._listeners = null;
 
 // Constructor
 	p.init = function (src, owner, flash, flashSrc) {
@@ -901,9 +892,6 @@ this.createjs = this.createjs || {};
 	p.toString = function () {
 		return "[FlashPlugin SoundInstance]"
 	};
-
-	// Note this is for SoundInstance above.
-	createjs.EventDispatcher.initialize(SoundInstance.prototype);
 
 	createjs.FlashPlugin.SoundInstance = SoundInstance;
 }());
