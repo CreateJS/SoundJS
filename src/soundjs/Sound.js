@@ -1520,7 +1520,7 @@ this.createjs = this.createjs || {};
 		this.src = src;
 		this.max = max || this.maxDefault;
 		if (this.max == -1) {
-			this.max == this.maxDefault;
+			this.max = this.maxDefault;
 		}
 		this.instances = [];
 	};
