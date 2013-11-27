@@ -533,8 +533,8 @@ this.createjs = this.createjs || {};
 	 * ({{#crossLink "WebAudioPlugin"}}{{/crossLink}} followed by {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}),
 	 * and are installed if no other plugins are present when the user attempts to start playback or register sound.
 	 * <h4>Example</h4>
-	 *      createjs.FlashPlugin.BASE_PATH = "../src/SoundJS/";
 	 *      createjs.Sound.registerPlugin(createjs.FlashPlugin);
+	 *      createjs.FlashPlugin.swfPath = "../src/SoundJS/";
 	 *
 	 * To register multiple plugins, use {{#crossLink "Sound/registerPlugins"}}{{/crossLink}}.
 	 *

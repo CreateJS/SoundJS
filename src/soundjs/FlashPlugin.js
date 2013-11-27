@@ -44,11 +44,11 @@ this.createjs = this.createjs || {};
 	 * plugin is recommended to be included if sound support is required in older browsers such as IE8.
 	 *
 	 * This plugin requires FlashAudioPlugin.swf and swfObject.js (which is compiled
-	 * into the minified FlashPlugin-X.X.X.min.js file. You must ensure that {{#crossLink "FlashPlugin/BASE_PATH:property"}}{{/crossLink}}
+	 * into the minified FlashPlugin-X.X.X.min.js file. You must ensure that {{#crossLink "FlashPlugin/swfPath:property"}}{{/crossLink}}
 	 * is set when using this plugin, so that the script can find the swf.
 	 *
 	 * <h4>Example</h4>
-	 *      createjs.FlashPlugin.BASE_PATH = "../src/SoundJS/";
+	 *      createjs.FlashPlugin.swfPath = "../src/SoundJS/";
 	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
 	 *      // Adds FlashPlugin as a fallback if WebAudio and HTMLAudio do not work.
 	 *
@@ -81,14 +81,27 @@ this.createjs = this.createjs || {};
 	s.capabilities = null;
 
 	/**
+	 * Deprecated in favor of {{#crossLink "FlashPlugin/swfPath:property"}}{{/crossLink}}
 	 * The path relative to the HTML page that the FlashAudioPlugin.swf resides. Note if this is not correct, this
 	 * plugin will not work.
 	 * @property BASE_PATH
 	 * @type {String}
 	 * @default src/SoundJS
 	 * @static
+	 * @deprecated
 	 */
-	s.BASE_PATH = "src/SoundJS/";
+	s.BASE_PATH = null;
+
+	/**
+	 * The path relative to the HTML page that the FlashAudioPlugin.swf resides. Note if this is not correct, this
+	 * plugin will not work.
+	 * @property swfPath
+	 * @type {String}
+	 * @default src/SoundJS
+	 * @static
+	 * @since 0.5.2
+	 */
+	s.swfPath = "src/SoundJS/";
 
 	/**
 	 * Determine if the plugin can be used in the current browser/OS.
@@ -283,7 +296,8 @@ this.createjs = this.createjs || {};
 			w.appendChild(c);
 
 			// Embed SWF
-			var val = swfobject.embedSWF(s.BASE_PATH + "FlashAudioPlugin.swf", this.CONTAINER_ID, "1", "1",
+			var path = s.BASE_PATH || s.swfPath;	// BASE_PATH defaults to null, so it will only give value if set by user
+			var val = swfobject.embedSWF(path + "FlashAudioPlugin.swf", this.CONTAINER_ID, "1", "1",
 					"9.0.0", null, null, null, null,
 					createjs.proxy(this.handleSWFReady, this)
 			);
