@@ -449,12 +449,10 @@ this.createjs = this.createjs || {};
 		 * @method preload
 		 * @param {String} src The path to the Sound
 		 * @param {Object} instance Not used in this plugin.
-		 * @param {String} basePath A file path to prepend to the src.
 		 */
-		preload:function (src, instance, basePath) {
+		preload:function (src, instance) {
 			this.audioSources[src] = true;  // NOTE this does not mean preloading has started, just that it will
 			var loader = new createjs.FlashPlugin.Loader(src, this, this.flash);
-			if (basePath != null) {loader.src = basePath + src;}
 			loader.load();  // this will handle if flash is not ready
 		},
 

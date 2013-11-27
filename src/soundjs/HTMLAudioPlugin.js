@@ -398,12 +398,10 @@ this.createjs = this.createjs || {};
 	 * @method preload
 	 * @param {String} src The sound URI to load.
 	 * @param {Object} instance An object containing a tag property that is an HTML audio tag used to load src.
-	 * @param {String} basePath A file path to prepend to the src.
 	 * @since 0.4.0
 	 */
-	p.preload = function (src, instance, basePath) {
+	p.preload = function (src, instance) {
 		this.audioSources[src] = true;
-		if(basePath != null) {instance.tag.src = basePath + src;}
 		new createjs.HTMLAudioPlugin.Loader(src, instance.tag);
 	};
 

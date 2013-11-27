@@ -419,14 +419,12 @@ this.createjs = this.createjs || {};
 	 * @method preload
 	 * @param {String} src The sound URI to load.
 	 * @param {Object} instance Not used in this plugin.
-	 * @param {String} basePath A file path to prepend to the src.
 	 * @protected
 	 */
-	p.preload = function (src, instance, basePath) {
+	p.preload = function (src, instance) {
 		this.arrayBuffers[src] = true;
 		var loader = new createjs.WebAudioPlugin.Loader(src, this);
 		loader.onload = this.handlePreloadComplete;
-		if (basePath != null) {loader.src = basePath+loader.src;}
 		loader.load();
 	};
 

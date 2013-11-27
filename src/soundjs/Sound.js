@@ -684,18 +684,21 @@ this.createjs = this.createjs || {};
 	 * @param {Number|String|Boolean|Object} [data] Data associated with the item. Sound uses the data parameter as the
 	 * number of channels for an audio instance, however a "channels" property can be appended to the data object if
 	 * this property is used for other information. The audio channels will default to 1 if no value is found.
+	 * @param {String} [path] A combined basepath and subPath from PreloadJS that has already been prepended to src.
 	 * @return {Boolean|Object} An object with the modified values of those that were passed in, or false if the active
 	 * plugin can not play the audio type.
 	 * @protected
 	 * @static
 	 */
-	s.initLoad = function (src, type, id, data, basePath) {
-		var details = s.registerSound(src, id, data, false, basePath);
+	s.initLoad = function (src, type, id, data, path) {
+		// remove path from src so we can continue to support "|" splitting of src files	// TODO remove this when "|" is removed
+		src = src.replace(path, "");
+		var details = s.registerSound(src, id, data, false, path);
 		if (details == null) {
 			return false;
 		}
 		return details;
-	}
+	};
 
 	/**
 	 * Register an audio file for loading and future playback in Sound. This is automatically called when using
@@ -714,7 +717,7 @@ this.createjs = this.createjs || {};
 	 * for other information. The audio channels will set a default based on plugin if no value is found.
 	 * @param {Boolean} [preload=true] If the sound should be internally preloaded so that it can be played back
 	 * without an external preloader.
-	 * @param {string} basePath Set a path that will be prepending to src for loading.
+	 * @param {string} basePath Set a path that will be prepended to src for loading.
 	 * @return {Object} An object with the modified values that were passed in, which defines the sound.
 	 * Returns false if the source cannot be parsed or no plugins can be initialized.
 	 * Returns true if the source is already loaded.
@@ -727,7 +730,7 @@ this.createjs = this.createjs || {};
 		}
 
 		if (src instanceof Object) {
-			basePath = id;	//this assumes preload will not be passed in as a property // OJR check if arguments == 3
+			basePath = id;	//this assumes preload has not be passed in as a property // OJR check if arguments == 3 would be less fragile
 			//?? preload = src.preload;
 			// OJR refactor how data is passed in to make the parameters work better
 			id = src.id;
@@ -738,6 +741,7 @@ this.createjs = this.createjs || {};
 		if (details == null) {
 			return false;
 		}
+		if (basePath != null) {details.src = basePath + details.src;}
 
 		if (id != null) {
 			s.idHash[id] = details.src;
@@ -789,8 +793,7 @@ this.createjs = this.createjs || {};
 			s.preloadHash[details.src].push({src:src, id:id, data:data});  // keep this data so we can return it in fileload event
 			if (s.preloadHash[details.src].length == 1) {
 				// if already loaded once, don't load a second time  // OJR note this will disallow reloading a sound if loading fails or the source changes
-				if (basePath == null) {basePath = "";}
-				s.activePlugin.preload(details.src, loader, basePath);
+				s.activePlugin.preload(details.src, loader);
 			} else {
 				// if src already loaded successfully, return true
 				if (s.preloadHash[details.src][0] == true) {return true;}
@@ -818,7 +821,8 @@ this.createjs = this.createjs || {};
 	 * @param {Array} manifest An array of objects to load. Objects are expected to be in the format needed for
 	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}}: <code>{src:srcURI, id:ID, data:Data, preload:UseInternalPreloader}</code>
 	 * with "id", "data", and "preload" being optional.
-	 * @param {string} basePath Set a path that will be prepending to each src when loading.
+	 * @param {string} basePath Set a path that will be prepended to each src when loading.  When creating or playing
+	 * audio that was loaded with a basePath by src, the basePath must be included.
 	 * @return {Object} An array of objects with the modified values that were passed in, which defines each sound.
 	 * Like registerSound, it will return false for any values that the source cannot be parsed or if no plugins can be initialized.
 	 * Also, it will returns true for any values that the source is already loaded.
@@ -837,7 +841,7 @@ this.createjs = this.createjs || {};
 	 * Remove a sound that has been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
 	 * {{#crossLink "Sound/registerManifest"}}{{/crossLink}}.
 	 * Note this will stop playback on active instances playing this sound before deleting them.
-	 * Note if you passed in a basePath, you do not need to pass it or add assetPath to the src here.
+	 * Note if you passed in a basePath, you need to prepend it to the src here.
 	 *
 	 * <h4>Example</h4>
 	 *      createjs.Sound.removeSound("myAudioPath/mySound.mp3|myAudioPath/mySound.ogg");
@@ -845,11 +849,12 @@ this.createjs = this.createjs || {};
 	 *
 	 * @method removeSound
 	 * @param {String | Object} src The src or ID of the audio, or an Object with a "src" property
+	 * @param {string} basePath Set a path that will be prepended to each src when removing.
 	 * @return {Boolean} True if sound is successfully removed.
 	 * @static
 	 * @since 0.4.1
 	 */
-	s.removeSound = function(src) {
+	s.removeSound = function(src, basePath) {
 		if (s.activePlugin == null) {
 			return false;
 		}
@@ -900,15 +905,16 @@ this.createjs = this.createjs || {};
 	 * @method removeManifest
 	 * @param {Array} manifest An array of objects to remove. Objects are expected to be in the format needed for
 	 * {{#crossLink "Sound/removeSound"}}{{/crossLink}}: <code>{srcOrID:srcURIorID}</code>
+	 * @param {string} basePath Set a path that will be prepended to each src when removing.
 	 * @return {Object} An array of Boolean values representing if the sounds with the same array index in manifest was
 	 * successfully removed.
 	 * @static
 	 * @since 0.4.1
 	 */
-	s.removeManifest = function (manifest) {
+	s.removeManifest = function (manifest, basePath) {
 		var returnValues = [];
 		for (var i = 0, l = manifest.length; i < l; i++) {
-			returnValues[i] = createjs.Sound.removeSound(manifest[i].src);
+			returnValues[i] = createjs.Sound.removeSound(manifest[i].src, basePath);
 		}
 		return returnValues;
 	}
