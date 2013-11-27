@@ -96,21 +96,22 @@
             // set up our manifest of assets to load
             var assetsPath = "assets/";
             var manifest = [
-                {src:"Game-Break.ogg|Game-Break.mp3", id:"0"},
-                {src:"Game-Spawn.ogg|Game-Spawn.mp3", id:"1"},
-                {src:"Game-Shot.ogg|Game-Shot.mp3", id:"2"},
-                {src:"Thunder1.ogg|Thunder1.mp3", id:"3"},
-                {src:"Game-Death.ogg|Game-Death.mp3", id:"4"},
-                {src:"GU-StealDaisy.ogg|GU-StealDaisy.mp3", id:"bounce", data:soundInstanceLimit}
+                {src:"Game-Break.ogg", id:"0"},
+                {src:"Game-Spawn.ogg", id:"1"},
+                {src:"Game-Shot.ogg", id:"2"},
+                {src:"Thunder1.ogg", id:"3"},
+                {src:"Game-Death.ogg", id:"4"},
+                {src:"GU-StealDaisy.ogg", id:"bounce", data:soundInstanceLimit}
             ]
 
             // Instantiate a queue to preload our assets
-            queue = new createjs.LoadQueue();
+            queue = new createjs.LoadQueue(true, assetsPath);
+			createjs.Sound.alternateExtensions = ["mp3"];	// add other extensions to try loading if the src file extension is not supported
             queue.installPlugin(createjs.Sound);
             queue.addEventListener("complete", loadComplete);
             queue.addEventListener("error",handleFileError);
             queue.addEventListener("progress",handleProgress);
-            queue.loadManifest(manifest, true, assetsPath);
+            queue.loadManifest(manifest);
         }
 
         // show progress so the user knows something is happening during preload

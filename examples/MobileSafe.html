@@ -95,12 +95,13 @@
 
 					// Create a single item to load.
 					var assetsPath = "assets/";
-					this.src = assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3";
+					this.src = assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg";
 					// NOTE the "|" character is used by Sound to separate source into distinct files, which allows you to provide multiple extensions for wider browser support
 
 					this.displayStatus.innerHTML = "Waiting for load to complete.";  // let the user know what's happening
 					// NOTE createjs.proxy is used to apply scope so we stay within the touch scope, allowing sound to play on mobile devices
 					this.loadProxy = createjs.proxy(this.handleLoad, this);
+					createjs.Sound.alternateExtensions = ["mp3"];	// add other extensions to try loading if the src file extension is not supported
 					createjs.Sound.addEventListener("fileload", this.loadProxy); // add event listener for when load is completed.
 					createjs.Sound.registerSound(this.src);  // register sound, which preloads by default
 

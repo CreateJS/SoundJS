@@ -81,7 +81,7 @@
                 document.getElementById("header").style.display = "none";
             }
 
-			createjs.FlashPlugin.BASE_PATH = "../src/soundjs/"; // Initialize the base path from this document to the Flash Plugin
+			createjs.FlashPlugin.swfPath = "../src/soundjs/"; // Initialize the base path from this document to the Flash Plugin
             if (params.type == "flash") {
                 createjs.Sound.registerPlugins([createjs.FlashPlugin]);
             } else if (params.type == "html5") {
@@ -109,14 +109,15 @@
 
             // Create a single item to load.
             var assetsPath = "assets/";
-            var item = {src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3", id:"music"};
+            //var item = {src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg", id:"music"};
             var manifest = [
-                {id:"music", src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg|"+assetsPath+"18-machinae_supremacy-lord_krutors_dominion.mp3"}
+                {id:"music", src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"}
             ]
 
             // Instantiate a queue.
             queue = new createjs.LoadQueue();
-            queue.installPlugin(createjs.Sound);
+			createjs.Sound.alternateExtensions = ["mp3"];	// add other extensions to try loading if the src file extension is not supported
+			queue.installPlugin(createjs.Sound);
             queue.addEventListener("complete", loadComplete);
             queue.addEventListener("fileload", fileComplete);
             queue.addEventListener("error",handleFileError);

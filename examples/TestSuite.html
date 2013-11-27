@@ -185,7 +185,7 @@
             document.getElementById("header").style.display = "none";
         }
 
-        createjs.FlashPlugin.BASE_PATH = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
+        createjs.FlashPlugin.swfPath = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
         if (params.type == "flash") {
             createjs.Sound.registerPlugins([createjs.FlashPlugin]);
         } else if (params.type == "html5") {
@@ -325,16 +325,17 @@
 
         var assetsPath = "./assets/";
         var manifest = [
-            {id:"Music", src:"M-GameBG.mp3", data:2},
+            {id:"Music", src:"M-GameBG.ogg", data:2},
             {id:"Humm (mp3)", src:"Humm.mp3"},
-            {id:"Humm (ogg)", src:"Humm.ogg"},
-            {id:"Thunder", src:"Thunder1.ogg|Thunder1.mp3", data:3},
-            {id:"Tone wobble", src:"ToneWobble.ogg|ToneWobble.mp3", type:"sound", data:1},
-            {id:"Rat Damage", src:"R-Damage.mp3", type:"sound"},
-            {id:"Seagull Damage", src:"S-Damage.mp3", type:"sound"},
-            {id:"Cabin Boy", src:"U-CabinBoy3.mp3", type:"sound", data:1}
+            {id:"Humm", src:"Humm.ogg"},
+            {id:"Thunder", src:"Thunder1.ogg", data:3},
+            {id:"Tone wobble", src:"ToneWobble.ogg", type:"sound", data:1},
+            {id:"Rat Damage", src:"R-Damage.ogg", type:"sound"},
+            {id:"Seagull Damage", src:"S-Damage.ogg", type:"sound"},
+            {id:"Cabin Boy", src:"U-CabinBoy3.ogg", type:"sound", data:1}
         ];
 
+		createjs.Sound.alternateExtensions = ["mp3"];	// add other extensions to try loading if the src file extension is not supported
         createjs.Sound.addEventListener("fileload", createjs.proxy(addSoundToList,this)); // add an event listener for when load is completed
         createjs.Sound.registerManifest(manifest, assetsPath);
     }

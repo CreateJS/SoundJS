@@ -75,7 +75,7 @@
             }
 
             // Web Audio only demo, so we register just the WebAudioPlugin and if that fails, display fail message
-            if (!createjs.Sound.registerPlugin(createjs.WebAudioPlugin)) {
+            if (!createjs.Sound.registerPlugins([createjs.WebAudioPlugin])) {
                 document.getElementById("error").style.display = "block";
                 return;
             }
