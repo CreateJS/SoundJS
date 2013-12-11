@@ -21,7 +21,7 @@
     <p>
         <strong>Synopsis:</strong> An approach to playing audio that also works on mobile devices<br>
         <strong>Topics:</strong> sound, play, mobile safe approaches, best practices<br>
-        <strong>Target:</strong> SoundJS 0.4.0+
+        <strong>Target:</strong> SoundJS 0.5.2+
     </p>
 </header>
 <p class="highlight">
@@ -48,19 +48,22 @@
 			&lt;/head&gt;
 
 			&lt;body onload="init()"&gt;
-				&lt;script src="http://code.createjs.com/soundjs-0.4.0.min.js"/&gt;
+				&lt;script src="http://code.createjs.com/soundjs-0.5.2.min.js"/&gt;
 
 				&lt;script&gt;
 					function init() {
+						// if initializeDefaultPlugins returns false, we cannot play sound in this browser
 						if (!createjs.Sound.initializeDefaultPlugins()) {return;}
+
 						var audioPath = "assets/";
 						var manifest = [
-							{id:"Music", src:audioPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+audioPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"},
-							{id:"Thunder", src:audioPath + "Thunder1.mp3|"+audioPath + "Thunder1.ogg"}
+							{id:"Music", src:"18-machinae_supremacy-lord_krutors_dominion.ogg"},
+							{id:"Thunder", src:"Thunder1.ogg"}
 						];
 
-						createjs.Sound.addEventListener("loadComplete", handleLoad);
-						createjs.Sound.registerManifest(manifest);
+						createjs.Sound.alternateExtensions = ["mp3"];
+						createjs.Sound.addEventListener("fileload", handleLoad);
+						createjs.Sound.registerManifest(manifest, audioPath);
 					}
 
 					function handleLoad(event) {
@@ -157,7 +160,7 @@
 		&lt;body onload="init()"&gt;
 		&lt;h1 id="status"&gt;Hello World.&lt;/h1&gt;
 
-		&lt;script src="http://code.createjs.com/soundjs-0.4.0.min.js"&gt;&lt;/script&gt;
+		&lt;script src="http://code.createjs.com/soundjs-0.5.2.min.js"&gt;&lt;/script&gt;
 
 		&lt;script&gt;
 			var displayMessage = null;
@@ -169,12 +172,14 @@
 
 				var audioPath = "assets/";
 				var manifest = [
-					{id:"Music", src:audioPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+audioPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"},
-					{id:"Thunder", src:audioPath + "Thunder1.mp3|"+audioPath + "Thunder1.ogg"}
+					{id:"Music", src:"18-machinae_supremacy-lord_krutors_dominion.ogg"},
+					{id:"Thunder", src:"Thunder1.ogg"}
 				];
 
-				createjs.Sound.addEventListener("loadComplete", handleLoad);
-				createjs.Sound.registerManifest(manifest);
+				displayMessage.innerHTML = "Loading Audio";
+				createjs.Sound.alternateExtensions = ["mp3"];
+				createjs.Sound.addEventListener("fileload", handleLoad);
+				createjs.Sound.registerManifest(manifest, audioPath);
 			}
 
 			function handleLoad(event) {
@@ -207,7 +212,7 @@
 
 	<h3>Namespace and Closure</h3>
 	<p>
-		The first changes we want to make is to set up our code more like an application. If you are building something
+		The first change we want to make is to set up our code more like an application. If you are building something
         more complex, hopefully you have already taken these steps.
     </p>
     <ol>
@@ -272,13 +277,14 @@
 
 			var audioPath = "assets/";
 			var manifest = [
-				{id:"Music", src:audioPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+audioPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"},
-				{id:"Thunder", src:audioPath + "Thunder1.mp3|"+audioPath + "Thunder1.ogg"}
+				{id:"Music", src:"18-machinae_supremacy-lord_krutors_dominion.ogg"},
+				{id:"Thunder", src:"Thunder1.ogg"}
 			];
 
-			this.displayMessage.innerHTML = "loading audio";
-			createjs.Sound.addEventListener("loadComplete", this.handleLoad);
-			createjs.Sound.registerManifest(manifest);
+			this.displayMessage.innerHTML = "Loading Audio";
+			createjs.Sound.alternateExtensions = ["mp3"];
+			createjs.Sound.addEventListener("fileload", handleLoad);
+			createjs.Sound.registerManifest(manifest, audioPath);
 		}
 
 		handleLoad: function(event) {
@@ -318,14 +324,14 @@
         more essential step: Currently, our <code>handleLoad</code> function is not called in the MyApp scope. That
         means it will not have access to the MyApp object (this), and that the audio is not played inside of the touch
         scope. We need this function to execute in our application scope to fix these problems, which we do using the
-        handy <code>createjs.proxy</code> method. This function uses <a href="https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/apply" target="_blank">
-		<code>Function.apply</code></a> to set the scope that a function executes in, which sets the "this" reference.
-        Function scope is a very important topic with JavaScript application development, so invest some time in
-        research if you want to understand it better.
+        handy <code>createjs.proxy</code> method. Createjs.proxy uses <a href="https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/apply" target="_blank">
+		<code>Function.apply</code></a> to set the scope that a function executes in, setting the reference of "this".
+        Function scope is a very important topic of JavaScript application development, so it can be worth investing
+		some time in research to understand it better.
 	</p>
 	<textarea class="brush: js;" readonly>
 		var loadProxyMethod = createjs.proxy(this.handleLoad, this);
-		createjs.Sound.addEventListener("loadComplete", loadProxyMethod);
+		createjs.Sound.addEventListener("fileload", loadProxyMethod);
 
 	</textarea>
 
@@ -345,7 +351,7 @@
 		&lt;body onload="init()"&gt;
 			&lt;h1 id="status"&gt;Hello World.&lt;/h1&gt;
 
-			&lt;script src="http://code.createjs.com/soundjs-0.4.0.min.js"&gt;&lt;/script&gt;
+			&lt;script src="http://code.createjs.com/soundjs-0.5.2.min.js"&gt;&lt;/script&gt;
 
 			&lt;script&gt;
 				var display;
@@ -377,14 +383,15 @@
 
 							var audioPath = "assets/";
 							var manifest = [
-								{id:"Music", src:audioPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+audioPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"},
-								{id:"Thunder", src:audioPath + "Thunder1.mp3|"+audioPath + "Thunder1.ogg"}
+								{id:"Music", src:"18-machinae_supremacy-lord_krutors_dominion.ogg"},
+								{id:"Thunder", src:"Thunder1.ogg"}
 							];
 
 							this.displayMessage.innerHTML = "loading audio";
+							createjs.Sound.alternateExtensions = ["mp3"];
 							var loadProxy = createjs.proxy(this.handleLoad, this);
-							createjs.Sound.addEventListener("loadComplete", loadProxy);
-							createjs.Sound.registerManifest(manifest);
+							createjs.Sound.addEventListener("fileload", loadProxy);
+							createjs.Sound.registerManifest(manifest, audioPath);
 						},
 
 						handleLoad: function(event) {
@@ -428,6 +435,7 @@
 			<li>Get involved in active <a href="http://community.createjs.com/discussions/soundjs" target="_blank">community discussion</a>.</li>
 		</ol>
 	</section>
+</section>
 
 	</article>
 </body>

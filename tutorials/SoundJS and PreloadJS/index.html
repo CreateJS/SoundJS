@@ -22,7 +22,7 @@
     <p>
         <strong>Synopsis:</strong> Preload audio.<br>
         <strong>Topics:</strong> preload, registerSound, registerManifest, PreloadJS, manifest<br>
-        <strong>Target:</strong> PreloadJS v0.3.0+
+        <strong>Target:</strong> PreloadJS v0.4.1+
     </p>
 </header>
 <p class="highlight">
@@ -58,8 +58,7 @@
         <h2>SoundJS Internal Preloading</h2>
     </header>
     <p>
-        Since version 0.4.0, SoundJS has included the ability to internally preload audio, instead of requiring
-        <a href="http://preloadjs.com" target="_blank">PreloadJS</a>. Internal preloading requires each sound to be
+        SoundJS includes the ability to internally preload audio.  This requires each sound to be
         "registered" with SoundJS, and it will immediately be preloaded for use.
     </p>
     <textarea class="brush: js;" readonly>
@@ -71,18 +70,15 @@
         browser can play will be preloaded.
     </p>
     <textarea class="brush: js;" readonly>
-        // Browsers with MP3 support will load "music.mp3"
         // Firefox and Opera will load "music.ogg"
-        createjs.Sound.registerSound({id:"soundId", src:"assets/music.mp3|assets/music.ogg"});
+        // Browsers with MP3 support will load "music.mp3"
+		createjs.Sound.alternateExtensions = ["mp3"];
+		createjs.Sound.registerSound({id:"soundId", src:"assets/music.ogg"});
     </textarea>
 
     <p>
-        When each audio file is complete, the Sound class will fire off a <code>fileload</code> event (this event was
-        renamed to <code>fileload</code> in version 0.4.1, but the the deprecated <code>loadComplete</code> event will
-        still work for now).
-    </p>
-    <p>
-        A <code>fileload</code> event is dispatched <strong>once</strong> for each audio file that has been registered.
+        When each audio file is complete, the Sound class will fire off a <code>fileload</code> event. A
+		<code>fileload</code> event is dispatched <strong>once</strong> for each audio file that has been registered.
         Multiple requests for the same audio source will fire the first time it is loaded, but for each instance that
         uses that source. The event contains the sound's <code>src</code> and <code>id</code> property, as well as a
         generic <code>data</code> property containing any associated data that was passed into the <code>registerSound</code>
@@ -92,13 +88,13 @@
     <textarea class="brush: js; highlight:[1]" readonly>
         createjs.Sound.addEventListener("fileload", handleFileLoad);
         function handleFileLoad(event) {
-        // A sound has been preloaded.
-        console.log("Preloaded:", event.id, event.src);
+        	// A sound has been preloaded.
+        	console.log("Preloaded:", event.id, event.src);
         }
     </textarea>
 
     <p>
-        Once you have registered sounds and they have finished loading, they can be played on-demand using the a play
+        Once you have registered sounds and they have finished loading, they can be played on-demand using the play
         call that passes in either the <code>src</code> or the <code>id</code>.
     </p>
     <textarea class="brush: js;" readonly>
@@ -113,15 +109,18 @@
         sound - there is no "complete" event for internal preloading a manifest in SoundJS.
     </p>
 
-    <textarea class="brush: js; highlight:[2,3,4,5]" readonly>
+    <textarea class="brush: js; highlight:[3,4,5,6]" readonly>
         createjs.Sound.addEventListener("fileload", handleFileLoad);
-        createjs.Sound.registerManifest([
-        {id:"music1", src:"assets/music.mp3"},
-        {id:"music2", src:"assets/music2.mp3"}
-        ]);
-        function handleFileLoad(event) {
-        // A sound has been preloaded. This will fire TWICE
-        console.log("Preloaded:", event.id, event.src);
+        createjs.Sound.alternateExtensions = ["mp3"];
+        createjs.Sound.registerManifest(
+			[{id:"music1", src:"music.mp3"},
+        	{id:"music2", src:"music2.mp3"}]
+        , "assets/");
+
+
+		function handleFileLoad(event) {
+        	// A sound has been preloaded. This will fire TWICE
+        	console.log("Preloaded:", event.id, event.src);
         }
     </textarea>
 
@@ -162,8 +161,8 @@
         queue.loadFile({id:"myImage", src:"assets/image.jpg"});
         // OR
         queue.loadManifest([
-        {id:"myImage", src:"assets/image.jpg"},
-        {id:"myImage2", src:"assets/image2.jpg"}
+        	{id:"myImage", src:"assets/image.jpg"},
+        	{id:"myImage2", src:"assets/image2.jpg"}
         ]);
     </textarea>
 
@@ -171,8 +170,7 @@
         Sounds require some special considerations though:
     </p>
     <ol>
-        <li>PreloadJS doesn't know how to read the compound file paths that SoundJS supports when providing multiple file
-            types</li>
+        <li>PreloadJS doesn't know how to fallback to alternate file types if the original type is not supported</li>
         <li>PreloadJS has no way to determine <em>how</em> to load audio (xhr, tag, flash, etc)</li>
         <li>SoundJS requires some additional calls to register sounds properly</li>
     </ol>
@@ -184,11 +182,12 @@
         SoundJS has already been built as a PreloadJS plugin, so it can just be installed, and audio loads will
         automatically be handled by SoundJS.
     </p>
-    <textarea class="brush: js; highlight: [2]" readonly>
+    <textarea class="brush: js; highlight: [3]" readonly>
         var queue = new createjs.LoadQueue();
+        createjs.Sound.alternateExtensions = ["mp3"];
         queue.installPlugin(createjs.Sound);
         queue.addEventListener("complete", handleComplete);
-        queue.loadFile({id:"mySound", src:"assets/sound.mp3"});
+        queue.loadFile({id:"mySound", src:"assets/sound.ogg"});
     </textarea>
 
     <p>

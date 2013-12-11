@@ -22,7 +22,7 @@
     <p>
         <strong>Synopsis:</strong> Play audio with best practices.<br>
         <strong>Topics:</strong> sound, play, best practices, basics<br>
-        <strong>Target:</strong> SoundJS 0.4.0+
+        <strong>Target:</strong> SoundJS 0.5.2+
     </p>
 </header>
 <p class="highlight">
@@ -64,7 +64,7 @@
     <p>
         Conversely, all of our scripts are loaded at the bottom of the &lt;BODY&gt;. This is because JavaScript has a
         blocking behavior, preventing the display of any content following it until the script load has completed.
-        Generally it is better to show a user something, then add functionality using JavaScript, then to make the user
+        Generally it is better to show a user something, then add functionality using JavaScript, rather then to make the user
         wait for everything to load first.
     </p>
 
@@ -75,21 +75,21 @@
         <h2>Initial Setup</h2>
     </header>
     <p>
-        After creating a new html document, the first thing we'll need to play audio is, not surprisingly, link to the
+        After creating a new html document, the first thing we'll need to play audio is, not surprisingly, a link to the
         SoundJS library. SoundJS is hosted on a <a href="http://code.createjs.com/" target=_blank>CDN</a>, so in the
-        HTML body we create a &lt;SCRIPT&gt; tag and set it's source to <code>http://code.createjs.com/soundjs-0.4.1.min.js</code>.
+        HTML body we create a &lt;SCRIPT&gt; tag and set it's source to <code>http://code.createjs.com/soundjs-0.5.2.min.js</code>.
         Note that the SoundJS library is available globally under the "createjs" namespace. For example the primary
         class "Sound" is accessed in code with <code>createjs.Sound</code>.
     </p>
     <textarea class="brush: js;" readonly>
-        &lt;script src="http://code.createjs.com/soundjs-0.4.0.min.js"&gt;&lt;/script&gt;
+        &lt;script src="http://code.createjs.com/soundjs-0.5.2.min.js"&gt;&lt;/script&gt;
     </textarea>
 
     <p>
         Next, create an inline script that does the actual work of playing the sound. In general, it is a better
         practice to create an external JavaScript file and load it in the html. This gives the benefit of separating 
         code into more maintainable chunks and allows browsers to cache the files for quicker loads if users revisit 
-        your site or visit different areas in your site that use the same script. However for our purposes, it is easier 
+        your site or visit different areas in your site that use the same script. However, for our purposes, it is easier
         to demonstrate how to play sound inline in the HTML file.</p>
 
     <p>Inside this script, create an <code>init</code> function, which will be called by adding an onload handler to the 
@@ -98,7 +98,7 @@
     </p>
     <textarea class="brush: js;" readonly>
         &lt;body onload="init()"&gt;
-        &lt;script src="http://code.createjs.com/soundjs-0.4.0.min.js"/&gt;
+        &lt;script src="http://code.createjs.com/soundjs-0.5.2.min.js"/&gt;
         &lt;script&gt;
         function init() {
 
@@ -115,9 +115,9 @@
     </header>
     <p>
         Once setup is complete, we can get directly to loading and playing sounds. It is important to know, however,
-        that SoundJS uses a number of plugins to playback audio in different browsers. There are no additional steps to
-        initialize the plugins, and the default plugin set (Web Audio and HTML Elements) will work in the majority of
-        modern browsers. For this tutorial, the default plugin set will be fine.
+        that SoundJS uses a number of plugins to enable audio playback in different browsers. There are no additional
+		steps to initialize the plugins, and the default plugin set (Web Audio and HTML Elements) will work in the
+		majority of modern browsers. For this tutorial, the default plugin set will be fine.
     </p>
     <p>
         Plugin selection will happen automatically the first time audio is preloaded or played, however if you need to
@@ -137,7 +137,7 @@
     </header>
     <p>
         It is a best practice to preload audio so it is ready for immediate playback. We have an <a href="../SoundJS%20and%20PreloadJS/index.html" target="_blank">
-        excellent tutorial on preloading techniques</a>, but for this example we'll only be doing a basic internal
+        excellent tutorial on preloading techniques</a>, but for this example we'll only be using a basic internal
         preloading approach.
     </p>
     <p>
@@ -149,37 +149,36 @@
         We store the relative path to our audio assets as a variable as a best practice, which allows us to make a
         single change when moving the files, rather than trying to track down every individual use. Another best
         practice is to include both an mp3 and ogg version of your audio to give the broadest playback support possible.
-        SoundJS enables you to do this by adding a delimiter (the default is "|") character between audio files. The
-        code should look like this:
+        SoundJS enables you to do this by adding a setting the
+		<a href="http://www.createjs.com/Docs/SoundJS/classes/Sound.html#property_alternateExtensions" target="_blank">
+		alternateExtensions property</a>. The code will look like this:
     </p>
     <textarea class="brush: js;" readonly>
         var audioPath = "assets/";
         var manifest = [
-        {id:"Music",
-        src:audioPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+audioPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"},
-        {id:"Thunder", src:audioPath + "Thunder1.mp3|"+audioPath + "Thunder1.ogg"}
+        	{id:"Music", src:"18-machinae_supremacy-lord_krutors_dominion.ogg},
+        	{id:"Thunder", src:"Thunder1.ogg"}
         ];
+		createjs.Sound.alternateExtensions = ["mp3"];
     </textarea>
 
-    <!-- TODO replace loadComplete event with current fileload when updated -->
     <p>
-        With our audio comfortably defined in a manifest, let's move on to loading the audio. SoundJS introduced an
-        Event model in 0.4.0, and we can add an event listener for the <a href="http://www.createjs.com/Docs/SoundJS/classes/Sound.html#event_fileload" target="_blank">
-        <code>fileload</code> event</a> (Note that SoundJS 0.4.0 uses a inconsistently-named <code>loadComplete</code>
-        event instead). It is a best practice to add this <em>before</em> we begin loading the audio to avoid a race
+        With our audio comfortably defined in a manifest, let's move on to loading the audio. SoundJS uses an
+        Event model, so we can add an event listener for the <a href="http://www.createjs.com/Docs/SoundJS/classes/Sound.html#event_fileload" target="_blank">
+        <code>fileload</code> event</a>. It is a best practice to add this <em>before</em> we begin loading the audio to avoid a race
         condition where audio can load from cache immediately. The second parameter of the listener is the function to
         call back. Once this is ready, the audio load can be kicked off using the <a href="http://www.createjs.com/Docs/SoundJS/classes/Sound.html#method_registerManifest" target="_blank">
         <code>registerManifest</code> method</a>. Our deceptively simple and clean code should look like this:
     </p>
     <textarea class="brush: js;" readonly>
         function init() {
-        // create a manifest (above)
-        createjs.Sound.addEventListener("loadComplete", handleLoad);
-        createjs.Sound.registerManifest(manifest);
+        	// create a manifest and audioPath (above)
+        	createjs.Sound.addEventListener("loadComplete", handleLoad);
+        	createjs.Sound.registerManifest(manifest, audioPath);
         }
 
         function handleLoad(event) {
-        // Do something with the loaded sound
+        	// Do something with the loaded sound
         }
     </textarea>
 
@@ -197,7 +196,7 @@
     </p>
     <textarea class="brush: js;" readonly>
         function handleLoad(event) {
-        createjs.Sound.play(event.src);
+        	createjs.Sound.play(event.src);
         }
     </textarea>
 
@@ -207,30 +206,31 @@
     </p>
     <textarea class="brush: js;" readonly>
         &lt;body onload="init()"&gt;
-        &lt;script src="http://code.createjs.com/soundjs-0.4.0.min.js"/&gt;
+        &lt;script src="http://code.createjs.com/soundjs-0.5.2.min.js"/&gt;
         &lt;script&gt;
         function init() {
-        // if initializeDefaultPlugins returns false, we cannot play sound in this browser
-        if (!createjs.Sound.initializeDefaultPlugins()) {return;}
-        var audioPath = "assets/";
-        var manifest = [
-        {id:"Music",
-        src:audioPath+"18-machinae_supremacy-lord_krutors_dominion.mp3|"+audioPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"},
-        {id:"Thunder", src:audioPath + "Thunder1.mp3|"+audioPath + "Thunder1.ogg"}
-        ];
+        	// if initializeDefaultPlugins returns false, we cannot play sound in this browser
+			if (!createjs.Sound.initializeDefaultPlugins()) {return;}
 
-        createjs.Sound.addEventListener("loadComplete", handleLoad);
-        createjs.Sound.registerManifest(manifest);
+			var audioPath = "assets/";
+			var manifest = [
+				{id:"Music", src:"18-machinae_supremacy-lord_krutors_dominion.ogg"},
+				{id:"Thunder", src:"Thunder1.ogg"}
+			];
+
+			createjs.Sound.alternateExtensions = ["mp3"];
+			createjs.Sound.addEventListener("fileload", handleLoad);
+			createjs.Sound.registerManifest(manifest, audioPath);
         }
 
         function handleLoad(event) {
-        createjs.Sound.play(event.src);
+        	createjs.Sound.play(event.src);
         }
         &lt;/script&gt;
         &lt;/body&gt;
     </textarea>
 
-    <p>Check out the sample.html provided in this tutorial's directory.</p>
+    <p>Check out sample.html provided in this tutorial's directory.</p>
 </section>
 
 <section>
@@ -240,9 +240,9 @@
 
     <p>
         This wraps up the tutorial on basics and best practices, which should give you a great start. The above example
-        will not work on mobile devices (phones and tablets), due to security requirements that require user input to
+        will not work on all mobile devices (phones and tablets), due to security requirements that require user input to
         play audio. This topic is the focus of the <a href="../Mobile%20Safe%20Approach/index.html" target="_blank">
-        Mobile Safe tutorial</a>. Good places to learn more are the SoundJS are the
+        Mobile Safe tutorial</a>. Good places to learn more are SoundJS are the
         <a href="http://createjs.com/Docs/SoundJS" target="_blank">online documentation</a>
         and <a href="https://github.com/CreateJS/SoundJS/tree/master/examples" target="_blank">examples in GitHub</a>.
     </p>
@@ -257,7 +257,7 @@
     </header>
     <ol>
         <li>Download CreateJS from the <a href="http://code.createjs.com" target="_blank">Adobe CDN</a>.</li>
-        <li>Get the SoundJS source code, including minified versions of SoundJS and FlashPlugin from <a
+        <li>Get the latest SoundJS source code, including minified versions of SoundJS and FlashPlugin from <a
                 href="http://github.com/CreateJS/SoundJS/" target="_blank">GitHub</a>.
         </li>
         <li>Read more about SoundJS in the <a href="http://createjs.com/Docs/SoundJS" target="_blank">online
