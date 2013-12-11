@@ -851,8 +851,8 @@ kbd .cmd {
 .yui3-skin-sam .yui3-tab-selected .yui3-tab-label:hover {
   background: none !important;
   border: none !important;
-  background-color: #8765d6 !important;
+  background-color: #3399ff !important;
 }
 .yui3-skin-sam .yui3-tabview-list {
-  border-bottom: 5px solid #8765d6 !important;
+  border-bottom: 5px solid #3399ff !important;
 }

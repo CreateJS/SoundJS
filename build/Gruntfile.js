@@ -14,7 +14,6 @@ module.exports = function (grunt) {
 				// Setup doc names / paths.
 				docsName: '<%= pkg.name %>_docs-<%= version %>',
 				docsZip: "<%= docsName %>.zip",
-				docsFolder: "./output/<%= docsName %>/",
 
 				// Setup Uglify for JS minification.
 				uglify: {
@@ -55,13 +54,13 @@ module.exports = function (grunt) {
 						url: '<%= pkg.url %>',
 						logo: '<%= pkg.logo %>',
 						options: {
-							paths: ['../src/'],
+							paths: ['./'],
 							outdir: '<%= docsFolder %>',
 							linkNatives: true,
 							attributesEmit: true,
 							selleck: true,
-							helpers: ["./path.js"],
-							themedir: "createjsTheme/"
+							helpers: ["../build/path.js"],
+							themedir: "../build/createjsTheme/"
 						}
 					}
 				},
@@ -173,13 +172,22 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.loadTasks('tasks/');
 
+	grunt.registerTask('setDocsBase', "Internal utility task to set a correct base for YUIDocs.", function() {
+		grunt.file.setBase('../src');
+		grunt.config.set('docsFolder', "../build/output/<%= docsName %>/");
+	});
+
+	grunt.registerTask('resetBase', "Internal utility task to reset the base, after setDocsBase", function() {
+		grunt.file.setBase('../build');
+		grunt.config.set('docsFolder', "./output/<%= docsName %>/");
+	});
+
 	/**
 	 * Build the docs using YUIdocs.
 	 */
 	grunt.registerTask('docs', [
-		"yuidoc", "compress", "copy:docsZip"
+		"setDocsBase", "yuidoc", "resetBase", "compress", "copy:docsZip"
 	]);
-
 	/**
 	 * Sets out version to the version in package.json (defaults to NEXT)
 	 */

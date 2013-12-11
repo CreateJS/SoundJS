@@ -1,9 +1,9 @@
 {
   "name": "SoundJS",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "SoundJS Docs",
-  "url": "http://www.createjs.com/SoundJS",
-  "logo": "http://createjs.com/resources/SuiteIcons/SoundJS/docs-icon-SoundJS.png",
+  "url": "http://www.createjs.com/#!/SoundJS",
+  "logo": "assets/docs-icon-SoundJS.png",
   "devDependencies": {
     "grunt": "~0.4.1",
 	"grunt-contrib-concat": "~0.3.0",
