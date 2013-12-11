@@ -62,22 +62,22 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	function WebAudioPlugin() {
-		this.init();
+		this._init();
 	}
 
 
 	var s = WebAudioPlugin;
 
 	/**
-	 * The capabilities of the plugin. This is generated via the {{#crossLink "WebAudioPlugin/generateCapabilities:method"}}{{/crossLink}}
+	 * The capabilities of the plugin. This is generated via the {{#crossLink "WebAudioPlugin/_generateCapabilities:method"}}{{/crossLink}}
 	 * method and is used internally.
-	 * @property capabilities
+	 * @property _capabilities
 	 * @type {Object}
 	 * @default null
 	 * @protected
 	 * @static
 	 */
-	s.capabilities = null;
+	s._capabilities = null;
 
 	/**
 	 * Determine if the plugin can be used in the current browser/OS.
@@ -88,9 +88,9 @@ this.createjs = this.createjs || {};
 	s.isSupported = function () {
 		// check if this is some kind of mobile device, Web Audio works with local protocol under PhoneGap and it is unlikely someone is trying to run a local file
 		var isMobilePhoneGap = createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid || createjs.Sound.BrowserDetect.isBlackberry;
-		// OJR isMobile may be redundant with isFileXHRSupported available.  Consider removing.
-		if (location.protocol == "file:" && !isMobilePhoneGap && !this.isFileXHRSupported()) { return false; }  // Web Audio requires XHR, which is not usually available locally
-		s.generateCapabilities();
+		// OJR isMobile may be redundant with _isFileXHRSupported available.  Consider removing.
+		if (location.protocol == "file:" && !isMobilePhoneGap && !this._isFileXHRSupported()) { return false; }  // Web Audio requires XHR, which is not usually available locally
+		s._generateCapabilities();
 		if (s.context == null) {
 			return false;
 		}
@@ -99,14 +99,14 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Determine if XHR is supported, which is necessary for web audio.
-	 * @method isFileXHRSupported
+	 * @method _isFileXHRSupported
 	 * @return {Boolean} If XHR is supported.
 	 * @since 0.4.2
 	 * @protected
 	 * @static
 	 */
-	s.isFileXHRSupported = function() {
-		// it's much easier to detect when something goes wrong, so let's start optimisticaly
+	s._isFileXHRSupported = function() {
+		// it's much easier to detect when something goes wrong, so let's start optimistically
 		var supported = true;
 
 		var xhr = new XMLHttpRequest();
@@ -133,12 +133,12 @@ this.createjs = this.createjs || {};
 	/**
 	 * Determine the capabilities of the plugin. Used internally. Please see the Sound API {{#crossLink "Sound/getCapabilities"}}{{/crossLink}}
 	 * method for an overview of plugin capabilities.
-	 * @method generateCapabiities
+	 * @method _generateCapabilities
 	 * @static
 	 * @protected
 	 */
-	s.generateCapabilities = function () {
-		if (s.capabilities != null) {
+	s._generateCapabilities = function () {
+		if (s._capabilities != null) {
 			return;
 		}
 		// Web Audio can be in any formats supported by the audio element, from http://www.w3.org/TR/webaudio/#AudioContext-section,
@@ -160,12 +160,12 @@ this.createjs = this.createjs || {};
 		}
 
 		// this handles if only deprecated Web Audio API calls are supported
-		s.compatibilitySetUp();
+		s._compatibilitySetUp();
 
 		// playing this inside of a touch event will enable audio on iOS, which starts muted
 		s.playEmptySound();
 
-		s.capabilities = {
+		s._capabilities = {
 			panning:true,
 			volume:true,
 			tracks:-1
@@ -177,13 +177,13 @@ this.createjs = this.createjs || {};
 		for (var i = 0, l = supportedExtensions.length; i < l; i++) {
 			var ext = supportedExtensions[i];
 			var playType = extensionMap[ext] || ext;
-			s.capabilities[ext] = (t.canPlayType("audio/" + ext) != "no" && t.canPlayType("audio/" + ext) != "") || (t.canPlayType("audio/" + playType) != "no" && t.canPlayType("audio/" + playType) != "");
+			s._capabilities[ext] = (t.canPlayType("audio/" + ext) != "no" && t.canPlayType("audio/" + ext) != "") || (t.canPlayType("audio/" + playType) != "no" && t.canPlayType("audio/" + playType) != "");
 		}  // OJR another way to do this might be canPlayType:"m4a", codex: mp4
 
 		// 0=no output, 1=mono, 2=stereo, 4=surround, 6=5.1 surround.
 		// See http://www.w3.org/TR/webaudio/#AudioChannelSplitter for more details on channels.
 		if (s.context.destination.numberOfChannels < 2) {
-			s.capabilities.panning = false;
+			s._capabilities.panning = false;
 		}
 
 		// set up AudioNodes that all of our source audio will connect to
@@ -199,11 +199,11 @@ this.createjs = this.createjs || {};
 	 * Needed so we can support new browsers that don't support deprecated calls (Firefox) as well as old browsers that
 	 * don't support new calls.
 	 *
-	 * @method compatibilitySetUp
+	 * @method _compatibilitySetUp
 	 * @protected
 	 * @since 0.4.2
 	 */
-	s.compatibilitySetUp = function() {
+	s._compatibilitySetUp = function() {
 		//assume that if one new call is supported, they all are
 		if (s.context.createGain) { return; }
 
@@ -216,7 +216,7 @@ this.createjs = this.createjs || {};
 		audioNode.__proto__.stop = audioNode.__proto__.noteOff;
 
 		// panningModel
-		this.panningModel = 0;
+		this._panningModel = 0;
 	};
 
 	/**
@@ -250,17 +250,17 @@ this.createjs = this.createjs || {};
 
 	var p = WebAudioPlugin.prototype;
 
-	p.capabilities = null; // doc'd above
+	p._capabilities = null; // doc'd above
 
 	/**
-	 * The internal volume value of the plugin.
-	 * @property volume
+	 * The internal master volume value of the plugin.
+	 * @property _volume
 	 * @type {Number}
 	 * @default 1
 	 * @protected
 	 */
 	// TODO refactor Sound.js so we can use getter setter for volume
-	p.volume = 1;
+	p._volume = 1;
 
 	/**
 	 * The web audio context, which WebAudio uses to play audio. All nodes that interact with the WebAudioPlugin
@@ -272,11 +272,11 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Value to set panning model to equal power for SoundInstance.  Can be "equalpower" or 0 depending on browser implementation.
-	 * @property panningModel
+	 * @property _panningModel
 	 * @type {Number / String}
 	 * @protected
 	 */
-	p.panningModel = "equalpower";
+	p._panningModel = "equalpower";
 
 	/**
 	 * A DynamicsCompressorNode, which is used to improve sound quality and prevent audio distortion.
@@ -287,7 +287,7 @@ this.createjs = this.createjs || {};
 	p.dynamicsCompressorNode = null;
 
 	/**
-	 * A GainNode for controlling master volume. It is connected to {{#crossLink "WebAudioPlugin/dynamicsCompressorNode:property"}}{{/crossLink}}.
+	 * A GainNode for controlling master _volume. It is connected to {{#crossLink "WebAudioPlugin/dynamicsCompressorNode:property"}}{{/crossLink}}.
 	 * @property gainNode
 	 * @type {AudioGainNode}
 	 */
@@ -298,20 +298,20 @@ this.createjs = this.createjs || {};
 	 * prevents having to load and decode audio files more than once. If a load has been started on a file,
 	 * <code>arrayBuffers[src]</code> will be set to true. Once load is complete, it is set the the loaded
 	 * ArrayBuffer instance.
-	 * @property arrayBuffers
+	 * @property _arrayBuffers
 	 * @type {Object}
 	 * @protected
 	 */
-	p.arrayBuffers = null;
+	p._arrayBuffers = null;
 
 	/**
 	 * An initialization function run by the constructor
-	 * @method init
+	 * @method _init
 	 * @protected
 	 */
-	p.init = function () {
-		this.capabilities = s.capabilities;
-		this.arrayBuffers = {};
+	p._init = function () {
+		this._capabilities = s._capabilities;
+		this._arrayBuffers = {};
 
 		this.context = s.context;
 		this.gainNode = s.gainNode;
@@ -329,7 +329,7 @@ this.createjs = this.createjs || {};
 	 * @return {Object} A result object, containing a "tag" for preloading purposes.
 	 */
 	p.register = function (src, instances) {
-		this.arrayBuffers[src] = true;  // This is needed for PreloadJS
+		this._arrayBuffers[src] = true;  // This is needed for PreloadJS
 		var tag = new createjs.WebAudioPlugin.Loader(src, this);
 		return {
 			tag:tag
@@ -344,7 +344,7 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean}
 	 */
 	p.isPreloadStarted = function (src) {
-		return (this.arrayBuffers[src] != null);
+		return (this._arrayBuffers[src] != null);
 	};
 
 	/**
@@ -354,17 +354,7 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean}
 	 */
 	p.isPreloadComplete = function (src) {
-		return (!(this.arrayBuffers[src] == null || this.arrayBuffers[src] == true));
-	};
-
-	/**
-	 * Remove a source from our preload list. Note this does not cancel a preload.
-	 * @method removeFromPreload
-	 * @param {String} src The sound URI to unload.
-	 * @deprecated
-	 */
-	p.removeFromPreload = function (src) {
-		delete(this.arrayBuffers[src]);
+		return (!(this._arrayBuffers[src] == null || this._arrayBuffers[src] == true));
 	};
 
 	/**
@@ -374,7 +364,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 	p.removeSound = function (src) {
-		delete(this.arrayBuffers[src]);
+		delete(this._arrayBuffers[src]);
 	};
 
 	/**
@@ -384,7 +374,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 	p.removeAllSounds = function () {
-		this.arrayBuffers = {};
+		this._arrayBuffers = {};
 	};
 
 	/**
@@ -394,17 +384,17 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean}
 	 */
 	p.addPreloadResults = function (src, result) {
-		this.arrayBuffers[src] = result;
+		this._arrayBuffers[src] = result;
 	};
 
 	/**
 	 * Handles internal preload completion.
-	 * @method handlePreloadComplete
+	 * @method _handlePreloadComplete
 	 * @protected
 	 */
-	p.handlePreloadComplete = function () {
+	p._handlePreloadComplete = function () {
 		//LM: I would recommend having the Loader include an "event" in the onload, and properly binding this callback.
-		createjs.Sound.sendFileLoadEvent(this.src);  // fire event or callback on Sound
+		createjs.Sound._sendFileLoadEvent(this.src);  // fire event or callback on Sound
 		// note "this" will reference Loader object
 	};
 
@@ -413,12 +403,11 @@ this.createjs = this.createjs || {};
 	 * @method preload
 	 * @param {String} src The sound URI to load.
 	 * @param {Object} instance Not used in this plugin.
-	 * @protected
 	 */
 	p.preload = function (src, instance) {
-		this.arrayBuffers[src] = true;
+		this._arrayBuffers[src] = true;
 		var loader = new createjs.WebAudioPlugin.Loader(src, this);
-		loader.onload = this.handlePreloadComplete;
+		loader.onload = this._handlePreloadComplete;
 		loader.load();
 	};
 
@@ -443,18 +432,18 @@ this.createjs = this.createjs || {};
 	 * instances manually otherwise.
 	 */
 	p.setVolume = function (value) {
-		this.volume = value;
-		this.updateVolume();
+		this._volume = value;
+		this._updateVolume();
 		return true;
 	};
 
 	/**
 	 * Set the gain value for master audio. Should not be called externally.
-	 * @method updateVolume
+	 * @method _updateVolume
 	 * @protected
 	 */
-	p.updateVolume = function () {
-		var newVolume = createjs.Sound.masterMute ? 0 : this.volume;
+	p._updateVolume = function () {
+		var newVolume = createjs.Sound._masterMute ? 0 : this._volume;
 		if (newVolume != this.gainNode.gain.value) {
 			this.gainNode.gain.value = newVolume;
 		}
@@ -466,7 +455,7 @@ this.createjs = this.createjs || {};
 	 * @return The volume level, between 0 and 1.
 	 */
 	p.getVolume = function () {
-		return this.volume;
+		return this._volume;
 	};
 
 	/**
@@ -477,7 +466,7 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} If the mute call succeeds.
 	 */
 	p.setMute = function (value) {
-		this.updateVolume();
+		this._updateVolume();
 		return true;
 	};
 
@@ -510,10 +499,10 @@ this.createjs = this.createjs || {};
 	 * playback has completed, a simple call to the {{#crossLink "SoundInstance/play"}}{{/crossLink}} instance method
 	 * will rebuild the references the Sound class need to control it.
 	 *
-	 *      var myInstance = createjs.Sound.play("myAssetPath/mySrcFile.mp3");
-	 *      myInstance.addEventListener("complete", playAgain);
-	 *      function playAgain(event) {
-	 *          myInstance.play();
+	 *      var myInstance = createjs.Sound.play("myAssetPath/mySrcFile.mp3", {loop:2});
+	 *      myInstance.addEventListener("loop", handleLoop);
+	 *      function handleLoop(event) {
+	 *          myInstance.volume = myInstance.volume * 0.5;
 	 *      }
 	 *
 	 * Events are dispatched from the instance to notify when the sound has completed, looped, or when playback fails
@@ -531,7 +520,7 @@ this.createjs = this.createjs || {};
 	 * @constructor
 	 */
 	function SoundInstance(src, owner) {
-		this.init(src, owner);
+		this._init(src, owner);
 	}
 
 	var p = SoundInstance.prototype = new createjs.EventDispatcher();
@@ -562,34 +551,33 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * The plugin that created the instance
-	 * @property owner
+	 * @property _owner
 	 * @type {WebAudioPlugin}
 	 * @default null
 	 * @protected
 	 */
-	p.owner = null;
+	p._owner = null;
 
 	/**
 	 * How far into the sound to begin playback in milliseconds. This is passed in when play is called and used by
 	 * pause and setPosition to track where the sound should be at.
 	 * Note this is converted from milliseconds to seconds for consistency with the WebAudio API.
-	 * @property offset
+	 * @property _offset
 	 * @type {Number}
 	 * @default 0
 	 * @protected
 	 */
-	p.offset = 0;
+	p._offset = 0;
 
 	/**
 	 * The time in milliseconds before the sound starts.
 	 * Note this is handled by {{#crossLink "Sound"}}{{/crossLink}}.
-	 * @property delay
+	 * @property _delay
 	 * @type {Number}
 	 * @default 0
 	 * @protected
 	 */
-	p.delay = 0;
-
+	p._delay = 0;	// OJR remove this property from SoundInstance as it is not used here?
 
 	/**
 	 * The volume of the sound, between 0 and 1.
@@ -614,7 +602,7 @@ this.createjs = this.createjs || {};
 			if (Number(value) == null) {return false}
 			value = Math.max(0, Math.min(1, value));
 			this._volume = value;
-			this.updateVolume();
+			this._updateVolume();
 		}
 		});
 	} catch (e) {
@@ -640,7 +628,7 @@ this.createjs = this.createjs || {};
 				return this._pan;
 			},
 			set: function(value) {
-				if (!this.owner.capabilities.panning || Number(value) == null) {return false;}
+				if (!this._owner._capabilities.panning || Number(value) == null) {return false;}
 
 				value = Math.max(-1, Math.min(1, value));	// force pan to stay in the -1 to 1 range
 				// Note that panning in WebAudioPlugin can support 3D audio, but our implementation does not.
@@ -726,52 +714,50 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE this only exists as a {{#crossLink "WebAudioPlugin"}}{{/crossLink}} property and is only intended for use by advanced users.
-	 * sourceNodeNext is the audio source for the next loop, inserted in a look ahead approach to allow for smooth
+	 * _sourceNodeNext is the audio source for the next loop, inserted in a look ahead approach to allow for smooth
 	 * looping. Connected to {{#crossLink "SoundInstance/gainNode:property"}}{{/crossLink}}.
-	 * @property sourceNodeNext
+	 * @property _sourceNodeNext
 	 * @type {AudioNode}
 	 * @default null
 	 * @protected
 	 * @since 0.4.1
 	 *
 	 */
-	p.sourceNodeNext = null;
+	p._sourceNodeNext = null;
 
 	/**
 	 * Determines if the audio is currently muted.
 	 * Use {{#crossLink "SoundInstance/getMute:method"}}{{/crossLink}} and {{#crossLink "SoundInstance/setMute:method"}}{{/crossLink}} to access.
-	 * @property muted
+	 * @property _muted
 	 * @type {Boolean}
 	 * @default false
 	 * @protected
 	 */
-	p.muted = false;
+	p._muted = false;
 
 	/**
 	 * Determines if the audio is currently paused.
 	 * Use {{#crossLink "SoundInstance/pause:method"}}{{/crossLink}} and {{#crossLink "SoundInstance/resume:method"}}{{/crossLink}} to set.
-	 * @property paused
+	 * @property _paused
 	 * @type {Boolean}
 	 * @default false
 	 * @protected
 	 */
-	p.paused = false;
+	p._paused = false;
 
 	/**
 	 * WebAudioPlugin only.
 	 * Time audio started playback, in seconds. Used to handle set position, get position, and resuming from paused.
-	 * @property startTime
+	 * @property _startTime
 	 * @type {Number}
 	 * @default 0
 	 * @protected
 	 * @since 0.4.0
 	 */
-	p.startTime = 0;
+	p._startTime = 0;
 
 	// Proxies, make removing listeners easier.
-	p.endedHandler = null;
-	p.readyHandler = null;
-	p.stalledHandler = null;
+	p._endedHandler = null;
 
 // Events
 	/**
@@ -857,11 +843,11 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * A helper method that dispatches all events for SoundInstance.
-	 * @method sendEvent
+	 * @method _sendEvent
 	 * @param {String} type The event type
 	 * @protected
 	 */
-	p.sendEvent = function (type) {
+	p._sendEvent = function (type) {
 		var event = new createjs.Event(type);
 		this.dispatchEvent(event);
 	};
@@ -869,39 +855,37 @@ this.createjs = this.createjs || {};
 // Constructor
 	/**
 	 * Initialize the SoundInstance. This is called from the constructor.
-	 * @method init
+	 * @method _init
 	 * @param {string} src The source of the audio.
 	 * @param {Class} owner The plugin that created this instance.
 	 * @protected
 	 */
-	p.init = function (src, owner) {
-		this.owner = owner;
+	p._init = function (src, owner) {
+		this._owner = owner;
 		this.src = src;
 
-		this.gainNode = this.owner.context.createGain();
+		this.gainNode = this._owner.context.createGain();
 
-		this.panNode = this.owner.context.createPanner();  //TODO test how this affects when we have mono audio
-		this.panNode.panningModel = this.owner.panningModel;
+		this.panNode = this._owner.context.createPanner();  //TODO test how this affects when we have mono audio
+		this.panNode.panningModel = this._owner._panningModel;
 		this.panNode.connect(this.gainNode);
 
-		if (this.owner.isPreloadComplete(this.src)) {
-			this.duration = this.owner.arrayBuffers[this.src].duration * 1000;
+		if (this._owner.isPreloadComplete(this.src)) {
+			this._duration = this._owner._arrayBuffers[this.src].duration * 1000;
 		}
 
-		this.endedHandler = createjs.proxy(this.handleSoundComplete, this);
-		this.readyHandler = createjs.proxy(this.handleSoundReady, this);
-		this.stalledHandler = createjs.proxy(this.handleSoundStalled, this);
+		this._endedHandler = createjs.proxy(this._handleSoundComplete, this);
 	};
 
 	/**
 	 * Clean up the instance. Remove references and clean up any additional properties such as timers.
-	 * @method cleanup
+	 * @method _cleanUp
 	 * @protected
 	 */
-	p.cleanUp = function () {
+	p._cleanUp = function () {
 		if (this.sourceNode && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-			this.sourceNode = this.cleanUpAudioNode(this.sourceNode);
-			this.sourceNodeNext = this.cleanUpAudioNode(this.sourceNodeNext);
+			this.sourceNode = this._cleanUpAudioNode(this.sourceNode);
+			this._sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
 		}
 
 		if (this.gainNode.numberOfOutputs != 0) {
@@ -909,25 +893,26 @@ this.createjs = this.createjs || {};
 		}  // this works because we only have one connection, and it returns 0 if we've already disconnected it.
 		// OJR there appears to be a bug that this doesn't always work in webkit (Chrome and Safari). According to the documentation, this should work.
 
-		clearTimeout(this.delayTimeoutId); // clear timeout that plays delayed sound
-		clearTimeout(this.soundCompleteTimeout);  // clear timeout that triggers sound complete
+		clearTimeout(this._delayTimeoutId); // clear timeout that plays delayed sound
+		clearTimeout(this._soundCompleteTimeout);  // clear timeout that triggers sound complete
 
-		this.startTime = 0;	// This is used by getPosition
+		this._startTime = 0;	// This is used by getPosition
 
 		if (window.createjs == null) {
 			return;
 		}
-		createjs.Sound.playFinished(this);
+		createjs.Sound._playFinished(this);
 	};
 
 	/**
 	 * Turn off and disconnect an audioNode, then set reference to null to release it for garbage collection
+	 * @method _cleanUpAudioNode
 	 * @param audioNode
 	 * @return {audioNode}
 	 * @protected
 	 * @since 0.4.1
 	 */
-	p.cleanUpAudioNode = function(audioNode) {
+	p._cleanUpAudioNode = function(audioNode) {
 		if(audioNode) {
 			audioNode.stop(0);
 			audioNode.disconnect(this.panNode);
@@ -938,68 +923,64 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * The sound has been interrupted.
-	 * @method interrupt
+	 * @method _interrupt
 	 * @protected
 	 */
-	p.interrupt = function () {
-		this.cleanUp();
+	p._interrupt = function () {
+		this._cleanUp();
 		this.playState = createjs.Sound.PLAY_INTERRUPTED;
-		this.paused = false;
-		this.sendEvent("interrupted");
+		this._paused = false;
+		this._sendEvent("interrupted");
 	};
 
-	// Playback has stalled, and therefore failed.
-	p.handleSoundStalled = function (event) {
-		this.sendEvent("failed");
-	};
-
-	// The sound is ready for playing
-	p.handleSoundReady = function (event) {
+	/**
+	 * Handles starting playback when the sound is ready for playing.
+	 * @method _handleSoundReady
+	 * @protected
+ 	 */
+	p._handleSoundReady = function (event) {
 		if (window.createjs == null) {
 			return;
 		}
 
-		if ((this.offset*1000) > this.getDuration()) {	// converting offset to ms
+		if ((this._offset*1000) > this.getDuration()) {	// converting offset to ms
 			this.playFailed();
 			return;
-		} else if (this.offset < 0) {  // may not need this check if play ignores negative values, this is not specified in the API http://www.w3.org/TR/webaudio/#AudioBufferSourceNode
-			this.offset = 0;
+		} else if (this._offset < 0) {  // may not need this check if play ignores negative values, this is not specified in the API http://www.w3.org/TR/webaudio/#AudioBufferSourceNode
+			this._offset = 0;
 		}
 
 		this.playState = createjs.Sound.PLAY_SUCCEEDED;
-		this.paused = false;
+		this._paused = false;
 
-		this.gainNode.connect(this.owner.gainNode);  // this line can cause a memory leak.  Nodes need to be disconnected from the audioDestination or any sequence that leads to it.
+		this.gainNode.connect(this._owner.gainNode);  // this line can cause a memory leak.  Nodes need to be disconnected from the audioDestination or any sequence that leads to it.
 
-		var dur = this.owner.arrayBuffers[this.src].duration;
-		this.sourceNode = this.createAndPlayAudioNode((this.owner.context.currentTime - dur), this.offset);
-		this.duration = dur * 1000;	// NOTE *1000 because WebAudio reports everything in seconds but js uses milliseconds
-		this.startTime = this.sourceNode.startTime - this.offset;
+		var dur = this._owner._arrayBuffers[this.src].duration;
+		this.sourceNode = this._createAndPlayAudioNode((this._owner.context.currentTime - dur), this._offset);
+		this._duration = dur * 1000;	// NOTE *1000 because WebAudio reports everything in seconds but js uses milliseconds
+		this._startTime = this.sourceNode.startTime - this._offset;
 
-		this.soundCompleteTimeout = setTimeout(this.endedHandler, (dur - this.offset) * 1000);
+		this._soundCompleteTimeout = setTimeout(this._endedHandler, (dur - this._offset) * 1000);
 
-		if(this.remainingLoops != 0) {
-			this.sourceNodeNext = this.createAndPlayAudioNode(this.startTime, 0);
+		if(this._remainingLoops != 0) {
+			this._sourceNodeNext = this._createAndPlayAudioNode(this._startTime, 0);
 		}
 	};
 
 	/**
 	 * Creates an audio node using the current src and context, connects it to the gain node, and starts playback.
-	 * @method createAudioNode
+	 * @method _createAndPlayAudioNode
 	 * @param {Number} startTime The time to add this to the web audio context, in seconds.
 	 * @param {Number} offset The amount of time into the src audio to start playback, in seconds.
 	 * @return {audioNode}
 	 * @protected
 	 * @since 0.4.1
 	 */
-	p.createAndPlayAudioNode = function(startTime, offset) {
-		// WebAudio supports BufferSource, MediaElementSource, and MediaStreamSource.
-		// NOTE MediaElementSource requires different commands to play, pause, and stop because it uses audio tags.
-		// The same is assumed for MediaStreamSource, although it may share the same commands as MediaElementSource.
-		var audioNode = this.owner.context.createBufferSource();
-		audioNode.buffer = this.owner.arrayBuffers[this.src];
+	p._createAndPlayAudioNode = function(startTime, offset) {
+		var audioNode = this._owner.context.createBufferSource();
+		audioNode.buffer = this._owner._arrayBuffers[this.src];
 		audioNode.connect(this.panNode);
-		var currentTime = this.owner.context.currentTime;
+		var currentTime = this._owner.context.currentTime;
 		audioNode.startTime = startTime + audioNode.buffer.duration;	//currentTime + audioNode.buffer.duration - (currentTime - startTime);
 		audioNode.start(audioNode.startTime, offset, audioNode.buffer.duration - offset);
 		return audioNode;
@@ -1030,21 +1011,21 @@ this.createjs = this.createjs || {};
 	 * for HTML Audio.
 	 */
 	p.play = function (interrupt, delay, offset, loop, volume, pan) {
-		this.cleanUp();
-		createjs.Sound.playInstance(this, interrupt, delay, offset, loop, volume, pan);
+		this._cleanUp();
+		createjs.Sound._playInstance(this, interrupt, delay, offset, loop, volume, pan);
 	};
 
 	/**
 	 * Called by the Sound class when the audio is ready to play (delay has completed). Starts sound playing if the
 	 * src is loaded, otherwise playback will fail.
-	 * @method beginPlaying
+	 * @method _beginPlaying
 	 * @param {Number} offset How far into the sound to begin playback, in milliseconds.
 	 * @param {Number} loop The number of times to loop the audio. Use -1 for infinite loops.
 	 * @param {Number} volume The volume of the sound, between 0 and 1.
 	 * @param {Number} pan The pan of the sound between -1 (left) and 1 (right). Note that pan does not work for HTML Audio.
 	 * @protected
 	 */
-	p.beginPlaying = function (offset, loop, volume, pan) {
+	p._beginPlaying = function (offset, loop, volume, pan) {
 		if (window.createjs == null) {
 			return;
 		}
@@ -1053,14 +1034,14 @@ this.createjs = this.createjs || {};
 			return;
 		}
 
-		this.offset = offset / 1000;  //convert ms to sec
-		this.remainingLoops = loop;
+		this._offset = offset / 1000;  //convert ms to sec
+		this._remainingLoops = loop;
 		this.volume = volume;
 		this.pan = pan;
 
-		if (this.owner.isPreloadComplete(this.src)) {
-			this.handleSoundReady(null);
-			this.sendEvent("succeeded");
+		if (this._owner.isPreloadComplete(this.src)) {
+			this._handleSoundReady(null);
+			this._sendEvent("succeeded");
 			return 1;
 		} else {
 			this.playFailed();
@@ -1080,19 +1061,19 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} If the pause call succeeds. This will return false if the sound isn't currently playing.
 	 */
 	p.pause = function () {
-		if (!this.paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-			this.paused = true;
+		if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
+			this._paused = true;
 
-			this.offset = this.owner.context.currentTime - this.startTime;  // this allows us to restart the sound at the same point in playback
-			this.cleanUpAudioNode(this.sourceNode);
-			this.cleanUpAudioNode(this.sourceNodeNext);
+			this._offset = this._owner.context.currentTime - this._startTime;  // this allows us to restart the sound at the same point in playback
+			this._cleanUpAudioNode(this.sourceNode);
+			this._cleanUpAudioNode(this._sourceNodeNext);
 
 			if (this.gainNode.numberOfOutputs != 0) {
 				this.gainNode.disconnect();
 			}  // this works because we only have one connection, and it returns 0 if we've already disconnected it.
 
-			clearTimeout(this.delayTimeoutId); // clear timeout that plays delayed sound
-			clearTimeout(this.soundCompleteTimeout);  // clear timeout that triggers sound complete
+			clearTimeout(this._delayTimeoutId); // clear timeout that plays delayed sound
+			clearTimeout(this._soundCompleteTimeout);  // clear timeout that triggers sound complete
 			return true;
 		}
 		return false;
@@ -1112,10 +1093,10 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} If the resume call succeeds. This will return false if called on a sound that is not paused.
 	 */
 	p.resume = function () {
-		if (!this.paused) {
+		if (!this._paused) {
 			return false;
 		}
-		this.handleSoundReady(null);
+		this._handleSoundReady(null);
 		return true;
 	};
 
@@ -1131,9 +1112,9 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} If the stop call succeeds.
 	 */
 	p.stop = function () {
-		this.cleanUp();
+		this._cleanUp();
 		this.playState = createjs.Sound.PLAY_FINISHED;
-		this.offset = 0;  // set audio to start at the beginning
+		this._offset = 0;  // set audio to start at the beginning
 		return true;
 	};
 
@@ -1160,12 +1141,12 @@ this.createjs = this.createjs || {};
 	/**
 	 * Internal function used to update the volume based on the instance volume, master volume, instance mute value,
 	 * and master mute value.
-	 * @method updateVolume
+	 * @method _updateVolume
 	 * @return {Boolean} if the volume was updated.
 	 * @protected
 	 */
-	p.updateVolume = function () {
-		var newVolume = this.muted ? 0 : this._volume;
+	p._updateVolume = function () {
+		var newVolume = this._muted ? 0 : this._volume;
 		if (newVolume != this.gainNode.gain.value) {
 			this.gainNode.gain.value = newVolume;
 			return true;
@@ -1204,8 +1185,8 @@ this.createjs = this.createjs || {};
 			return false;
 		}
 
-		this.muted = value;
-		this.updateVolume();
+		this._muted = value;
+		this._updateVolume();
 		return true;
 	};
 
@@ -1262,7 +1243,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Get the position of the playhead in the instance in milliseconds.
+	 * Get the position of the playhead of the instance in milliseconds.
 	 *
 	 * <h4>Example</h4>
 	 *
@@ -1272,10 +1253,10 @@ this.createjs = this.createjs || {};
 	 * @return {Number} The position of the playhead in the sound, in milliseconds.
 	 */
 	p.getPosition = function () {
-		if (this.paused || this.sourceNode == null) {
-			var pos = this.offset;
+		if (this._paused || this.sourceNode == null) {
+			var pos = this._offset;
 		} else {
-			var pos = this.owner.context.currentTime - this.startTime;
+			var pos = this._owner.context.currentTime - this._startTime;
 		}
 
 		return pos * 1000; // pos in seconds * 1000 to give milliseconds
@@ -1293,17 +1274,17 @@ this.createjs = this.createjs || {};
 	 * @param {Number} value The position to place the playhead, in milliseconds.
 	 */
 	p.setPosition = function (value) {
-		this.offset = value / 1000; // convert milliseconds to seconds
+		this._offset = value / 1000; // convert milliseconds to seconds
 
 		if (this.sourceNode && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
 			// we need to stop this sound from continuing to play, as we need to recreate the sourceNode to change position
-			this.cleanUpAudioNode(this.sourceNode);
-			this.cleanUpAudioNode(this.sourceNodeNext);
-			clearTimeout(this.soundCompleteTimeout);  // clear timeout that triggers sound complete
-		}  // NOTE we cannot just call cleanup because it also calls the Sound function playFinished which releases this instance in SoundChannel
+			this._cleanUpAudioNode(this.sourceNode);
+			this._cleanUpAudioNode(this._sourceNodeNext);
+			clearTimeout(this._soundCompleteTimeout);  // clear timeout that triggers sound complete
+		}  // NOTE we cannot just call cleanup because it also calls the Sound function _playFinished which releases this instance in SoundChannel
 
-		if (!this.paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-			this.handleSoundReady(null);
+		if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
+			this._handleSoundReady(null);
 		}
 
 		return true;
@@ -1322,43 +1303,47 @@ this.createjs = this.createjs || {};
 	 * @return {Number} The duration of the sound instance in milliseconds.
 	 */
 	p.getDuration = function () {
-		return this.duration;
+		return this._duration;
 	};
 
-	// Audio has finished playing. Manually loop it if required.
-	// called internally by soundCompleteTimeout in WebAudioPlugin
-	p.handleSoundComplete = function (event) {
-		this.offset = 0;  // have to set this as it can be set by pause during playback
+	/**
+	 * Audio has finished playing. Manually loop it if required.
+	 * @method _handleSoundComplete
+	 * @param event
+	 * @protected
+	 */
+	 // called internally by _soundCompleteTimeout in WebAudioPlugin
+	p._handleSoundComplete = function (event) {
+		this._offset = 0;  // have to set this as it can be set by pause during playback
 
+		if (this._remainingLoops != 0) {
+			this._remainingLoops--;  // NOTE this introduces a theoretical limit on loops = float max size x 2 - 1
 
-		if (this.remainingLoops != 0) {
-			this.remainingLoops--;  // NOTE this introduces a theoretical limit on loops = float max size x 2 - 1
-
-			// OJR we are using a look ahead approach to ensure smooth looping.  We add sourceNodeNext to the audio
+			// OJR we are using a look ahead approach to ensure smooth looping.  We add _sourceNodeNext to the audio
 			// context so that it starts playing even if this callback is delayed.  This technique and the reasons for
 			// using it are described in greater detail here:  http://www.html5rocks.com/en/tutorials/audio/scheduling/
 			// NOTE the cost of this is that our audio loop may not always match the loop event timing precisely.
-			if(this.sourceNodeNext) { // this can be set to null, but this should not happen when looping
-				this.cleanUpAudioNode(this.sourceNode);
-				this.sourceNode = this.sourceNodeNext;
-				this.startTime = this.sourceNode.startTime;
-				this.sourceNodeNext = this.createAndPlayAudioNode(this.startTime, 0);
-				this.soundCompleteTimeout = setTimeout(this.endedHandler, this.duration);
+			if(this._sourceNodeNext) { // this can be set to null, but this should not happen when looping
+				this._cleanUpAudioNode(this.sourceNode);
+				this.sourceNode = this._sourceNodeNext;
+				this._startTime = this.sourceNode.startTime;
+				this._sourceNodeNext = this._createAndPlayAudioNode(this._startTime, 0);
+				this._soundCompleteTimeout = setTimeout(this._endedHandler, this._duration);
 			}
 			else {
-				this.handleSoundReady(null);
+				this._handleSoundReady(null);
 			}
 
-			this.sendEvent("loop");
+			this._sendEvent("loop");
 			return;
 		}
 
 		if (window.createjs == null) {
 			return;
 		}
-		this.cleanUp();
+		this._cleanUp();
 		this.playState = createjs.Sound.PLAY_FINISHED;
-		this.sendEvent("complete");
+		this._sendEvent("complete");
 	};
 
 	// Play has failed, which can happen for a variety of reasons.
@@ -1366,9 +1351,9 @@ this.createjs = this.createjs || {};
 		if (window.createjs == null) {
 			return;
 		}
-		this.cleanUp();
+		this._cleanUp();
 		this.playState = createjs.Sound.PLAY_FAILED;
-		this.sendEvent("failed");
+		this._sendEvent("failed");
 	};
 
 	p.toString = function () {
@@ -1391,7 +1376,7 @@ this.createjs = this.createjs || {};
 	 * @constructor
 	 */
 	function Loader(src, owner) {
-		this.init(src, owner);
+		this._init(src, owner);
 	}
 
 	var p = Loader.prototype;
@@ -1448,7 +1433,7 @@ this.createjs = this.createjs || {};
 	p.onError = null;
 
 	// constructor
-	p.init = function (src, owner) {
+	p._init = function (src, owner) {
 		this.src = src;
 		this.originalSrc = src;
 		this.owner = owner;

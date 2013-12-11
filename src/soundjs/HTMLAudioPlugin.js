@@ -89,7 +89,7 @@ this.createjs = this.createjs || {};
 	 * @constructor
 	 */
 	function HTMLAudioPlugin() {
-		this.init();
+		this._init();
 	}
 
 	var s = HTMLAudioPlugin;
@@ -105,65 +105,55 @@ this.createjs = this.createjs || {};
 	s.MAX_INSTANCES = 30;
 
 	/**
-	 * The capabilities of the plugin. This is generated via the the SoundInstance {{#crossLink "HTMLAudioPlugin/generateCapabilities"}}{{/crossLink}}
-	 * method. Please see the Sound {{#crossLink "Sound/getCapabilities"}}{{/crossLink}} method for an overview of all
-	 * of the available properties.
-	 * @property capabilities
-	 * @type {Object}
-	 * @protected
-	 * @static
-	 */
-	s.capabilities = null;
-
-	/**
 	 * Event constant for the "canPlayThrough" event for cleaner code.
-	 * @property AUDIO_READY
+	 * @property _AUDIO_READY
 	 * @type {String}
 	 * @default canplaythrough
 	 * @static
 	 * @protected
 	 */
-	s.AUDIO_READY = "canplaythrough";
+	s._AUDIO_READY = "canplaythrough";
 
 	/**
 	 * Event constant for the "ended" event for cleaner code.
-	 * @property AUDIO_ENDED
+	 * @property _AUDIO_ENDED
 	 * @type {String}
 	 * @default ended
 	 * @static
 	 * @protected
 	 */
-	s.AUDIO_ENDED = "ended";
+	s._AUDIO_ENDED = "ended";
 
 	/**
 	 * Event constant for the "seeked" event for cleaner code.  We utilize this event for maintaining loop events.
-	 * @property AUDIO_SEEKED
+	 * @property _AUDIO_SEEKED
 	 * @type {String}
 	 * @default seeked
 	 * @static
 	 * @protected
 	 */
-	s.AUDIO_SEEKED = "seeked";
+	s._AUDIO_SEEKED = "seeked";
 
 	/**
-	 * Event constant for the "error" event for cleaner code.
-	 * @property AUDIO_ERROR
+	 * Event constant for the "stalled" event for cleaner code.
+	 * @property _AUDIO_STALLED
 	 * @type {String}
 	 * @default stalled
 	 * @static
 	 * @protected
 	 */
-	s.AUDIO_ERROR = "error"; //TODO: Handle error cases
+	s._AUDIO_STALLED = "stalled";
 
 	/**
-	 * Event constant for the "stalled" event for cleaner code.
-	 * @property AUDIO_STALLED
-	 * @type {String}
-	 * @default stalled
+	 * The capabilities of the plugin. This is generated via the the SoundInstance {{#crossLink "HTMLAudioPlugin/_generateCapabilities"}}{{/crossLink}}
+	 * method. Please see the Sound {{#crossLink "Sound/getCapabilities"}}{{/crossLink}} method for an overview of all
+	 * of the available properties.
+	 * @property _capabilities
+	 * @type {Object}
+	 * @protected
 	 * @static
 	 */
-	s.AUDIO_STALLED = "stalled";
-
+	s._capabilities = null;
 
 	/**
 	 * Allows users to enable HTML audio on IOS, which is disabled by default.
@@ -188,15 +178,12 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.isSupported = function () {
-		// HTML audio can be enable on iOS by removing this if statement, but it is not recommended due to the limitations:
-		// iOS can only have a single <audio> instance, cannot preload or autoplay, cannot cache sound, and can only be
-		// played in response to a user event (click)
 		if (createjs.Sound.BrowserDetect.isIOS && !s.enableIOS) {
 			return false;
 		}
-		s.generateCapabilities();
+		s._generateCapabilities();
 		var t = s.tag;  // OJR do we still need this check, when cap will already be null if this is the case
-		if (t == null || s.capabilities == null) {
+		if (t == null || s._capabilities == null) {
 			return false;
 		}
 		return true;
@@ -205,12 +192,12 @@ this.createjs = this.createjs || {};
 	/**
 	 * Determine the capabilities of the plugin. Used internally. Please see the Sound API {{#crossLink "Sound/getCapabilities"}}{{/crossLink}}
 	 * method for an overview of plugin capabilities.
-	 * @method generateCapabiities
+	 * @method _generateCapabilities
 	 * @static
 	 * @protected
 	 */
-	s.generateCapabilities = function () {
-		if (s.capabilities != null) {
+	s._generateCapabilities = function () {
+		if (s._capabilities != null) {
 			return;
 		}
 		var t = s.tag = document.createElement("audio");
@@ -218,7 +205,7 @@ this.createjs = this.createjs || {};
 			return null;
 		}
 
-		s.capabilities = {
+		s._capabilities = {
 			panning:true,
 			volume:true,
 			tracks:-1
@@ -230,23 +217,23 @@ this.createjs = this.createjs || {};
 		for (var i = 0, l = supportedExtensions.length; i < l; i++) {
 			var ext = supportedExtensions[i];
 			var playType = extensionMap[ext] || ext;
-			s.capabilities[ext] = (t.canPlayType("audio/" + ext) != "no" && t.canPlayType("audio/" + ext) != "") || (t.canPlayType("audio/" + playType) != "no" && t.canPlayType("audio/" + playType) != "");
+			s._capabilities[ext] = (t.canPlayType("audio/" + ext) != "no" && t.canPlayType("audio/" + ext) != "") || (t.canPlayType("audio/" + playType) != "no" && t.canPlayType("audio/" + playType) != "");
 		}  // OJR another way to do this might be canPlayType:"m4a", codex: mp4
 	}
 
 	var p = HTMLAudioPlugin.prototype;
 
 	// doc'd above
-	p.capabilities = null;
+	p._capabilities = null;
 
 	/**
 	 * Object hash indexed by the source of each file to indicate if an audio source is loaded, or loading.
-	 * @property audioSources
+	 * @property _audioSources
 	 * @type {Object}
 	 * @protected
 	 * @since 0.4.0
 	 */
-	p.audioSources = null;
+	p._audioSources = null;
 
 	/**
 	 * The default number of instances to allow.  Passed back to {{#crossLink "Sound"}}{{/crossLink}} when a source
@@ -266,12 +253,12 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * An initialization function run by the constructor
-	 * @method init
+	 * @method _init
 	 * @protected
 	 */
-	p.init = function () {
-		this.capabilities = s.capabilities;
-		this.audioSources = {};
+	p._init = function () {
+		this._capabilities = s._capabilities;
+		this._audioSources = {};
 	};
 
 	/**
@@ -285,17 +272,17 @@ this.createjs = this.createjs || {};
 	 * controlling how many instances of a source can be played by default.
 	 */
 	p.register = function (src, instances) {
-		this.audioSources[src] = true;  // Note this does not mean preloading has started
+		this._audioSources[src] = true;  // Note this does not mean preloading has started
 		var channel = createjs.HTMLAudioPlugin.TagPool.get(src);
 		var tag = null;
 		var l = instances || this.defaultNumChannels;
 		for (var i = 0; i < l; i++) {  // OJR should we be enforcing s.MAX_INSTANCES here?  Does the chrome bug still exist, or can we change this code?
-			tag = this.createTag(src);
+			tag = this._createTag(src);
 			channel.add(tag);
 		}
 
 		tag.id = src;	// co-opting id as we need a way to store original src in case it is changed before loading
-		this.loadedHandler = createjs.proxy(this.handleTagLoad, this);  // we need this bind to be able to remove event listeners
+		this.loadedHandler = createjs.proxy(this._handleTagLoad, this);  // we need this bind to be able to remove event listeners
 		tag.addEventListener && tag.addEventListener("canplaythrough", this.loadedHandler);
 		if(tag.onreadystatechange == null) {
 			tag.onreadystatechange = this.loadedHandler;
@@ -319,12 +306,12 @@ this.createjs = this.createjs || {};
 	 * Deprecated as this will not be required with new approach to basePath.
 	 * Checks if src was changed on tag used to create instances in TagPool before loading
 	 * Currently PreloadJS does this when a basePath is set, so we are replicating that behavior for internal preloading.
-	 * @method handleTagLoad
+	 * @method _handleTagLoad
 	 * @param event
 	 * @protected
 	 * @deprecated
 	 */
-	p.handleTagLoad = function(event) {
+	p._handleTagLoad = function(event) {
 		// cleanup and so we don't send the event more than once
 		event.target.removeEventListener && event.target.removeEventListener("canplaythrough", this.loadedHandler);
 		event.target.onreadystatechange = null;
@@ -336,12 +323,12 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Create an HTML audio tag.
-	 * @method createTag
+	 * @method _createTag
 	 * @param {String} src The source file to set for the audio tag.
 	 * @return {HTMLElement} Returns an HTML audio tag.
 	 * @protected
 	 */
-	p.createTag = function (src) {
+	p._createTag = function (src) {
 		var tag = document.createElement("audio");
 		tag.autoplay = false;
 		tag.preload = "none";
@@ -358,7 +345,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 	p.removeSound = function (src) {
-		delete(this.audioSources[src]);
+		delete(this._audioSources[src]);
 		createjs.HTMLAudioPlugin.TagPool.remove(src);
 	};
 
@@ -369,7 +356,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 	p.removeAllSounds = function () {
-		this.audioSources = {};	// this drops all references, in theory freeing them for garbage collection
+		this._audioSources = {};	// this drops all references, in theory freeing them for garbage collection
 		createjs.HTMLAudioPlugin.TagPool.removeAll();
 	};
 
@@ -383,7 +370,7 @@ this.createjs = this.createjs || {};
 		// if this sound has not be registered, create a tag and preload it
 		if (!this.isPreloadStarted(src)) {
 			var channel = createjs.HTMLAudioPlugin.TagPool.get(src);
-			var tag = this.createTag(src);
+			var tag = this._createTag(src);
 			tag.id = src;
 			channel.add(tag);
 			this.preload(src, {tag:tag});
@@ -400,7 +387,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	p.isPreloadStarted = function (src) {
-		return (this.audioSources[src] != null);
+		return (this._audioSources[src] != null);
 	};
 
 	/**
@@ -411,7 +398,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	p.preload = function (src, instance) {
-		this.audioSources[src] = true;
+		this._audioSources[src] = true;
 		new createjs.HTMLAudioPlugin.Loader(src, instance.tag);
 	};
 
@@ -430,7 +417,7 @@ this.createjs = this.createjs || {};
 	// NOTE Documentation for the SoundInstance class in WebAudioPlugin file. Each plugin generates a SoundInstance that
 	// follows the same interface.
 	function SoundInstance(src, owner) {
-		this.init(src, owner);
+		this._init(src, owner);
 	}
 
 	var p = SoundInstance.prototype = new createjs.EventDispatcher();
@@ -438,10 +425,10 @@ this.createjs = this.createjs || {};
 	p.src = null,
 	p.uniqueId = -1;
 	p.playState = null;
-	p.owner = null;
+	p._owner = null;
 	p.loaded = false;
-	p.offset = 0;
-	p.delay = 0;
+	p._offset = 0;
+	p._delay = 0;
 	p._volume =  1;
 	// IE8 has Object.defineProperty, but only for DOM objects, so check if fails to suppress errors
 	try {
@@ -453,49 +440,49 @@ this.createjs = this.createjs || {};
 				if (Number(value) == null) {return;}
 				value = Math.max(0, Math.min(1, value));
 				this._volume = value;
-				this.updateVolume();
+				this._updateVolume();
 			}
 		});
 	} catch (e) {
 		// dispatch message or error?
 	};
 	p.pan = 0;
-	p.duration = 0;
-	p.remainingLoops = 0;
-	p.delayTimeoutId = null;
+	p._duration = 0;
+	p._remainingLoops = 0;
+	p._delayTimeoutId = null;
 	p.tag = null;
-	p.muted = false;
-	p.paused = false;
+	p._muted = false;
+	p._paused = false;
 
 	// Proxies, make removing listeners easier.
-	p.endedHandler = null;
-	p.readyHandler = null;
-	p.stalledHandler = null;
+	p._endedHandler = null;
+	p._readyHandler = null;
+	p._stalledHandler = null;
 	p.loopHandler = null;
 
 // Constructor
-	p.init = function (src, owner) {
+	p._init = function (src, owner) {
 		this.src = src;
-		this.owner = owner;
+		this._owner = owner;
 
-		this.endedHandler = createjs.proxy(this.handleSoundComplete, this);
-		this.readyHandler = createjs.proxy(this.handleSoundReady, this);
-		this.stalledHandler = createjs.proxy(this.handleSoundStalled, this);
+		this._endedHandler = createjs.proxy(this._handleSoundComplete, this);
+		this._readyHandler = createjs.proxy(this._handleSoundReady, this);
+		this._stalledHandler = createjs.proxy(this._handleSoundStalled, this);
 		this.loopHandler = createjs.proxy(this.handleSoundLoop, this);
 	};
 
-	p.sendEvent = function (type) {
+	p._sendEvent = function (type) {
 		var event = new createjs.Event(type);
 		this.dispatchEvent(event);
 	};
 
-	p.cleanUp = function () {
+	p._cleanUp = function () {
 		var tag = this.tag;
 		if (tag != null) {
 			tag.pause();
-			tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
-			tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
-			tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
+			tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_ENDED, this._endedHandler, false);
+			tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_READY, this._readyHandler, false);
+			tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
 			try {
 				tag.currentTime = 0;
 			} catch (e) {
@@ -504,30 +491,30 @@ this.createjs = this.createjs || {};
 			this.tag = null;
 		}
 
-		clearTimeout(this.delayTimeoutId);
+		clearTimeout(this._delayTimeoutId);
 		if (window.createjs == null) {
 			return;
 		}
-		createjs.Sound.playFinished(this);
+		createjs.Sound._playFinished(this);
 	};
 
-	p.interrupt = function () {
+	p._interrupt = function () {
 		if (this.tag == null) {
 			return;
 		}
 		this.playState = createjs.Sound.PLAY_INTERRUPTED;
-		this.cleanUp();
-		this.paused = false;
-		this.sendEvent("interrupted");
+		this._cleanUp();
+		this._paused = false;
+		this._sendEvent("interrupted");
 	};
 
 // Public API
 	p.play = function (interrupt, delay, offset, loop, volume, pan) {
-		this.cleanUp(); //LM: Is this redundant?
-		createjs.Sound.playInstance(this, interrupt, delay, offset, loop, volume, pan);
+		this._cleanUp(); //LM: Is this redundant?
+		createjs.Sound._playInstance(this, interrupt, delay, offset, loop, volume, pan);
 	};
 
-	p.beginPlaying = function (offset, loop, volume, pan) {
+	p._beginPlaying = function (offset, loop, volume, pan) {
 		if (window.createjs == null) {
 			return -1;
 		}
@@ -537,70 +524,70 @@ this.createjs = this.createjs || {};
 			return -1;
 		}
 
-		tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_ENDED, this.endedHandler, false);
+		tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_ENDED, this._endedHandler, false);
 
 		// Reset this instance.
-		this.offset = offset;
+		this._offset = offset;
 		this.volume = volume;
 		this.pan = pan;	// not pan has no effect
-		this.updateVolume();  // note this will set for mute and masterMute
-		this.remainingLoops = loop;
+		this._updateVolume();  // note this will set for mute and _masterMute
+		this._remainingLoops = loop;
 
 		if (tag.readyState !== 4) {
-			tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
-			tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_STALLED, this.stalledHandler, false);
+			tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_READY, this._readyHandler, false);
+			tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_STALLED, this._stalledHandler, false);
 			tag.preload = "auto"; // This is necessary for Firefox, as it won't ever "load" until this is set.
 			tag.load();
 		} else {
-			this.handleSoundReady(null);
+			this._handleSoundReady(null);
 		}
 
-		this.sendEvent("succeeded");
+		this._sendEvent("succeeded");
 		return 1;
 	};
 
 	// Note: Sounds stall when trying to begin playback of a new audio instance when the existing instances
 	//  has not loaded yet. This doesn't mean the sound will not play.
-	p.handleSoundStalled = function (event) {
-		this.cleanUp();  // OJR NOTE this will stop playback, and I think we should remove this and let the developer decide how to handle stalled instances
-		this.sendEvent("failed");
+	p._handleSoundStalled = function (event) {
+		this._cleanUp();  // OJR NOTE this will stop playback, and I think we should remove this and let the developer decide how to handle stalled instances
+		this._sendEvent("failed");
 	};
 
-	p.handleSoundReady = function (event) {
+	p._handleSoundReady = function (event) {
 		if (window.createjs == null) {
 			return;
 		}
 
-		// OJR would like a cleaner way to do this in init, discuss with LM
-		this.duration = this.tag.duration * 1000;  // need this for setPosition on stopped sounds
+		// OJR would like a cleaner way to do this in _init, discuss with LM
+		this._duration = this.tag.duration * 1000;  // need this for setPosition on stopped sounds
 
 		this.playState = createjs.Sound.PLAY_SUCCEEDED;
-		this.paused = false;
-		this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_READY, this.readyHandler, false);
+		this._paused = false;
+		this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_READY, this._readyHandler, false);
 
-		if (this.offset >= this.getDuration()) {
+		if (this._offset >= this.getDuration()) {
 			this.playFailed();  // OJR: throw error?
 			return;
-		} else if (this.offset > 0) {
-			this.tag.currentTime = this.offset * 0.001;
+		} else if (this._offset > 0) {
+			this.tag.currentTime = this._offset * 0.001;
 		}
-		if (this.remainingLoops == -1) {
+		if (this._remainingLoops == -1) {
 			this.tag.loop = true;
 		}
-		if(this.remainingLoops != 0) {
-			this.tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
+		if(this._remainingLoops != 0) {
+			this.tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
 			this.tag.loop = true;
 		}
 		this.tag.play();
 	};
 
 	p.pause = function () {
-		if (!this.paused && this.playState == createjs.Sound.PLAY_SUCCEEDED && this.tag != null) {
-			this.paused = true;
+		if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED && this.tag != null) {
+			this._paused = true;
 			// Note: when paused by user, we hold a reference to our tag. We do not release it until stopped.
 			this.tag.pause();
 
-			clearTimeout(this.delayTimeoutId);
+			clearTimeout(this._delayTimeoutId);
 
 			return true;
 		}
@@ -608,24 +595,24 @@ this.createjs = this.createjs || {};
 	};
 
 	p.resume = function () {
-		if (!this.paused || this.tag == null) {
+		if (!this._paused || this.tag == null) {
 			return false;
 		}
-		this.paused = false;
+		this._paused = false;
 		this.tag.play();
 		return true;
 	};
 
 	p.stop = function () {
-		this.offset = 0;
+		this._offset = 0;
 		this.pause();
 		this.playState = createjs.Sound.PLAY_FINISHED;
-		this.cleanUp();
+		this._cleanUp();
 		return true;
 	};
 
 	p.setMasterVolume = function (value) {
-		this.updateVolume();
+		this._updateVolume();
 		return true;
 	};
 
@@ -634,9 +621,9 @@ this.createjs = this.createjs || {};
 		return true;
 	};
 
-	p.updateVolume = function () {
+	p._updateVolume = function () {
 		if (this.tag != null) {
-			var newVolume = (this.muted || createjs.Sound.masterMute) ? 0 : this._volume * createjs.Sound.masterVolume;
+			var newVolume = (this._muted || createjs.Sound._masterMute) ? 0 : this._volume * createjs.Sound._masterVolume;
 			if (newVolume != this.tag.volume) {
 				this.tag.volume = newVolume;
 			}
@@ -651,7 +638,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p.setMasterMute = function (isMuted) {
-		this.updateVolume();
+		this._updateVolume();
 		return true;
 	};
 
@@ -660,13 +647,13 @@ this.createjs = this.createjs || {};
 			return false;
 		}
 
-		this.muted = isMuted;
-		this.updateVolume();
+		this._muted = isMuted;
+		this._updateVolume();
 		return true;
 	};
 
 	p.getMute = function () {
-		return this.muted;
+		return this._muted;
 	};
 
 	// Can not set pan in HTML
@@ -680,53 +667,53 @@ this.createjs = this.createjs || {};
 
 	p.getPosition = function () {
 		if (this.tag == null) {
-			return this.offset;
+			return this._offset;
 		}
 		return this.tag.currentTime * 1000;
 	};
 
 	p.setPosition = function (value) {
 		if (this.tag == null) {
-			this.offset = value
+			this._offset = value
 		} else {
-			this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
+			this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
 			try {
 				this.tag.currentTime = value * 0.001;
 			} catch (error) { // Out of range
 				return false;
 			}
-			this.tag.addEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
+			this.tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
 		}
 		return true;
 	};
 
 	p.getDuration = function () {  // NOTE this will always return 0 until sound has been played.
-		return this.duration;
+		return this._duration;
 	};
 
-	p.handleSoundComplete = function (event) {
-		this.offset = 0;
+	p._handleSoundComplete = function (event) {
+		this._offset = 0;
 
 		if (window.createjs == null) {
 			return;
 		}
 		this.playState = createjs.Sound.PLAY_FINISHED;
-		this.cleanUp();
-		this.sendEvent("complete");
+		this._cleanUp();
+		this._sendEvent("complete");
 	};
 
 	// handles looping functionality
 	// NOTE with this approach audio will loop as reliably as the browser allows
 	// but we could end up sending the loop event after next loop playback begins
 	p.handleSoundLoop = function (event) {
-		this.offset = 0;
+		this._offset = 0;
 
-		this.remainingLoops--;
-		if(this.remainingLoops == 0) {
+		this._remainingLoops--;
+		if(this._remainingLoops == 0) {
 			this.tag.loop = false;
-			this.tag.removeEventListener(createjs.HTMLAudioPlugin.AUDIO_SEEKED, this.loopHandler, false);
+			this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
 		}
-		this.sendEvent("loop");
+		this._sendEvent("loop");
 	};
 
 	p.playFailed = function () {
@@ -734,8 +721,8 @@ this.createjs = this.createjs || {};
 			return;
 		}
 		this.playState = createjs.Sound.PLAY_FAILED;
-		this.cleanUp();
-		this.sendEvent("failed");
+		this._cleanUp();
+		this._sendEvent("failed");
 	};
 
 	p.toString = function () {
@@ -763,7 +750,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	function Loader(src, tag) {
-		this.init(src, tag);
+		this._init(src, tag);
 	}
 
 	var p = Loader.prototype;
@@ -799,7 +786,7 @@ this.createjs = this.createjs || {};
 	p.loadedHandler = null;
 
 	// constructor
-	p.init = function (src, tag) {
+	p._init = function (src, tag) {
 		this.src = src;
 		this.tag = tag;
 
@@ -858,7 +845,7 @@ this.createjs = this.createjs || {};
 	p.sendLoadedEvent = function (evt) {
 		this.tag.removeEventListener && this.tag.removeEventListener("canplaythrough", this.loadedHandler);  // cleanup and so we don't send the event more than once
 		this.tag.onreadystatechange = null;  // cleanup and so we don't send the event more than once
-		createjs.Sound.sendFileLoadEvent(this.src);  // fire event or callback on Sound
+		createjs.Sound._sendFileLoadEvent(this.src);  // fire event or callback on Sound
 	};
 
 	// used for debugging
@@ -884,7 +871,7 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	function TagPool(src) {
-		this.init(src);
+		this._init(src);
 	}
 
 	var s = TagPool;
@@ -1027,7 +1014,7 @@ this.createjs = this.createjs || {};
 	p.tags = null;
 
 	// constructor
-	p.init = function (src) {
+	p._init = function (src) {
 		this.src = src;
 		this.tags = [];
 	};
