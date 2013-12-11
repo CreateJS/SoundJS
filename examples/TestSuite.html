@@ -285,8 +285,8 @@
         $("#pauseBtn").click(function(event){
             var instance = getInstance();
             if (instance == null) { return; }
-            instance.paused ? instance.resume() : instance.pause();
-            $("#pauseBtn").attr("value", instance.paused ? "Resume" : "Pause");
+            instance._paused ? instance.resume() : instance.pause();
+            $("#pauseBtn").attr("value", instance._paused ? "Resume" : "Pause");
         });
         $("#muteBtn").click(function(event){
             var instance = getInstance();
@@ -481,7 +481,7 @@
             setPosSlider();
             audioInterval = setInterval(setPosSlider, intervalTime);
 
-            $("#pauseBtn").attr("value", instance.paused ? "Resume" : "Pause");
+            $("#pauseBtn").attr("value", instance._paused ? "Resume" : "Pause");
             $("#muteBtn").attr("value", instance.getMute() ? "Unmute" : "Mute");
         } else {
             enableSet("instance", false);
