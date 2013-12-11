@@ -43,9 +43,6 @@ this.createjs = this.createjs || {};
  *      <li>Master volume, mute, and stop controls for all sounds at once</li>
  * </ul>
  *
- * <b>Please note that as of version 0.4.0, the "SoundJS" object only provides version information. All APIs from
- * SoundJS are now available on the {{#crossLink "Sound"}}{{/crossLink}} class.</b>
- *
  * <b>Controlling Sounds</b><br />
  * Playing sounds creates {{#crossLink "SoundInstance"}}{{/crossLink}} instances, which can be controlled individually.
  * <ul><li>Pause, resume, seek, and stop sounds</li>
@@ -160,7 +157,7 @@ this.createjs = this.createjs || {};
 	 * <b>Firefox 25 Web Audio limitations</b>
 	 * <ul><li>mp3 audio files do not load properly on all windows machines, reported
 	 * <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=929969" target="_blank">here</a>. </br>
-	 * For this reason it is recommended to pass ogg file first until this bug is resolved, if possible.</li></ul>
+	 * For this reason it is recommended to pass another FF supported type (ie ogg) first until this bug is resolved, if possible.</li></ul>
 
 	 * <b>Safari limitations</b><br />
 	 * <ul><li>Safari requires Quicktime to be installed for audio playback.</li></ul>
@@ -168,10 +165,9 @@ this.createjs = this.createjs || {};
 	 * <b>iOS 6 Web Audio limitations</b><br />
 	 * <ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event
 	 * (touch/click).</li>
-	 * <li>Despite suggestions to the opposite, we have control over audio volume through our gain nodes.</li>
 	 * <li>A bug exists that will distort un-cached web audio when a video element is present in the DOM.</li>
 	 * <li>Note HTMLAudioPlugin is not supported on iOS by default.  See {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}
-	 * for more details.<li>
+	 * for more details.</li>
 	 * </ul>
 	 *
 	 * <b>Android HTML Audio limitations</b><br />
@@ -191,8 +187,10 @@ this.createjs = this.createjs || {};
 	var s = Sound;
 
 	/**
+	 * DEPRECATED
 	 * This approach has is being replaced by {{#crossLink "Sound/alternateExtensions:property"}}{{/crossLink}}, and
 	 * support will be removed in the next version.
+	 *
 	 * The character (or characters) that are used to split multiple paths from an audio source.
 	 * @property DELIMITER
 	 * @type {String}
@@ -306,12 +304,12 @@ this.createjs = this.createjs || {};
 	 *
 	 * NOTE this does not currently work for {{#crossLink "FlashPlugin"}}{{/crossLink}}.
 	 *
-	 * More details on file formats can be found at http://en.wikipedia.org/wiki/Audio_file_format. A very detailed
-	 * list of file formats can be found at http://www.fileinfo.com/filetypes/audio. A useful list of extensions for
-	 * each format can be found at http://html5doctor.com/html5-audio-the-state-of-play/
+	 * More details on file formats can be found at <a href="http://en.wikipedia.org/wiki/Audio_file_format" target="_blank">http://en.wikipedia.org/wiki/Audio_file_format</a>.<br />
+	 * A very detailed list of file formats can be found at <a href="http://www.fileinfo.com/filetypes/audio" target="_blank">http://www.fileinfo.com/filetypes/audio</a>.
 	 * @property SUPPORTED_EXTENSIONS
 	 * @type {Array[String]}
 	 * @default ["mp3", "ogg", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"]
+	 * @since 0.4.0
 	 */
 	s.SUPPORTED_EXTENSIONS = ["mp3", "ogg", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"];  // OJR FlashPlugin does not currently support
 
@@ -319,9 +317,12 @@ this.createjs = this.createjs || {};
 	 * Some extensions use another type of extension support to play (one of them is a codex).  This allows you to map
 	 * that support so plugins can accurately determine if an extension is supported.  Adding to this list can help
 	 * plugins determine more accurately if an extension is supported.
+	 *
+ 	 * A useful list of extensions for each format can be found at <a href="http://html5doctor.com/html5-audio-the-state-of-play/" target="_blank">http://html5doctor.com/html5-audio-the-state-of-play/</a>.
 	 * @property EXTENSION_MAP
 	 * @type {Object}
 	 * @since 0.4.0
+	 * @default {m4a:"mp4"}
 	 */
 	s.EXTENSION_MAP = {
 		m4a:"mp4"
@@ -625,12 +626,11 @@ this.createjs = this.createjs || {};
 	 * the user has manually registered plugins, and enables Sound to work without manual plugin setup. Currently, the
 	 * default plugins are {{#crossLink "WebAudioPlugin"}}{{/crossLink}} followed by {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}.
 	 *
-	 *  * <h4>Example</h4>
-	 *      if (!createjs.initializeDefaultPlugins()) { return; }
+	 * <h4>Example</h4>
+	 * 	if (!createjs.initializeDefaultPlugins()) { return; }
 	 *
 	 * @method initializeDefaultPlugins
-	 * @returns {Boolean} If a plugin is initialized (true) or not (false). If the browser does not have the
-	 * capabilities to initialize any available plugins, this will return false.
+	 * @returns {Boolean} True if a plugin was initialized, false otherwise.
 	 * @since 0.4.0
 	 */
 	s.initializeDefaultPlugins = function () {
@@ -671,6 +671,9 @@ this.createjs = this.createjs || {};
 	 * <ul>
 	 *     <li><b>panning:</b> If the plugin can pan audio from left to right</li>
 	 *     <li><b>volume;</b> If the plugin can control audio volume.</li>
+	 *     <li><b>tracks:</b> The maximum number of audio tracks that can be played back at a time. This will be -1
+	 *     if there is no known limit.</li>
+	 * <br />An entry for each file type in {{#crossLink "Sound/SUPPORTED_EXTENSIONS:property"}}{{/crossLink}}:
 	 *     <li><b>mp3:</b> If MP3 audio is supported.</li>
 	 *     <li><b>ogg:</b> If OGG audio is supported.</li>
 	 *     <li><b>wav:</b> If WAV audio is supported.</li>
@@ -680,8 +683,7 @@ this.createjs = this.createjs || {};
 	 *     <li><b>aiff:</b> If aiff audio is supported.</li>
 	 *     <li><b>wma:</b> If wma audio is supported.</li>
 	 *     <li><b>mid:</b> If mid audio is supported.</li>
-	 *     <li><b>tracks:</b> The maximum number of audio tracks that can be played back at a time. This will be -1
-	 *     if there is no known limit.</li>
+	 * </ul>
 	 * @method getCapabilities
 	 * @return {Object} An object containing the capabilities of the active plugin.
 	 * @static
@@ -757,7 +759,7 @@ this.createjs = this.createjs || {};
 	 * channels for an audio instance, however a "channels" property can be appended to the data object if it is used
 	 * for other information. The audio channels will set a default based on plugin if no value is found.
 	 * @param {Boolean} [preload=true] If the sound should be internally preloaded so that it can be played back
-	 * without an external preloader.
+	 * without an external preloader.  This is currently used by PreloadJS when loading sounds to disable internal preloading.
 	 * @param {string} basePath Set a path that will be prepended to src for loading.
 	 * @return {Object} An object with the modified values that were passed in, which defines the sound.
 	 * Returns false if the source cannot be parsed or no plugins can be initialized.
@@ -867,13 +869,13 @@ this.createjs = this.createjs || {};
 	 *
 	 * @method registerManifest
 	 * @param {Array} manifest An array of objects to load. Objects are expected to be in the format needed for
-	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}}: <code>{src:srcURI, id:ID, data:Data, preload:UseInternalPreloader}</code>
-	 * with "id", "data", and "preload" being optional.
-	 * @param {string} basePath Set a path that will be prepended to each src when loading.  When creating or playing
+	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}}: <code>{src:srcURI, id:ID, data:Data}</code>
+	 * with "id" and "data" being optional.
+	 * @param {string} basePath Set a path that will be prepended to each src when loading.  When creating, playing, or removing
 	 * audio that was loaded with a basePath by src, the basePath must be included.
 	 * @return {Object} An array of objects with the modified values that were passed in, which defines each sound.
-	 * Like registerSound, it will return false for any values that the source cannot be parsed or if no plugins can be initialized.
-	 * Also, it will returns true for any values that the source is already loaded.
+	 * Like registerSound, it will return false for any values when the source cannot be parsed or if no plugins can be initialized.
+	 * Also, it will return true for any values when the source is already loaded.
 	 * @static
 	 * @since 0.4.0
 	 */
@@ -881,15 +883,15 @@ this.createjs = this.createjs || {};
 		var returnValues = [];
 		for (var i = 0, l = manifest.length; i < l; i++) {
 			returnValues[i] = createjs.Sound.registerSound(manifest[i].src, manifest[i].id, manifest[i].data, manifest[i].preload, basePath);
-		}
+		}	// OJR consider removing .preload from args, as it is only used by PreloadJS
 		return returnValues;
 	};
 
 	/**
 	 * Remove a sound that has been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
 	 * {{#crossLink "Sound/registerManifest"}}{{/crossLink}}.
-	 * Note this will stop playback on active instances playing this sound before deleting them.
-	 * Note if you passed in a basePath, you need to prepend it to the src here.
+	 * <br />Note this will stop playback on active instances playing this sound before deleting them.
+	 * <br />Note if you passed in a basePath, you need to pass it or prepend it to the src here.
 	 *
 	 * <h4>Example</h4>
 	 *      createjs.Sound.removeSound("myAudioBasePath/mySound.ogg");
@@ -945,8 +947,8 @@ this.createjs = this.createjs || {};
 	/**
 	 * Remove a manifest of audio files that have been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
 	 * {{#crossLink "Sound/registerManifest"}}{{/crossLink}}.
-	 * Note this will stop playback on active instances playing this audio before deleting them.
-	 * Note if you passed in a basePath, you do not need to pass it or add it to the src here.
+	 * <br />Note this will stop playback on active instances playing this audio before deleting them.
+	 * <br />Note if you passed in a basePath, you need to pass it or prepend it to the src here.
 	 *
 	 * <h4>Example</h4>
 	 *      var manifest = [
@@ -976,7 +978,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Remove all sounds that have been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
 	 * {{#crossLink "Sound/registerManifest"}}{{/crossLink}}.
-	 * Note this will stop playback on all active sound instances before deleting them.
+	 * <br />Note this will stop playback on all active sound instances before deleting them.
 	 *
 	 * <h4>Example</h4>
 	 *     createjs.Sound.removeAllSounds();
@@ -1095,18 +1097,17 @@ this.createjs = this.createjs || {};
 	 * SoundInstance will still be returned, and have a playState of {{#crossLink "Sound/PLAY_FAILED:property"}}{{/crossLink}}.
 	 * Note that even on sounds with failed playback, you may still be able to call SoundInstance {{#crossLink "SoundInstance/play"}}{{/crossLink}},
 	 * since the failure could be due to lack of available channels. If the src does not have a supported extension or
-	 * if there is no available plugin, {{#crossLink "Sound/defaultSoundInstance:property"}}{{/crossLink}} will be
-	 * returned, which will not play any audio, but will not generate errors.
+	 * if there is no available plugin, a default SoundInstance will be returned which will not play any audio, but will not generate errors.
 	 *
 	 * <h4>Example</h4>
 	 *      createjs.Sound.addEventListener("fileload", handleLoad);
 	 *      createjs.Sound.registerSound("myAudioPath/mySound.mp3", "myID", 3);
 	 *      function handleLoad(event) {
 	 *      	createjs.Sound.play("myID");
-	 *      	// alternately we could call the following
+	 *      	// we can pass in options we want to set inside of an object, and store off SoundInstance for controlling
+	 *      	var myInstance = createjs.Sound.play("myID", {interrupt: createjs.Sound.INTERRUPT_ANY, loop:-1});
+	 *      	// alternately, we can pass full source path and specify each argument individually
 	 *      	var myInstance = createjs.Sound.play("myAudioPath/mySound.mp3", createjs.Sound.INTERRUPT_ANY, 0, 0, -1, 1, 0);
-	 *      	// another alternative is to pass in just the options we want to set inside of an object
-	 *      	var myInstance = createjs.Sound.play("myAudioPath/mySound.mp3", {interrupt: createjs.Sound.INTERRUPT_ANY, loop:-1});
 	 *      }
 	 *
 	 * @method play
@@ -1139,8 +1140,8 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Creates a {{#crossLink "SoundInstance"}}{{/crossLink}} using the passed in src. If the src does not have a
-	 * supported extension or if there is no available plugin, a {{#crossLink "Sound/defaultSoundInstance:property"}}{{/crossLink}}
-	 * will be returned that can be called safely but does nothing.
+	 * supported extension or if there is no available plugin, a default SoundInstance will be returned that can be
+	 * called safely but does nothing.
 	 *
 	 * <h4>Example</h4>
 	 *      var myInstance = null;
@@ -1216,7 +1217,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Get the master volume of Sound. The master volume is multiplied against each sound's individual volume.
-	 * To get individual sound volume, use SoundInstance {{#crossLink "SoundInstance/volume"}}{{/crossLink}} instead.
+	 * To get individual sound volume, use SoundInstance {{#crossLink "SoundInstance/volume:property"}}{{/crossLink}} instead.
 	 *
 	 * <h4>Example</h4>
 	 *     var masterVolume = createjs.Sound.getVolume();
@@ -1284,7 +1285,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Stop all audio (global stop). Stopped audio is reset, and not paused. To play audio that has been stopped,
-	 * call {{#crossLink "SoundInstance.play"}}{{/crossLink}}.
+	 * call SoundInstance {{#crossLink "SoundInstance/play"}}{{/crossLink}}.
 	 *
 	 * <h4>Example</h4>
 	 *     createjs.Sound.stop();
@@ -1425,16 +1426,6 @@ this.createjs = this.createjs || {};
 			this.instances.splice(index, 1);
 		}
 	};
-
-	/**
-	 * REMOVED.  Please use createjs.proxy instead
-	 * @method proxy
-	 * @param {Function} method The function to call
-	 * @param {Object} scope The scope to call the method name on
-	 * @protected
-	 * @static
-	 * @deprecated Deprecated in favor of createjs.proxy.
-	 */
 
 	createjs.Sound = Sound;
 

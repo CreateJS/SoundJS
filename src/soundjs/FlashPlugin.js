@@ -43,7 +43,7 @@ this.createjs = this.createjs || {};
 	 * {{#crossLink "Sound"}}{{/crossLink}} using the {{#crossLink "Sound/registerPlugins"}}{{/crossLink}} method. This
 	 * plugin is recommended to be included if sound support is required in older browsers such as IE8.
 	 *
-	 * This plugin requires FlashAudioPlugin.swf and swfObject.js (which is compiled
+	 * This plugin requires FlashAudioPlugin.swf and swfObject.js, which is compiled
 	 * into the minified FlashPlugin-X.X.X.min.js file. You must ensure that {{#crossLink "FlashPlugin/swfPath:property"}}{{/crossLink}}
 	 * is set when using this plugin, so that the script can find the swf.
 	 *
@@ -56,10 +56,10 @@ this.createjs = this.createjs || {};
 	 * will have an id of "flashAudioContainer". The container DIV is positioned 1 pixel off-screen to the left to avoid
 	 * showing the 1x1 pixel white square.
 	 *
-	 * <h4>Known Browser and OS issues for HTML Audio</h4>
+	 * <h4>Known Browser and OS issues for Flash Audio</h4>
 	 * <b>All browsers</b><br />
 	 * <ul><li> There can be a delay in flash player starting playback of audio.  This has been most noticeable in Firefox.
-	 * Unfortunely this is an issue with the flash player and therefore cannot be addressed by SoundJS.</li></ul>
+	 * Unfortunely this is an issue with the flash player and the browser and therefore cannot be addressed by SoundJS.</li></ul>
 	 *
 	 * @class FlashPlugin
 	 * @constructor
@@ -71,22 +71,23 @@ this.createjs = this.createjs || {};
 	var s = FlashPlugin;
 
 	/**
-	 * The capabilities of the plugin. This is generated via the {{#crossLink "WebAudioPlugin/generateCapabilities"}}{{/crossLink}}
+	 * The capabilities of the plugin. This is generated via the {{#crossLink "WebAudioPlugin/_generateCapabilities"}}{{/crossLink}}
 	 * method. Please see the Sound {{#crossLink "Sound/getCapabilities"}}{{/crossLink}} method for a list of available
 	 * capabilities.
 	 * @property capabilities
 	 * @type {Object}
+	 * @protected
 	 * @static
 	 */
 	s.capabilities = null;
 
 	/**
 	 * Deprecated in favor of {{#crossLink "FlashPlugin/swfPath:property"}}{{/crossLink}}
-	 * The path relative to the HTML page that the FlashAudioPlugin.swf resides. Note if this is not correct, this
+	 * <br />The path relative to the HTML page that the FlashAudioPlugin.swf resides. Note if this is not correct, this
 	 * plugin will not work.
 	 * @property BASE_PATH
 	 * @type {String}
-	 * @default src/SoundJS
+	 * @default null
 	 * @static
 	 * @deprecated
 	 */
@@ -515,7 +516,8 @@ this.createjs = this.createjs || {};
 		},
 
 // Flash Communication
-		/**
+// Note we have decided not to include these in the docs
+		/*
 		 * Used to couple a Flash loader instance with a <code>Loader</code> instance
 		 * @method registerPreloadInstance
 		 * @param {String} flashId Used to identify the Loader.
@@ -525,7 +527,7 @@ this.createjs = this.createjs || {};
 			this.flashPreloadInstances[flashId] = instance;
 		},
 
-		/**
+		/*
 		 * Used to decouple a <code>Loader</code> instance from Flash.
 		 * @method unregisterPreloadInstance
 		 * @param {String} flashId Used to identify the Loader.
@@ -534,7 +536,7 @@ this.createjs = this.createjs || {};
 			delete this.flashPreloadInstances[flashId];
 		},
 
-		/**
+		/*
 		 * Used to couple a Flash sound instance with a {{#crossLink "SoundInstance"}}{{/crossLink}}.
 		 * @method registerSoundInstance
 		 * @param {String} flashId Used to identify the SoundInstance.
@@ -544,7 +546,7 @@ this.createjs = this.createjs || {};
 			this.flashInstances[flashId] = instance;
 		},
 
-		/**
+		/*
 		 * Used to decouple a {{#crossLink "SoundInstance"}}{{/crossLink}} from Flash.
 		 * instance.
 		 * @method unregisterSoundInstance
@@ -555,7 +557,7 @@ this.createjs = this.createjs || {};
 			delete this.flashInstances[flashId];
 		},
 
-		/**
+		/*
 		 * Used to output traces from Flash to the console, if {{#crossLink "FlashPlugin/showOutput"}}{{/crossLink}} is
 		 * <code>true</code>.
 		 * @method flashLog
@@ -568,7 +570,7 @@ this.createjs = this.createjs || {};
 			}
 		},
 
-		/**
+		/*
 		 * Handles events from Flash, and routes communication to a {{#crossLink "SoundInstance"}}{{/crossLink}} via
 		 * the Flash ID. The method and arguments from Flash are run directly on the sound instance.
 		 * @method handleSoundEvent
@@ -594,7 +596,7 @@ this.createjs = this.createjs || {};
 			}
 		},
 
-		/**
+		/*
 		 * Handles events from Flash and routes communication to a <code>Loader</code> via the Flash ID. The method
 		 * and arguments from Flash are run directly on the sound loader.
 		 * @method handlePreloadEvent
@@ -620,7 +622,7 @@ this.createjs = this.createjs || {};
 			}
 		},
 
-		/**
+		/*
 		 * Handles events from Flash intended for the FlashPlugin class. Currently only a "ready" event is processed.
 		 * @method handleEvent
 		 * @param {String} method Indicates the method to run.
@@ -635,7 +637,7 @@ this.createjs = this.createjs || {};
 			}
 		},
 
-		/**
+		/*
 		 * Handles error events from Flash. Note this function currently does not process any events.
 		 * @method handleErrorEvent
 		 * @param {String} error Indicates the error.

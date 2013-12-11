@@ -39,22 +39,15 @@ this.createjs = this.createjs || {};
 	"use strict";
 
 	/**
-	 * Play sounds using Web Audio in the browser. The WebAudio plugin has been successfully tested with:
-	 * <ul><li>Google Chrome, version 23+ on OS X and Windows</li>
-	 *      <li>Safari 6+ on OS X</li>
-	 *      <li>Mobile Safari on iOS 6+</li>
-	 *      <li>Firefox 25+ on OS X, Windows, and Fx OS</li>
-	 * </ul>
-	 *
-	 * The WebAudioPlugin is currently the default plugin, and will be used anywhere that it is supported. Currently
-	 * Chrome and Safari offer support.  Firefox and Android Chrome both offer support for web audio in upcoming
-	 * releases.  To change plugin priority, check out the Sound API {{#crossLink "Sound/registerPlugins"}}{{/crossLink}} method.
+	 * Play sounds using Web Audio in the browser. The WebAudioPlugin is currently the default plugin, and will be used
+	 * anywhere that it is supported. To change plugin priority, check out the Sound API
+	 * {{#crossLink "Sound/registerPlugins"}}{{/crossLink}} method.
 
-	 * <h4>Known Browser and OS issues for Web Audio Plugin</h4>
+	 * <h4>Known Browser and OS issues for Web Audio</h4>
 	 * <b>Firefox 25</b>
 	 * <ul><li>mp3 audio files do not load properly on all windows machines, reported
 	 * <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=929969" target="_blank">here</a>. </br>
-	 * For this reason it is recommended to pass ogg file first until this bug is resolved, if possible.</li></ul>
+	 * For this reason it is recommended to pass another FF supported type (ie ogg) first until this bug is resolved, if possible.</li></ul>
 	 * <br />
 	 * <b>Webkit (Chrome and Safari)</b>
 	 * <ul><li>AudioNode.disconnect does not always seem to work.  This can cause the file size to grow over time if you
@@ -62,7 +55,6 @@ this.createjs = this.createjs || {};
 	 * <br />
 	 * <b>iOS 6 limitations</b>
 	 * 	<ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event (touch/click).</li>
-	 *  <li>Despite suggestions to the opposite, we have relative control over audio volume through the gain nodes.</li>
 	 *	<li>A bug exists that will distort uncached audio when a video element is present in the DOM.</li>
 	 * </ul>
 	 * @class WebAudioPlugin
@@ -287,8 +279,8 @@ this.createjs = this.createjs || {};
 	p.panningModel = "equalpower";
 
 	/**
-	 * A DynamicsCompressorNode, which is used to improve sound quality and prevent audio distortion according to
-	 * http://www.w3.org/TR/webaudio/#DynamicsCompressorNode. It is connected to <code>context.destination</code>.
+	 * A DynamicsCompressorNode, which is used to improve sound quality and prevent audio distortion.
+	 * It is connected to <code>context.destination</code>.
 	 * @property dynamicsCompressorNode
 	 * @type {AudioNode}
 	 */
@@ -328,7 +320,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Pre-register a sound for preloading and setup. This is called by {{#crossLink "Sound"}}{{/crossLink}}.
-	 * Note that WebAudio provides a <code>Loader</code> instance, which <a href="http://preloadjs.com">PreloadJS</a>
+	 * Note that WebAudio provides a <code>Loader</code> instance, which <a href="http://preloadjs.com" target="_blank">PreloadJS</a>
 	 * can use to assist with preloading.
 	 * @method register
 	 * @param {String} src The source of the audio
@@ -549,7 +541,6 @@ this.createjs = this.createjs || {};
 	 * @property src
 	 * @type {String}
 	 * @default null
-	 * @protected
 	 */
 	p.src = null;
 
@@ -602,7 +593,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * The volume of the sound, between 0 and 1.
-	 * Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower and Opera versions 11.50 or lower,
+	 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower and Opera versions 11.50 or lower,
 	 * and Internet Explorer 8 or lower.  Instead use {{#crossLink "SoundInstance/setVolume"}}{{/crossLink}} and {{#crossLink "SoundInstance/getVolume"}}{{/crossLink}}.
 	 *
 	 * The actual output volume of a sound can be calculated using:
@@ -631,10 +622,11 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * The pan of the sound, between -1 (left) and 1 (right). Note that pan does not work for HTML Audio.
-	 * Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower, Opera versions 11.50 or lower,
+	 * The pan of the sound, between -1 (left) and 1 (right). Note that pan is not supported by HTML Audio.
+	 *
+	 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower, Opera versions 11.50 or lower,
 	 * and Internet Explorer 8 or lower.  Instead use {{#crossLink "SoundInstance/setPan"}}{{/crossLink}} and {{#crossLink "SoundInstance/getPan"}}{{/crossLink}}.
-	 * Note in WebAudioPlugin this only gives us the "x" value of what is actually 3D audio.
+	 * <br />Note in WebAudioPlugin this only gives us the "x" value of what is actually 3D audio.
 	 *
 	 * @property pan
 	 * @type {Number}
@@ -664,51 +656,50 @@ this.createjs = this.createjs || {};
 /**
 	 * The length of the audio clip, in milliseconds.
 	 * Use {{#crossLink "SoundInstance/getDuration:method"}}{{/crossLink}} to access.
-	 * @property pan
+	 * @property _duration
 	 * @type {Number}
 	 * @default 0
 	 * @protected
 	 */
-	p.duration = 0;
+	p._duration = 0;
 
 	/**
 	 * The number of play loops remaining. Negative values will loop infinitely.
-	 * @property remainingLoops
+	 * @property _remainingLoops
 	 * @type {Number}
 	 * @default 0
 	 * @protected
 	 */
-	p.remainingLoops = 0;
+	p._remainingLoops = 0;
 
 	/**
 	 * A Timeout created by {{#crossLink "Sound"}}{{/crossLink}} when this SoundInstance is played with a delay.
 	 * This allows SoundInstance to remove the delay if stop or pause or cleanup are called before playback begins.
-	 * @property delayTimeoutId
+	 * @property _delayTimeoutId
 	 * @type {timeoutVariable}
 	 * @default null
 	 * @protected
 	 * @since 0.4.0
 	 */
-	p.delayTimeoutId = null;
+	p._delayTimeoutId = null;
 
 	/**
 	 * Timeout that is created internally to handle sound playing to completion. Stored so we can remove it when
 	 * stop, pause, or cleanup are called
-	 * @property soundCompleteTimeout
+	 * @property _soundCompleteTimeout
 	 * @type {timeoutVariable}
 	 * @default null
 	 * @protected
 	 * @since 0.4.0
 	 */
-	p.soundCompleteTimeout = null;
+	p._soundCompleteTimeout = null;
 
 	/**
 	 * NOTE this only exists as a {{#crossLink "WebAudioPlugin"}}{{/crossLink}} property and is only intended for use by advanced users.
-	 * GainNode for controlling <code>SoundInstance</code> volume. Connected to the WebAudioPlugin {{#crossLink "WebAudioPlugin/gainNode:property"}}{{/crossLink}}
+	 * <br />GainNode for controlling <code>SoundInstance</code> volume. Connected to the WebAudioPlugin {{#crossLink "WebAudioPlugin/gainNode:property"}}{{/crossLink}}
 	 * that sequences to <code>context.destination</code>.
 	 * @property gainNode
 	 * @type {AudioGainNode}
-	 * @default null
 	 * @since 0.4.0
 	 *
 	 */
@@ -716,20 +707,18 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE this only exists as a {{#crossLink "WebAudioPlugin"}}{{/crossLink}} property and is only intended for use by advanced users.
-	 * A panNode allowing left and right audio channel panning only. Connected to SoundInstance {{#crossLink "SoundInstance/gainNode:property"}}{{/crossLink}}.
+	 * <br />A panNode allowing left and right audio channel panning only. Connected to SoundInstance {{#crossLink "SoundInstance/gainNode:property"}}{{/crossLink}}.
 	 * @property panNode
 	 * @type {AudioPannerNode}
-	 * @default null
 	 * @since 0.4.0
 	 */
 	p.panNode = null;
 
 	/**
 	 * NOTE this only exists as a {{#crossLink "WebAudioPlugin"}}{{/crossLink}} property and is only intended for use by advanced users.
-	 * sourceNode is the audio source. Connected to {{#crossLink "SoundInstance/gainNode:property"}}{{/crossLink}}.
+	 * <br />sourceNode is the audio source. Connected to SoundInstance {{#crossLink "SoundInstance/panNode:property"}}{{/crossLink}}.
 	 * @property sourceNode
 	 * @type {AudioNode}
-	 * @default null
 	 * @since 0.4.0
 	 *
 	 */
@@ -786,14 +775,6 @@ this.createjs = this.createjs || {};
 
 // Events
 	/**
-	 * The event that is fired when a sound is ready to play.
-	 * @event ready
-	 * @param {Object} target The object that dispatched the event.
-	 * @param {String} type The event type.
-	 * @since 0.4.0
-	 */
-
-	/**
 	 * The event that is fired when playback has started successfully.
 	 * @event succeeded
 	 * @param {Object} target The object that dispatched the event.
@@ -838,13 +819,6 @@ this.createjs = this.createjs || {};
 	 */
 
 	//TODO: Deprecated
-	/**
-	 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "SoundInstance/ready:event"}}{{/crossLink}}
-	 * event.
-	 * @property onReady
-	 * @type {Function}
-	 * @deprecated Use addEventListener and the "ready" event.
-	 */
 	/**
 	 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "SoundInstance/succeeded:event"}}{{/crossLink}}
 	 * event.
@@ -1038,14 +1012,13 @@ this.createjs = this.createjs || {};
 	 *
 	 * <h4>Example</h4>
 	 *      var myInstance = createjs.Sound.createInstance(mySrc);
-	 *      myInstance.play(createjs.Sound.INTERRUPT_ANY);
-	 *      // alternatively, we can pass in options we want to set in an object
-	 *      myInstance.play({offset:1, loop:2, pan:0.5});
+	 *      myInstance.play({offset:1, loop:2, pan:0.5});	// options as object properties
+	 *      myInstance.play(createjs.Sound.INTERRUPT_ANY);	// options as parameters
 	 *
 	 * @method play
 	 * @param {String | Object} [interrupt="none"|options] How to interrupt any currently playing instances of audio with the same source,
 	 * if the maximum number of instances of the sound are already playing. Values are defined as <code>INTERRUPT_TYPE</code>
-	 * constants on the Sound class, with the default defined by {{#crossLink "Sound/defaultInterruptBehavior"}}{{/crossLink}}.
+	 * constants on the Sound class, with the default defined by Sound {{#crossLink "Sound/defaultInterruptBehavior:property"}}{{/crossLink}}.
 	 * <br /><strong>OR</strong><br />
 	 * This parameter can be an object that contains any or all optional properties by name, including: interrupt,
 	 * delay, offset, loop, volume, and pan (see the above code sample).
@@ -1165,7 +1138,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE that you can set volume directly, and setVolume remains to allow support for IE8 with FlashPlugin.
+	 * NOTE that you can set volume directly as a property, and setVolume remains to allow support for IE8 with FlashPlugin.
 	 * Set the volume of the instance. You can retrieve the volume using {{#crossLink "SoundInstance/getVolume"}}{{/crossLink}}.
 	 *
 	 * <h4>Example</h4>
@@ -1201,7 +1174,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE that you can get volume directly, and getVolume remains to allow support for IE8 with FlashPlugin.
+	 * NOTE that you can access volume directly as a property, and getVolume remains to allow support for IE8 with FlashPlugin.
 	 *
 	 * Get the volume of the instance. The actual output volume of a sound can be calculated using:
 	 * <code>myInstance.getVolume() * createjs.Sound.getVolume();</code>
@@ -1212,14 +1185,6 @@ this.createjs = this.createjs || {};
 	p.getVolume = function () {
 		return this.volume;
 	};
-
-	/**
-	 * REMOVED. <strong>Please use {{#crossLink "SoundInstance/setMute"}}{{/crossLink}} instead</strong>.
-	 * @method mute
-	 * @param {Boolean} value If the sound should be muted or not.
-	 * @return {Boolean} If the mute call succeeds.
-	 * @deprecated This method has been replaced by setMute.
-	 */
 
 	/**
 	 * Mute and unmute the sound. Muted sounds will still play at 0 volume. Note that an unmuted sound may still be
@@ -1256,11 +1221,11 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	p.getMute = function () {
-		return this.muted;
+		return this._muted;
 	};
 
 	/**
-	 * NOTE that you can set pan directly, and getPan remains to allow support for IE8 with FlashPlugin.
+	 * NOTE that you can set pan directly as a property, and getPan remains to allow support for IE8 with FlashPlugin.
 	 *
 	 * Set the left(-1)/right(+1) pan of the instance. Note that {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}} does not
 	 * support panning, and only simple left/right panning has been implemented for {{#crossLink "WebAudioPlugin"}}{{/crossLink}}.
@@ -1280,7 +1245,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE that you can get volume directly, and getPan remains to allow support for IE8 with FlashPlugin.
+	 * NOTE that you can access pan directly as a property, and getPan remains to allow support for IE8 with FlashPlugin.
 	 *
 	 * Get the left/right pan of the instance. Note in WebAudioPlugin this only gives us the "x" value of what is
 	 * actually 3D audio.
@@ -1317,7 +1282,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Set the position of the playhead in the instance. This can be set while a sound is playing, paused, or even
+	 * Set the position of the playhead in the instance. This can be set while a sound is playing, paused, or
 	 * stopped.
 	 *
 	 * <h4>Example</h4>
@@ -1346,7 +1311,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Get the duration of the instance, in milliseconds. Note in most cases, you need to play a sound using
-	 * {{#crossLink "SoundInstance/play"}}{{/crossLink}} or the Sound API {{#crossLink "Sound.play"}}{{/crossLink}}
+	 * {{#crossLink "SoundInstance/play"}}{{/crossLink}} or the Sound API {{#crossLink "Sound/play"}}{{/crossLink}}
 	 * method before its duration can be reported accurately.
 	 *
 	 * <h4>Example</h4>

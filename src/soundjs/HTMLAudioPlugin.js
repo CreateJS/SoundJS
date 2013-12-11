@@ -47,7 +47,7 @@ this.createjs = this.createjs || {};
 	 * <b>All browsers</b><br />
 	 * Testing has shown in all browsers there is a limit to how many audio tag instances you are allowed.  If you exceed
 	 * this limit, you can expect to see unpredictable results.  This will be seen as soon as you register sounds, as
-	 * tags are precreated to all Chrome to load them.  Please use {{#crossLink "Sound.MAX_INSTANCES"}}{{/crossLink}} as
+	 * tags are precreated to allow Chrome to load them.  Please use {{#crossLink "Sound.MAX_INSTANCES"}}{{/crossLink}} as
 	 * a guide to how many total audio tags you can safely use in all browsers.
 	 *
      * <b>IE 9 html limitations</b><br />
@@ -63,15 +63,19 @@ this.createjs = this.createjs || {};
 	 * <ul><li>Safari requires Quicktime to be installed for audio playback.</li></ul>
 	 *
 	 * <b>iOS 6 limitations</b><br />
-	 * Note it is recommended to use {{#crossLink "WebAudioPlugin"}}{{/crossLink}} for iOS (6+). HTML Audio is disabled by
-	 * default as it can only have one &lt;audio&gt; tag, can not preload or autoplay the audio, can not cache the audio,
-	 * and can not play the audio except inside a user initiated event.
-	 *<br /><br />
-	 * <b>Android HTML Audio limitations</b><br />
+	 * <ul><li>Note it is recommended to use {{#crossLink "WebAudioPlugin"}}{{/crossLink}} for iOS (6+)</li>
+	 * 		<li>HTML Audio is disabled by default because</li>
+	 * 		<li>can only have one &lt;audio&gt; tag</li>
+	 * 		<li>can not preload or autoplay the audio</li>
+	 * 		<li>can not cache the audio</li>
+	 * 		<li>can not play the audio except inside a user initiated event.</li>
+	 * </ul>
+	 *
+	 * <b>Android Native Browser limitations</b><br />
 	 * <ul><li>We have no control over audio volume. Only the user can set volume on their device.</li>
-	 *      <li>We can only play audio inside a user event (touch/click).  This currently means you cannot loop sound or use a delay.</li>
+	 *      <li>We can only play audio inside a user event (touch/click).  This currently means you cannot loop sound or use a delay.</li></ul>
 	 * <b> Android Chrome 26.0.1410.58 specific limitations</b><br />
-	 * 		<li>Chrome reports true when you run createjs.Sound.BrowserDetect.isChrome, but is a different browser
+	 * <ul><li>Chrome reports true when you run createjs.Sound.BrowserDetect.isChrome, but is a different browser
 	 *      with different abilities.</li>
 	 *      <li>Can only play 1 sound at a time.</li>
 	 *      <li>Sound is not cached.</li>
@@ -117,6 +121,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default canplaythrough
 	 * @static
+	 * @protected
 	 */
 	s.AUDIO_READY = "canplaythrough";
 
@@ -126,6 +131,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default ended
 	 * @static
+	 * @protected
 	 */
 	s.AUDIO_ENDED = "ended";
 
@@ -135,6 +141,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default seeked
 	 * @static
+	 * @protected
 	 */
 	s.AUDIO_SEEKED = "seeked";
 
@@ -142,8 +149,9 @@ this.createjs = this.createjs || {};
 	 * Event constant for the "error" event for cleaner code.
 	 * @property AUDIO_ERROR
 	 * @type {String}
-	 * @default error
+	 * @default stalled
 	 * @static
+	 * @protected
 	 */
 	s.AUDIO_ERROR = "error"; //TODO: Handle error cases
 
@@ -269,7 +277,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Pre-register a sound instance when preloading/setup. This is called by {{#crossLink "Sound"}}{{/crossLink}}.
 	 * Note that this provides an object containing a tag used for preloading purposes, which
-	 * <a href="http://preloadjs.com">PreloadJS</a> can use to assist with preloading.
+	 * <a href="http://preloadjs.com" target="_blank">PreloadJS</a> can use to assist with preloading.
 	 * @method register
 	 * @param {String} src The source of the audio
 	 * @param {Number} instances The number of concurrently playing instances to allow for the channel at any time.
@@ -306,12 +314,15 @@ this.createjs = this.createjs || {};
 		};
 	};
 
+	// TODO remove this when | approach is removed
 	/**
+	 * Deprecated as this will not be required with new approach to basePath.
 	 * Checks if src was changed on tag used to create instances in TagPool before loading
 	 * Currently PreloadJS does this when a basePath is set, so we are replicating that behavior for internal preloading.
 	 * @method handleTagLoad
 	 * @param event
 	 * @protected
+	 * @deprecated
 	 */
 	p.handleTagLoad = function(event) {
 		// cleanup and so we don't send the event more than once
