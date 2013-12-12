@@ -55,7 +55,8 @@ this.createjs = this.createjs || {};
 	 * <br />
 	 * <b>iOS 6 limitations</b>
 	 * 	<ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event (touch/click).</li>
-	 *	<li>A bug exists that will distort uncached audio when a video element is present in the DOM.</li>
+	 *	<li>A bug exists that will distort uncached audio when a video element is present in the DOM.  You can avoid this bug
+	 * 	by ensuring the audio and video audio share the same sampleRate.</li>
 	 * </ul>
 	 * @class WebAudioPlugin
 	 * @constructor

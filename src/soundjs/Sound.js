@@ -165,7 +165,7 @@ this.createjs = this.createjs || {};
 	 * <b>iOS 6 Web Audio limitations</b><br />
 	 * <ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event
 	 * (touch/click).</li>
-	 * <li>A bug exists that will distort un-cached web audio when a video element is present in the DOM.</li>
+	 * <li>A bug exists that will distort un-cached web audio when a video element is present in the DOM that has audio at a different sampleRate.</li>
 	 * <li>Note HTMLAudioPlugin is not supported on iOS by default.  See {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}
 	 * for more details.</li>
 	 * </ul>
@@ -558,6 +558,11 @@ this.createjs = this.createjs || {};
 	 * @deprecated
 	 */
 	s.registerPlugin = function (plugin) {
+		try {
+			console.log("createjs.Sound.registerPlugin has been deprecated. Please use registerPlugins.");
+		} catch (err) {
+			// you are in IE with the console closed, you monster
+		}
 		return s._registerPlugin(plugin);
 	};
 
@@ -1037,6 +1042,13 @@ this.createjs = this.createjs || {};
 	s._parsePath = function (value, type, id, data) {
         if (typeof(value) != "string") {value = value.toString();}
 		var sounds = value.split(s.DELIMITER);
+		if (sounds.length > 1) {
+			try {
+				console.log("createjs.Sound.DELIMITER \"|\" loading approach has been deprecated. Please use the new alternateExtensions property.");
+			} catch (err) {
+				// you are in IE with the console closed, you monster
+			}
+		}
 		var ret = {type:type || "sound", id:id, data:data};
 		var c = s.getCapabilities();
 		for (var i = 0, l = sounds.length; i < l; i++) {

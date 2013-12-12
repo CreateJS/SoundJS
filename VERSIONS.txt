@@ -1,21 +1,22 @@
 Version NEXT [Not Released]
 ************************************************************************************************************************
 - updated tutorials for changes in this build
-- fixed a bug with default SoundInstance, it did not have playFailed function that is called by Sound
 - updates and fixes to all docs
 - added {"AllowScriptAccess" : "always"} to swfObject for FlashPlugin
 - all Sound, WebAudioPlugin, HTMLAudioPlugin, FlashPlugin, and SoundInstance internal properties and methods renamed to
 	start with _ (underscore)
-- fix a bug that prevented interrupt value from being read in play call if it was passed in an object
-- deprecated registerPlugin in favor of registerPlugins with a single argument
+- fixed a bug with default SoundInstance, it did not have playFailed function that is called by Sound
+- fixed a bug that prevented interrupt value from being read in play call if it was passed in an object
 - changed SoundInstance to extend createjs.EventDispatcher rather than mix in
-- deprecated FlashPlugin BASE_PATH in favor swfPath
 - alterations to basePath approach that require full src (basePath + src) in create and play calls
-- include basePath in removeSound and removeManifest, which is now required of it was included in loading
+- include basePath in removeSound and removeManifest, which is now required if it was included in loading
 - introduced createjs.Sound.alternateExtensions, which is replacing a delimited list as a means to load alternate
 	file types
 - deprecated "|" approach to alternate files, in favor of class level alternateExtensions approach
-- added willTrigger method to EventDispatcher
+- deprecated registerPlugin in favor of registerPlugins with a single argument
+- deprecated FlashPlugin BASE_PATH in favor swfPath
+- added console logs deprecated calls above are used
+- added willTrigger() method to EventDispatcher
 
 
 Version 0.5.1 [November 15, 2013]
@@ -166,4 +167,5 @@ sound is played, providing a much easier way to control audio once it has starte
 
 Version 0.1.0
 ****************************************************************************************************
+Initial release.******************************************************************
 Initial release.

@@ -298,6 +298,13 @@ this.createjs = this.createjs || {};
 			w.appendChild(c);
 
 			// Embed SWF
+			if (s.BASE_PATH) {
+				try {
+					console.log("createjs.FlashPlugin.BASE_PATH has been deprecated, please use swfPath");
+				} catch (err) {
+					// you are in IE with the console closed, you monster
+				}
+			}
 			var path = s.BASE_PATH || s.swfPath;	// BASE_PATH defaults to null, so it will only give value if set by user
 			var val = swfobject.embedSWF(path + "FlashAudioPlugin.swf", this._CONTAINER_ID, "1", "1",
 					"9.0.0", null, null, {"AllowScriptAccess" : "always"}, null,
