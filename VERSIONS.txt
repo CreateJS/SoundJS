@@ -1,4 +1,4 @@
-Version NEXT [Not Released]
+Version 0.5.2 [December 12, 2013]
 ************************************************************************************************************************
 - updated tutorials for changes in this build
 - updates and fixes to all docs
