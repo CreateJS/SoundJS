@@ -335,7 +335,7 @@ this.createjs = this.createjs || {};
 	 * is called without passing a value for interrupt.
 	 * @property defaultInterruptBehavior
 	 * @type {String}
-	 * @default none
+	 * @default Sound.INTERRUPT_NONE, or "none"
 	 * @static
 	 * @since 0.4.0
 	 */
