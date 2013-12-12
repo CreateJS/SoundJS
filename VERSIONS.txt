@@ -1,24 +1,31 @@
 Version NEXT [Not Released]
 ************************************************************************************************************************
-CRITICAL (may break existing content)
-- alterations to basePath approach that require full src (basePath + src) in create and play calls. This change is to
-	support the basePath modifications in PreloadJS 0.4.1.
-
-*****
+- updated tutorials for changes in this build
+- fixed a bug with default SoundInstance, it did not have playFailed function that is called by Sound
+- updates and fixes to all docs
+- added {"AllowScriptAccess" : "always"} to swfObject for FlashPlugin
+- all Sound, WebAudioPlugin, HTMLAudioPlugin, FlashPlugin, and SoundInstance internal properties and methods renamed to
+	start with _ (underscore)
+- fix a bug that prevented interrupt value from being read in play call if it was passed in an object
 - deprecated registerPlugin in favor of registerPlugins with a single argument
 - changed SoundInstance to extend createjs.EventDispatcher rather than mix in
 - deprecated FlashPlugin BASE_PATH in favor swfPath
+- alterations to basePath approach that require full src (basePath + src) in create and play calls
 - include basePath in removeSound and removeManifest, which is now required of it was included in loading
-- introduced createjs.Sound.alternateExtensions, which is replacing "|" as a means to load alternate file types
+- introduced createjs.Sound.alternateExtensions, which is replacing a delimited list as a means to load alternate
+	file types
 - deprecated "|" approach to alternate files, in favor of class level alternateExtensions approach
+- added willTrigger method to EventDispatcher
 
 
-Version 0.5.1
+Version 0.5.1 [November 15, 2013]
 ************************************************************************************************************************
-- suppressing errors in WebAudioPlugin and HTMLAudioPlugin in old browsers that do not properly support object.defineProperty
+- suppressing errors in WebAudioPlugin and HTMLAudioPlugin in old browsers that do not properly support
+	object.defineProperty
 - changes to WebAudioPlugin to allow it to work with latest working draft of Web Audio API
 - WebAudioPlugin changed SoundInstance node order to SourceNode -> PanNode -> GainNode --> context.destination to get
   around firefox bug https://bugzilla.mozilla.org/show_bug.cgi?id=933304
+
 
 Version 0.5.0 [September 25, 2013]
 ************************************************************************************************************************
