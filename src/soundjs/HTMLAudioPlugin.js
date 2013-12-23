@@ -422,7 +422,7 @@ this.createjs = this.createjs || {};
 
 	var p = SoundInstance.prototype = new createjs.EventDispatcher();
 
-	p.src = null,
+	p.src = null;
 	p.uniqueId = -1;
 	p.playState = null;
 	p._owner = null;
