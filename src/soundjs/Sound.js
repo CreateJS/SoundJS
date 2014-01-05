@@ -1335,24 +1335,27 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s._playInstance = function (instance, interrupt, delay, offset, loop, volume, pan) {
-		if (interrupt instanceof Object) {
-			delay = interrupt.delay;
-			offset = interrupt.offset;
-			loop = interrupt.loop;
-			volume = interrupt.volume;
-			pan = interrupt.pan;
-			interrupt = interrupt.interrupt;
+		
+		var _interrupt = interrupt, _delay = delay, _offset=offset, _loop=loop, _volume = volume, _pan = pan;
+		
+		if (_interrupt instanceof Object) {
+			_delay = _interrupt.delay;
+			_offset = _interrupt.offset;
+			_loop = _interrupt.loop;
+			_volume = _interrupt.volume;
+			_pan = _interrupt.pan;
+			_interrupt = _interrupt.interrupt;
 		}
 
-		interrupt = interrupt || s.defaultInterruptBehavior;
-		if (delay == null) {delay = 0;}
-		if (offset == null) {offset = instance.getPosition();}
-		if (loop == null) {loop = 0;}
-		if (volume == null) {volume = instance.volume;}
-		if (pan == null) {pan = instance.pan;}
+		_interrupt = _interrupt || s.defaultInterruptBehavior;
+		if (_delay == null) {_delay = 0;}
+		if (_offset == null) {_offset = instance.getPosition();}
+		if (_loop == null) {_loop = 0;}
+		if (_volume == null) {_volume = instance.volume;}
+		if (_pan == null) {_pan = instance.pan;}
 
-		if (delay == 0) {
-			var ok = s._beginPlaying(instance, interrupt, offset, loop, volume, pan);
+		if (_delay == 0) {
+			var ok = s._beginPlaying(instance, _interrupt, _offset, _loop, _volume, _pan);
 			if (!ok) {
 				return false;
 			}
@@ -1360,8 +1363,8 @@ this.createjs = this.createjs || {};
 			//Note that we can't pass arguments to proxy OR setTimeout (IE only), so just wrap the function call.
 			// OJR WebAudio may want to handle this differently, so it might make sense to move this functionality into the plugins in the future
 			var delayTimeoutId = setTimeout(function () {
-				s._beginPlaying(instance, interrupt, offset, loop, volume, pan);
-			}, delay);
+				s._beginPlaying(instance, _interrupt, _offset, _loop, _volume, _pan);
+			}, _delay);
 			instance._delayTimeoutId = delayTimeoutId;
 		}
 
