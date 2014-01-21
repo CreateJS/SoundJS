@@ -176,12 +176,11 @@
             $("#position").css("display", "block");
 
             instance = createjs.Sound.play("music");
-            instance.onComplete = function() {
-                //console.log("onComplete");
+            instance.addEventListener("complete", function() {
                 clearInterval(positionInterval);
                 $("#playBtn").removeClass("pauseBtn").addClass("playBtn")
                 $("#stopBtn").attr("disabled", true);
-            }
+            });
             $("#playPauseBtn").attr("disabled", false);
             $("#playBtn").removeClass("playBtn").addClass("pauseBtn");
             $("#playBtn").click(function(event){

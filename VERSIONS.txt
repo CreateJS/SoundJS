@@ -1,3 +1,9 @@
+Version NEXT
+************************************************************************************************************************
+- fixed HTMLAudioPlugin typo on SoundInstance.src declaration
+- fixed WebAudioPlugin bug, sourceNode was not being properly set to null on pause and setPosition
+- added readonly paused property to SoundInstance
+
 Version 0.5.2 [December 12, 2013]
 ************************************************************************************************************************
 - updated tutorials for changes in this build

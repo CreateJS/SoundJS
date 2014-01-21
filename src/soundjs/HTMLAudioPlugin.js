@@ -422,7 +422,7 @@ this.createjs = this.createjs || {};
 
 	var p = SoundInstance.prototype = new createjs.EventDispatcher();
 
-	p.src = null,
+	p.src = null;
 	p.uniqueId = -1;
 	p.playState = null;
 	p._owner = null;
@@ -452,6 +452,7 @@ this.createjs = this.createjs || {};
 	p._delayTimeoutId = null;
 	p.tag = null;
 	p._muted = false;
+	p.paused = false;
 	p._paused = false;
 
 	// Proxies, make removing listeners easier.
@@ -504,7 +505,7 @@ this.createjs = this.createjs || {};
 		}
 		this.playState = createjs.Sound.PLAY_INTERRUPTED;
 		this._cleanUp();
-		this._paused = false;
+		this.paused = this._paused = false;
 		this._sendEvent("interrupted");
 	};
 
@@ -562,7 +563,7 @@ this.createjs = this.createjs || {};
 		this._duration = this.tag.duration * 1000;  // need this for setPosition on stopped sounds
 
 		this.playState = createjs.Sound.PLAY_SUCCEEDED;
-		this._paused = false;
+		this.paused = this._paused = false;
 		this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_READY, this._readyHandler, false);
 
 		if (this._offset >= this.getDuration()) {
@@ -583,7 +584,7 @@ this.createjs = this.createjs || {};
 
 	p.pause = function () {
 		if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED && this.tag != null) {
-			this._paused = true;
+			this.paused = this._paused = true;
 			// Note: when paused by user, we hold a reference to our tag. We do not release it until stopped.
 			this.tag.pause();
 
@@ -598,7 +599,7 @@ this.createjs = this.createjs || {};
 		if (!this._paused || this.tag == null) {
 			return false;
 		}
-		this._paused = false;
+		this.paused = this._paused = false;
 		this.tag.play();
 		return true;
 	};
@@ -751,7 +752,7 @@ this.createjs = this.createjs || {};
 	 */
 	function Loader(src, tag) {
 		this._init(src, tag);
-	}
+	};
 
 	var p = Loader.prototype;
 
@@ -851,7 +852,7 @@ this.createjs = this.createjs || {};
 	// used for debugging
 	p.toString = function () {
 		return "[HTMLAudioPlugin Loader]";
-	}
+	};
 
 	createjs.HTMLAudioPlugin.Loader = Loader;
 
@@ -897,7 +898,7 @@ this.createjs = this.createjs || {};
 			channel = s.tags[src] = new TagPool(src);
 		}
 		return channel;
-	}
+	};
 
 	/**
 	 * Delete a TagPool and all related tags. Note that if the TagPool does not exist, this will fail.
@@ -914,7 +915,7 @@ this.createjs = this.createjs || {};
 		channel.removeAll();
 		delete(s.tags[src]);
 		return true;
-	}
+	};
 
 	/**
 	 * Delete all TagPools and all related tags.
@@ -926,7 +927,7 @@ this.createjs = this.createjs || {};
 			s.tags[channel].removeAll();	// this stops and removes all active instances
 		}
 		s.tags = {};
-	}
+	};
 
 	/**
 	 * Get a tag instance. This is a shortcut method.
@@ -941,7 +942,7 @@ this.createjs = this.createjs || {};
 			return null;
 		}
 		return channel.get();
-	}
+	};
 
 	/**
 	 * Return a tag instance. This is a shortcut method.
@@ -957,7 +958,7 @@ this.createjs = this.createjs || {};
 			return null;
 		}
 		return channel.set(tag);
-	}
+	};
 
 	/**
 	 * A function to check if src has changed in the loaded audio tag.
@@ -974,7 +975,7 @@ this.createjs = this.createjs || {};
 			return null;
 		}
 		channel.checkSrcChange();
-	}
+	};
 
 	var p = TagPool.prototype;
 
@@ -1090,7 +1091,7 @@ this.createjs = this.createjs || {};
 
 	p.toString = function () {
 		return "[HTMLAudioPlugin TagPool]";
-	}
+	};
 
 	createjs.HTMLAudioPlugin.TagPool = TagPool;
 

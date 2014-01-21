@@ -682,6 +682,7 @@ this.createjs = this.createjs || {};
 	p._duration = 0;
 	p._delayTimeoutId = null;
 	p._muted = false;
+	p.paused = false;
 	p._paused = false;
 
 	// IE8 has Object.defineProperty, but only for DOM objects, so check if fails to suppress errors
@@ -730,7 +731,7 @@ this.createjs = this.createjs || {};
 		this.playState = createjs.Sound.PLAY_INTERRUPTED;
 		this._flash.interrupt(this.flashId);
 		this._cleanUp();
-		this._paused = false;
+		this.paused = this._paused = false;
 		this._sendEvent("interrupted");
 	};
 
@@ -746,7 +747,7 @@ this.createjs = this.createjs || {};
 
 	p._beginPlaying = function (offset, loop, volume, pan) {
 		this.loop = loop;
-		this._paused = false;
+		this.paused = this._paused = false;
 
 		if (!this._owner.flashReady) {
 			return false;
@@ -778,7 +779,7 @@ this.createjs = this.createjs || {};
 
 	p.pause = function () {
 		if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-			this._paused = true;
+			this.paused = this._paused = true;
 			clearTimeout(this._delayTimeoutId);
 			return this._flash.pauseSound(this.flashId);
 		}
@@ -789,13 +790,13 @@ this.createjs = this.createjs || {};
 		if (!this._paused) {
 			return false;
 		}
-		this._paused = false;
+		this.paused = this._paused = false;
 		return this._flash.resumeSound(this.flashId);
 	};
 
 	p.stop = function () {
 		this.playState = createjs.Sound.PLAY_FINISHED;
-		this._paused = false;
+		this.paused = this._paused = false;
 		this._offset = 0;  // flash destroys the wrapper, so we need to track offset on our own
 		var ok = this._flash.stopSound(this.flashId);
 		this._cleanUp();

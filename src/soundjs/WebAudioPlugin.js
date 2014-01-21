@@ -737,14 +737,13 @@ this.createjs = this.createjs || {};
 	p._muted = false;
 
 	/**
-	 * Determines if the audio is currently paused.
+	 * Read only value that tells you if the audio is currently paused.
 	 * Use {{#crossLink "SoundInstance/pause:method"}}{{/crossLink}} and {{#crossLink "SoundInstance/resume:method"}}{{/crossLink}} to set.
-	 * @property _paused
+	 * @property paused
 	 * @type {Boolean}
-	 * @default false
-	 * @protected
 	 */
-	p._paused = false;
+	p.paused = false;	// this value will not be used, and is only set
+	p._paused = false;	// this value is used internally for setting paused
 
 	/**
 	 * WebAudioPlugin only.
@@ -930,7 +929,7 @@ this.createjs = this.createjs || {};
 	p._interrupt = function () {
 		this._cleanUp();
 		this.playState = createjs.Sound.PLAY_INTERRUPTED;
-		this._paused = false;
+		this.paused = this._paused = false;
 		this._sendEvent("interrupted");
 	};
 
@@ -952,7 +951,7 @@ this.createjs = this.createjs || {};
 		}
 
 		this.playState = createjs.Sound.PLAY_SUCCEEDED;
-		this._paused = false;
+		this.paused = this._paused = false;
 
 		this.gainNode.connect(this._owner.gainNode);  // this line can cause a memory leak.  Nodes need to be disconnected from the audioDestination or any sequence that leads to it.
 
@@ -1063,11 +1062,11 @@ this.createjs = this.createjs || {};
 	 */
 	p.pause = function () {
 		if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-			this._paused = true;
+			this.paused = this._paused = true;
 
 			this._offset = this._owner.context.currentTime - this._startTime;  // this allows us to restart the sound at the same point in playback
-			this._cleanUpAudioNode(this.sourceNode);
-			this._cleanUpAudioNode(this._sourceNodeNext);
+			this.sourceNode = this._cleanUpAudioNode(this.sourceNode);
+			this.sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
 
 			if (this.gainNode.numberOfOutputs != 0) {
 				this.gainNode.disconnect();
@@ -1113,6 +1112,7 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} If the stop call succeeds.
 	 */
 	p.stop = function () {
+		this.paused = this._paused = false;
 		this._cleanUp();
 		this.playState = createjs.Sound.PLAY_FINISHED;
 		this._offset = 0;  // set audio to start at the beginning
@@ -1279,8 +1279,8 @@ this.createjs = this.createjs || {};
 
 		if (this.sourceNode && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
 			// we need to stop this sound from continuing to play, as we need to recreate the sourceNode to change position
-			this._cleanUpAudioNode(this.sourceNode);
-			this._cleanUpAudioNode(this._sourceNodeNext);
+			this.sourceNode = this._cleanUpAudioNode(this.sourceNode);
+			this._sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
 			clearTimeout(this._soundCompleteTimeout);  // clear timeout that triggers sound complete
 		}  // NOTE we cannot just call cleanup because it also calls the Sound function _playFinished which releases this instance in SoundChannel
 
