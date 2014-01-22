@@ -914,7 +914,9 @@ this.createjs = this.createjs || {};
 	 */
 	p._cleanUpAudioNode = function(audioNode) {
 		if(audioNode) {
-			audioNode.stop(0);
+			if ( audioNode.playbackState == audioNode.PLAYING_STATE ) { // Only stop an audioNode if it's playing
+				audioNode.stop(0);
+			}
 			audioNode.disconnect(this.panNode);
 			audioNode = null;	// release reference so Web Audio can handle removing references and garbage collection
 		}
