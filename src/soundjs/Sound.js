@@ -992,7 +992,7 @@ this.createjs = this.createjs || {};
 		s._idHash = {};
 		s._preloadHash = {};
 		SoundChannel.removeAll();
-		s.activePlugin.removeAllSounds();
+		if (s.activePlugin) {s.activePlugin.removeAllSounds();}
 	};
 
 	/**
