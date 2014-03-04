@@ -160,7 +160,6 @@ this.createjs = this.createjs || {};
 			return null;
 		}
 
-		// this handles if only deprecated Web Audio API calls are supported
 		s._compatibilitySetUp();
 
 		// playing this inside of a touch event will enable audio on iOS, which starts muted
@@ -260,7 +259,6 @@ this.createjs = this.createjs || {};
 	 * @default 1
 	 * @protected
 	 */
-	// TODO refactor Sound.js so we can use getter setter for volume
 	p._volume = 1;
 
 	/**
@@ -804,43 +802,6 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 
-	//TODO: Deprecated
-	/**
-	 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "SoundInstance/succeeded:event"}}{{/crossLink}}
-	 * event.
-	 * @property onPlaySucceeded
-	 * @type {Function}
-	 * @deprecated Use addEventListener and the "succeeded" event.
-	 */
-	/**
-	 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "SoundInstance/interrupted:event"}}{{/crossLink}}
-	 * event.
-	 * @property onPlayInterrupted
-	 * @type {Function}
-	 * @deprecated Use addEventListener and the "interrupted" event.
-	 */
-	/**
-	 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "SoundInstance/failed:event"}}{{/crossLink}}
-	 * event.
-	 * @property onPlayFailed
-	 * @type {Function}
-	 * @deprecated Use addEventListener and the "failed" event.
-	 */
-	/**
-	 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "SoundInstance/complete:event"}}{{/crossLink}}
-	 * event.
-	 * @property onComplete
-	 * @type {Function}
-	 * @deprecated Use addEventListener and the "complete" event.
-	 */
-	/**
-	 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "SoundInstance/loop:event"}}{{/crossLink}}
-	 * event.
-	 * @property onLoop
-	 * @type {Function}
-	 * @deprecated Use addEventListener and the "loop" event.
-	 */
-
 	/**
 	 * A helper method that dispatches all events for SoundInstance.
 	 * @method _sendEvent
@@ -866,7 +827,7 @@ this.createjs = this.createjs || {};
 
 		this.gainNode = this._owner.context.createGain();
 
-		this.panNode = this._owner.context.createPanner();  //TODO test how this affects when we have mono audio
+		this.panNode = this._owner.context.createPanner();
 		this.panNode.panningModel = this._owner._panningModel;
 		this.panNode.connect(this.gainNode);
 
@@ -1396,13 +1357,6 @@ this.createjs = this.createjs || {};
 	p.src = null;
 
 	/**
-	 * The original source of the sound, before it is altered with a basePath.
-	 * #property src
-	 * @type {String}
-	 */
-	p.originalSrc = null;
-
-	/**
 	 * The decoded AudioBuffer array that is returned when loading is complete.
 	 * #property result
 	 * @type {AudioBuffer}
@@ -1436,7 +1390,6 @@ this.createjs = this.createjs || {};
 	// constructor
 	p._init = function (src, owner) {
 		this.src = src;
-		this.originalSrc = src;
 		this.owner = owner;
 	};
 
@@ -1447,7 +1400,6 @@ this.createjs = this.createjs || {};
 	 */
 	p.load = function (src) {
 		if (src != null) {
-			// TODO does this need to set this.originalSrc
 			this.src = src;
 		}
 
@@ -1495,7 +1447,6 @@ this.createjs = this.createjs || {};
 	p.handleAudioDecoded = function (decodedAudio) {
 		this.progress = 1;
 		this.result = decodedAudio;
-		this.src = this.originalSrc;
 		this.owner.addPreloadResults(this.src, this.result);
 		this.onload && this.onload();
 	};

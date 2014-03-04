@@ -73,11 +73,6 @@ this.createjs = this.createjs || {};
 
 	"use strict";
 
-	//TODO: Interface to validate plugins and throw warnings
-	//TODO: Determine if methods exist on a plugin before calling  // OJR this is only an issue if something breaks or user changes something
-	//TODO: Interface to validate instances and throw warnings
-	//TODO: Surface errors on audio from all plugins
-	//TODO: Timeouts  // OJR for?
 	/**
 	 * The Sound class is the public API for creating sounds, controlling the overall sound levels, and managing plugins.
 	 * All Sound APIs on this class are static.
@@ -87,7 +82,7 @@ this.createjs = this.createjs || {};
 	 * or register multiple sounds using {{#crossLink "Sound/registerManifest"}}{{/crossLink}}. If you don't register a
 	 * sound prior to attempting to play it using {{#crossLink "Sound/play"}}{{/crossLink}} or create it using {{#crossLink "Sound/createInstance"}}{{/crossLink}},
 	 * the sound source will be automatically registered but playback will fail as the source will not be ready. If you use
-	 * <a href="http://preloadjs.com" target="_blank">PreloadJS</a>, this is handled for you when the sound is
+	 * <a href="http://preloadjs.com" target="_blank">PreloadJS</a>, registration is handled for you when the sound is
 	 * preloaded. It is recommended to preload sounds either internally using the register functions or externally using
 	 * PreloadJS so they are ready when you want to use them.
 	 *
@@ -124,7 +119,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * Sound can be used as a plugin with PreloadJS to help preload audio properly. Audio preloaded with PreloadJS is
 	 * automatically registered with the Sound class. When audio is not preloaded, Sound will do an automatic internal
-	 * load. As a result, it may not play immediately the first time play is called. Use the
+	 * load. As a result, it may fail to play the first time play is called if the audio is not finished loading. Use the
 	 * {{#crossLink "Sound/fileload"}}{{/crossLink}} event to determine when a sound has finished internally preloading.
 	 * It is recommended that all audio is preloaded before it is played.
 	 *
@@ -186,19 +181,16 @@ this.createjs = this.createjs || {};
 
 	var s = Sound;
 
+	// TODO DEPRECATED
 	/**
-	 * DEPRECATED
-	 * This approach has is being replaced by {{#crossLink "Sound/alternateExtensions:property"}}{{/crossLink}}, and
-	 * support will be removed in the next version.
-	 *
-	 * The character (or characters) that are used to split multiple paths from an audio source.
+	 * REMOVED
+	 * Use {{#crossLink "Sound/alternateExtensions:property"}}{{/crossLink}} instead
 	 * @property DELIMITER
 	 * @type {String}
 	 * @default |
 	 * @static
 	 * @deprecated
 	 */
-	s.DELIMITER = "|";
 
 	/**
 	 * The interrupt value to interrupt any currently playing instance with the same source, if the maximum number of
@@ -488,16 +480,6 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 
-	//TODO: Deprecated
-	/**
-	 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "Sound/fileload:event"}}{{/crossLink}}
-	 * event.
-	 * @property onLoadComplete
-	 * @type {Function}
-	 * @deprecated Use addEventListener and the fileload event.
-	 * @since 0.4.0
-	 */
-
 	/**
 	 * Used by external plugins to dispatch file load events.
 	 * @method _sendFileLoadEvent
@@ -548,33 +530,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Deprecated in favor of {{#crossLink "Sound/registerPlugins"}}{{/crossLink}} with a single argument.
-	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin]);
-	 *
-	 * @method registerPlugin
-	 * @param {Object} plugin The plugin class to install.
-	 * @return {Boolean} Whether the plugin was successfully initialized.
-	 * @static
-	 * @deprecated
-	 */
-	s.registerPlugin = function (plugin) {
-		try {
-			console.log("createjs.Sound.registerPlugin has been deprecated. Please use registerPlugins.");
-		} catch (err) {
-			// you are in IE with the console closed, you monster
-		}
-		return s._registerPlugin(plugin);
-	};
-
-	/**
-	 * Register a Sound plugin. Plugins handle the actual playback of audio. The default plugins are
-	 * ({{#crossLink "WebAudioPlugin"}}{{/crossLink}} followed by {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}),
-	 * and are installed if no other plugins are present when the user attempts to start playback or register sound.
-	 * <h4>Example</h4>
-	 *      createjs.FlashPlugin.swfPath = "../src/SoundJS/";
-	 *      createjs.Sound._registerPlugin(createjs.FlashPlugin);
-	 *
-	 * To register multiple plugins, use {{#crossLink "Sound/registerPlugins"}}{{/crossLink}}.
+	 * Used by {{#crossLink "Sound/registerPlugins"}}{{/crossLink}} to register a Sound plugin.
 	 *
 	 * @method _registerPlugin
 	 * @param {Object} plugin The plugin class to install.
@@ -590,7 +546,6 @@ this.createjs = this.createjs || {};
 		// Note: Each plugin is passed in as a class reference, but we store the activePlugin as an instance
 		if (plugin.isSupported()) {
 			s.activePlugin = new plugin();
-			//TODO: Check error on initialization
 			return true;
 		}
 		return false;
@@ -730,9 +685,7 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.initLoad = function (src, type, id, data, path) {
-		// remove path from src so we can continue to support "|" splitting of src files	// TODO remove this when "|" is removed
-		src = src.replace(path, "");
-		var details = s.registerSound(src, id, data, false, path);
+		var details = s.registerSound(src, id, data, false);
 		if (details == null) {
 			return false;
 		}
@@ -770,20 +723,14 @@ this.createjs = this.createjs || {};
 		}
 
 		if (src instanceof Object) {
-			basePath = id;	//this assumes preload has not be passed in as a property // OJR check if arguments == 3 would be less fragile
-			//?? preload = src.preload;
+			basePath = id;	//this assumes preload has not be passed in as a property /
 			// OJR refactor how data is passed in to make the parameters work better
 			id = src.id;
 			data = src.data;
 			src = src.src;
 		}
 
-		// branch to different parse based on alternate formats setting
-		if (s.alternateExtensions.length) {
-			var details = s._parsePath2(src, "sound", id, data);
-		} else {
-			var details = s._parsePath(src, "sound", id, data);
-		}
+		var details = s._parsePath(src, "sound", id, data);
 		if (details == null) {
 			return false;
 		}
@@ -821,7 +768,7 @@ this.createjs = this.createjs || {};
 			}
 
 			// If the loader returns a tag, return it instead for preloading.
-			// OJR all loaders currently use tags?
+			// OJR all loaders currently use tags
 			if (loader.tag != null) {
 				details.tag = loader.tag;
 			} else if (loader.src) {
@@ -915,11 +862,7 @@ this.createjs = this.createjs || {};
 		}
 		src = s._getSrcById(src);
 
-		if (s.alternateExtensions.length) {
-			var details = s._parsePath2(src);
-		} else {
-			var details = s._parsePath(src);
-		}
+		var details = s._parsePath(src);
 		if (details == null) {
 			return false;
 		}
@@ -1011,11 +954,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	s.loadComplete = function (src) {
-		if (s.alternateExtensions.length) {
-			var details = s._parsePath2(src, "sound");
-		} else {
-			var details = s._parsePath(src, "sound");
-		}
+		var details = s._parsePath(src, "sound");
 		if (details) {
 			src = s._getSrcById(details.src);
 		} else {
@@ -1025,10 +964,8 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Parse the path of a sound, usually from a manifest item. Manifest items support single file paths, as well as
-	 * composite paths using {{#crossLink "Sound/DELIMITER:property"}}{{/crossLink}}, which defaults to "|". The first path supported by the
-	 * current browser/plugin will be used.
-	 * NOTE the "|" approach is deprecated and will be removed in the next version
+	 * Parse the path of a sound, usually from a manifest item. alternate extensions will be attempted in order if the
+	 * current extension is not supported
 	 * @method _parsePath
 	 * @param {String} value The path to an audio source.
 	 * @param {String} [type] The type of path. This will typically be "sound" or null.
@@ -1040,39 +977,6 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	s._parsePath = function (value, type, id, data) {
-        if (typeof(value) != "string") {value = value.toString();}
-		var sounds = value.split(s.DELIMITER);
-		if (sounds.length > 1) {
-			try {
-				console.log("createjs.Sound.DELIMITER \"|\" loading approach has been deprecated. Please use the new alternateExtensions property.");
-			} catch (err) {
-				// you are in IE with the console closed, you monster
-			}
-		}
-		var ret = {type:type || "sound", id:id, data:data};
-		var c = s.getCapabilities();
-		for (var i = 0, l = sounds.length; i < l; i++) {
-			var sound = sounds[i];
-
-			var match = sound.match(s.FILE_PATTERN);
-			if (match == null) {
-				return false;
-			}
-			var name = match[4];
-			var ext = match[5];
-
-			if (c[ext] && createjs.indexOf(s.SUPPORTED_EXTENSIONS, ext) > -1) {
-				ret.name = name;
-				ret.src = sound;
-				ret.extension = ext;
-				return ret;
-			}
-		}
-		return null;
-	};
-
-	// new approach, when old approach is deprecated this will become _parsePath
-	s._parsePath2 = function (value, type, id, data) {
 		if (typeof(value) != "string") {value = value.toString();}
 
 		var match = value.match(s.FILE_PATTERN);
@@ -1174,11 +1078,7 @@ this.createjs = this.createjs || {};
 
 		src = s._getSrcById(src);
 
-		if (s.alternateExtensions.length) {
-			var details = s._parsePath2(src, "sound");
-		} else {
-			var details = s._parsePath(src, "sound");
-		}
+		var details = s._parsePath(src, "sound");
 
 		var instance = null;
 		if (details != null && details.src != null) {
@@ -1237,14 +1137,6 @@ this.createjs = this.createjs || {};
 	s.getVolume = function () {
 		return s._masterVolume;
 	};
-
-	/**
-	 * REMOVED. Please see {{#crossLink "Sound/setMute"}}{{/crossLink}}.
-	 * @method mute
-	 * @param {Boolean} value Whether the audio should be muted or not.
-	 * @static
-	 * @deprecated This function has been deprecated. Please use setMute instead.
-	 */
 
 	/**
 	 * Mute/Unmute all audio. Note that muted audio still plays at 0 volume. This global mute value is maintained

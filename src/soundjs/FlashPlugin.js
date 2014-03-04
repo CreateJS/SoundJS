@@ -81,17 +81,15 @@ this.createjs = this.createjs || {};
 	 */
 	s._capabilities = null;
 
+	// TODO DEPRECATED
 	/**
-	 * Deprecated in favor of {{#crossLink "FlashPlugin/swfPath:property"}}{{/crossLink}}
-	 * <br />The path relative to the HTML page that the FlashAudioPlugin.swf resides. Note if this is not correct, this
-	 * plugin will not work.
+	 * REMOVED in favor of {{#crossLink "FlashPlugin/swfPath:property"}}{{/crossLink}}
 	 * @property BASE_PATH
 	 * @type {String}
 	 * @default null
 	 * @static
 	 * @deprecated
 	 */
-	s.BASE_PATH = null;
 
 	/**
 	 * The path relative to the HTML page that the FlashAudioPlugin.swf resides. Note if this is not correct, this
@@ -120,7 +118,6 @@ this.createjs = this.createjs || {};
 			return false;
 		}
 		return swfobject.hasFlashPlayerVersion("9.0.0");
-		//TODO: Internal detection instead of SWFObject?
 	};
 
 	/**
@@ -134,8 +131,6 @@ this.createjs = this.createjs || {};
 		if (s._capabilities != null) {
 			return;
 		}
-		// TODO change to support file types using SUPPORTED_EXTENSIONS like other plugins if possible
-		// see http://helpx.adobe.com/flash/kb/supported-codecs-flash-player.html
 		var c = s._capabilities = {
 			panning:true,
 			volume:true,
@@ -297,21 +292,11 @@ this.createjs = this.createjs || {};
 			c.appendChild(document.createTextNode("SoundJS Flash Container"));
 			w.appendChild(c);
 
-			// Embed SWF
-			if (s.BASE_PATH) {
-				try {
-					console.log("createjs.FlashPlugin.BASE_PATH has been deprecated, please use swfPath");
-				} catch (err) {
-					// you are in IE with the console closed, you monster
-				}
-			}
-			var path = s.BASE_PATH || s.swfPath;	// BASE_PATH defaults to null, so it will only give value if set by user
+			var path = s.swfPath;
 			var val = swfobject.embedSWF(path + "FlashAudioPlugin.swf", this._CONTAINER_ID, "1", "1",
 					"9.0.0", null, null, {"AllowScriptAccess" : "always"}, null,
 					createjs.proxy(this._handleSWFReady, this)
 			);
-
-			//TODO: Internal detection instead of swfobject
 		},
 
 		/**

@@ -248,9 +248,6 @@ this.createjs = this.createjs || {};
 	 */
 	p.defaultNumChannels = 2;
 
-	// Proxies, make removing listeners easier.
-	p.loadedHandler = null;
-
 	/**
 	 * An initialization function run by the constructor
 	 * @method _init
@@ -281,44 +278,10 @@ this.createjs = this.createjs || {};
 			channel.add(tag);
 		}
 
-		tag.id = src;	// co-opting id as we need a way to store original src in case it is changed before loading
-		this.loadedHandler = createjs.proxy(this._handleTagLoad, this);  // we need this bind to be able to remove event listeners
-		tag.addEventListener && tag.addEventListener("canplaythrough", this.loadedHandler);
-		if(tag.onreadystatechange == null) {
-			tag.onreadystatechange = this.loadedHandler;
-		} else {
-			var f = tag.onreadystatechange;
-			// OJR will this lose scope?
-			tag.onreadystatechange = function() {
-				f();
-				this.loadedHandler();
-			}
-		}
-
 		return {
 			tag:tag, // Return one instance for preloading purposes
 			numChannels:l  // The default number of channels to make for this Sound or the passed in value
 		};
-	};
-
-	// TODO remove this when | approach is removed
-	/**
-	 * Deprecated as this will not be required with new approach to basePath.
-	 * Checks if src was changed on tag used to create instances in TagPool before loading
-	 * Currently PreloadJS does this when a basePath is set, so we are replicating that behavior for internal preloading.
-	 * @method _handleTagLoad
-	 * @param event
-	 * @protected
-	 * @deprecated
-	 */
-	p._handleTagLoad = function(event) {
-		// cleanup and so we don't send the event more than once
-		event.target.removeEventListener && event.target.removeEventListener("canplaythrough", this.loadedHandler);
-		event.target.onreadystatechange = null;
-
-		if (event.target.src == event.target.id) { return; }
-		// else src has changed before loading, and we need to make the change to TagPool because we pre create tags
-		createjs.HTMLAudioPlugin.TagPool.checkSrc(event.target.id);
 	};
 
 	/**
@@ -550,7 +513,7 @@ this.createjs = this.createjs || {};
 	// Note: Sounds stall when trying to begin playback of a new audio instance when the existing instances
 	//  has not loaded yet. This doesn't mean the sound will not play.
 	p._handleSoundStalled = function (event) {
-		this._cleanUp();  // OJR NOTE this will stop playback, and I think we should remove this and let the developer decide how to handle stalled instances
+		this._cleanUp();  // OJR this will stop playback, we could remove this and let the developer decide how to handle stalled instances
 		this._sendEvent("failed");
 	};
 
@@ -559,7 +522,7 @@ this.createjs = this.createjs || {};
 			return;
 		}
 
-		// OJR would like a cleaner way to do this in _init, discuss with LM
+		// OJR would like a cleaner way to do this in _init
 		this._duration = this.tag.duration * 1000;  // need this for setPosition on stopped sounds
 
 		this.playState = createjs.Sound.PLAY_SUCCEEDED;
@@ -960,23 +923,6 @@ this.createjs = this.createjs || {};
 		return channel.set(tag);
 	};
 
-	/**
-	 * A function to check if src has changed in the loaded audio tag.
-	 * This is required because PreloadJS appends a basePath to the src before loading.
-	 * Note this is currently only called when a change is detected
-	 * #method checkSrc
-	 * @param src the unaltered src that is used to store the channel.
-	 * @static
-	 * @protected
-	 */
-	s.checkSrc = function (src) {
-		var channel = s.tags[src];
-		if (channel == null) {
-			return null;
-		}
-		channel.checkSrcChange();
-	};
-
 	var p = TagPool.prototype;
 
 	/**
@@ -1072,21 +1018,6 @@ this.createjs = this.createjs || {};
 			this.tags.push(tag);
 		}
 		this.available = this.tags.length;
-	};
-
-	/**
-	 * Make sure the src of all other tags is correct after load.
-	 * This is needed because PreloadJS appends a basePath to src before loading.
-	 * #method checkSrcChange
-	 */
-	p.checkSrcChange = function () {
-		// the last tag always has the latest src after loading
-		//var i = this.length-1;	// this breaks in Firefox because it is not correctly removing an event listener
-		var i = this.tags.length - 1;
-		var newSrc = this.tags[i].src;
-		while(i--) {
-			this.tags[i].src = newSrc;
-		}
 	};
 
 	p.toString = function () {
