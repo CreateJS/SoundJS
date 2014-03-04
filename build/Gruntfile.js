@@ -40,7 +40,12 @@ module.exports = function (grunt) {
 					},
 					build: {
 						files: {
-							'output/<%= pkg.name.toLowerCase() %>-<%= version %>.combined.js': getCombinedSource()
+							'output/<%= pkg.name.toLowerCase() %>-<%= version %>.combined.js': combineSource([
+										{cwd: '', config:'config.json', source:'source'}
+									]),
+							'output/flashplugin-<%= version %>.combined.js': combineSource([
+																	{cwd: '', config:'config.json', source:'flashplugin_source'}
+																])
 						}
 					}
 				},
@@ -128,14 +133,6 @@ module.exports = function (grunt) {
 		return config[name];
 	}
 
-	function getCombinedSource() {
-		var configs = [
-			{cwd: '', config:'config.json', source:'source'}
-		];
-
-		return combineSource(configs);
-	}
-
 	function combineSource(configs) {
 		// Pull out all the source paths.
 		var sourcePaths = [];
@@ -216,7 +213,7 @@ module.exports = function (grunt) {
 	 *
 	 */
 	grunt.registerTask('coreBuild', [
-		"updateversion", "uglify", "docs", "copy:src"
+		"updateversion", "combine", "uglify", "docs", "copy:src"
 	]);
 
 	/**
