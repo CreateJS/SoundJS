@@ -107,7 +107,7 @@
 
         function handleLoad(evt) {
             // get the context.  NOTE to connect to existing nodes we need to work in the same context.
-            var context = createjs.WebAudioPlugin.context;
+            var context = createjs.Sound.activePlugin.context;
 
             // create an analyser node
             analyserNode = context.createAnalyser();
@@ -116,7 +116,7 @@
             analyserNode.connect(context.destination);  // connect to the context.destination, which outputs the audio
 
             // attach visualizer node to our existing dynamicsCompressorNode, which was connected to context.destination
-            var dynamicsNode = createjs.WebAudioPlugin.dynamicsCompressorNode;
+            var dynamicsNode = createjs.Sound.activePlugin.dynamicsCompressorNode;
             dynamicsNode.disconnect();  // disconnect from destination
             dynamicsNode.connect(analyserNode);
 

@@ -1,5 +1,7 @@
 Version NEXT
 ************************************************************************************************************************
+- POTENTIALLY BREAKING CHANGE: changed WebAudioPlugin dynamicsCompressorNode and gainNode to be instance level rather than static class level
+  this is now accessed via createjs.Sound.activePlugin.dynamicsCompressorNode rather than createjs.WebAudioPlugin.dynamicsCompressorNode
 - removed deprecated code and cleaned up supporting code for deprecated "|" loading approach
 - updated removeAllSounds to check for activePlugin before calling to prevent errors
 - corrected error display wording in MusicVisualizer example

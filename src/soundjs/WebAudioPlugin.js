@@ -185,12 +185,6 @@ this.createjs = this.createjs || {};
 		if (s.context.destination.numberOfChannels < 2) {
 			s._capabilities.panning = false;
 		}
-
-		// set up AudioNodes that all of our source audio will connect to
-		s.dynamicsCompressorNode = s.context.createDynamicsCompressor();
-		s.dynamicsCompressorNode.connect(s.context.destination);
-		s.gainNode = s.context.createGain();
-		s.gainNode.connect(s.dynamicsCompressorNode);
 	};
 
 	/**
@@ -200,6 +194,7 @@ this.createjs = this.createjs || {};
 	 * don't support new calls.
 	 *
 	 * @method _compatibilitySetUp
+	 * @static
 	 * @protected
 	 * @since 0.4.2
 	 */
@@ -232,16 +227,17 @@ this.createjs = this.createjs || {};
 	 *     }
 	 *
 	 * @method playEmptySound
+	 * @static
 	 * @since 0.4.1
 	 */
 	s.playEmptySound = function() {
 		// create empty buffer
-		var buffer = this.context.createBuffer(1, 1, 22050);
-		var source = this.context.createBufferSource();
+		var buffer = s.context.createBuffer(1, 1, 22050);
+		var source = s.context.createBufferSource();
 		source.buffer = buffer;
 
 		// connect to output (your speakers)
-		source.connect(this.context.destination);
+		source.connect(s.context.destination);
 
 		// play the file
 		source.start(0, 0, 0);
@@ -280,6 +276,8 @@ this.createjs = this.createjs || {};
 	/**
 	 * A DynamicsCompressorNode, which is used to improve sound quality and prevent audio distortion.
 	 * It is connected to <code>context.destination</code>.
+	 *
+	 * Can be accessed by advanced users through createjs.Sound.activePlugin.dynamicsCompressorNode.
 	 * @property dynamicsCompressorNode
 	 * @type {AudioNode}
 	 */
@@ -287,6 +285,8 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * A GainNode for controlling master _volume. It is connected to {{#crossLink "WebAudioPlugin/dynamicsCompressorNode:property"}}{{/crossLink}}.
+	 *
+	 * Can be accessed by advanced users through createjs.Sound.activePlugin.gainNode.
 	 * @property gainNode
 	 * @type {AudioGainNode}
 	 */
@@ -312,9 +312,13 @@ this.createjs = this.createjs || {};
 		this._capabilities = s._capabilities;
 		this._arrayBuffers = {};
 
+		// OJR may want to handle the case where s.context does not exist, althought that should not happen with the current setup
 		this.context = s.context;
-		this.gainNode = s.gainNode;
-		this.dynamicsCompressorNode = s.dynamicsCompressorNode;
+		// set up AudioNodes that all of our source audio will connect to
+		this.dynamicsCompressorNode = this.context.createDynamicsCompressor();
+		this.dynamicsCompressorNode.connect(this.context.destination);
+		this.gainNode = this.context.createGain();
+		this.gainNode.connect(this.dynamicsCompressorNode);
 	};
 
 	/**
