@@ -393,8 +393,7 @@ this.createjs = this.createjs || {};
 	p._offset = 0;
 	p._delay = 0;
 	p._volume =  1;
-	// IE8 has Object.defineProperty, but only for DOM objects, so check if fails to suppress errors
-	try {
+	if (createjs.definePropertySupported) {
 		Object.defineProperty(p, "volume", {
 			get: function() {
 				return this._volume;
@@ -406,9 +405,7 @@ this.createjs = this.createjs || {};
 				this._updateVolume();
 			}
 		});
-	} catch (e) {
-		// dispatch message or error?
-	};
+	}
 	p.pan = 0;
 	p._duration = 0;
 	p._remainingLoops = 0;

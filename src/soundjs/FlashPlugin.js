@@ -670,8 +670,7 @@ this.createjs = this.createjs || {};
 	p.paused = false;
 	p._paused = false;
 
-	// IE8 has Object.defineProperty, but only for DOM objects, so check if fails to suppress errors
-	try {
+	if (createjs.definePropertySupported) {
 		Object.defineProperty(p, "volume", {
 			get: function() {
 				return this._volume;
@@ -694,10 +693,7 @@ this.createjs = this.createjs || {};
 				return this._flash.setPan(this.flashId, value);
 			}
 		});
-	} catch (e) {
-		// dispatch message or error?
-	};
-
+	}
 // Constructor
 	p._init = function (src, owner, flash, flashSrc) {
 		this.src = src;

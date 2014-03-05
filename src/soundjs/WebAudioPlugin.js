@@ -595,8 +595,7 @@ this.createjs = this.createjs || {};
 	 * @default 1
 	 */
 	p._volume =  1;
-	// IE8 has Object.defineProperty, but only for DOM objects, so check if fails to suppress errors
-	try {
+	if (createjs.definePropertySupported) {
 		Object.defineProperty(p, "volume", {
 		get: function() {
 			return this._volume;
@@ -608,9 +607,7 @@ this.createjs = this.createjs || {};
 			this._updateVolume();
 		}
 		});
-	} catch (e) {
-		// dispatch message or error?
-	};
+	}
 
 	/**
 	 * The pan of the sound, between -1 (left) and 1 (right). Note that pan is not supported by HTML Audio.
@@ -624,8 +621,7 @@ this.createjs = this.createjs || {};
 	 * @default 0
 	 */
 	p._pan =  0;
-	// IE8 has Object.defineProperty, but only for DOM objects, so check if fails to suppress errors
-	try {
+	if (createjs.definePropertySupported) {
 		Object.defineProperty(p, "pan", {
 			get: function() {
 				return this._pan;
@@ -639,10 +635,7 @@ this.createjs = this.createjs || {};
 				this.panNode.setPosition(value, 0, -0.5);  // z need to be -0.5 otherwise the sound only plays in left, right, or center
 			}
 		});
-	} catch (e) {
-		// dispatch message or error?
-	};
-
+	}
 
 /**
 	 * The length of the audio clip, in milliseconds.
