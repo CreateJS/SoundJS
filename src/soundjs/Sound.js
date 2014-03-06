@@ -62,8 +62,8 @@ this.createjs = this.createjs || {};
  *      }
  *
  * <h4>Browser Support</h4>
- * Audio will work in browsers which support HTMLAudioElement (<a href="http://caniuse.com/audio">http://caniuse.com/audio</a>)
- * or WebAudio (<a href="http://caniuse.com/audio-api">http://caniuse.com/audio-api</a>). A Flash fallback can be added
+ * Audio will work in browsers which support WebAudio (<a href="http://caniuse.com/audio-api">http://caniuse.com/audio-api</a>)
+ * or HTMLAudioElement (<a href="http://caniuse.com/audio">http://caniuse.com/audio</a>). A Flash fallback can be added
  * as well, which will work in any browser that supports the Flash player.
  * @module SoundJS
  * @main SoundJS
@@ -123,7 +123,8 @@ this.createjs = this.createjs || {};
 	 * {{#crossLink "Sound/fileload"}}{{/crossLink}} event to determine when a sound has finished internally preloading.
 	 * It is recommended that all audio is preloaded before it is played.
 	 *
-	 *      createjs.PreloadJS.installPlugin(createjs.Sound);
+	 *      var queue = new createjs.LoadQueue();
+	 *		queue.installPlugin(createjs.Sound);
 	 *
 	 * <b>Mobile Safe Approach</b><br />
 	 * Mobile devices require sounds to be played inside of a user initiated event (touch/click) in varying degrees.
@@ -293,7 +294,7 @@ this.createjs = this.createjs || {};
 	 * @default ["mp3", "ogg", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"]
 	 * @since 0.4.0
 	 */
-	s.SUPPORTED_EXTENSIONS = ["mp3", "ogg", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"];  // OJR FlashPlugin does not currently support
+	s.SUPPORTED_EXTENSIONS = ["mp3", "ogg", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"];
 
 	/**
 	 * Some extensions use another type of extension support to play (one of them is a codex).  This allows you to map
@@ -539,10 +540,6 @@ this.createjs = this.createjs || {};
 	 * @private
 	 */
 	s._registerPlugin = function (plugin) {
-		s._pluginsRegistered = true;
-		if (plugin == null) {
-			return false;
-		}
 		// Note: Each plugin is passed in as a class reference, but we store the activePlugin as an instance
 		if (plugin.isSupported()) {
 			s.activePlugin = new plugin();
@@ -564,9 +561,9 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.registerPlugins = function (plugins) {
+		s._pluginsRegistered = true;
 		for (var i = 0, l = plugins.length; i < l; i++) {
-			var plugin = plugins[i];
-			if (s._registerPlugin(plugin)) {
+			if (s._registerPlugin(plugins[i])) {
 				return true;
 			}
 		}
@@ -586,15 +583,9 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	s.initializeDefaultPlugins = function () {
-		if (s.activePlugin != null) {
-			return true;
-		}
-		if (s._pluginsRegistered) {
-			return false;
-		}
-		if (s.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin])) {
-			return true;
-		}
+		if (s.activePlugin != null) {return true;}
+		if (s._pluginsRegistered) {return false;}
+		if (s.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin])) {return true;}
 		return false;
 	};
 
@@ -641,9 +632,7 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.getCapabilities = function () {
-		if (s.activePlugin == null) {
-			return null;
-		}
+		if (s.activePlugin == null) {return null;}
 		return s.activePlugin._capabilities;
 	};
 
@@ -661,9 +650,7 @@ this.createjs = this.createjs || {};
 	 * @see getCapabilities
 	 */
 	s.getCapability = function (key) {
-		if (s.activePlugin == null) {
-			return null;
-		}
+		if (s.activePlugin == null) {return null;}
 		return s.activePlugin._capabilities[key];
 	};
 
@@ -685,55 +672,14 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.initLoad = function (src, type, id, data, path) {
-		var details = s.registerSound(src, id, data, false);
-		if (details == null) {
-			return false;
-		}
-		return details;
+		return s._registerSound(src, id, data);
 	};
 
-	/**
-	 * Register an audio file for loading and future playback in Sound. This is automatically called when using
-	 * <a href="http://preloadjs.com" target="_blank">PreloadJS</a>.  It is recommended to register all sounds that
-	 * need to be played back in order to properly prepare and preload them. Sound does internal preloading when required.
-	 *
-	 * <h4>Example</h4>
-	 *      createjs.Sound.alternateExtensions = ["mp3"];
-	 *      createjs.Sound.addEventListener("fileload", handleLoad); // add an event listener for when load is completed
-	 *      createjs.Sound.registerSound("myAudioPath/mySound.ogg", "myID", 3);
-	 *
-	 * @method registerSound
-	 * @param {String | Object} src The source or an Object with a "src" property
-	 * @param {String} [id] An id specified by the user to play the sound later.
-	 * @param {Number | Object} [data] Data associated with the item. Sound uses the data parameter as the number of
-	 * channels for an audio instance, however a "channels" property can be appended to the data object if it is used
-	 * for other information. The audio channels will set a default based on plugin if no value is found.
-	 * @param {Boolean} [preload=true] If the sound should be internally preloaded so that it can be played back
-	 * without an external preloader.  This is currently used by PreloadJS when loading sounds to disable internal preloading.
-	 * @param {string} basePath Set a path that will be prepended to src for loading.
-	 * @return {Object} An object with the modified values that were passed in, which defines the sound.
-	 * Returns false if the source cannot be parsed or no plugins can be initialized.
-	 * Returns true if the source is already loaded.
-	 * @static
-	 * @since 0.4.0
-	 */
-	s.registerSound = function (src, id, data, preload, basePath) {
-		if (!s.initializeDefaultPlugins()) {
-			return false;
-		}
-
-		if (src instanceof Object) {
-			basePath = id;	//this assumes preload has not be passed in as a property /
-			// OJR refactor how data is passed in to make the parameters work better
-			id = src.id;
-			data = src.data;
-			src = src.src;
-		}
+	s._registerSound = function (src, id, data, basePath) {
+		if (!s.initializeDefaultPlugins()) {return false;}
 
 		var details = s._parsePath(src, "sound", id, data);
-		if (details == null) {
-			return false;
-		}
+		if (details == null) {return false;}
 		if (basePath != null) {
 			src = basePath + src;
 			details.src = basePath + details.src;
@@ -743,6 +689,7 @@ this.createjs = this.createjs || {};
 			s._idHash[id] = details.src;
 		}
 
+		// OJR find a better way to do numChannels
 		var numChannels = null; // null tells SoundChannel to set this to it's internal maxDefault
 		if (data != null) {
 			if (!isNaN(data.channels)) {
@@ -783,18 +730,53 @@ this.createjs = this.createjs || {};
 			}
 		}
 
-		if (preload != false) {
-			if (!s._preloadHash[details.src]) {
-				s._preloadHash[details.src] = [];
-			}  // we do this so we can store multiple id's and data if needed
-			s._preloadHash[details.src].push({src:src, id:id, data:data});  // keep this data so we can return it in fileload event
-			if (s._preloadHash[details.src].length == 1) {
-				// if already loaded once, don't load a second time  // OJR note this will disallow reloading a sound if loading fails or the source changes
-				s.activePlugin.preload(details.src, loader);
-			} else {
-				// if src already loaded successfully, return true
-				if (s._preloadHash[details.src][0] == true) {return true;}
-			}
+		return details;
+	};
+		/**
+	 * Register an audio file for loading and future playback in Sound. This is automatically called when using
+	 * <a href="http://preloadjs.com" target="_blank">PreloadJS</a>.  It is recommended to register all sounds that
+	 * need to be played back in order to properly prepare and preload them. Sound does internal preloading when required.
+	 *
+	 * <h4>Example</h4>
+	 *      createjs.Sound.alternateExtensions = ["mp3"];
+	 *      createjs.Sound.addEventListener("fileload", handleLoad); // add an event listener for when load is completed
+	 *      createjs.Sound.registerSound("myAudioPath/mySound.ogg", "myID", 3);
+	 *
+	 * @method registerSound
+	 * @param {String | Object} src The source or an Object with a "src" property
+	 * @param {String} [id] An id specified by the user to play the sound later.
+	 * @param {Number | Object} [data] Data associated with the item. Sound uses the data parameter as the number of
+	 * channels for an audio instance, however a "channels" property can be appended to the data object if it is used
+	 * for other information. The audio channels will set a default based on plugin if no value is found.
+	 * @param {string} basePath Set a path that will be prepended to src for loading.
+	 * @return {Object} An object with the modified values that were passed in, which defines the sound.
+	 * Returns false if the source cannot be parsed or no plugins can be initialized.
+	 * Returns true if the source is already loaded.
+	 * @static
+	 * @since 0.4.0
+	 */
+	s.registerSound = function (src, id, data, basePath) {
+		if (src instanceof Object) {
+			basePath = id;
+			id = src.id;
+			data = src.data;
+			src = src.src;
+		}
+
+		var details = s._registerSound(src, id, data, basePath);
+
+		if(!details) {return false;}
+
+		if (!s._preloadHash[details.src]) {
+			s._preloadHash[details.src] = [];
+		}  // we do this so we can store multiple id's and data if needed
+		s._preloadHash[details.src].push({src:src, id:id, data:details.data});  // keep this data so we can return it in fileload event
+		if (s._preloadHash[details.src].length == 1) {
+			// if already loaded once, don't load a second time  // OJR note this will disallow reloading a sound if loading fails or the source changes
+			s.activePlugin.preload(details.src, details.tag);
+		} else {
+			// if src already loaded successfully, return true
+			if (s._preloadHash[details.src][0] == true) {return true;}
 		}
 
 		return details;
@@ -830,8 +812,8 @@ this.createjs = this.createjs || {};
 	s.registerManifest = function (manifest, basePath) {
 		var returnValues = [];
 		for (var i = 0, l = manifest.length; i < l; i++) {
-			returnValues[i] = createjs.Sound.registerSound(manifest[i].src, manifest[i].id, manifest[i].data, manifest[i].preload, basePath);
-		}	// OJR consider removing .preload from args, as it is only used by PreloadJS
+			returnValues[i] = createjs.Sound.registerSound(manifest[i].src, manifest[i].id, manifest[i].data, basePath);
+		}
 		return returnValues;
 	};
 

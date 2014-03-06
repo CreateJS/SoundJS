@@ -432,9 +432,9 @@ this.createjs = this.createjs || {};
 		 * Preload a sound instance. This plugin uses Flash to preload and play all sounds.
 		 * @method preload
 		 * @param {String} src The path to the Sound
-		 * @param {Object} instance Not used in this plugin.
+		 * @param {Object} tag Not used in this plugin.
 		 */
-		preload:function (src, instance) {
+		preload:function (src, tag) {
 			this._audioSources[src] = true;  // NOTE this does not mean preloading has started, just that it will
 			var loader = new createjs.FlashPlugin.Loader(src, this, this._flash);
 			loader.load();  // this will handle if flash is not ready

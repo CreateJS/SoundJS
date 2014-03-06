@@ -357,12 +357,12 @@ this.createjs = this.createjs || {};
 	 * Internally preload a sound.
 	 * @method preload
 	 * @param {String} src The sound URI to load.
-	 * @param {Object} instance An object containing a tag property that is an HTML audio tag used to load src.
+	 * @param {Object} tag An HTML audio tag used to load src.
 	 * @since 0.4.0
 	 */
-	p.preload = function (src, instance) {
+	p.preload = function (src, tag) {
 		this._audioSources[src] = true;
-		new createjs.HTMLAudioPlugin.Loader(src, instance.tag);
+		new createjs.HTMLAudioPlugin.Loader(src, tag);
 	};
 
 	p.toString = function () {

@@ -405,9 +405,9 @@ this.createjs = this.createjs || {};
 	 * Internally preload a sound. Loading uses XHR2 to load an array buffer for use with WebAudio.
 	 * @method preload
 	 * @param {String} src The sound URI to load.
-	 * @param {Object} instance Not used in this plugin.
+	 * @param {Object} tag Not used in this plugin.
 	 */
-	p.preload = function (src, instance) {
+	p.preload = function (src, tag) {
 		this._arrayBuffers[src] = true;
 		var loader = new createjs.WebAudioPlugin.Loader(src, this);
 		loader.onload = this._handlePreloadComplete;
