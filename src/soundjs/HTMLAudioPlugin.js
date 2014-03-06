@@ -50,12 +50,13 @@ this.createjs = this.createjs || {};
 	 * tags are precreated to allow Chrome to load them.  Please use {{#crossLink "Sound.MAX_INSTANCES"}}{{/crossLink}} as
 	 * a guide to how many total audio tags you can safely use in all browsers.
 	 *
-     * <b>IE 9 html limitations</b><br />
+     * <b>IE html limitations</b><br />
      * <ul><li>There is a delay in applying volume changes to tags that occurs once playback is started. So if you have
      * muted all sounds, they will all play during this delay until the mute applies internally. This happens regardless of
      * when or how you apply the volume change, as the tag seems to need to play to apply it.</li>
      * <li>MP3 encoding will not always work for audio tags if it's not default.  We've found default encoding with
      * 64kbps works.</li>
+	 * <li>Occasionally very short samples will get cut off.</li>
 	 * <li>There is a limit to how many audio tags you can load and play at once, which appears to be determined by
 	 * hardware and browser settings.  See {{#crossLink "HTMLAudioPlugin.MAX_INSTANCES"}}{{/crossLink}} for a safe estimate.</li></ul>
 	 *
@@ -236,7 +237,7 @@ this.createjs = this.createjs || {};
 	p._audioSources = null;
 
 	/**
-	 * The default number of instances to allow.  Passed back to {{#crossLink "Sound"}}{{/crossLink}} when a source
+	 * The default number of instances to allow.  Used by {{#crossLink "Sound"}}{{/crossLink}} when a source
 	 * is registered using the {{#crossLink "Sound/register"}}{{/crossLink}} method.  This is only used if
 	 * a value is not provided.
 	 *
@@ -272,15 +273,14 @@ this.createjs = this.createjs || {};
 		this._audioSources[src] = true;  // Note this does not mean preloading has started
 		var channel = createjs.HTMLAudioPlugin.TagPool.get(src);
 		var tag = null;
-		var l = instances || this.defaultNumChannels;
+		var l = instances;
 		for (var i = 0; i < l; i++) {  // OJR should we be enforcing s.MAX_INSTANCES here?  Does the chrome bug still exist, or can we change this code?
 			tag = this._createTag(src);
 			channel.add(tag);
 		}
 
 		return {
-			tag:tag, // Return one instance for preloading purposes
-			numChannels:l  // The default number of channels to make for this Sound or the passed in value
+			tag:tag // Return one instance for preloading purposes
 		};
 	};
 

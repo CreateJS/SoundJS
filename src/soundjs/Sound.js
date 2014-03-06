@@ -147,6 +147,7 @@ this.createjs = this.createjs || {};
 	 * when or how you apply the volume change, as the tag seems to need to play to apply it.</li>
      * <li>MP3 encoding will not always work for audio tags, particularly in Internet Explorer. We've found default
 	 * encoding with 64kbps works.</li>
+	 * <li>Occasionally very short samples will get cut off.</li>
 	 * <li>There is a limit to how many audio tags you can load and play at once, which appears to be determined by
 	 * hardware and browser settings.  See {{#crossLink "HTMLAudioPlugin.MAX_INSTANCES"}}{{/crossLink}} for a safe estimate.</li></ul>
 	 *
@@ -685,12 +686,9 @@ this.createjs = this.createjs || {};
 			details.src = basePath + details.src;
 		}
 
-		if (id != null) {
-			s._idHash[id] = details.src;
-		}
+		if (id != null) {s._idHash[id] = details.src;}
 
-		// OJR find a better way to do numChannels
-		var numChannels = null; // null tells SoundChannel to set this to it's internal maxDefault
+		var numChannels = s.activePlugin.defaultNumChannels || null;
 		if (data != null) {
 			if (!isNaN(data.channels)) {
 				numChannels = parseInt(data.channels);
@@ -701,34 +699,18 @@ this.createjs = this.createjs || {};
 		}
 		var loader = s.activePlugin.register(details.src, numChannels);  // Note only HTML audio uses numChannels
 
-		if (loader != null) {	// all plugins currently return a loader
-			if (loader.numChannels != null) {
-				numChannels = loader.numChannels;
-			} // currently only HTMLAudio returns this
-			SoundChannel.create(details.src, numChannels);
+		SoundChannel.create(details.src, numChannels);
 
-			// return the number of instances to the user.  This will also be returned in the load event.
-			if (data == null || !isNaN(data)) {
-				data = details.data = numChannels || SoundChannel.maxPerChannel();
-			} else {
-				data.channels = details.data.channels = numChannels || SoundChannel.maxPerChannel();
-			}
-
-			// If the loader returns a tag, return it instead for preloading.
-			// OJR all loaders currently use tags
-			if (loader.tag != null) {
-				details.tag = loader.tag;
-			} else if (loader.src) {
-				details.src = loader.src;
-			}
-			// If the loader returns a complete handler, pass it on to the prelaoder.
-			if (loader.completeHandler != null) {
-				details.completeHandler = loader.completeHandler;
-			}
-			if (loader.type) {
-				details.type = loader.type;
-			}
+		// return the number of instances to the user.  This will also be returned in the load event.
+		if (data == null || !isNaN(data)) {
+			details.data = numChannels || SoundChannel.maxPerChannel();
+		} else {
+			details.data.channels = numChannels || SoundChannel.maxPerChannel();
 		}
+
+		details.tag = loader.tag;
+		if (loader.completeHandler) {details.completeHandler = loader.completeHandler;}
+		if (loader.type) {details.type = loader.type;}
 
 		return details;
 	};
@@ -767,12 +749,11 @@ this.createjs = this.createjs || {};
 
 		if(!details) {return false;}
 
-		if (!s._preloadHash[details.src]) {
-			s._preloadHash[details.src] = [];
-		}  // we do this so we can store multiple id's and data if needed
-		s._preloadHash[details.src].push({src:src, id:id, data:details.data});  // keep this data so we can return it in fileload event
+		if (!s._preloadHash[details.src]) {	s._preloadHash[details.src] = [];}
+		s._preloadHash[details.src].push({src:src, id:id, data:details.data});
 		if (s._preloadHash[details.src].length == 1) {
-			// if already loaded once, don't load a second time  // OJR note this will disallow reloading a sound if loading fails or the source changes
+			// if already loaded once, don't load a second time
+			// OJR note this will disallow reloading a sound if loading fails or the source changes
 			s.activePlugin.preload(details.src, details.tag);
 		} else {
 			// if src already loaded successfully, return true
