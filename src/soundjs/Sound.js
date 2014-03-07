@@ -1004,11 +1004,8 @@ this.createjs = this.createjs || {};
 	 */
 	s.play = function (src, interrupt, delay, offset, loop, volume, pan) {
 		var instance = s.createInstance(src);
-
 		var ok = s._playInstance(instance, interrupt, delay, offset, loop, volume, pan);
-		if (!ok) {
-			instance.playFailed();
-		}
+		if (!ok) {instance.playFailed();}
 		return instance;
 	};
 
@@ -1034,9 +1031,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	s.createInstance = function (src) {
-		if (!s.initializeDefaultPlugins()) {
-			return s._defaultSoundInstance;
-		}
+		if (!s.initializeDefaultPlugins()) {return s._defaultSoundInstance;}
 
 		src = s._getSrcById(src);
 
@@ -1044,13 +1039,9 @@ this.createjs = this.createjs || {};
 
 		var instance = null;
 		if (details != null && details.src != null) {
-			// make sure that we have a sound channel (sound is registered or previously played)
 			SoundChannel.create(details.src);
 			instance = s.activePlugin.create(details.src);
 		} else {
-			// the src is not supported, so give back a dummy instance.
-			// This can happen if PreloadJS fails because the plugin does not support the ext, and was passed an id which
-			// will not get added to the _idHash.
 			instance = Sound._defaultSoundInstance;
 		}
 
@@ -1072,9 +1063,7 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.setVolume = function (value) {
-		if (Number(value) == null) {
-			return false;
-		}
+		if (Number(value) == null) {return false;}
 		value = Math.max(0, Math.min(1, value));
 		s._masterVolume = value;
 		if (!this.activePlugin || !this.activePlugin.setVolume || !this.activePlugin.setVolume(value)) {
@@ -1115,15 +1104,13 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	s.setMute = function (value) {
-		if (value == null || value == undefined) {
-			return false;
-		}
+		if (value == null) {return false;}
 
 		this._masterMute = value;
 		if (!this.activePlugin || !this.activePlugin.setMute || !this.activePlugin.setMute(value)) {
 			var instances = this._instances;
 			for (var i = 0, l = instances.length; i < l; i++) {
-				instances[i].setMasterMute(value);
+				instances[i].setMasterMute(value);	// OJR change to _updateVolume?
 			}
 		}
 		return true;
@@ -1201,15 +1188,13 @@ this.createjs = this.createjs || {};
 		interrupt = interrupt || s.defaultInterruptBehavior;
 		if (delay == null) {delay = 0;}
 		if (offset == null) {offset = instance.getPosition();}
-		if (loop == null) {loop = 0;}
+		if (loop == null) {loop = 0;}	// OJR consider using instance._remainingLoops
 		if (volume == null) {volume = instance.volume;}
 		if (pan == null) {pan = instance.pan;}
 
 		if (delay == 0) {
 			var ok = s._beginPlaying(instance, interrupt, offset, loop, volume, pan);
-			if (!ok) {
-				return false;
-			}
+			if (!ok) {return false;}
 		} else {
 			//Note that we can't pass arguments to proxy OR setTimeout (IE only), so just wrap the function call.
 			// OJR WebAudio may want to handle this differently, so it might make sense to move this functionality into the plugins in the future
@@ -1249,9 +1234,7 @@ this.createjs = this.createjs || {};
 		if (!result) {
 			//LM: Should we remove this from the SoundChannel (see finishedPlaying)
 			var index = createjs.indexOf(this._instances, instance);
-			if (index > -1) {
-				this._instances.splice(index, 1);
-			}
+			if (index > -1) {this._instances.splice(index, 1);}
 			return false;
 		}
 		return true;
@@ -1262,15 +1245,12 @@ this.createjs = this.createjs || {};
 	 * instead.
 	 * @method _getSrcById
 	 * @param {String} value The ID the sound was registered with.
-	 * @return {String} The source of the sound.  Returns null if src has been registered with this id.
+	 * @return {String} The source of the sound if it has been registered with this ID or the value that was passed in.
 	 * @protected
 	 * @static
 	 */
 	s._getSrcById = function (value) {
-		if (s._idHash == null || s._idHash[value] == null) {
-			return value;
-		}
-		return s._idHash[value];
+		return s._idHash[value] || value;
 	};
 
 	/**
