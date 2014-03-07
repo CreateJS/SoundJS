@@ -675,6 +675,23 @@ this.createjs = this.createjs || {};
 		return s._registerSound(src, id, data);
 	};
 
+	/**
+	 * Internal method for loading sounds.  This should not be called directly.
+	 *
+	 * @method _registerSound
+	 * @param {String | Object} src The source to load.
+	 * @param {String} [id] An id specified by the user to play the sound later.
+	 * @param {Number | Object} [data] Data associated with the item. Sound uses the data parameter as the number of
+	 * channels for an audio instance, however a "channels" property can be appended to the data object if it is used
+	 * for other information. The audio channels will set a default based on plugin if no value is found.
+	 * @return {Object} An object with the modified values that were passed in, which defines the sound.
+	 * Returns false if the source cannot be parsed or no plugins can be initialized.
+	 * Returns true if the source is already loaded.
+	 * @static
+	 * @private
+	 * @since 0.5.3
+	 */
+
 	s._registerSound = function (src, id, data) {
 		if (!s.initializeDefaultPlugins()) {return false;}
 
@@ -709,7 +726,8 @@ this.createjs = this.createjs || {};
 
 		return details;
 	};
-		/**
+
+	/**
 	 * Register an audio file for loading and future playback in Sound. This is automatically called when using
 	 * <a href="http://preloadjs.com" target="_blank">PreloadJS</a>.  It is recommended to register all sounds that
 	 * need to be played back in order to properly prepare and preload them. Sound does internal preloading when required.
@@ -813,9 +831,7 @@ this.createjs = this.createjs || {};
 	s.removeSound = function(src, basePath) {
 		if (s.activePlugin == null) {return false;}
 
-		if (src instanceof Object) {
-			src = src.src;
-		}
+		if (src instanceof Object) {src = src.src;}
 		src = s._getSrcById(src);
 
 		var details = s._parsePath(src);
@@ -823,7 +839,6 @@ this.createjs = this.createjs || {};
 		if (basePath != null) {details.src = basePath + details.src;}
 		src = details.src;
 
-		// remove src from _idHash	// Note "for in" can be a slow operation
 		for(var prop in s._idHash){
 			if(s._idHash[prop] == src) {
 				delete(s._idHash[prop]);
@@ -833,10 +848,8 @@ this.createjs = this.createjs || {};
 		// clear from SoundChannel, which also stops and deletes all instances
 		SoundChannel.removeSrc(src);
 
-		// remove src from _preloadHash
 		delete(s._preloadHash[src]);
 
-		// activePlugin cleanup
 		s.activePlugin.removeSound(src);
 
 		return true;
@@ -934,24 +947,19 @@ this.createjs = this.createjs || {};
 		if (typeof(value) != "string") {value = value.toString();}
 
 		var match = value.match(s.FILE_PATTERN);
-		if (match == null) {
-			return false;
-		}
+		if (match == null) {return false;}
+
 		var name = match[4];
 		var ext = match[5];
-
 		var c = s.getCapabilities();
 		var i = 0;
 		while (!c[ext]) {
 			ext = s.alternateExtensions[i++];
 			if (i > s.alternateExtensions.length) { return null;}	// no extensions are supported
 		}
-
 		value = value.replace("."+match[5], "."+ext);
-		var ret = {type:type || "sound", id:id, data:data};
-		ret.name = name;
-		ret.src = value;
-		ret.extension = ext;
+
+		var ret = {type:type || "sound", id:id, data:data, name:name, src:value, extension:ext};
 		return ret;
 	};
 
