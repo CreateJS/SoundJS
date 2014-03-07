@@ -666,25 +666,20 @@ this.createjs = this.createjs || {};
 	 * @param {Number|String|Boolean|Object} [data] Data associated with the item. Sound uses the data parameter as the
 	 * number of channels for an audio instance, however a "channels" property can be appended to the data object if
 	 * this property is used for other information. The audio channels will default to 1 if no value is found.
-	 * @param {String} [path] A combined basepath and subPath from PreloadJS that has already been prepended to src.
 	 * @return {Boolean|Object} An object with the modified values of those that were passed in, or false if the active
 	 * plugin can not play the audio type.
 	 * @protected
 	 * @static
 	 */
-	s.initLoad = function (src, type, id, data, path) {
+	s.initLoad = function (src, type, id, data) {
 		return s._registerSound(src, id, data);
 	};
 
-	s._registerSound = function (src, id, data, basePath) {
+	s._registerSound = function (src, id, data) {
 		if (!s.initializeDefaultPlugins()) {return false;}
 
 		var details = s._parsePath(src, "sound", id, data);
 		if (details == null) {return false;}
-		if (basePath != null) {
-			src = basePath + src;
-			details.src = basePath + details.src;
-		}
 
 		if (id != null) {s._idHash[id] = details.src;}
 
@@ -745,18 +740,18 @@ this.createjs = this.createjs || {};
 			src = src.src;
 		}
 
-		var details = s._registerSound(src, id, data, basePath);
+		if (basePath != null) {src = basePath + src;}
+
+		var details = s._registerSound(src, id, data);
 
 		if(!details) {return false;}
 
 		if (!s._preloadHash[details.src]) {	s._preloadHash[details.src] = [];}
 		s._preloadHash[details.src].push({src:src, id:id, data:details.data});
 		if (s._preloadHash[details.src].length == 1) {
-			// if already loaded once, don't load a second time
 			// OJR note this will disallow reloading a sound if loading fails or the source changes
 			s.activePlugin.preload(details.src, details.tag);
 		} else {
-			// if src already loaded successfully, return true
 			if (s._preloadHash[details.src][0] == true) {return true;}
 		}
 
@@ -816,9 +811,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 	s.removeSound = function(src, basePath) {
-		if (s.activePlugin == null) {
-			return false;
-		}
+		if (s.activePlugin == null) {return false;}
 
 		if (src instanceof Object) {
 			src = src.src;
@@ -826,9 +819,7 @@ this.createjs = this.createjs || {};
 		src = s._getSrcById(src);
 
 		var details = s._parsePath(src);
-		if (details == null) {
-			return false;
-		}
+		if (details == null) {return false;}
 		if (basePath != null) {details.src = basePath + details.src;}
 		src = details.src;
 
