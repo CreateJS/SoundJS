@@ -382,7 +382,6 @@ this.createjs = this.createjs || {};
 	p._owner = null;
 	p.loaded = false;
 	p._offset = 0;
-	p._delay = 0;
 	p._volume =  1;
 	if (createjs.definePropertySupported) {
 		Object.defineProperty(p, "volume", {
@@ -444,9 +443,6 @@ this.createjs = this.createjs || {};
 		}
 
 		clearTimeout(this._delayTimeoutId);
-		if (window.createjs == null) {
-			return;
-		}
 		createjs.Sound._playFinished(this);
 	};
 
@@ -467,9 +463,6 @@ this.createjs = this.createjs || {};
 	};
 
 	p._beginPlaying = function (offset, loop, volume, pan) {
-		if (window.createjs == null) {
-			return -1;
-		}
 		var tag = this.tag = createjs.HTMLAudioPlugin.TagPool.getInstance(this.src);
 		if (tag == null) {
 			this.playFailed();
@@ -506,10 +499,6 @@ this.createjs = this.createjs || {};
 	};
 
 	p._handleSoundReady = function (event) {
-		if (window.createjs == null) {
-			return;
-		}
-
 		// OJR would like a cleaner way to do this in _init
 		this._duration = this.tag.duration * 1000;  // need this for setPosition on stopped sounds
 
@@ -576,12 +565,7 @@ this.createjs = this.createjs || {};
 	p._updateVolume = function () {
 		if (this.tag != null) {
 			var newVolume = (this._muted || createjs.Sound._masterMute) ? 0 : this._volume * createjs.Sound._masterVolume;
-			if (newVolume != this.tag.volume) {
-				this.tag.volume = newVolume;
-			}
-			return true;
-		} else {
-			return false;
+			if (newVolume != this.tag.volume) {this.tag.volume = newVolume;}
 		}
 	};
 
@@ -646,9 +630,6 @@ this.createjs = this.createjs || {};
 	p._handleSoundComplete = function (event) {
 		this._offset = 0;
 
-		if (window.createjs == null) {
-			return;
-		}
 		this.playState = createjs.Sound.PLAY_FINISHED;
 		this._cleanUp();
 		this._sendEvent("complete");
@@ -669,9 +650,6 @@ this.createjs = this.createjs || {};
 	};
 
 	p.playFailed = function () {
-		if (window.createjs == null) {
-			return;
-		}
 		this.playState = createjs.Sound.PLAY_FAILED;
 		this._cleanUp();
 		this._sendEvent("failed");

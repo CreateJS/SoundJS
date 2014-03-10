@@ -647,7 +647,6 @@ this.createjs = this.createjs || {};
 	p._volume =  1;
 	p._pan =  0;
 	p._offset = 0; // used for setPosition on a stopped instance
-	p._delay = 0;
 	p._duration = 0;
 	p._delayTimeoutId = null;
 	p._muted = false;

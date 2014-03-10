@@ -553,16 +553,6 @@ this.createjs = this.createjs || {};
 	p._offset = 0;
 
 	/**
-	 * The time in milliseconds before the sound starts.
-	 * Note this is handled by {{#crossLink "Sound"}}{{/crossLink}}.
-	 * @property _delay
-	 * @type {Number}
-	 * @default 0
-	 * @protected
-	 */
-	p._delay = 0;	// OJR remove this property from SoundInstance as it is not used here?
-
-	/**
 	 * The volume of the sound, between 0 and 1.
 	 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower and Opera versions 11.50 or lower,
 	 * and Internet Explorer 8 or lower.  Instead use {{#crossLink "SoundInstance/setVolume"}}{{/crossLink}} and {{#crossLink "SoundInstance/getVolume"}}{{/crossLink}}.
@@ -638,7 +628,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * A Timeout created by {{#crossLink "Sound"}}{{/crossLink}} when this SoundInstance is played with a delay.
-	 * This allows SoundInstance to remove the delay if stop or pause or cleanup are called before playback begins.
+	 * This allows SoundInstance to remove the delay if stop, pause, or cleanup are called before playback begins.
 	 * @property _delayTimeoutId
 	 * @type {timeoutVariable}
 	 * @default null
@@ -799,8 +789,8 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._init = function (src, owner) {
-		this._owner = owner;
 		this.src = src;
+		this._owner = owner;
 
 		this.gainNode = this._owner.context.createGain();
 
@@ -808,9 +798,7 @@ this.createjs = this.createjs || {};
 		this.panNode.panningModel = this._owner._panningModel;
 		this.panNode.connect(this.gainNode);
 
-		if (this._owner.isPreloadComplete(this.src)) {
-			this._duration = this._owner._arrayBuffers[this.src].duration * 1000;
-		}
+		if (this._owner.isPreloadComplete(this.src)) {this._duration = this._owner._arrayBuffers[this.src].duration * 1000;}
 
 		this._endedHandler = createjs.proxy(this._handleSoundComplete, this);
 	};
@@ -826,9 +814,7 @@ this.createjs = this.createjs || {};
 			this._sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
 		}
 
-		if (this.gainNode.numberOfOutputs != 0) {
-			this.gainNode.disconnect(0);
-		}  // this works because we only have one connection, and it returns 0 if we've already disconnected it.
+		if (this.gainNode.numberOfOutputs != 0) {this.gainNode.disconnect(0);}
 		// OJR there appears to be a bug that this doesn't always work in webkit (Chrome and Safari). According to the documentation, this should work.
 
 		clearTimeout(this._delayTimeoutId); // clear timeout that plays delayed sound
@@ -836,7 +822,6 @@ this.createjs = this.createjs || {};
 
 		this._startTime = 0;	// This is used by getPosition
 
-		if (window.createjs == null) {return;}
 		createjs.Sound._playFinished(this);
 	};
 
@@ -852,7 +837,7 @@ this.createjs = this.createjs || {};
 		if(audioNode) {
 			audioNode.stop(0);
 			audioNode.disconnect(this.panNode);
-			audioNode = null;	// release reference so Web Audio can handle removing references and garbage collection
+			audioNode = null;
 		}
 		return audioNode;
 	};
@@ -875,9 +860,7 @@ this.createjs = this.createjs || {};
 	 * @protected
  	 */
 	p._handleSoundReady = function (event) {
-		if (window.createjs == null) {return;}	// OJR this is pointless?
-
-		if ((this._offset*1000) > this.getDuration()) {	// converting offset to ms
+		if ((this._offset*1000) > this.getDuration()) {
 			this.playFailed();
 			return;
 		} else if (this._offset < 0) {  // may not need this check if play ignores negative values, this is not specified in the API http://www.w3.org/TR/webaudio/#AudioBufferSourceNode
@@ -915,7 +898,7 @@ this.createjs = this.createjs || {};
 		audioNode.buffer = this._owner._arrayBuffers[this.src];
 		audioNode.connect(this.panNode);
 		var currentTime = this._owner.context.currentTime;
-		audioNode.startTime = startTime + audioNode.buffer.duration;	//currentTime + audioNode.buffer.duration - (currentTime - startTime);
+		audioNode.startTime = startTime + audioNode.buffer.duration;
 		audioNode.start(audioNode.startTime, offset, audioNode.buffer.duration - offset);
 		return audioNode;
 	};
@@ -960,10 +943,6 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._beginPlaying = function (offset, loop, volume, pan) {
-		if (window.createjs == null) {return;}	// OJR this is pointless?
-
-		if (!this.src) {return;}
-
 		this._offset = offset / 1000;  //convert ms to sec
 		this._remainingLoops = loop;
 		this.volume = volume;
@@ -991,22 +970,19 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} If the pause call succeeds. This will return false if the sound isn't currently playing.
 	 */
 	p.pause = function () {
-		if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-			this.paused = this._paused = true;
+		if (this._paused || this.playState != createjs.Sound.PLAY_SUCCEEDED) {return false;}
 
-			this._offset = this._owner.context.currentTime - this._startTime;  // this allows us to restart the sound at the same point in playback
-			this.sourceNode = this._cleanUpAudioNode(this.sourceNode);
-			this.sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
+		this.paused = this._paused = true;
 
-			if (this.gainNode.numberOfOutputs != 0) {
-				this.gainNode.disconnect();
-			}  // this works because we only have one connection, and it returns 0 if we've already disconnected it.
+		this._offset = this._owner.context.currentTime - this._startTime;  // this allows us to restart the sound at the same point in playback
+		this.sourceNode = this._cleanUpAudioNode(this.sourceNode);
+		this._sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
 
-			clearTimeout(this._delayTimeoutId); // clear timeout that plays delayed sound
-			clearTimeout(this._soundCompleteTimeout);  // clear timeout that triggers sound complete
-			return true;
-		}
-		return false;
+		if (this.gainNode.numberOfOutputs != 0) {this.gainNode.disconnect();}
+
+		clearTimeout(this._delayTimeoutId);
+		clearTimeout(this._soundCompleteTimeout);
+		return true;
 	};
 
 	/**
@@ -1023,10 +999,8 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} If the resume call succeeds. This will return false if called on a sound that is not paused.
 	 */
 	p.resume = function () {
-		if (!this._paused) {
-			return false;
-		}
-		this._handleSoundReady(null);
+		if (!this._paused) {return false;}
+		this._handleSoundReady();
 		return true;
 	};
 
@@ -1066,23 +1040,20 @@ this.createjs = this.createjs || {};
 	 */
 	p.setVolume = function (value) {
 		this.volume = value;
-		return true;  // This is always true because even if the volume is not updated, the value is set
+		return true;
 	};
 
 	/**
 	 * Internal function used to update the volume based on the instance volume, master volume, instance mute value,
 	 * and master mute value.
 	 * @method _updateVolume
-	 * @return {Boolean} if the volume was updated.
 	 * @protected
 	 */
 	p._updateVolume = function () {
 		var newVolume = this._muted ? 0 : this._volume;
 		if (newVolume != this.gainNode.gain.value) {
 			this.gainNode.gain.value = newVolume;
-			return true;
 		}
-		return false;
 	};
 
 	/**
@@ -1112,9 +1083,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	p.setMute = function (value) {
-		if (value == null || value == undefined) {
-			return false;
-		}
+		if (value == null) {return false;}
 
 		this._muted = value;
 		this._updateVolume();
@@ -1154,6 +1123,7 @@ this.createjs = this.createjs || {};
 	p.setPan = function (value) {
 		this.pan = value;  // Unfortunately panner does not give us a way to access this after it is set http://www.w3.org/TR/webaudio/#AudioPannerNode
 		if(this.pan != value) {return false;}
+		return true;
 	};
 
 	/**
@@ -1214,9 +1184,7 @@ this.createjs = this.createjs || {};
 			clearTimeout(this._soundCompleteTimeout);  // clear timeout that triggers sound complete
 		}  // NOTE we cannot just call cleanup because it also calls the Sound function _playFinished which releases this instance in SoundChannel
 
-		if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-			this._handleSoundReady(null);
-		}
+		if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {this._handleSoundReady();}
 
 		return true;
 	};
@@ -1262,16 +1230,13 @@ this.createjs = this.createjs || {};
 				this._soundCompleteTimeout = setTimeout(this._endedHandler, this._duration);
 			}
 			else {
-				this._handleSoundReady(null);
+				this._handleSoundReady();
 			}
 
 			this._sendEvent("loop");
 			return;
 		}
 
-		if (window.createjs == null) {
-			return;
-		}
 		this._cleanUp();
 		this.playState = createjs.Sound.PLAY_FINISHED;
 		this._sendEvent("complete");
@@ -1279,7 +1244,6 @@ this.createjs = this.createjs || {};
 
 	// Play has failed, which can happen for a variety of reasons.
 	p.playFailed = function () {
-		if (window.createjs == null) {return;}
 		this._cleanUp();
 		this.playState = createjs.Sound.PLAY_FAILED;
 		this._sendEvent("failed");
