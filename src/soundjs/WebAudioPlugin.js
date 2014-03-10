@@ -92,9 +92,7 @@ this.createjs = this.createjs || {};
 		// OJR isMobile may be redundant with _isFileXHRSupported available.  Consider removing.
 		if (location.protocol == "file:" && !isMobilePhoneGap && !this._isFileXHRSupported()) { return false; }  // Web Audio requires XHR, which is not usually available locally
 		s._generateCapabilities();
-		if (s.context == null) {
-			return false;
-		}
+		if (s.context == null) {return false;}
 		return true;
 	};
 
@@ -139,23 +137,15 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	s._generateCapabilities = function () {
-		if (s._capabilities != null) {
-			return;
-		}
-		// Web Audio can be in any formats supported by the audio element, from http://www.w3.org/TR/webaudio/#AudioContext-section,
-		// therefore tag is still required for the capabilities check
+		if (s._capabilities != null) {return;}
+		// Web Audio can be in any formats supported by the audio element, from http://www.w3.org/TR/webaudio/#AudioContext-section
 		var t = document.createElement("audio");
+		if (t.canPlayType == null) {return null;}
 
-		if (t.canPlayType == null) {
-			return null;
-		}
-
-		// This check is first because it's what is currently used, but the spec calls for it to be AudioContext so this
-		//  will probably change in time
-		if (window.webkitAudioContext) {
-			s.context = new webkitAudioContext();
-		} else if (window.AudioContext) {
+		if (window.AudioContext) {
 			s.context = new AudioContext();
+		} else if (window.webkitAudioContext) {
+			s.context = new webkitAudioContext();
 		} else {
 			return null;
 		}
@@ -199,6 +189,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.2
 	 */
 	s._compatibilitySetUp = function() {
+		s._panningModel = "equalpower";
 		//assume that if one new call is supported, they all are
 		if (s.context.createGain) { return; }
 
@@ -211,7 +202,7 @@ this.createjs = this.createjs || {};
 		audioNode.__proto__.stop = audioNode.__proto__.noteOff;
 
 		// panningModel
-		this._panningModel = 0;
+		s._panningModel = 0;
 	};
 
 	/**
@@ -221,7 +212,6 @@ this.createjs = this.createjs || {};
 	 * for example).
 	 *
 	 * <h4>Example</h4>
-	 *
 	 *     function handleTouch(event) {
 	 *         createjs.WebAudioPlugin.playEmptySound();
 	 *     }
@@ -231,15 +221,9 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 	s.playEmptySound = function() {
-		// create empty buffer
-		var buffer = s.context.createBuffer(1, 1, 22050);
 		var source = s.context.createBufferSource();
-		source.buffer = buffer;
-
-		// connect to output (your speakers)
+		source.buffer = s.context.createBuffer(1, 1, 22050);
 		source.connect(s.context.destination);
-
-		// play the file
 		source.start(0, 0, 0);
 	};
 
@@ -284,7 +268,7 @@ this.createjs = this.createjs || {};
 	p.dynamicsCompressorNode = null;
 
 	/**
-	 * A GainNode for controlling master _volume. It is connected to {{#crossLink "WebAudioPlugin/dynamicsCompressorNode:property"}}{{/crossLink}}.
+	 * A GainNode for controlling master volume. It is connected to {{#crossLink "WebAudioPlugin/dynamicsCompressorNode:property"}}{{/crossLink}}.
 	 *
 	 * Can be accessed by advanced users through createjs.Sound.activePlugin.gainNode.
 	 * @property gainNode
@@ -293,7 +277,7 @@ this.createjs = this.createjs || {};
 	p.gainNode = null;
 
 	/**
-	 * An object hash used internally to store ArrayBuffers, indexed by the source URI used  to load it. This
+	 * An object hash used internally to store ArrayBuffers, indexed by the source URI used to load it. This
 	 * prevents having to load and decode audio files more than once. If a load has been started on a file,
 	 * <code>arrayBuffers[src]</code> will be set to true. Once load is complete, it is set the the loaded
 	 * ArrayBuffer instance.
@@ -312,8 +296,9 @@ this.createjs = this.createjs || {};
 		this._capabilities = s._capabilities;
 		this._arrayBuffers = {};
 
-		// OJR may want to handle the case where s.context does not exist, althought that should not happen with the current setup
 		this.context = s.context;
+		this._panningModel = s._panningModel;
+
 		// set up AudioNodes that all of our source audio will connect to
 		this.dynamicsCompressorNode = this.context.createDynamicsCompressor();
 		this.dynamicsCompressorNode.connect(this.context.destination);
@@ -332,11 +317,9 @@ this.createjs = this.createjs || {};
 	 * @return {Object} A result object, containing a "tag" for preloading purposes.
 	 */
 	p.register = function (src, instances) {
-		this._arrayBuffers[src] = true;  // This is needed for PreloadJS
-		var tag = new createjs.WebAudioPlugin.Loader(src, this);
-		return {
-			tag:tag
-		};
+		this._arrayBuffers[src] = true;
+		var loader = {tag: new createjs.WebAudioPlugin.Loader(src, this)};
+		return loader;
 	};
 
 	/**
@@ -421,9 +404,7 @@ this.createjs = this.createjs || {};
 	 * @return {SoundInstance} A sound instance for playback and control.
 	 */
 	p.create = function (src) {
-		if (!this.isPreloadStarted(src)) {
-			this.preload(src);
-		}
+		if (!this.isPreloadStarted(src)) {this.preload(src);}
 		return new createjs.WebAudioPlugin.SoundInstance(src, this);
 	};
 
@@ -490,7 +471,6 @@ this.createjs = this.createjs || {};
 	 * for control by the user.
 	 *
 	 * <h4>Example</h4>
-	 *
 	 *      var myInstance = createjs.Sound.play("myAssetPath/mySrcFile.mp3");
 	 *
 	 * A number of additional parameters provide a quick way to determine how a sound is played. Please see the Sound
@@ -856,9 +836,7 @@ this.createjs = this.createjs || {};
 
 		this._startTime = 0;	// This is used by getPosition
 
-		if (window.createjs == null) {
-			return;
-		}
+		if (window.createjs == null) {return;}
 		createjs.Sound._playFinished(this);
 	};
 
@@ -897,9 +875,7 @@ this.createjs = this.createjs || {};
 	 * @protected
  	 */
 	p._handleSoundReady = function (event) {
-		if (window.createjs == null) {
-			return;
-		}
+		if (window.createjs == null) {return;}	// OJR this is pointless?
 
 		if ((this._offset*1000) > this.getDuration()) {	// converting offset to ms
 			this.playFailed();
@@ -984,13 +960,9 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._beginPlaying = function (offset, loop, volume, pan) {
-		if (window.createjs == null) {
-			return;
-		}
+		if (window.createjs == null) {return;}	// OJR this is pointless?
 
-		if (!this.src) {
-			return;
-		}
+		if (!this.src) {return;}
 
 		this._offset = offset / 1000;  //convert ms to sec
 		this._remainingLoops = loop;
@@ -1307,9 +1279,7 @@ this.createjs = this.createjs || {};
 
 	// Play has failed, which can happen for a variety of reasons.
 	p.playFailed = function () {
-		if (window.createjs == null) {
-			return;
-		}
+		if (window.createjs == null) {return;}
 		this._cleanUp();
 		this.playState = createjs.Sound.PLAY_FAILED;
 		this._sendEvent("failed");
@@ -1396,9 +1366,7 @@ this.createjs = this.createjs || {};
 	 * @param {String} src The path to the sound.
 	 */
 	p.load = function (src) {
-		if (src != null) {
-			this.src = src;
-		}
+		if (src != null) {this.src = src;}
 
 		this.request = new XMLHttpRequest();
 		this.request.open("GET", this.src, true);
@@ -1422,7 +1390,7 @@ this.createjs = this.createjs || {};
 	 */
 	p.handleProgress = function (loaded, total) {
 		this.progress = loaded / total;
-		this.onprogress != null && this.onprogress({loaded:loaded, total:total, progress:this.progress});
+		this.onprogress && this.onprogress({loaded:loaded, total:total, progress:this.progress});
 	};
 
 	/**

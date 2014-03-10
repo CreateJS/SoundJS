@@ -1067,7 +1067,7 @@ this.createjs = this.createjs || {};
 		value = Math.max(0, Math.min(1, value));
 		s._masterVolume = value;
 		if (!this.activePlugin || !this.activePlugin.setVolume || !this.activePlugin.setVolume(value)) {
-			var instances = this._instances;  // OJR does this impact garbage collection more than it helps performance?
+			var instances = this._instances;
 			for (var i = 0, l = instances.length; i < l; i++) {
 				instances[i].setMasterVolume(value);
 			}
@@ -1110,7 +1110,7 @@ this.createjs = this.createjs || {};
 		if (!this.activePlugin || !this.activePlugin.setMute || !this.activePlugin.setMute(value)) {
 			var instances = this._instances;
 			for (var i = 0, l = instances.length; i < l; i++) {
-				instances[i].setMasterMute(value);	// OJR change to _updateVolume?
+				instances[i].setMasterMute(value);
 			}
 		}
 		return true;
@@ -1232,7 +1232,6 @@ this.createjs = this.createjs || {};
 		}
 		var result = instance._beginPlaying(offset, loop, volume, pan);
 		if (!result) {
-			//LM: Should we remove this from the SoundChannel (see finishedPlaying)
 			var index = createjs.indexOf(this._instances, instance);
 			if (index > -1) {this._instances.splice(index, 1);}
 			return false;
