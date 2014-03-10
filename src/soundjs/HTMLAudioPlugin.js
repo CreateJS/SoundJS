@@ -179,14 +179,9 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.isSupported = function () {
-		if (createjs.Sound.BrowserDetect.isIOS && !s.enableIOS) {
-			return false;
-		}
+		if (createjs.Sound.BrowserDetect.isIOS && !s.enableIOS) {return false;}
 		s._generateCapabilities();
-		var t = s.tag;  // OJR do we still need this check, when cap will already be null if this is the case
-		if (t == null || s._capabilities == null) {
-			return false;
-		}
+		if (s._capabilities == null) {return false;}
 		return true;
 	};
 
@@ -198,13 +193,9 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	s._generateCapabilities = function () {
-		if (s._capabilities != null) {
-			return;
-		}
-		var t = s.tag = document.createElement("audio");
-		if (t.canPlayType == null) {
-			return null;
-		}
+		if (s._capabilities != null) {return;}
+		var t = document.createElement("audio");
+		if (t.canPlayType == null) {return null;}
 
 		s._capabilities = {
 			panning:true,
@@ -274,7 +265,7 @@ this.createjs = this.createjs || {};
 		var channel = createjs.HTMLAudioPlugin.TagPool.get(src);
 		var tag = null;
 		var l = instances;
-		for (var i = 0; i < l; i++) {  // OJR should we be enforcing s.MAX_INSTANCES here?  Does the chrome bug still exist, or can we change this code?
+		for (var i = 0; i < l; i++) {
 			tag = this._createTag(src);
 			channel.add(tag);
 		}
@@ -319,7 +310,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 	p.removeAllSounds = function () {
-		this._audioSources = {};	// this drops all references, in theory freeing them for garbage collection
+		this._audioSources = {};
 		createjs.HTMLAudioPlugin.TagPool.removeAll();
 	};
 
@@ -759,12 +750,12 @@ this.createjs = this.createjs || {};
 		this.loadedHandler = createjs.proxy(this.sendLoadedEvent, this);  // we need this bind to be able to remove event listeners
 		this.tag.addEventListener && this.tag.addEventListener("canplaythrough", this.loadedHandler);
 		if(this.tag.onreadystatechange == null) {
-			this.tag.onreadystatechange = createjs.proxy(this.sendLoadedEvent, this);  // OJR not 100% sure we need this, just copied from PreloadJS
+			this.tag.onreadystatechange = createjs.proxy(this.sendLoadedEvent, this);
 		} else {
 			var f = this.tag.onreadystatechange;
 			this.tag.onreadystatechange = function() {
 				f();
-				this.tag.onreadystatechange = createjs.proxy(this.sendLoadedEvent, this);  // OJR not 100% sure we need this, just copied from PreloadJS
+				this.tag.onreadystatechange = createjs.proxy(this.sendLoadedEvent, this);
 			}
 		}
 
@@ -869,9 +860,7 @@ this.createjs = this.createjs || {};
 	 */
 	s.remove = function (src) {
 		var channel = s.tags[src];
-		if (channel == null) {
-			return false;
-		}
+		if (channel == null) {return false;}
 		channel.removeAll();
 		delete(s.tags[src]);
 		return true;
@@ -898,9 +887,7 @@ this.createjs = this.createjs || {};
 	 */
 	s.getInstance = function (src) {
 		var channel = s.tags[src];
-		if (channel == null) {
-			return null;
-		}
+		if (channel == null) {return null;}
 		return channel.get();
 	};
 
@@ -914,9 +901,7 @@ this.createjs = this.createjs || {};
 	 */
 	s.setInstance = function (src, tag) {
 		var channel = s.tags[src];
-		if (channel == null) {
-			return null;
-		}
+		if (channel == null) {return null;}
 		return channel.set(tag);
 	};
 
@@ -993,14 +978,10 @@ this.createjs = this.createjs || {};
 	 * @return {HTMLAudioElement} An HTML audio tag.
 	 */
 	p.get = function () {
-		if (this.tags.length == 0) {
-			return null;
-		}
+		if (this.tags.length == 0) {return null;}
 		this.available = this.tags.length;
 		var tag = this.tags.pop();
-		if (tag.parentNode == null) {
-			document.body.appendChild(tag);
-		}
+		if (tag.parentNode == null) {document.body.appendChild(tag);}
 		return tag;
 	};
 
@@ -1011,9 +992,7 @@ this.createjs = this.createjs || {};
 	 */
 	p.set = function (tag) {
 		var index = createjs.indexOf(this.tags, tag);
-		if (index == -1) {
-			this.tags.push(tag);
-		}
+		if (index == -1) {this.tags.push(tag);}
 		this.available = this.tags.length;
 	};
 

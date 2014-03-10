@@ -110,13 +110,9 @@ this.createjs = this.createjs || {};
 	 */
 	s.isSupported = function () {
 		// there is no flash player on mobile devices
-		if (createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid || createjs.Sound.BrowserDetect.isBlackberry) {
-			return false;
-		}
+		if (createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid || createjs.Sound.BrowserDetect.isBlackberry) {return false;}
 		s._generateCapabilities();
-		if (swfobject == null) {
-			return false;
-		}
+		if (swfobject == null) {return false;}
 		return swfobject.hasFlashPlayerVersion("9.0.0");
 	};
 
@@ -128,9 +124,7 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	s._generateCapabilities = function () {
-		if (s._capabilities != null) {
-			return;
-		}
+		if (s._capabilities != null) {return;}
 		var c = s._capabilities = {
 			panning:true,
 			volume:true,
@@ -357,10 +351,8 @@ this.createjs = this.createjs || {};
 			} else {
 				this._flash.register(src);  // NOTE this flash function currently does nothing  // OJR remove this entire thing, as it does nothing?
 			}
-			var tag = new createjs.FlashPlugin.Loader(src, this, this._flash);
-			return {
-				tag:tag
-			};
+			var loader = {tag: new createjs.FlashPlugin.Loader(src, this, this._flash)};
+			return loader;
 		},
 
 
@@ -374,9 +366,7 @@ this.createjs = this.createjs || {};
 		removeSound:function (src) {
 			delete(this._audioSources[src]);
 			var i = createjs.indexOf(this._queuedInstances, src);
-			if(i != -1) {
-				this._queuedInstances.splice(i,1);
-			}
+			if(i != -1) {this._queuedInstances.splice(i,1);}
 			// NOTE sound cannot be removed from a swf
 		},
 
@@ -387,10 +377,9 @@ this.createjs = this.createjs || {};
 		 * @since 0.4.1
 		 */
 		removeAllSounds:function () {
-			this._audioSources = {};	// this drops all references, in theory freeing them for garbage collection
+			this._audioSources = {};
 			this._queuedInstances.length = 0;
 
-			// OJR these may not be necessary, but are included for cleanup clarity.
 			this._flashInstances = {};
 			this._flashPreloadInstances = {};
 			this._preloadInstances = {};
@@ -404,9 +393,7 @@ this.createjs = this.createjs || {};
 		 * @return {SoundInstance} A sound instance for playback and control.
 		 */
 		create:function (src) {
-			if (!this.isPreloadStarted(src)) {
-				this.preload(src);
-			}
+			if (!this.isPreloadStarted(src)) {this.preload(src);}
 
 			try {
 				var instance = new createjs.FlashPlugin.SoundInstance(src, this, this._flash, this._audioSources[src]);
@@ -437,19 +424,17 @@ this.createjs = this.createjs || {};
 		preload:function (src, tag) {
 			this._audioSources[src] = true;  // NOTE this does not mean preloading has started, just that it will
 			var loader = new createjs.FlashPlugin.Loader(src, this, this._flash);
-			loader.load();  // this will handle if flash is not ready
+			loader.load();
 		},
 
 		/**
-		 * Registers loaded source files to handle src being changed before loading.
-		 * This occurs when there is a basePath added (by PreloadJS or internal Preloading.
+		 * Registers loaded source files.
 		 * @method _registerLoadedSrc
-		 * @param loadSrc
 		 * @param src
 		 * @protected
 		 */
-		_registerLoadedSrc: function(loadSrc, src) {
-			this._audioSources[src] = loadSrc;
+		_registerLoadedSrc: function(src) {
+			this._audioSources[src] = src;
 		},
 
 		/**
@@ -551,6 +536,7 @@ this.createjs = this.createjs || {};
 			try {
 				this.showOutput && console.log(data);
 			} catch (error) {
+				// older IE will cause error if console is not open
 			}
 		},
 
@@ -563,9 +549,7 @@ this.createjs = this.createjs || {};
 		 */
 		handleSoundEvent:function (flashId, method) {
 			var instance = this._flashInstances[flashId];
-			if (instance == null) {
-				return;
-			}
+			if (instance == null) {return;}
 			var args = [];
 			for (var i = 2, l = arguments.length; i < l; i++) {
 				args.push(arguments[i]);
@@ -916,13 +900,6 @@ this.createjs = this.createjs || {};
 	p.src = null;
 
 	/**
-	 * The original src, before being altered with basePath possibly by PreloadJS
-	 * #property src
-	 * @type {String}
-	 */
-	p.originalSrc = null;
-
-	/**
 	 * ID used to facilitate communication with flash.
 	 * #property flashId
 	 * @type {String}
@@ -985,7 +962,6 @@ this.createjs = this.createjs || {};
 	// constructor
 	p._init = function (src, owner, flash) {
 		this.src = src;
-		this.originalSrc = src;
 		this.owner = owner;
 		this._flash = flash;
 	};
@@ -1016,7 +992,7 @@ this.createjs = this.createjs || {};
 		if (this._flash == null || !this.owner.flashReady) {
 			this.loading = true;
 			// register for future preloading
-			this.owner._preloadInstances[this.src] = this; // OJR this would be better as an API call
+			this.owner._preloadInstances[this.src] = this;
 			return false;
 		}
 
@@ -1047,9 +1023,8 @@ this.createjs = this.createjs || {};
 	p.handleComplete = function () {
 		this.progress = 1;
 		this.readyState = 4;
-		this.owner._registerLoadedSrc(this.src, this.originalSrc);
-		//this.src = this.originalSrc;
-		createjs.Sound._sendFileLoadEvent(this.originalSrc);  // fire event or callback on Sound // can't use onload callback because we need to pass the source
+		this.owner._registerLoadedSrc(this.src);
+		createjs.Sound._sendFileLoadEvent(this.src);
 		this.onload && this.onload();
 	};
 
