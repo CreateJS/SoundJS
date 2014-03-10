@@ -833,10 +833,10 @@ this.createjs = this.createjs || {};
 
 		if (src instanceof Object) {src = src.src;}
 		src = s._getSrcById(src);
+		if (basePath != null) {src = basePath + src;}
 
 		var details = s._parsePath(src);
 		if (details == null) {return false;}
-		if (basePath != null) {details.src = basePath + details.src;}
 		src = details.src;
 
 		for(var prop in s._idHash){
@@ -1265,9 +1265,7 @@ this.createjs = this.createjs || {};
 	s._playFinished = function (instance) {
 		SoundChannel.remove(instance);
 		var index = createjs.indexOf(this._instances, instance);
-		if (index > -1) {
-			this._instances.splice(index, 1);
-		}
+		if (index > -1) {this._instances.splice(index, 1);}	// OJR this will always be > -1, there is no way for an instance to exist without being added to this._instances
 	};
 
 	createjs.Sound = Sound;
@@ -1328,10 +1326,8 @@ this.createjs = this.createjs || {};
 	 */
 	SoundChannel.removeSrc = function (src) {
 		var channel = SoundChannel.get(src);
-		if (channel == null) {
-			return false;
-		}
-		channel.removeAll();	// this stops and removes all active instances
+		if (channel == null) {return false;}
+		channel._removeAll();	// this stops and removes all active instances
 		delete(SoundChannel.channels[src]);
 		return true;
 	};
@@ -1342,7 +1338,7 @@ this.createjs = this.createjs || {};
 	 */
 	SoundChannel.removeAll = function () {
 		for(var channel in SoundChannel.channels) {
-			SoundChannel.channels[channel].removeAll();	// this stops and removes all active instances
+			SoundChannel.channels[channel]._removeAll();	// this stops and removes all active instances
 		}
 		SoundChannel.channels = {};
 	};
@@ -1357,10 +1353,8 @@ this.createjs = this.createjs || {};
 	 */
 	SoundChannel.add = function (instance, interrupt) {
 		var channel = SoundChannel.get(instance.src);
-		if (channel == null) {
-			return false;
-		}
-		return channel.add(instance, interrupt);
+		if (channel == null) {return false;}
+		return channel._add(instance, interrupt);
 	};
 	/**
 	 * Remove an instance from the channel.
@@ -1371,10 +1365,8 @@ this.createjs = this.createjs || {};
 	 */
 	SoundChannel.remove = function (instance) {
 		var channel = SoundChannel.get(instance.src);
-		if (channel == null) {
-			return false;
-		}
-		channel.remove(instance);
+		if (channel == null) {return false;}
+		channel._remove(instance);
 		return true;
 	};
 	/**
@@ -1437,9 +1429,7 @@ this.createjs = this.createjs || {};
 	p.init = function (src, max) {
 		this.src = src;
 		this.max = max || this.maxDefault;
-		if (this.max == -1) {
-			this.max = this.maxDefault;
-		}
+		if (this.max == -1) {this.max = this.maxDefault;}
 		this._instances = [];
 	};
 
@@ -1449,7 +1439,7 @@ this.createjs = this.createjs || {};
 	 * @param {Number} index The index to return.
 	 * @return {SoundInstance} The SoundInstance at a specific instance.
 	 */
-	p.get = function (index) {
+	p._get = function (index) {
 		return this._instances[index];
 	};
 
@@ -1459,10 +1449,8 @@ this.createjs = this.createjs || {};
 	 * @param {SoundInstance} instance The instance to add.
 	 * @return {Boolean} The success of the method call. If the channel is full, it will return false.
 	 */
-	p.add = function (instance, interrupt) {
-		if (!this.getSlot(interrupt, instance)) {
-			return false;
-		}
+	p._add = function (instance, interrupt) {
+		if (!this._getSlot(interrupt, instance)) {return false;}
 		this._instances.push(instance);
 		this.length++;
 		return true;
@@ -1475,11 +1463,9 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} The success of the remove call. If the instance is not found in this channel, it will
 	 * return false.
 	 */
-	p.remove = function (instance) {
+	p._remove = function (instance) {
 		var index = createjs.indexOf(this._instances, instance);
-		if (index == -1) {
-			return false;
-		}
+		if (index == -1) {return false;}
 		this._instances.splice(index, 1);
 		this.length--;
 		return true;
@@ -1489,8 +1475,8 @@ this.createjs = this.createjs || {};
 	 * Stop playback and remove all instances from the channel.  Usually in response to a delete call.
 	 * #method removeAll
 	 */
-	p.removeAll = function () {
-		// Note that stop() removes the item from the list, but we don't want to assume that.
+	p._removeAll = function () {
+		// Note that stop() removes the item from the list
 		for (var i=this.length-1; i>=0; i--) {
 			this._instances[i].stop();
 		}
@@ -1504,11 +1490,11 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} Determines if there is an available slot. Depending on the interrupt mode, if there are no slots,
 	 * an existing SoundInstance may be interrupted. If there are no slots, this method returns false.
 	 */
-	p.getSlot = function (interrupt, instance) {
+	p._getSlot = function (interrupt, instance) {
 		var target, replacement;
 
 		for (var i = 0, l = this.max; i < l; i++) {
-			target = this.get(i);
+			target = this._get(i);
 
 			// Available Space
 			if (target == null) {
@@ -1530,16 +1516,15 @@ this.createjs = this.createjs || {};
 				replacement = target;
 
 				// Audio is a better candidate than the current target, according to playhead
-			} else if (
-					(interrupt == Sound.INTERRUPT_EARLY && target.getPosition() < replacement.getPosition()) ||
-							(interrupt == Sound.INTERRUPT_LATE && target.getPosition() > replacement.getPosition())) {
+			} else if (	(interrupt == Sound.INTERRUPT_EARLY && target.getPosition() < replacement.getPosition()) ||
+						(interrupt == Sound.INTERRUPT_LATE && target.getPosition() > replacement.getPosition())) {
 				replacement = target;
 			}
 		}
 
 		if (replacement != null) {
 			replacement._interrupt();
-			this.remove(replacement);
+			this._remove(replacement);
 			return true;
 		}
 		return false;
