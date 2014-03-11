@@ -396,7 +396,7 @@ this.createjs = this.createjs || {};
 			if (!this.isPreloadStarted(src)) {this.preload(src);}
 
 			try {
-				var instance = new createjs.FlashPlugin.SoundInstance(src, this, this._flash, this._audioSources[src]);
+				var instance = new createjs.FlashPlugin.SoundInstance(src, this, this._flash);
 				return instance;
 			} catch (err) {
 				//console.log("Error: Please ensure you have permission to play audio from this location.", err);
@@ -630,14 +630,13 @@ this.createjs = this.createjs || {};
 
 	// NOTE documentation for this class can be found online or in WebAudioPlugin.SoundInstance
 	// NOTE audio control is shuttled to a flash player instance via the flash reference.
-	function SoundInstance(src, owner, flash, flashSrc) {
-		this._init(src, owner, flash, flashSrc);
+	function SoundInstance(src, owner, flash) {
+		this._init(src, owner, flash);
 	}
 
 	var p = SoundInstance.prototype = new createjs.EventDispatcher();
 
 	p.src = null;
-	p.flashSrc = null;	// because loaded src in flash can be different due to basePath appending
 	p.uniqueId = -1;
 	p._owner = null;
 	p._capabilities = null;
@@ -678,9 +677,8 @@ this.createjs = this.createjs || {};
 		});
 	}
 // Constructor
-	p._init = function (src, owner, flash, flashSrc) {
+	p._init = function (src, owner, flash) {
 		this.src = src;
-		this.flashSrc = flashSrc;
 		this._owner = owner;
 		this._flash = flash;
 	};
@@ -712,23 +710,17 @@ this.createjs = this.createjs || {};
 	p._beginPlaying = function (offset, loop, volume, pan) {
 		this.loop = loop;
 		this.paused = this._paused = false;
-
-		if (!this._owner.flashReady) {
-			return false;
-		}
-
+		if (!this._owner.flashReady) {return false;}
 		this._offset = offset;
 
-		this.flashId = this._flash.playSound(this.flashSrc, offset, loop, volume, pan);
+		this.flashId = this._flash.playSound(this.src, offset, loop, volume, pan);
 		if (this.flashId == null) {
 			this._cleanUp();
 			return false;
 		}
 
 		//this._duration = this._flash.getDuration(this.flashId);  // this is 0 at this point
-		if (this._muted) {
-			this.setMute(true);
-		}
+		if (this._muted) {this.setMute(true);}
 		this.playState = createjs.Sound.PLAY_SUCCEEDED;
 		this._owner.registerSoundInstance(this.flashId, this);
 		this._sendEvent("succeeded");
@@ -742,18 +734,14 @@ this.createjs = this.createjs || {};
 	};
 
 	p.pause = function () {
-		if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-			this.paused = this._paused = true;
-			clearTimeout(this._delayTimeoutId);
-			return this._flash.pauseSound(this.flashId);
-		}
-		return false;
+		if (this._paused || this.playState != createjs.Sound.PLAY_SUCCEEDED) {return false;}
+		this.paused = this._paused = true;
+		clearTimeout(this._delayTimeoutId);
+		return this._flash.pauseSound(this.flashId);
 	};
 
 	p.resume = function () {
-		if (!this._paused) {
-			return false;
-		}
+		if (!this._paused) {return false;}
 		this.paused = this._paused = false;
 		return this._flash.resumeSound(this.flashId);
 	};
@@ -761,7 +749,7 @@ this.createjs = this.createjs || {};
 	p.stop = function () {
 		this.playState = createjs.Sound.PLAY_FINISHED;
 		this.paused = this._paused = false;
-		this._offset = 0;  // flash destroys the wrapper, so we need to track offset on our own
+		this._offset = 0;
 		var ok = this._flash.stopSound(this.flashId);
 		this._cleanUp();
 		return ok;
@@ -795,7 +783,7 @@ this.createjs = this.createjs || {};
 	// duplicating functionality to support IE8
 	p.setPan = function (value) {
 		if (Number(value)==null) {return;}
-		value = Math.max(-1, Math.min(1, value));	// force pan to stay in the -1 to 1 range
+		value = Math.max(-1, Math.min(1, value));
 		this._pan = value;
 		return this._flash.setPan(this.flashId, value);
 	};
@@ -803,11 +791,9 @@ this.createjs = this.createjs || {};
 	p.getPosition = function () {
 		var value = -1;
 		if (this._flash && this.flashId) {
-			value = this._flash.getPosition(this.flashId); // this returns -1 on stopped instance
+			value = this._flash.getPosition(this.flashId);	// this returns -1 on stopped instance
 		}
-		if (value != -1) {
-			this._offset = value;
-		}
+		if (value != -1) {this._offset = value;}
 		return this._offset;
 	};
 
@@ -820,11 +806,9 @@ this.createjs = this.createjs || {};
 	p.getDuration = function () {
 		var value = -1;
 		if (this._flash && this.flashId) {
-			value = this._flash.getDuration(this.flashId);
+			value = this._flash.getDuration(this.flashId);	// this returns -1 on stopped instance
 		}
-		if (value != -1) {
-			this._duration = value;
-		}
+		if (value != -1) {this._duration = value;}
 		return this._duration;
 	};
 

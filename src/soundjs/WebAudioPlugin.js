@@ -379,8 +379,7 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._handlePreloadComplete = function () {
-		//LM: I would recommend having the Loader include an "event" in the onload, and properly binding this callback.
-		createjs.Sound._sendFileLoadEvent(this.src);  // fire event or callback on Sound
+		createjs.Sound._sendFileLoadEvent(this.src);
 		// note "this" will reference Loader object
 	};
 

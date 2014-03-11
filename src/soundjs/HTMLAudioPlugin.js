@@ -447,9 +447,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p._interrupt = function () {
-		if (this.tag == null) {
-			return;
-		}
+		if (this.tag == null) {return;}
 		this.playState = createjs.Sound.PLAY_INTERRUPTED;
 		this._cleanUp();
 		this.paused = this._paused = false;
@@ -458,7 +456,7 @@ this.createjs = this.createjs || {};
 
 // Public API
 	p.play = function (interrupt, delay, offset, loop, volume, pan) {
-		this._cleanUp(); //LM: Is this redundant?
+		this._cleanUp();
 		createjs.Sound._playInstance(this, interrupt, delay, offset, loop, volume, pan);
 	};
 
@@ -474,8 +472,7 @@ this.createjs = this.createjs || {};
 		// Reset this instance.
 		this._offset = offset;
 		this.volume = volume;
-		this.pan = pan;	// not pan has no effect
-		this._updateVolume();  // note this will set for mute and _masterMute
+		this._updateVolume();
 		this._remainingLoops = loop;
 
 		if (tag.readyState !== 4) {
@@ -499,15 +496,13 @@ this.createjs = this.createjs || {};
 	};
 
 	p._handleSoundReady = function (event) {
-		// OJR would like a cleaner way to do this in _init
-		this._duration = this.tag.duration * 1000;  // need this for setPosition on stopped sounds
-
+		this._duration = this.tag.duration * 1000;
 		this.playState = createjs.Sound.PLAY_SUCCEEDED;
 		this.paused = this._paused = false;
 		this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_READY, this._readyHandler, false);
 
 		if (this._offset >= this.getDuration()) {
-			this.playFailed();  // OJR: throw error?
+			this.playFailed();
 			return;
 		} else if (this._offset > 0) {
 			this.tag.currentTime = this._offset * 0.001;
@@ -525,20 +520,15 @@ this.createjs = this.createjs || {};
 	p.pause = function () {
 		if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED && this.tag != null) {
 			this.paused = this._paused = true;
-			// Note: when paused by user, we hold a reference to our tag. We do not release it until stopped.
 			this.tag.pause();
-
 			clearTimeout(this._delayTimeoutId);
-
 			return true;
 		}
 		return false;
 	};
 
 	p.resume = function () {
-		if (!this._paused || this.tag == null) {
-			return false;
-		}
+		if (!this._paused || this.tag == null) {return false;}
 		this.paused = this._paused = false;
 		this.tag.play();
 		return true;
@@ -554,7 +544,6 @@ this.createjs = this.createjs || {};
 
 	p.setMasterVolume = function (value) {
 		this._updateVolume();
-		return true;
 	};
 
 	p.setVolume = function (value) {
@@ -575,14 +564,10 @@ this.createjs = this.createjs || {};
 
 	p.setMasterMute = function (isMuted) {
 		this._updateVolume();
-		return true;
 	};
 
 	p.setMute = function (isMuted) {
-		if (isMuted == null || isMuted == undefined) {
-			return false;
-		}
-
+		if (isMuted == null) {return false;}
 		this._muted = isMuted;
 		this._updateVolume();
 		return true;
@@ -592,7 +577,7 @@ this.createjs = this.createjs || {};
 		return this._muted;
 	};
 
-	// Can not set pan in HTML
+	// Can not set pan in HTML audio
 	p.setPan = function (value) {
 		return false;
 	};
@@ -602,9 +587,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p.getPosition = function () {
-		if (this.tag == null) {
-			return this._offset;
-		}
+		if (this.tag == null) {return this._offset;}
 		return this.tag.currentTime * 1000;
 	};
 
@@ -629,18 +612,15 @@ this.createjs = this.createjs || {};
 
 	p._handleSoundComplete = function (event) {
 		this._offset = 0;
-
 		this.playState = createjs.Sound.PLAY_FINISHED;
 		this._cleanUp();
 		this._sendEvent("complete");
 	};
 
-	// handles looping functionality
 	// NOTE with this approach audio will loop as reliably as the browser allows
 	// but we could end up sending the loop event after next loop playback begins
 	p.handleSoundLoop = function (event) {
 		this._offset = 0;
-
 		this._remainingLoops--;
 		if(this._remainingLoops == 0) {
 			this.tag.loop = false;
