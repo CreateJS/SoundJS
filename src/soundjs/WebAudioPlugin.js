@@ -378,9 +378,9 @@ this.createjs = this.createjs || {};
 	 * @method _handlePreloadComplete
 	 * @protected
 	 */
-	p._handlePreloadComplete = function () {
-		createjs.Sound._sendFileLoadEvent(this.src);
-		// note "this" will reference Loader object
+	p._handlePreloadComplete = function (loader) {
+		createjs.Sound._sendFileLoadEvent(loader.src);
+		loader.cleanUp();
 	};
 
 	/**
@@ -1310,12 +1310,12 @@ this.createjs = this.createjs || {};
 	p.onprogress = null;
 
 	/**
-	 * The callback that fires if the load hits an error.
-	 * #property onError
+	 * The callback that fires if the load hits an error.  This follows HTML tag naming.
+	 * #property onerror
 	 * @type {Method}
 	 * @protected
 	 */
-	p.onError = null;
+	p.onerror = null;
 
 	// constructor
 	p._init = function (src, owner) {
@@ -1335,7 +1335,7 @@ this.createjs = this.createjs || {};
 		this.request.open("GET", this.src, true);
 		this.request.responseType = "arraybuffer";
 		this.request.onload = createjs.proxy(this.handleLoad, this);
-		this.request.onError = createjs.proxy(this.handleError, this);
+		this.request.onerror = createjs.proxy(this.handleError, this);
 		this.request.onprogress = createjs.proxy(this.handleProgress, this);
 
 		this.request.send();
@@ -1376,7 +1376,7 @@ this.createjs = this.createjs || {};
 		this.progress = 1;
 		this.result = decodedAudio;
 		this.owner.addPreloadResults(this.src, this.result);
-		this.onload && this.onload();
+		this.onload && this.onload(this);
 	};
 
 	/**
@@ -1387,6 +1387,23 @@ this.createjs = this.createjs || {};
 	p.handleError = function (evt) {
 		this.owner.removeSound(this.src);
 		this.onerror && this.onerror(evt);
+	};
+
+	/**
+	 * Remove all external references from loader
+	 * #method cleanUp
+	 */
+	p.cleanUp = function () {
+		if(!this.request) {return;}
+		this.src = null;
+		this.owner = null;
+		this.request.onload = null;
+		this.request.onerror = null;
+		this.request.onprogress = null;
+		this.request = null;
+		this.onload = null;
+		this.onprogress = null;
+		this.onerror = null;
 	};
 
 	p.toString = function () {
