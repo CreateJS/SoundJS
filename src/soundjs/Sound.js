@@ -427,7 +427,7 @@ this.createjs = this.createjs || {};
 	s._instances = [];
 
 	/**
-	 * An object hash storing sound sources via there corresponding ID.
+	 * An object hash storing objects with sound sources, startTime, and duration via there corresponding ID.
 	 * @property _idHash
 	 * @type {Object}
 	 * @protected
@@ -684,6 +684,10 @@ this.createjs = this.createjs || {};
 	 * @param {Number | Object} [data] Data associated with the item. Sound uses the data parameter as the number of
 	 * channels for an audio instance, however a "channels" property can be appended to the data object if it is used
 	 * for other information. The audio channels will set a default based on plugin if no value is found.
+	 * @param {Array} sprite Array of audio sprites in the following format {id, startTime, duration}.<br/>
+	 *   id used to play the sound later, in the same manner as a sound src with an id.<br/>
+	 *   startTime is the initial offset to start playback and loop from, in milliseconds.<br/>
+	 *   duration is the amount of time to play the clip for, in milliseconds.<br/>
 	 * @return {Object} An object with the modified values that were passed in, which defines the sound.
 	 * Returns false if the source cannot be parsed or no plugins can be initialized.
 	 * Returns true if the source is already loaded.
@@ -692,20 +696,30 @@ this.createjs = this.createjs || {};
 	 * @since 0.5.3
 	 */
 
-	s._registerSound = function (src, id, data) {
+	s._registerSound = function (src, id, data, sprite) {
 		if (!s.initializeDefaultPlugins()) {return false;}
 
-		var details = s._parsePath(src, "sound", id, data);
+		var details = s._parsePath(src);
 		if (details == null) {return false;}
+		details.type = "sound";
+		details.id = id;
+		details.data = data;
+		details.sprite = sprite;
 
-		if (id != null) {s._idHash[id] = details.src;}
+		if (id != null) {s._idHash[id] = {src: details.src}};
+		if(sprite) {
+			var sp;
+			for(var i = sprite.length; i--; ) {
+				sp = sprite[i];
+				s._idHash[sp.id] = {src: details.src, startTime: parseInt(sp.startTime), duration: parseInt(sp.duration)};
+			}
+		}
 
 		var numChannels = s.activePlugin.defaultNumChannels || null;
 		if (data != null) {
 			if (!isNaN(data.channels)) {
 				numChannels = parseInt(data.channels);
-			}
-			else if (!isNaN(data)) {
+			} else if (!isNaN(data)) {
 				numChannels = parseInt(data);
 			}
 		}
@@ -743,6 +757,10 @@ this.createjs = this.createjs || {};
 	 * @param {Number | Object} [data] Data associated with the item. Sound uses the data parameter as the number of
 	 * channels for an audio instance, however a "channels" property can be appended to the data object if it is used
 	 * for other information. The audio channels will set a default based on plugin if no value is found.
+	 * @param {Array} sprite Array of audio sprites in the following format {id, startTime, duration}.<br/>
+	 *   id used to play the sound later, in the same manner as a sound src with an id.<br/>
+	 *   startTime is the initial offset to start playback and loop from, in milliseconds.<br/>
+	 *   duration is the amount of time to play the clip for, in milliseconds.<br/>
 	 * @param {string} basePath Set a path that will be prepended to src for loading.
 	 * @return {Object} An object with the modified values that were passed in, which defines the sound.
 	 * Returns false if the source cannot be parsed or no plugins can be initialized.
@@ -750,18 +768,18 @@ this.createjs = this.createjs || {};
 	 * @static
 	 * @since 0.4.0
 	 */
-	s.registerSound = function (src, id, data, basePath) {
+	s.registerSound = function (src, id, data, sprite, basePath) {
 		if (src instanceof Object) {
 			basePath = id;
 			id = src.id;
 			data = src.data;
+			sprite = src.sprite;
 			src = src.src;
 		}
 
 		if (basePath != null) {src = basePath + src;}
 
-		var details = s._registerSound(src, id, data);
-
+		var details = s._registerSound(src, id, data, sprite);
 		if(!details) {return false;}
 
 		if (!s._preloadHash[details.src]) {	s._preloadHash[details.src] = [];}
@@ -793,7 +811,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * @method registerManifest
 	 * @param {Array} manifest An array of objects to load. Objects are expected to be in the format needed for
-	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}}: <code>{src:srcURI, id:ID, data:Data}</code>
+	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}}: <code>{src:srcURI, id:ID, data:Data, sprite:Object}</code>
 	 * with "id" and "data" being optional.
 	 * @param {string} basePath Set a path that will be prepended to each src when loading.  When creating, playing, or removing
 	 * audio that was loaded with a basePath by src, the basePath must be included.
@@ -806,7 +824,7 @@ this.createjs = this.createjs || {};
 	s.registerManifest = function (manifest, basePath) {
 		var returnValues = [];
 		for (var i = 0, l = manifest.length; i < l; i++) {
-			returnValues[i] = createjs.Sound.registerSound(manifest[i].src, manifest[i].id, manifest[i].data, basePath);
+			returnValues[i] = createjs.Sound.registerSound(manifest[i].src, manifest[i].id, manifest[i].data, manifest[i].sprite, basePath);
 		}
 		return returnValues;
 	};
@@ -832,7 +850,7 @@ this.createjs = this.createjs || {};
 		if (s.activePlugin == null) {return false;}
 
 		if (src instanceof Object) {src = src.src;}
-		src = s._getSrcById(src);
+		src = s._getSrcById(src).src;
 		if (basePath != null) {src = basePath + src;}
 
 		var details = s._parsePath(src);
@@ -840,7 +858,7 @@ this.createjs = this.createjs || {};
 		src = details.src;
 
 		for(var prop in s._idHash){
-			if(s._idHash[prop] == src) {
+			if(s._idHash[prop].src == src) {
 				delete(s._idHash[prop]);
 			}
 		}
@@ -921,11 +939,11 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	s.loadComplete = function (src) {
-		var details = s._parsePath(src, "sound");
+		var details = s._parsePath(src);
 		if (details) {
-			src = s._getSrcById(details.src);
+			src = s._getSrcById(details.src).src;
 		} else {
-			src = s._getSrcById(src);
+			src = s._getSrcById(src).src;
 		}
 		return (s._preloadHash[src][0] == true);  // src only loads once, so if it's true for the first it's true for all
 	};
@@ -935,15 +953,11 @@ this.createjs = this.createjs || {};
 	 * current extension is not supported
 	 * @method _parsePath
 	 * @param {String} value The path to an audio source.
-	 * @param {String} [type] The type of path. This will typically be "sound" or null.
-	 * @param {String} [id] The user-specified sound ID. This may be null, in which case the src will be used instead.
-	 * @param {Number | String | Boolean | Object} [data] Arbitrary data appended to the sound, usually denoting the
-	 * number of channels for the sound. This method doesn't currently do anything with the data property.
 	 * @return {Object} A formatted object that can be registered with the {{#crossLink "Sound/activePlugin:property"}}{{/crossLink}}
 	 * and returned to a preloader like <a href="http://preloadjs.com" target="_blank">PreloadJS</a>.
 	 * @protected
 	 */
-	s._parsePath = function (value, type, id, data) {
+	s._parsePath = function (value) {
 		if (typeof(value) != "string") {value = value.toString();}
 
 		var match = value.match(s.FILE_PATTERN);
@@ -959,7 +973,7 @@ this.createjs = this.createjs || {};
 		}
 		value = value.replace("."+match[5], "."+ext);
 
-		var ret = {type:type || "sound", id:id, data:data, name:name, src:value, extension:ext};
+		var ret = {name:name, src:value, extension:ext};
 		return ret;
 	};
 
@@ -984,6 +998,9 @@ this.createjs = this.createjs || {};
 	 *      	var myInstance = createjs.Sound.play("myAudioPath/mySound.mp3", createjs.Sound.INTERRUPT_ANY, 0, 0, -1, 1, 0);
 	 *      }
 	 *
+	 * NOTE to create an audio sprite that has not already been registered, both startTime and duration need to be set.
+	 * This is only when creating a new audio sprite, not when playing using the id of an already registered audio sprite.
+	 *
 	 * @method play
 	 * @param {String} src The src or ID of the audio.
 	 * @param {String | Object} [interrupt="none"|options] How to interrupt any currently playing instances of audio with the same source,
@@ -991,7 +1008,7 @@ this.createjs = this.createjs || {};
 	 * constants on the Sound class, with the default defined by {{#crossLink "Sound/defaultInterruptBehavior:property"}}{{/crossLink}}.
 	 * <br /><strong>OR</strong><br />
 	 * This parameter can be an object that contains any or all optional properties by name, including: interrupt,
-	 * delay, offset, loop, volume, and pan (see the above code sample).
+	 * delay, offset, loop, volume, pan, startTime, and duration (see the above code sample).
 	 * @param {Number} [delay=0] The amount of time to delay the start of audio playback, in milliseconds.
 	 * @param {Number} [offset=0] The offset from the start of the audio to begin playback, in milliseconds.
 	 * @param {Number} [loop=0] How many times the audio loops when it reaches the end of playback. The default is 0 (no
@@ -999,11 +1016,24 @@ this.createjs = this.createjs || {};
 	 * @param {Number} [volume=1] The volume of the sound, between 0 and 1. Note that the master volume is applied
 	 * against the individual volume.
 	 * @param {Number} [pan=0] The left-right pan of the sound (if supported), between -1 (left) and 1 (right).
+	 * @param {Number} [startTime=null] To create an audio sprite (with duration), the initial offset to start playback and loop from, in milliseconds.
+	 * @param {Number} [duration=null] To create an audio sprite (with startTime), the amount of time to play the clip for, in milliseconds.
 	 * @return {SoundInstance} A {{#crossLink "SoundInstance"}}{{/crossLink}} that can be controlled after it is created.
 	 * @static
 	 */
-	s.play = function (src, interrupt, delay, offset, loop, volume, pan) {
-		var instance = s.createInstance(src);
+	s.play = function (src, interrupt, delay, offset, loop, volume, pan, startTime, duration) {
+		if (interrupt instanceof Object) {
+			delay = interrupt.delay;
+			offset = interrupt.offset;
+			loop = interrupt.loop;
+			volume = interrupt.volume;
+			pan = interrupt.pan;
+			startTime = interrupt.duration;
+			duration = interrupt.duration;
+			interrupt = interrupt.interrupt;
+
+		}
+		var instance = s.createInstance(src, startTime, duration);
 		var ok = s._playInstance(instance, interrupt, delay, offset, loop, volume, pan);
 		if (!ok) {instance.playFailed();}
 		return instance;
@@ -1024,23 +1054,29 @@ this.createjs = this.createjs || {};
 	 *      	myInstance = createjs.Sound.createInstance("myAudioPath/mySound.mp3");
 	 *      }
 	 *
+	 * NOTE to create an audio sprite that has not already been registered, both startTime and duration need to be set.
+	 * This is only when creating a new audio sprite, not when playing using the id of an already registered audio sprite.
+	 *
 	 * @method createInstance
 	 * @param {String} src The src or ID of the audio.
+	 * @param {Number} [startTime=null] To create an audio sprite (with duration), the initial offset to start playback and loop from, in milliseconds.
+	 * @param {Number} [duration=null] To create an audio sprite (with startTime), the amount of time to play the clip for, in milliseconds.
 	 * @return {SoundInstance} A {{#crossLink "SoundInstance"}}{{/crossLink}} that can be controlled after it is created.
 	 * Unsupported extensions will return the default SoundInstance.
 	 * @since 0.4.0
 	 */
-	s.createInstance = function (src) {
+	s.createInstance = function (src, startTime, duration) {
 		if (!s.initializeDefaultPlugins()) {return s._defaultSoundInstance;}
 
 		src = s._getSrcById(src);
 
-		var details = s._parsePath(src, "sound");
+		var details = s._parsePath(src.src);
 
 		var instance = null;
 		if (details != null && details.src != null) {
 			SoundChannel.create(details.src);
-			instance = s.activePlugin.create(details.src);
+			if (startTime == null) {startTime = src.startTime;}
+			instance = s.activePlugin.create(details.src, startTime, duration || src.duration);
 		} else {
 			instance = Sound._defaultSoundInstance;
 		}
@@ -1249,7 +1285,7 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s._getSrcById = function (value) {
-		return s._idHash[value] || value;
+		return s._idHash[value] || {src: value};
 	};
 
 	/**

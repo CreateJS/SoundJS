@@ -110,7 +110,7 @@ this.createjs = this.createjs || {};
 
 		var xhr = new XMLHttpRequest();
 		try {
-			xhr.open("GET", "fail.fail", false); // loading non-existant file triggers 404 only if it could load (synchronous call)
+			xhr.open("GET", "WebAudioPluginTest.fail", false); // loading non-existant file triggers 404 only if it could load (synchronous call)
 		} catch (error) {
 			// catch errors in cases where the onerror is passed by
 			supported = false;
@@ -400,11 +400,13 @@ this.createjs = this.createjs || {};
 	 * Create a sound instance. If the sound has not been preloaded, it is internally preloaded here.
 	 * @method create
 	 * @param {String} src The sound source to use.
+	 * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
+	 * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
 	 * @return {SoundInstance} A sound instance for playback and control.
 	 */
-	p.create = function (src) {
+	p.create = function (src, startTime, duration) {
 		if (!this.isPreloadStarted(src)) {this.preload(src);}
-		return new createjs.WebAudioPlugin.SoundInstance(src, this);
+		return new createjs.WebAudioPlugin.SoundInstance(src, startTime, duration, this);
 	};
 
 	/**
@@ -497,12 +499,14 @@ this.createjs = this.createjs || {};
 	 *
 	 * @class SoundInstance
 	 * @param {String} src The path to and file name of the sound.
+	 * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
+	 * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
 	 * @param {Object} owner The plugin instance that created this SoundInstance.
 	 * @extends EventDispatcher
 	 * @constructor
 	 */
-	function SoundInstance(src, owner) {
-		this._init(src, owner);
+	function SoundInstance(src, startTime, duration, owner) {
+		this._init(src, startTime, duration, owner);
 	}
 
 	var p = SoundInstance.prototype = new createjs.EventDispatcher();
@@ -550,6 +554,14 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._offset = 0;
+
+	/**
+	 * Audio sprite property used to determine the starting offset.
+	 * @type {Number}
+	 * @default null
+	 * @protected
+	 */
+	p._startTime = 0;
 
 	/**
 	 * The volume of the sound, between 0 and 1.
@@ -712,13 +724,13 @@ this.createjs = this.createjs || {};
 	/**
 	 * WebAudioPlugin only.
 	 * Time audio started playback, in seconds. Used to handle set position, get position, and resuming from paused.
-	 * @property _startTime
+	 * @property _playbackStartTime
 	 * @type {Number}
 	 * @default 0
 	 * @protected
 	 * @since 0.4.0
 	 */
-	p._startTime = 0;
+	p._playbackStartTime = 0;
 
 	// Proxies, make removing listeners easier.
 	p._endedHandler = null;
@@ -784,11 +796,15 @@ this.createjs = this.createjs || {};
 	 * Initialize the SoundInstance. This is called from the constructor.
 	 * @method _init
 	 * @param {string} src The source of the audio.
+	 * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
+	 * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
 	 * @param {Class} owner The plugin that created this instance.
 	 * @protected
 	 */
-	p._init = function (src, owner) {
+	p._init = function (src, startTime, duration, owner) {
 		this.src = src;
+		this._startTime = startTime * 0.001 || 0;	// convert ms to s as web audio handles everything in seconds
+		this._duration = duration || 0;
 		this._owner = owner;
 
 		this.gainNode = this._owner.context.createGain();
@@ -797,7 +813,7 @@ this.createjs = this.createjs || {};
 		this.panNode.panningModel = this._owner._panningModel;
 		this.panNode.connect(this.gainNode);
 
-		if (this._owner.isPreloadComplete(this.src)) {this._duration = this._owner._arrayBuffers[this.src].duration * 1000;}
+		if (this._owner.isPreloadComplete(this.src) && !this._duration) {this._duration = this._owner._arrayBuffers[this.src].duration * 1000;}
 
 		this._endedHandler = createjs.proxy(this._handleSoundComplete, this);
 	};
@@ -819,7 +835,7 @@ this.createjs = this.createjs || {};
 		clearTimeout(this._delayTimeoutId); // clear timeout that plays delayed sound
 		clearTimeout(this._soundCompleteTimeout);  // clear timeout that triggers sound complete
 
-		this._startTime = 0;	// This is used by getPosition
+		this._playbackStartTime = 0;	// This is used by getPosition
 
 		createjs.Sound._playFinished(this);
 	};
@@ -859,7 +875,8 @@ this.createjs = this.createjs || {};
 	 * @protected
  	 */
 	p._handleSoundReady = function (event) {
-		if ((this._offset*1000) > this.getDuration()) {
+		if (!this._duration) {this._duration = this._owner._arrayBuffers[this.src].duration * 1000;} // NOTE *1000 because WebAudio reports everything in seconds but js uses milliseconds
+		if ((this._offset*1000) > this._duration) {
 			this.playFailed();
 			return;
 		} else if (this._offset < 0) {  // may not need this check if play ignores negative values, this is not specified in the API http://www.w3.org/TR/webaudio/#AudioBufferSourceNode
@@ -871,15 +888,14 @@ this.createjs = this.createjs || {};
 
 		this.gainNode.connect(this._owner.gainNode);  // this line can cause a memory leak.  Nodes need to be disconnected from the audioDestination or any sequence that leads to it.
 
-		var dur = this._owner._arrayBuffers[this.src].duration;
+		var dur = this._duration * 0.001;
 		this.sourceNode = this._createAndPlayAudioNode((this._owner.context.currentTime - dur), this._offset);
-		this._duration = dur * 1000;	// NOTE *1000 because WebAudio reports everything in seconds but js uses milliseconds
-		this._startTime = this.sourceNode.startTime - this._offset;
+		this._playbackStartTime = this.sourceNode.startTime - this._offset;
 
 		this._soundCompleteTimeout = setTimeout(this._endedHandler, (dur - this._offset) * 1000);
 
 		if(this._remainingLoops != 0) {
-			this._sourceNodeNext = this._createAndPlayAudioNode(this._startTime, 0);
+			this._sourceNodeNext = this._createAndPlayAudioNode(this._playbackStartTime, 0);
 		}
 	};
 
@@ -896,9 +912,9 @@ this.createjs = this.createjs || {};
 		var audioNode = this._owner.context.createBufferSource();
 		audioNode.buffer = this._owner._arrayBuffers[this.src];
 		audioNode.connect(this.panNode);
-		var currentTime = this._owner.context.currentTime;
-		audioNode.startTime = startTime + audioNode.buffer.duration;
-		audioNode.start(audioNode.startTime, offset, audioNode.buffer.duration - offset);
+		var dur = this._duration * 0.001;
+		audioNode.startTime = startTime + dur;
+		audioNode.start(audioNode.startTime, offset+this._startTime, dur - offset);
 		return audioNode;
 	};
 
@@ -942,7 +958,7 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._beginPlaying = function (offset, loop, volume, pan) {
-		this._offset = offset / 1000;  //convert ms to sec
+		this._offset = offset * 0.001;  //convert ms to sec
 		this._remainingLoops = loop;
 		this.volume = volume;
 		this.pan = pan;
@@ -973,7 +989,7 @@ this.createjs = this.createjs || {};
 
 		this.paused = this._paused = true;
 
-		this._offset = this._owner.context.currentTime - this._startTime;  // this allows us to restart the sound at the same point in playback
+		this._offset = this._owner.context.currentTime - this._playbackStartTime;  // this allows us to restart the sound at the same point in playback
 		this.sourceNode = this._cleanUpAudioNode(this.sourceNode);
 		this._sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
 
@@ -1156,7 +1172,7 @@ this.createjs = this.createjs || {};
 		if (this._paused || this.sourceNode == null) {
 			var pos = this._offset;
 		} else {
-			var pos = this._owner.context.currentTime - this._startTime;
+			var pos = this._owner.context.currentTime - this._playbackStartTime;
 		}
 
 		return pos * 1000; // pos in seconds * 1000 to give milliseconds
@@ -1174,7 +1190,7 @@ this.createjs = this.createjs || {};
 	 * @param {Number} value The position to place the playhead, in milliseconds.
 	 */
 	p.setPosition = function (value) {
-		this._offset = value / 1000; // convert milliseconds to seconds
+		this._offset = value * 0.001; // convert milliseconds to seconds
 
 		if (this.sourceNode && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
 			// we need to stop this sound from continuing to play, as we need to recreate the sourceNode to change position
@@ -1224,8 +1240,8 @@ this.createjs = this.createjs || {};
 			if(this._sourceNodeNext) { // this can be set to null, but this should not happen when looping
 				this._cleanUpAudioNode(this.sourceNode);
 				this.sourceNode = this._sourceNodeNext;
-				this._startTime = this.sourceNode.startTime;
-				this._sourceNodeNext = this._createAndPlayAudioNode(this._startTime, 0);
+				this._playbackStartTime = this.sourceNode.startTime;
+				this._sourceNodeNext = this._createAndPlayAudioNode(this._playbackStartTime, 0);
 				this._soundCompleteTimeout = setTimeout(this._endedHandler, this._duration);
 			}
 			else {
