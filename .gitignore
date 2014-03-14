@@ -1,4 +1,16 @@
 .DS_Store
-build/node_modules/
 build/output/
+build/tmp/
+*TMP*
+node_modules/
 spikes/
+.idea/
+*.sublime-project
+*.sublime-workspace
+config.local.json
+
+#-----------------------------
+# INVALID FILES
+# (for cross OS compatibility)
+#-----------------------------
+*[\<\>\:\"\/\\\|\?\*]*
