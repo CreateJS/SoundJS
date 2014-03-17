@@ -187,10 +187,10 @@
 		}
 		
 	/******** PLAYBACK ********/		
-		protected function handlePlaySound(src:String, offset:Number=0, loop:int=0, volume:Number=1, pan:Number=0):String {
+		protected function handlePlaySound(src:String, offset:Number=0, loop:int=0, volume:Number=1, pan:Number=0, startTime:Number=0, duration:Number=0):String {
 			var id:String = "s" + nextId++;
 			
-			var wrapper:SoundWrapper = new SoundWrapper(id, src, this);			
+			var wrapper:SoundWrapper = new SoundWrapper(id, src, startTime,  duration,  this);
 			wrapper.play(offset, loop, volume, pan);
 			
 			lookup[id] = wrapper;
@@ -404,6 +404,10 @@ class SoundWrapper extends EventDispatcher {
 	public var src:String;
 	/** How far into the sound to start playback (milliseconds) */
 	public var offset:Number = 0;
+	/** Audio sprite start point */
+	public var _startTime:Number = 0;
+	/** Audio sprite length of clip */
+	public var _duration:Number = 0;
 	/** How many loops to play */
 	public var loop:int = 0;
 	/** A reference to the Plugin owner */
@@ -431,11 +435,13 @@ class SoundWrapper extends EventDispatcher {
 	 * @param id The unique ID of the instance
 	 * @param owner The owner of this sound instance
 	 */
-	public function SoundWrapper(id:String, src:String, owner:FlashAudioPlugin) {
-		this.owner = owner;
+	public function SoundWrapper(id:String, src:String, startTime:Number, duration:Number, owner:FlashAudioPlugin) {
 		this.id = id;
 		this.src = src;
-		
+		this._startTime = startTime;
+		this._duration = duration;
+		this.owner = owner;
+
 		sound = new Sound();
 		sound.addEventListener(IOErrorEvent.IO_ERROR, handleSoundError, false, 0, true);
 		sound.addEventListener(SecurityErrorEvent.SECURITY_ERROR, handleSoundError, false, 0, true);

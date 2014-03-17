@@ -390,13 +390,15 @@ this.createjs = this.createjs || {};
 		 * Create a sound instance. If the sound has not been preloaded, it is internally preloaded here.
 		 * @method create
 		 * @param {String} src The sound source to use.
+		 * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
+		 * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
 		 * @return {SoundInstance} A sound instance for playback and control.
 		 */
-		create:function (src) {
+		create:function (src, startTime, duration) {
 			if (!this.isPreloadStarted(src)) {this.preload(src);}
 
 			try {
-				var instance = new createjs.FlashPlugin.SoundInstance(src, this, this._flash);
+				var instance = new createjs.FlashPlugin.SoundInstance(src, startTime, duration, this, this._flash);
 				return instance;
 			} catch (err) {
 				//console.log("Error: Please ensure you have permission to play audio from this location.", err);
@@ -630,8 +632,8 @@ this.createjs = this.createjs || {};
 
 	// NOTE documentation for this class can be found online or in WebAudioPlugin.SoundInstance
 	// NOTE audio control is shuttled to a flash player instance via the flash reference.
-	function SoundInstance(src, owner, flash) {
-		this._init(src, owner, flash);
+	function SoundInstance(src, startTime, duration, owner, flash) {
+		this._init(src, startTime, duration, owner, flash);
 	}
 
 	var p = SoundInstance.prototype = new createjs.EventDispatcher();
@@ -646,6 +648,7 @@ this.createjs = this.createjs || {};
 	p._volume =  1;
 	p._pan =  0;
 	p._offset = 0; // used for setPosition on a stopped instance
+	p._startTime = 0;
 	p._duration = 0;
 	p._delayTimeoutId = null;
 	p._muted = false;
@@ -677,8 +680,10 @@ this.createjs = this.createjs || {};
 		});
 	}
 // Constructor
-	p._init = function (src, owner, flash) {
+	p._init = function (src, startTime, duration, owner, flash) {
 		this.src = src;
+		this._startTime = startTime || 0;
+		this._duration = duration || 0;
 		this._owner = owner;
 		this._flash = flash;
 	};
@@ -713,7 +718,7 @@ this.createjs = this.createjs || {};
 		if (!this._owner.flashReady) {return false;}
 		this._offset = offset;
 
-		this.flashId = this._flash.playSound(this.src, offset, loop, volume, pan);
+		this.flashId = this._flash.playSound(this.src, offset, loop, volume, pan, this._startTime, this._duration);
 		if (this.flashId == null) {
 			this._cleanUp();
 			return false;
@@ -804,11 +809,11 @@ this.createjs = this.createjs || {};
 	};
 
 	p.getDuration = function () {
-		var value = -1;
+		if (this._duration) {return this._duration;}
+
 		if (this._flash && this.flashId) {
-			value = this._flash.getDuration(this.flashId);	// this returns -1 on stopped instance
+			this._duration = this._flash.getDuration(this.flashId);	// this returns -1 on stopped instance
 		}
-		if (value != -1) {this._duration = value;}
 		return this._duration;
 	};
 
