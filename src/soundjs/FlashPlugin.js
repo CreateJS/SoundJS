@@ -809,9 +809,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p.getDuration = function () {
-		if (this._duration) {return this._duration;}
-
-		if (this._flash && this.flashId) {
+		if (!this._duration && this._flash && this.flashId) {
 			this._duration = this._flash.getDuration(this.flashId);	// this returns -1 on stopped instance
 		}
 		return this._duration;

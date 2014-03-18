@@ -9,7 +9,9 @@
 	import flash.events.IOErrorEvent;
 	import flash.events.ErrorEvent;
 	import flash.utils.Dictionary;
-	
+	import flash.utils.Timer;
+	import flash.events.TimerEvent;
+
 	public class FlashAudioPlugin extends Sprite {
 		
 	// Constants:
@@ -37,6 +39,7 @@
 		protected var preloadLookup:Dictionary;
 		protected var preloadHash:Object;
 		protected var nextId:int = 0;
+		protected var playbackTimer:Timer = new Timer(50);
 		public var masterVolume:Number = 1;
 		
 	// UI Elements:
@@ -110,6 +113,10 @@
 		protected function handleReady(evt) {
 			this.removeEventListener(Event.ENTER_FRAME, handleReady);
 			ExternalInterface.call(FLASH_CALLBACK, "ready");
+
+			// using a timer to handle audio sprites playing expected duration
+			playbackTimer.start();
+			playbackTimer.addEventListener(TimerEvent.TIMER, timerHandler);
 		}
 		
 		// General error handler.
@@ -197,7 +204,7 @@
 			wrapper.addEventListener(Event.SOUND_COMPLETE, handleSoundFinished, false, 0, true);
             wrapper.addEventListener("loop", handleSoundLoop, false, 0, true);
 			wrapper.addEventListener("interrupt", handleSoundInterrupt, false, 0, true);
-			log("Play Sound", id, src, "o:",offset, "l:",loop, "v:",volume, "p:",pan, "mv:",masterVolume);
+			log("Play Sound", id, src, "o:",offset, "l:",loop, "v:",volume, "p:",pan, "sT:",startTime, "d:",duration, "mv:",masterVolume);
 			return id;
 		}
 		
@@ -370,7 +377,17 @@
 			}
 			return count;
 		}
-		
+
+		protected function timerHandler(event:Event):void {
+			var list:Array = [];
+			for (var n:String in lookup) { list.push(lookup[n]); }
+			for (var i:uint=list.length; i--;) {
+				var wrapper:SoundWrapper = list[i] as SoundWrapper;
+				wrapper.handleAudioSprite();
+			}
+
+		}
+
 		override public function toString():String { return "[FlashAudioPlugin]"; }
 		
 	}
@@ -451,7 +468,6 @@ class SoundWrapper extends EventDispatcher {
 	/**
 	 * Play the sound.
 	 * @param src The path the the asset source
-	 * @param delay How long to wait before beginning playback
 	 * @param offset How far in to the sound to begin playback
 	 * @param loop How many times to loop the audio
 	 * @param volume The starting volume of the audio
@@ -563,11 +579,12 @@ class SoundWrapper extends EventDispatcher {
 	
 	/** Get the duration of the sound. */
 	public function get duration():Number {
-		return sound.length;
+		return this._duration || sound.length;
 	}
 	
 	// Begin playing the sound at a certain position.
 	protected function startSound(startAt:Number):void {
+		startAt += this._startTime;
 		if (startAt > sound.length) {
 			owner.log("Can not play, out of range");
 			dispatchEvent(new Event(Event.SOUND_COMPLETE));
@@ -577,7 +594,7 @@ class SoundWrapper extends EventDispatcher {
 			channel = sound.play(startAt);
 			channel.addEventListener(Event.SOUND_COMPLETE, handleSoundComplete, false, 0, true);
 		} else {
-            offset = startAt;  // allows you to set position on a paused or stopped sound
+            offset = startAt - this._startTime;  // allows you to set position on a paused or stopped sound
         }
 		updateVolume();
 	}
@@ -596,7 +613,15 @@ class SoundWrapper extends EventDispatcher {
 		if (_paused) { return; }
 		startSound(offset);
 	}
-	
+
+	public function handleAudioSprite():void {
+		if (this._duration != 0 && channel != null && (channel.position - this._startTime) >= this._duration) {
+			channel.stop();
+			channel = null;
+			this.handleSoundComplete(new Event(Event.SOUND_COMPLETE));
+		}
+	}
+
 	// Sound playback has completed.
 	protected function handleSoundComplete(event:Event):void {
         offset = 0;  // have to set this as it can be set by pause during playback
