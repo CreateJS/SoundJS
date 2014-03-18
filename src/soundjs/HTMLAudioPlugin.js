@@ -416,6 +416,8 @@ this.createjs = this.createjs || {};
 		this.src = src;
 		this._owner = owner;
 
+		this._duration = createjs.HTMLAudioPlugin.TagPool.getDuration(this.src);
+
 		this._endedHandler = createjs.proxy(this._handleSoundComplete, this);
 		this._readyHandler = createjs.proxy(this._handleSoundReady, this);
 		this._stalledHandler = createjs.proxy(this._handleSoundStalled, this);
@@ -496,7 +498,6 @@ this.createjs = this.createjs || {};
 	};
 
 	p._handleSoundReady = function (event) {
-		this._duration = this.tag.duration * 1000;
 		this.playState = createjs.Sound.PLAY_SUCCEEDED;
 		this.paused = this._paused = false;
 		this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_READY, this._readyHandler, false);
@@ -756,6 +757,7 @@ this.createjs = this.createjs || {};
 		this.tag.removeEventListener && this.tag.removeEventListener("canplaythrough", this.loadedHandler);  // cleanup and so we don't send the event more than once
 		this.tag.onreadystatechange = null;  // cleanup and so we don't send the event more than once
 		createjs.Sound._sendFileLoadEvent(this.src);  // fire event or callback on Sound
+
 	};
 
 	// used for debugging
@@ -863,6 +865,18 @@ this.createjs = this.createjs || {};
 		return channel.set(tag);
 	};
 
+	/**
+	 * Gets the duration of the src audio in milliseconds
+	 * #method getDuration
+	 * @param {String} src The source file used by the audio tag.
+	 * @return {Number} Duration of src in milliseconds
+	 */
+	s.getDuration= function (src) {
+		var channel = s.tags[src];
+		if (channel == null) {return 0;}
+		return channel.getDuration();
+	};
+
 	var p = TagPool.prototype;
 
 	/**
@@ -899,6 +913,15 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p.tags = null;
+
+	/**
+	 * The duration property of all audio tags, converted to milliseconds, which originally is only available on the
+	 * last tag in the tags array because that is the one that is loaded.
+	 * #property
+	 * @type {Number}
+	 * @protected
+	 */
+	p.duration = 0;
 
 	// constructor
 	p._init = function (src) {
@@ -952,6 +975,17 @@ this.createjs = this.createjs || {};
 		var index = createjs.indexOf(this.tags, tag);
 		if (index == -1) {this.tags.push(tag);}
 		this.available = this.tags.length;
+	};
+
+	/**
+	 * Gets the duration for the src audio and on first call stores it to this.duration
+	 * #method getDuration
+	 * @return {Number} Duration of the src in milliseconds
+	 */
+	p.getDuration = function () {
+		// this will work because this will be only be run the first time a sound instance is created and before any tags are taken from the pool
+		if (!this.duration) {this.duration = this.tags[this.tags.length - 1].duration * 1000;}
+		return this.duration;
 	};
 
 	p.toString = function () {

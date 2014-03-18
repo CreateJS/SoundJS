@@ -7,6 +7,7 @@ CRITICAL (may break existing content):
 - removed deprecated code and cleaned up supporting code for deprecated "|" loading approach
 
 *****
+- altered HTMLAudioPlugin so that SoundInstance will have duration immediately on creation
 - updated removeAllSounds to check for activePlugin before calling to prevent errors
 - corrected error display wording in MusicVisualizer example
 - fixed HTMLAudioPlugin typo on SoundInstance.src declaration
