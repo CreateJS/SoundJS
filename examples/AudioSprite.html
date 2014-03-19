@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>SoundJS: Mobile Safe</title>
+	<title>SoundJS: Audio Sprite</title>
 
 	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css" />
 </head>
@@ -9,8 +9,8 @@
 <body onload="init()">
 
 	<header id="header" class="SoundJS">
-	    <h1><span class="text-product">Sound<strong>JS</strong></span> Mobile Safe Play</h1>
-	    <p>This example registers and plays a sound with SoundJS in a way that will work on mobile devices.</p>
+	    <h1><span class="text-product">Sound<strong>JS</strong></span> Audio Sprite Example</h1>
+	    <p>This example shows the usage of an audio sprite.</p>
 	</header>
 
 	<div class="content" id="content">
@@ -77,14 +77,23 @@
 			}
 
 			MyApp.prototype = {
-				src:null,            // the audio src we are trying to play
-				soundInstance:null,  // the soundInstance returned by Sound when we create or play a src
+				MAX_LOOPS:3,		// used to set the max number of audio loops
+
 				displayStatus:null,  // the HTML element we use to display messages to the user
+				src:null,         	// the audio src we are trying to play
+				soundInstance:null,	// the soundInstance returned by Sound when we create or play a src
+				loops:null,			// number of times to loop audio
+				currentStep:null,	// current step in the audio process
+				sprite:null,
 				loadProxy:null,
+				loopProxy:null,
 
 				init: function () {
 					// store the DOM element so we do repeatedly pay the cost to look it up
 					this.displayStatus = document.getElementById("status");
+
+					//enable HTML Audio on iOS
+					createjs.HTMLAudioPlugin.enableIOS = true;
 
 					// this does two things, it initializes the default plugins, and if that fails the if statement triggers and we display an error
 					// NOTE that WebAudioPlugin plays an empty sound when initialized, which activates web audio on iOS if played inside of a function with a touch event in its callstack
@@ -94,25 +103,75 @@
 						return;
 					}
 
-					// Create a single item to load.
-					var assetsPath = "assets/";
-					this.src = assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg";
+					this.sprite = ["pew", "hit", "explode"];	// this code is not needed for sprites, it is used for the looping effect
+					var assetsPath = "./assets/";
+					var manifest = [
+						// This is an audio sprite.  The sprite property tells SoundJS what ids to use for playback, with time to start playback and length of playback
+						// we are setting data to 1 to show how sprites function with only a single instance
+						{src:"Game-AudioSprite.ogg", type:"sound", data: 1,
+							sprite: [
+								{id:"hit", startTime:0, duration:500},
+								{id:"pew", startTime:1000, duration:400},
+								{id:"explode", startTime:1700, duration: 1074}
+							]}
+					];
 
 					this.displayStatus.innerHTML = "Waiting for load to complete.";  // let the user know what's happening
 					// NOTE createjs.proxy is used to apply scope so we stay within the touch scope, allowing sound to play on mobile devices
 					this.loadProxy = createjs.proxy(this.handleLoad, this);
 					createjs.Sound.alternateExtensions = ["mp3"];	// add other extensions to try loading if the src file extension is not supported
 					createjs.Sound.addEventListener("fileload", this.loadProxy); // add event listener for when load is completed.
-					createjs.Sound.registerSound(this.src);  // register sound, which preloads by default
+					createjs.Sound.registerManifest(manifest, assetsPath);  // register manifest, which preloads by default
 
 					return this;
 				},
 
 				// play a sound inside
 				handleLoad: function (event) {
-					this.soundInstance = createjs.Sound.play(event.src);	// start playback and store the soundInstance we are currently playing
-					this.displayStatus.innerHTML = "Playing source: " + event.src;  // let the user know what we are playing
+					this.displayStatus.innerHTML = "Load Complete, time to kickoff playback.";  // let the user know what we are playing
 					createjs.Sound.removeEventListener("fileload", this.loadProxy);	// we only load 1 sound, so remove the listener
+
+					this.loopProxy = createjs.proxy(this.handleLoop, this);
+					this.launchLoop();
+				},
+
+				// kickoff our audio loop
+				launchLoop: function () {
+					this.currentStep = 0;
+					this.loops = Math.floor((Math.random()*this.MAX_LOOPS));	// random between 0 and MAX_LOOPS -1
+
+					this.soundInstance = createjs.Sound.play(this.sprite[this.currentStep], {loop: this.loops});
+					this.soundInstance.addEventListener("loop", this.loopProxy);
+					this.soundInstance.addEventListener("complete", createjs.proxy(this.nextAudioRelay, this));
+					this.displayStatus.innerHTML = this.sprite[this.currentStep];
+				},
+
+				// update display text
+				handleLoop: function () {
+					this.displayStatus.innerHTML = this.displayStatus.innerHTML + " " + this.sprite[this.currentStep];
+				},
+
+				// kick off delayed next step of audio loop
+				nextAudioRelay: function() {
+					var next = this.currentStep == 0 ? this.delayedNextAudio : this.launchLoop;
+					setTimeout(createjs.proxy(next, this), 1000+this.currentStep*200);
+				},
+
+				delayedNextAudio: function() {
+					this.currentStep++;
+					this.soundInstance = createjs.Sound.play(this.sprite[this.currentStep], {loop: this.loops});
+					this.soundInstance.addEventListener("loop", this.loopProxy);
+					this.soundInstance.addEventListener("complete", createjs.proxy(this.handleFinalAudio, this));
+					this.displayStatus.innerHTML = this.sprite[this.currentStep];
+				},
+
+				// final step of audio loop
+				handleFinalAudio: function() {
+					this.currentStep++;
+					this.soundInstance = createjs.Sound.play(this.sprite[this.currentStep]);
+					this.soundInstance.addEventListener("complete", createjs.proxy(this.nextAudioRelay, this));
+					this.handleLoop();
+
 				}
 			}
 

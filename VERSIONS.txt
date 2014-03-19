@@ -12,6 +12,7 @@ CRITICAL (may break existing content):
     {id:"id1", startTime:0, duration:500},
     {id:"id2", startTime:700, duration: 1000}
   ]});
+- added AudioSprite.html to examples
 - updated removeAllSounds to check for activePlugin before calling to prevent errors
 - corrected error display wording in MusicVisualizer example
 - fixed HTMLAudioPlugin typo on SoundInstance.src declaration
