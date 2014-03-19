@@ -491,9 +491,8 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 	s._sendFileLoadEvent = function (src) {
-		if (!s._preloadHash[src]) {
-			return;
-		}
+		if (!s._preloadHash[src]) {return;}
+
 		for (var i = 0, l = s._preloadHash[src].length; i < l; i++) {
 			var item = s._preloadHash[src][i];
 			s._preloadHash[src][i] = true;
@@ -504,6 +503,7 @@ this.createjs = this.createjs || {};
 			event.src = item.src;
 			event.id = item.id;
 			event.data = item.data;
+			event.sprite = item.sprite;
 
 			s.dispatchEvent(event);
 		}
@@ -783,7 +783,7 @@ this.createjs = this.createjs || {};
 		if(!details) {return false;}
 
 		if (!s._preloadHash[details.src]) {	s._preloadHash[details.src] = [];}
-		s._preloadHash[details.src].push({src:src, id:id, data:details.data});
+		s._preloadHash[details.src].push({src:src, id:id, data:details.data, sprite:sprite});
 		if (s._preloadHash[details.src].length == 1) {
 			// OJR note this will disallow reloading a sound if loading fails or the source changes
 			s.activePlugin.preload(details.src, details.tag);

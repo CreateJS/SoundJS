@@ -562,11 +562,10 @@ class SoundWrapper extends EventDispatcher {
 	/** Get/Set the playhead position. */
 	public function get position():Number {
         if (channel != null && !_paused) {
-            return channel.position;
+            return channel.position - this._startTime;
         }
 
         return offset;
-        //return channel ? channel.position : offset;
     }
 
 	/** @private */

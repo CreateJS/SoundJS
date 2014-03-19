@@ -524,17 +524,19 @@ this.createjs = this.createjs || {};
 		this.playState = createjs.Sound.PLAY_SUCCEEDED;
 		this.paused = this._paused = false;
 		this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_READY, this._readyHandler, false);
+		this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
 
-		var offset = this._startTime + this._offset;
 		if (this._offset >= this.getDuration()) {
 			this.playFailed();
 			return;
-		} else if (offset > 0) {
-			this.tag.currentTime = offset * 0.001;
 		}
+		this.tag.currentTime = (this._startTime + this._offset) * 0.001;
+
 
 		if (this._audioSpriteStopTime) {
+			this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_ENDED, this._endedHandler, false);
 			this.tag.addEventListener(createjs.HTMLAudioPlugin._TIME_UPDATE, this.__audioSpriteEndHandler, false);
+
 		} else {
 			if (this._remainingLoops == -1) {
 				this.tag.loop = true;
@@ -652,6 +654,7 @@ this.createjs = this.createjs || {};
 	// (up to 300ms), it is strongly recommended not to loop audio sprites with HTML Audio if smooth looping is desired
 	p._handleAudioSpriteLoop = function (event) {
 		if(this.tag.currentTime <= this._audioSpriteStopTime) {return;}
+		this.tag.pause();
 		if(this._remainingLoops == 0) {
 			this._handleSoundComplete(null);
 		} else {
