@@ -7,6 +7,12 @@ CRITICAL (may break existing content):
 - removed deprecated code and cleaned up supporting code for deprecated "|" loading approach
 
 *****
+- added AudioSprites support, with format of:
+  createjs.Sound.registerSound({src:src, sprite:[
+    {id:"id1", startTime:0, duration:500},
+    {id:"id2", startTime:700, duration: 1000}
+  ]});
+- added AudioSprite.html to examples
 - altered HTMLAudioPlugin so that SoundInstance will have duration immediately on creation
 - updated removeAllSounds to check for activePlugin before calling to prevent errors
 - corrected error display wording in MusicVisualizer example
