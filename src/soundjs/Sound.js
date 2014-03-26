@@ -665,7 +665,7 @@ this.createjs = this.createjs || {};
 	 * @param {String} [id] An optional user-specified id that is used to play sounds.
 	 * @param {Number|String|Boolean|Object} [data] Data associated with the item. Sound uses the data parameter as the
 	 * number of channels for an audio instance, however a "channels" property can be appended to the data object if
-	 * this property is used for other information. The audio channels will default to 1 if no value is found.
+	 * this property is used for other information. The audio channels will set a default based on plugin if no value is found.
 	 * @return {Boolean|Object} An object with the modified values of those that were passed in, or false if the active
 	 * plugin can not play the audio type.
 	 * @protected
@@ -684,10 +684,11 @@ this.createjs = this.createjs || {};
 	 * @param {Number | Object} [data] Data associated with the item. Sound uses the data parameter as the number of
 	 * channels for an audio instance, however a "channels" property can be appended to the data object if it is used
 	 * for other information. The audio channels will set a default based on plugin if no value is found.
-	 * @param {Array} sprite Array of audio sprites in the following format {id, startTime, duration}.<br/>
+	 * Sound also uses the data property to hold an audioSprite array of objects in the following format {id, startTime, duration}.<br/>
 	 *   id used to play the sound later, in the same manner as a sound src with an id.<br/>
 	 *   startTime is the initial offset to start playback and loop from, in milliseconds.<br/>
 	 *   duration is the amount of time to play the clip for, in milliseconds.<br/>
+	 * This allows Sound to support audio sprites that are played back by id.
 	 * @return {Object} An object with the modified values that were passed in, which defines the sound.
 	 * Returns false if the source cannot be parsed or no plugins can be initialized.
 	 * Returns true if the source is already loaded.
@@ -696,7 +697,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.5.3
 	 */
 
-	s._registerSound = function (src, id, data, sprite) {
+	s._registerSound = function (src, id, data) {
 		if (!s.initializeDefaultPlugins()) {return false;}
 
 		var details = s._parsePath(src);
@@ -704,16 +705,6 @@ this.createjs = this.createjs || {};
 		details.type = "sound";
 		details.id = id;
 		details.data = data;
-		details.sprite = sprite;
-
-		if (id != null) {s._idHash[id] = {src: details.src}};
-		if(sprite) {
-			var sp;
-			for(var i = sprite.length; i--; ) {
-				sp = sprite[i];
-				s._idHash[sp.id] = {src: details.src, startTime: parseInt(sp.startTime), duration: parseInt(sp.duration)};
-			}
-		}
 
 		var numChannels = s.activePlugin.defaultNumChannels || null;
 		if (data != null) {
@@ -722,7 +713,16 @@ this.createjs = this.createjs || {};
 			} else if (!isNaN(data)) {
 				numChannels = parseInt(data);
 			}
+
+			if(data.audioSprite) {
+				var sp;
+				for(var i = data.audioSprite.length; i--; ) {
+					sp = data.audioSprite[i];
+					s._idHash[sp.id] = {src: details.src, startTime: parseInt(sp.startTime), duration: parseInt(sp.duration)};
+				}
+			}
 		}
+		if (id != null) {s._idHash[id] = {src: details.src}};
 		var loader = s.activePlugin.register(details.src, numChannels);  // Note only HTML audio uses numChannels
 
 		SoundChannel.create(details.src, numChannels);
@@ -757,10 +757,11 @@ this.createjs = this.createjs || {};
 	 * @param {Number | Object} [data] Data associated with the item. Sound uses the data parameter as the number of
 	 * channels for an audio instance, however a "channels" property can be appended to the data object if it is used
 	 * for other information. The audio channels will set a default based on plugin if no value is found.
-	 * @param {Array} sprite Array of audio sprites in the following format {id, startTime, duration}.<br/>
+	 * Sound also uses the data property to hold an audioSprite array of objects in the following format {id, startTime, duration}.<br/>
 	 *   id used to play the sound later, in the same manner as a sound src with an id.<br/>
 	 *   startTime is the initial offset to start playback and loop from, in milliseconds.<br/>
 	 *   duration is the amount of time to play the clip for, in milliseconds.<br/>
+	 * This allows Sound to support audio sprites that are played back by id.
 	 * @param {string} basePath Set a path that will be prepended to src for loading.
 	 * @return {Object} An object with the modified values that were passed in, which defines the sound.
 	 * Returns false if the source cannot be parsed or no plugins can be initialized.
@@ -768,22 +769,21 @@ this.createjs = this.createjs || {};
 	 * @static
 	 * @since 0.4.0
 	 */
-	s.registerSound = function (src, id, data, sprite, basePath) {
+	s.registerSound = function (src, id, data, basePath) {
 		if (src instanceof Object) {
 			basePath = id;
 			id = src.id;
 			data = src.data;
-			sprite = src.sprite;
 			src = src.src;
 		}
 
 		if (basePath != null) {src = basePath + src;}
 
-		var details = s._registerSound(src, id, data, sprite);
+		var details = s._registerSound(src, id, data);
 		if(!details) {return false;}
 
 		if (!s._preloadHash[details.src]) {	s._preloadHash[details.src] = [];}
-		s._preloadHash[details.src].push({src:src, id:id, data:details.data, sprite:sprite});
+		s._preloadHash[details.src].push({src:src, id:id, data:details.data});
 		if (s._preloadHash[details.src].length == 1) {
 			// OJR note this will disallow reloading a sound if loading fails or the source changes
 			s.activePlugin.preload(details.src, details.tag);
@@ -811,7 +811,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * @method registerManifest
 	 * @param {Array} manifest An array of objects to load. Objects are expected to be in the format needed for
-	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}}: <code>{src:srcURI, id:ID, data:Data, sprite:Object}</code>
+	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}}: <code>{src:srcURI, id:ID, data:Data}</code>
 	 * with "id" and "data" being optional.
 	 * @param {string} basePath Set a path that will be prepended to each src when loading.  When creating, playing, or removing
 	 * audio that was loaded with a basePath by src, the basePath must be included.
@@ -824,7 +824,7 @@ this.createjs = this.createjs || {};
 	s.registerManifest = function (manifest, basePath) {
 		var returnValues = [];
 		for (var i = 0, l = manifest.length; i < l; i++) {
-			returnValues[i] = createjs.Sound.registerSound(manifest[i].src, manifest[i].id, manifest[i].data, manifest[i].sprite, basePath);
+			returnValues[i] = createjs.Sound.registerSound(manifest[i].src, manifest[i].id, manifest[i].data, basePath);
 		}
 		return returnValues;
 	};

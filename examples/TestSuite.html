@@ -332,12 +332,13 @@
             {id:"Thunder", src:"Thunder1.ogg", data:3},
             {id:"Rat Damage", src:"R-Damage.ogg", type:"sound"},
             {id:"Cabin Boy", src:"U-CabinBoy3.ogg", type:"sound", data:1},
-			{src:"Game-AudioSprite.ogg",
-				sprite: [
+			{src:"Game-AudioSprite.ogg", data: {
+				audioSprite: [
 					{id:"Audio Sprite Break", startTime:0, duration:500},
 					{id:"Audio Sprite Shot", startTime:1000, duration:245},
 					{id:"Audio Sprite Death", startTime:1700, duration: 1074}
 				]}
+			}
 		];
 
 		createjs.Sound.alternateExtensions = ["mp3"];	// add other extensions to try loading if the src file extension is not supported
@@ -347,9 +348,9 @@
 
     function addSoundToList(event) {
         var list = $("#library").get(0);
-		if(event.sprite) {
-			for(var i = event.sprite.length; i--; ) {
-				list.options.add(new Option((event.sprite[i].id) + " ("+(event.data||"unknown")+")", event.sprite[i].id));  //event.data should never be undefined, because it is set to the max limit by SoundJS
+		if(event.data.audioSprite) {
+			for(var i = event.data.audioSprite.length; i--; ) {
+				list.options.add(new Option((event.data.audioSprite[i].id) + " ("+(event.data.channels||"unknown")+")", event.data.audioSprite[i].id));  //event.data should never be undefined, because it is set to the max limit by SoundJS
 			}
 		} else {
         	list.options.add(new Option((event.id || event.src) + " ("+(event.data||"unknown")+")", event.id));  //event.data should never be undefined, because it is set to the max limit by SoundJS

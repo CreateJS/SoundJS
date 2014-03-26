@@ -108,12 +108,13 @@
 					var manifest = [
 						// This is an audio sprite.  The sprite property tells SoundJS what ids to use for playback, with time to start playback and length of playback
 						// we are setting data to 1 to show how sprites function with only a single instance
-						{src:"Game-AudioSprite.ogg", data: 1,
-							sprite: [
+						{src:"Game-AudioSprite.ogg", data: {channels: 1,
+							audioSprite: [
 								{id:"hit", startTime:0, duration:500},
 								{id:"pew", startTime:1000, duration:400},
 								{id:"explode", startTime:1700, duration: 1074}
 							]}
+						}
 					];
 
 					this.displayStatus.innerHTML = "Waiting for load to complete.";  // let the user know what's happening
