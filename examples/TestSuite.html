@@ -12,6 +12,8 @@
         .posSlider,
 	    .offsetSlider,
 	    .delaySlider,
+		.startTimeSlider,
+		.durationSlider,
 	    .masterVolumeSlider,
 	    .loopSlider { width:200px; }
 	</style>
@@ -27,6 +29,9 @@
 	    FORM P {
 		    margin: 0 0 10px 0;
 	    }
+		td {
+			min-width: 95px;
+		}
 	    #instanceControls {
 	    }
 	    .select {
@@ -78,11 +83,18 @@
 	            <option value="early">Early</option>
 	            <option value="late">Late</option>
 	        </select>
+	        <input id="stopAllSoundsBtn" name="stopAll" type="button" value="Stop All Sounds" />
+            <input id="muteAllSoundsBtn" name="muteAll" type="button" value="Mute All Sounds" />
 
 	        <br />
 	        <br />
 
 	        <table border="0" width="400" cellpadding="5" cellspacing="5">
+	            <tr>
+	                <td><label for="masterVolume" class="nodisable">Master Volume</label></td>
+	                <td> <div class="masterVolumeSlider" id="masterVolume"></div></td>
+	                <td><label for="masterVolume" id="masterVolumeValue">100</label></td>
+	            </tr>
 	            <tr>
 	                <td><label for="loop">Loop</label></td>
 	                <td><div class="loopSlider" id="loop"></div></td>
@@ -98,23 +110,36 @@
 	                <td><div class="offsetSlider" id="offset"></div></td>
 	                <td><label for="offset" id="offsetValue">0 seconds</label></td>
 	            </tr>
-	            <tr rowCount="2">
-	                <td><label for="masterVolume" class="nodisable">Master Volume</label></td>
-	                <td> <div class="masterVolumeSlider" id="masterVolume"></div></td>
-	                <td><label for="masterVolume" id="masterVolumeValue">100</label></td>
-	            </tr>
-	        </table>
-	        <input id="stopAllSoundsBtn" name="stopAll" type="button" value="Stop All Sounds" />
-            <input id="muteAllSoundsBtn" name="muteAll" type="button" value="Mute All Sounds" />
+			</table>
+
+			<table border="0" width="400" cellpadding="5" cellspacing="5">
+				<label>Audio Sprite Properties</label>
+				<tr>
+					<td><label for="startTime">StartTime</label></td>
+					<td><div class="startTimeSlider" id="startTime"></div></td>
+					<td><label for="startTime" id="startTimeValue">0 seconds</label></td>
+				</tr>
+				<tr>
+					<td><label for="duration">Duration</label></td>
+					<td><div class="durationSlider" id="duration"></div></td>
+					<td><label for="duration" id="durationValue">0 seconds</label></td>
+				</tr>
+			</table>
 	    </form>
 
 	    <form id="instanceControls">
-	        <p>Select a playing sound to stop, set volume, set pan, or set position. <br/>When a sound completes, it is removed from this list.</p>
+	        <p>Select a playing sound to stop, set volume, set pan, or set position. <br/>Use Clear to remove an instance from this list.</p>
 	        <select id="nowPlaying" multiple="multiple" disabled="disabled" class="select">
 	            <option value="-1">-- No Audio Playing --</option>
 	        </select>
+			<input id="playBtn" name="play" type="button" value="Play" />
+			<input id="pauseBtn" name="pause" type="button" value="Pause" />
+	        <input id="stopBtn" name="stop" type="button" value="Stop" />
+            <input id="muteBtn" name="mute" type="button" value="Mute" />
+			<input id="clearBtn" name="clear" type="button" value="Clear" />
+			<input id="clearAllBtn" name="clearAll" type="button" value="Clear All" />
 
-	        <br/>
+			<br/>
 	        <br/>
 	        <table border="0" width="400" cellpadding="5" cellspacing="5">  <!-- OJR it would be nice if this lined up with the library table.  Note adding <br/> does not line it up -->
 	            <tr>
@@ -133,9 +158,6 @@
                     <td><label for="pos" id="posValue">0</label></td>
 	            </tr>
 	        </table>
-	        <input id="pauseBtn" name="pause" type="button" value="Pause" />
-	        <input id="stopBtn" name="stop" type="button" value="Stop" />
-            <input id="muteBtn" name="mute" type="button" value="Mute" />
 	    </form>
 
 	</div>
@@ -221,7 +243,23 @@
         });
         $(".delaySlider").data("units", "second");
 
-        $(".masterVolumeSlider").slider({value: 100,
+		$(".startTimeSlider").slider({value: 0,
+			min: 0,
+			max: 10,
+			disabled:false,
+			change:handleSliderChange
+		});
+		$(".startTimeSlider").data("units", "second");
+
+		$(".durationSlider").slider({value: 0,
+			min: 0,
+			max: 10,
+			disabled:false,
+			change:handleSliderChange
+		});
+		$(".durationSlider").data("units", "second");
+
+		$(".masterVolumeSlider").slider({value: 100,
             min: 0,
             max: 100,
             disabled:false,
@@ -238,9 +276,8 @@
         $("#library").change(selectItem);
         $("#playSoundBtn").click(playSound);
         $("#stopAllSoundsBtn").click(function(event) {
-            clearInterval(audioInterval);
+            //clearInterval(audioInterval);
             createjs.Sound.stop();
-            removeSound("all");
         });
         $("#muteAllSoundsBtn").click(function(event){
             var muted = !createjs.Sound.getMute();
@@ -277,12 +314,16 @@
         });
 
         $("#nowPlaying").change(selectInstance);
-        $("#stopBtn").click(function(event){
-            var instance = getInstance()
+		$("#playBtn").click(function(event){
+			var instance = getInstance();
+			if (instance == null) { return; }
+			instance.play();
+		});
+		$("#stopBtn").click(function(event){
+            var instance = getInstance();
             if (instance == null) { return; }
             instance.stop();
-            removeSound(instance);
-        });
+		});
         $("#pauseBtn").click(function(event){
             var instance = getInstance();
             if (instance == null) { return; }
@@ -296,7 +337,17 @@
             instance.setMute(muted);
             $("#muteBtn").attr("value", muted ? "Unmute" : "Mute");
         });
-        // OJR it would be nice to add an instance play button, which would require re-architecting how instances are removed
+		$("#clearBtn").click(function(event){
+			var instance = getInstance();
+			if (instance == null) { return; }
+			instance.stop();
+			removeSound(instance);
+		});
+		$("#clearAllBtn").click(function(event) {
+			clearInterval(audioInterval);
+			createjs.Sound.stop();
+			removeSound("all");
+		});
 
         $(".volumeSlider").on('slidestop',function(event){
             var instance = getInstance();
@@ -373,16 +424,23 @@
         var loop = $(".loopSlider").slider("option", "value");
         var delay = $(".delaySlider").slider("option", "value") *1000;
         var offset = $(".offsetSlider").slider("option", "value")*1000;
+		var startTime = $(".startTimeSlider").slider("option", "value")*1000;
+		var duration = $(".durationSlider").slider("option", "value")*1000;
+		if (duration == 0) {
+			startTime = null;
+			duration = null;
+		}
 
-        for (var i=0, l=list.options.length; i<l; i++) {
+		for (var i=0, l=list.options.length; i<l; i++) {
             if (!list.options[i].selected) { continue; }
             var item = list.options[i];
 
-            var instance = createjs.Sound.createInstance(item.value);
-            instance.addEventListener("succeeded", createjs.proxy(handlePlaySuccess,instance));
-            instance.addEventListener("interrupted", createjs.proxy(handlePlayFailed,instance));
-            instance.addEventListener("failed", createjs.proxy(handlePlayFailed,instance));
-            instance.addEventListener("complete", createjs.proxy(handleSoundComplete,instance));
+            var instance = createjs.Sound.createInstance(item.value, startTime, duration);
+			instance.handleSuccessProxy = createjs.proxy(handlePlaySuccess,instance);	// OJR kind of hacky
+            instance.addEventListener("succeeded", instance.handleSuccessProxy);
+            //instance.addEventListener("interrupted", createjs.proxy(handlePlayFailed,instance));
+            //instance.addEventListener("failed", createjs.proxy(handlePlayFailed,instance));
+            //instance.addEventListener("complete", createjs.proxy(handleSoundComplete,instance));
 
             instance.play(interruptValue, delay, offset, loop);
         }
@@ -392,7 +450,8 @@
     function handlePlaySuccess(event) {
         instance = event.target;
         instanceHash[instance.uniqueId] = instance;
-        instance.removeEventListener("succeeded", handlePlaySuccess, instance);  // because we only want this to fire the first time we start playing
+        instance.removeEventListener("succeeded", instance.handleSuccessProxy);  // because we only want this to fire the first time we start playing
+		delete(instance.handleSuccessProxy);
 
         var nowPlaying = $("#nowPlaying").get(0);
 
@@ -413,11 +472,6 @@
         }
 
         nowPlaying.options.add(new Option(instance.src + "("+instance.uniqueId + ")", instance.uniqueId));
-    }
-
-    // Sound finished. Remove it from the list.
-    function handleSoundComplete(event) {
-        removeSound(event.target);
     }
 
     // Playback failed (usually interrupt failed)
@@ -511,10 +565,10 @@
     function enableSet(name, enabled) {
         switch (name) {
             case "sound":
-                enableItems("playControls", enabled, ["playSoundBtn", "interrupt", "loop", "delay", "offset"]);
+                enableItems("playControls", enabled, ["playSoundBtn", "interrupt", "loop", "delay", "offset", "startTime", "duration"]);
                 break;
             case "instance":
-                enableItems("instanceControls", enabled, ["pause", "volume", "stop", "pan", , "pos", "mute"]);
+                enableItems("instanceControls", enabled, ["play", "pause", "stop", "clear", "volume", "pan", "pos", "mute"]);
                 break;
         }
     }
