@@ -1,19 +1,14 @@
-Version NEXT
+Version NEXT [Not Released]
 ************************************************************************************************************************
 CRITICAL (may break existing content):
 - removed preload property from Sound.registerSound and Sound.registerManifest, as it is only used by PreloadJS
 - changed WebAudioPlugin dynamicsCompressorNode and gainNode to be instance level rather than static class level
-  this is now accessed via createjs.Sound.activePlugin.dynamicsCompressorNode rather than createjs.WebAudioPlugin.dynamicsCompressorNode
+  this is now accessed via createjs.Sound.activePlugin.dynamicsCompressorNode rather than
+  createjs.WebAudioPlugin.dynamicsCompressorNode
 - removed deprecated code and cleaned up supporting code for deprecated "|" loading approach
 
 *****
-- added AudioSprites support, with format of:
-  createjs.Sound.registerSound({src:src, data: {
-    audioSprite:[
-      {id:"id1", startTime:0, duration:500},
-      {id:"id2", startTime:700, duration: 1000}
-    ]}
-  });
+- added audio sprite support
 - added AudioSprite.html to examples
 - altered HTMLAudioPlugin so that SoundInstance will have duration immediately on creation
 - updated removeAllSounds to check for activePlugin before calling to prevent errors
@@ -21,6 +16,8 @@ CRITICAL (may break existing content):
 - fixed HTMLAudioPlugin typo on SoundInstance.src declaration
 - fixed WebAudioPlugin bug, sourceNode was not being properly set to null on pause and setPosition
 - added readonly paused property to SoundInstance
+- Added Bower support, including Grunt task for automatically updating the bower.json
+
 
 Version 0.5.2 [December 12, 2013]
 ************************************************************************************************************************
