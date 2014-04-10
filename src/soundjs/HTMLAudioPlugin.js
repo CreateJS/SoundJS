@@ -993,8 +993,12 @@ this.createjs = this.createjs || {};
 	 * #method removeAll
 	 */
 	p.removeAll = function () {
-		// This may not be neccessary
+		var tag;
 		while(this.length--) {
+			tag = this.tags[this.length];
+			if(tag.parentNode) {
+				tag.parentNode.removeChild(tag);
+			}
 			delete(this.tags[this.length]);	// NOTE that the audio playback is already stopped by this point
 		}
 		this.src = null;

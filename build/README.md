@@ -16,7 +16,7 @@ If your Node install is out of date, get the latest from [NodeJS.org](http://nod
 After node is setup, install the other dependencies. You may want to familiarize yourself with the Node Packager Manager (NPM) before proceeding.
 
 	# Install the grunt command line utility globally
-	sudo npm install grunt-cli -g
+	npm install grunt-cli -g
 
 	# Change to the build directory, which contains package.json
 	cd /path/to/libraryName/build/
