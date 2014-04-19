@@ -1028,7 +1028,7 @@ this.createjs = this.createjs || {};
 			loop = interrupt.loop;
 			volume = interrupt.volume;
 			pan = interrupt.pan;
-			startTime = interrupt.duration;
+			startTime = interrupt.startTime;
 			duration = interrupt.duration;
 			interrupt = interrupt.interrupt;
 
