@@ -851,7 +851,7 @@ this.createjs = this.createjs || {};
 	p._cleanUpAudioNode = function(audioNode) {
 		if(audioNode) {
 			audioNode.stop(0);
-			audioNode.disconnect(this.panNode);
+			audioNode.disconnect(0);
 			audioNode = null;
 		}
 		return audioNode;
