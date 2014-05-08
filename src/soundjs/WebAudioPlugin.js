@@ -851,7 +851,7 @@ this.createjs = this.createjs || {};
 	p._cleanUpAudioNode = function(audioNode) {
 		if(audioNode) {
 			audioNode.stop(0);
-			audioNode.disconnect(this.panNode);
+			audioNode.disconnect(0);
 			audioNode = null;
 		}
 		return audioNode;
@@ -993,7 +993,7 @@ this.createjs = this.createjs || {};
 		this.sourceNode = this._cleanUpAudioNode(this.sourceNode);
 		this._sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
 
-		if (this.gainNode.numberOfOutputs != 0) {this.gainNode.disconnect();}
+		if (this.gainNode.numberOfOutputs != 0) {this.gainNode.disconnect(0);}
 
 		clearTimeout(this._delayTimeoutId);
 		clearTimeout(this._soundCompleteTimeout);

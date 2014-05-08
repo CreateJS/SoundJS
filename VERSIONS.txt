@@ -8,6 +8,7 @@ CRITICAL (may break existing content):
 - removed deprecated code and cleaned up supporting code for deprecated "|" loading approach
 
 *****
+- fixed an issue with WebAudioPlugin that was not passing the correct parameter for disconnecting nodes
 - added audio sprite support
 - added AudioSprite.html to examples
 - fixed an issue with HTMLAudioPlugin that was not removing tags from DOM when removing src from SoundJS
