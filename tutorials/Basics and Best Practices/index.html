@@ -173,7 +173,7 @@
     <textarea class="brush: js;" readonly>
         function init() {
         	// create a manifest and audioPath (above)
-        	createjs.Sound.addEventListener("loadComplete", handleLoad);
+        	createjs.Sound.addEventListener("fileload", handleLoad);
         	createjs.Sound.registerManifest(manifest, audioPath);
         }
 
