@@ -4,7 +4,7 @@ For example, instead of playing a sound like this:
 var foo = SoundJS.play(id);
 
 You will need to reach into the createjs namespace:
-var bar = createjs.SounJS.play(id);
+var bar = createjs.SoundJS.play(id);
 
 This functionality is configurable though. You can easily shortcut the namespace or get rid of it completely.
 
