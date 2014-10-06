@@ -939,6 +939,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	s.loadComplete = function (src) {
+		if (!s.isReady()) { return false; }
 		var details = s._parsePath(src);
 		if (details) {
 			src = s._getSrcById(details.src).src;
