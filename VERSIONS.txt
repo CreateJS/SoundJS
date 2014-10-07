@@ -6,10 +6,12 @@ CRITICAL (may break existing content):
   this is now accessed via createjs.Sound.activePlugin.dynamicsCompressorNode rather than
   createjs.WebAudioPlugin.dynamicsCompressorNode
 - removed deprecated code and cleaned up supporting code for deprecated "|" loading approach
+- removed iOS disabling by default on HTMLAudioPlugin
 
 *****
+- fixed issue with windows phone reporting as iPhone
 - fixed an issue with WebAudioPlugin that was not passing the correct parameter for disconnecting nodes
-- added audio sprite support
+- added audio sprite support and documentation
 - added AudioSprite.html to examples
 - fixed an issue with HTMLAudioPlugin that was not removing tags from DOM when removing src from SoundJS
 - altered HTMLAudioPlugin so that SoundInstance will have duration immediately on creation

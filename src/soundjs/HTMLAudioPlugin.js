@@ -58,7 +58,8 @@ this.createjs = this.createjs || {};
      * 64kbps works.</li>
 	 * <li>Occasionally very short samples will get cut off.</li>
 	 * <li>There is a limit to how many audio tags you can load and play at once, which appears to be determined by
-	 * hardware and browser settings.  See {{#crossLink "HTMLAudioPlugin.MAX_INSTANCES"}}{{/crossLink}} for a safe estimate.</li></ul>
+	 * hardware and browser settings.  See {{#crossLink "HTMLAudioPlugin.MAX_INSTANCES"}}{{/crossLink}} for a safe estimate.
+	 * Note that audio sprites can be used as a solution to this issue.</li></ul>
 	 *
 	 * <b>Safari limitations</b><br />
 	 * <ul><li>Safari requires Quicktime to be installed for audio playback.</li></ul>
@@ -70,6 +71,7 @@ this.createjs = this.createjs || {};
 	 * 		<li>can not preload or autoplay the audio</li>
 	 * 		<li>can not cache the audio</li>
 	 * 		<li>can not play the audio except inside a user initiated event.</li>
+	 * 		<li>audio sprites can be used to mitigate some of these issues and are strongly recommended on iOS</li>
 	 * </ul>
 	 *
 	 * <b>Android Native Browser limitations</b><br />
@@ -168,9 +170,7 @@ this.createjs = this.createjs || {};
 	s._capabilities = null;
 
 	/**
-	 * Allows users to enable HTML audio on IOS, which is disabled by default.
-	 * Note this needs to be set before HTMLAudioPlugin is registered with SoundJS.
-	 * This is not recommend because of severe limitations on IOS devices including:
+	 * Deprecated now that we have audio sprite support.  Audio sprites are strongly recommend on iOS.
 	 * <li>it can only have one &lt;audio&gt; tag</li>
 	 * <li>can not preload or autoplay the audio</li>
 	 * <li>can not cache the audio</li>
@@ -179,6 +179,7 @@ this.createjs = this.createjs || {};
 	 * @property enableIOS
 	 * @type {Boolean}
 	 * @default false
+	 * @deprecated
 	 */
 	s.enableIOS = false;
 
@@ -190,7 +191,6 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.isSupported = function () {
-		if (createjs.Sound.BrowserDetect.isIOS && !s.enableIOS) {return false;}
 		s._generateCapabilities();
 		if (s._capabilities == null) {return false;}
 		return true;
