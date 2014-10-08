@@ -628,15 +628,21 @@ this.createjs = this.createjs || {};
 			this._offset = value
 		} else {
 			this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
+			this.tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this._handleSetPositionSeek, false);
 			try {
 				value = value + this._startTime;
 				this.tag.currentTime = value * 0.001;
 			} catch (error) { // Out of range
+				this._handleSetPositionSeek(null);
 				return false;
 			}
-			this.tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
 		}
 		return true;
+	};
+
+	p._handleSetPositionSeek = function(event) {
+		this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this._handleSetPositionSeek, false);
+		this.tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
 	};
 
 	p.getDuration = function () {  // NOTE this will always return 0 until sound has been played unless it is set
