@@ -1619,7 +1619,7 @@ this.createjs = this.createjs || {};
 	// This is a dummy sound instance, which allows Sound to return something so developers don't need to check nulls.
 	function SoundInstance() {
 		this.isDefault = true;
-		this.addEventListener = this.removeEventListener = this.removeAllEventListeners = this.dispatchEvent = this.hasEventListener = this._listeners = this._interrupt = this._playFailed = this.pause = this.resume = this.play = this._beginPlaying = this._cleanUp = this.stop = this.setMasterVolume = this.setVolume = this.mute = this.setMute = this.getMute = this.setPan = this.getPosition = this.setPosition = this.playFailed = function () {
+		this.addEventListener = this.on = this.off = this.removeEventListener = this.removeAllEventListeners = this.dispatchEvent = this.hasEventListener = this._listeners = this._interrupt = this._playFailed = this.pause = this.resume = this.play = this._beginPlaying = this._cleanUp = this.stop = this.setMasterVolume = this.setVolume = this.mute = this.setMute = this.getMute = this.setPan = this.getPosition = this.setPosition = this.playFailed = function () {
 			return false;
 		};
 		this.getVolume = this.getPan = this.getDuration = function () {
