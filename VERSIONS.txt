@@ -9,6 +9,7 @@ CRITICAL (may break existing content):
 - removed iOS disabling by default on HTMLAudioPlugin
 
 *****
+- fixed an issue that caused interrupt early/late to pick a playing sound over an finished sound when all instances are used
 - added new event methods on and off to defaultSoundInstance to prevent errors
 - fixed issue with windows phone reporting as iPhone
 - fixed an issue with WebAudioPlugin that was not passing the correct parameter for disconnecting nodes

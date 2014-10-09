@@ -1572,32 +1572,38 @@ this.createjs = this.createjs || {};
 	p._getSlot = function (interrupt, instance) {
 		var target, replacement;
 
+		if (interrupt != Sound.INTERRUPT_NONE) {
+			// First replacement candidate
+			replacement = this._get(0);
+			if (replacement == null) {
+				return true;
+			}
+		}
+
 		for (var i = 0, l = this.max; i < l; i++) {
 			target = this._get(i);
 
 			// Available Space
 			if (target == null) {
 				return true;
-			} else if (interrupt == Sound.INTERRUPT_NONE && target.playState != Sound.PLAY_FINISHED) {
-				continue;
-			}
-
-			// First replacement candidate
-			if (i == 0) {
-				replacement = target;
-				continue;
 			}
 
 			// Audio is complete or not playing
 			if (target.playState == Sound.PLAY_FINISHED ||
-					target.playState == Sound.PLAY_INTERRUPTED ||
-					target.playState == Sound.PLAY_FAILED) {
+				target.playState == Sound.PLAY_INTERRUPTED ||
+				target.playState == Sound.PLAY_FAILED) {
 				replacement = target;
+				break;
+			}
 
-				// Audio is a better candidate than the current target, according to playhead
-			} else if (	(interrupt == Sound.INTERRUPT_EARLY && target.getPosition() < replacement.getPosition()) ||
-						(interrupt == Sound.INTERRUPT_LATE && target.getPosition() > replacement.getPosition())) {
-				replacement = target;
+			if (interrupt == Sound.INTERRUPT_NONE) {
+				continue;
+			}
+
+			// Audio is a better candidate than the current target, according to playhead
+			if ((interrupt == Sound.INTERRUPT_EARLY && target.getPosition() < replacement.getPosition()) ||
+				(interrupt == Sound.INTERRUPT_LATE && target.getPosition() > replacement.getPosition())) {
+					replacement = target;
 			}
 		}
 
