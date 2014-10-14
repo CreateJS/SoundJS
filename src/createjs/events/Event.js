@@ -46,7 +46,7 @@ this.createjs = this.createjs||{};
 /**
  * Contains properties and methods shared by all events for use with
  * {{#crossLink "EventDispatcher"}}{{/crossLink}}.
- * 
+ *
  * Note that Event objects are often reused, so you should never
  * rely on an event object's state outside of the call stack it was received in.
  * @class Event
@@ -59,6 +59,7 @@ var Event = function(type, bubbles, cancelable) {
   this.initialize(type, bubbles, cancelable);
 };
 var p = Event.prototype;
+	Event.prototype.constructor = Event;
 
 // events:
 
@@ -162,7 +163,7 @@ var p = Event.prototype;
 	 * @readonly
 	*/
 	p.immediatePropagationStopped = false;
-	
+
 	/**
 	 * Indicates if {{#crossLink "Event/remove"}}{{/crossLink}} has been called on this event.
 	 * @property removed
@@ -217,21 +218,21 @@ var p = Event.prototype;
 	p.stopImmediatePropagation = function() {
 		this.immediatePropagationStopped = this.propagationStopped = true;
 	};
-	
+
 	/**
 	 * Causes the active listener to be removed via removeEventListener();
-	 * 
+	 *
 	 * 		myBtn.addEventListener("click", function(evt) {
 	 * 			// do stuff...
 	 * 			evt.remove(); // removes this listener.
 	 * 		});
-	 * 
+	 *
 	 * @method remove
 	 **/
 	p.remove = function() {
 		this.removed = true;
 	};
-	
+
 	/**
 	 * Returns a clone of the Event instance.
 	 * @method clone

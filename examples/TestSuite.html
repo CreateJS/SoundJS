@@ -440,14 +440,10 @@
             instance.addEventListener("succeeded", instance.handleSuccessProxy);
             //instance.addEventListener("interrupted", createjs.proxy(handlePlayFailed,instance));
             //instance.addEventListener("failed", createjs.proxy(handlePlayFailed,instance));
-            instance.addEventListener("complete", createjs.proxy(handleSoundComplete,instance));
+            //instance.addEventListener("complete", createjs.proxy(handleSoundComplete,instance));
 
             instance.play(interruptValue, delay, offset, loop);
         }
-    }
-
-    function handleSoundComplete(event) {
-        console.log(event.target.src + "completed");
     }
 
     // Create a sound, add listeners, and try playing it.
