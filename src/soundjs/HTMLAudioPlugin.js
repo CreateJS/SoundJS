@@ -225,6 +225,7 @@ this.createjs = this.createjs || {};
 	}
 
 	var p = HTMLAudioPlugin.prototype;
+	p.constructor = HTMLAudioPlugin;
 
 	// doc'd above
 	p._capabilities = null;
@@ -388,6 +389,7 @@ this.createjs = this.createjs || {};
 	}
 
 	var p = SoundInstance.prototype = new createjs.EventDispatcher();
+	p.constructor = SoundInstance;
 
 	p.src = null;
 	p.uniqueId = -1;
@@ -719,6 +721,7 @@ this.createjs = this.createjs || {};
 	};
 
 	var p = Loader.prototype;
+	p.constructor = Loader;
 
 	/**
 	 * The source to be loaded.
@@ -932,6 +935,7 @@ this.createjs = this.createjs || {};
 	};
 
 	var p = TagPool.prototype;
+	p.constructor = TagPool;
 
 	/**
 	 * The source of the tag pool.

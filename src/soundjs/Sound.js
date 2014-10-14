@@ -1467,6 +1467,7 @@ this.createjs = this.createjs || {};
 	};
 
 	var p = SoundChannel.prototype;
+	p.constructor = SoundChannel;
 
 	/**
 	 * The source of the channel.

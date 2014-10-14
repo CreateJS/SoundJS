@@ -620,6 +620,7 @@ this.createjs = this.createjs || {};
 		}
 
 	}
+	p.constructor = FlashPlugin;
 
 	createjs.FlashPlugin = FlashPlugin;
 
@@ -637,6 +638,7 @@ this.createjs = this.createjs || {};
 	}
 
 	var p = SoundInstance.prototype = new createjs.EventDispatcher();
+	p.constructor = SoundInstance;
 
 	p.src = null;
 	p.uniqueId = -1;
@@ -870,6 +872,7 @@ this.createjs = this.createjs || {};
 	}
 
 	var p = Loader.prototype;
+	p.constructor = Loader;
 
 	/**
 	 * A reference to the Flash instance that gets created.

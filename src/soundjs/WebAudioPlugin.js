@@ -229,6 +229,7 @@ this.createjs = this.createjs || {};
 
 
 	var p = WebAudioPlugin.prototype;
+	p.constructor = WebAudioPlugin;
 
 	p._capabilities = null; // doc'd above
 
@@ -510,6 +511,7 @@ this.createjs = this.createjs || {};
 	}
 
 	var p = SoundInstance.prototype = new createjs.EventDispatcher();
+	p.constructor = SoundInstance;
 
 	/**
 	 * The source of the sound.
@@ -1288,6 +1290,7 @@ this.createjs = this.createjs || {};
 	}
 
 	var p = Loader.prototype;
+	p.constructor = Loader;
 
 	// the request object for or XHR2 request
 	p.request = null;
