@@ -833,6 +833,7 @@ this.createjs = this.createjs || {};
 	 */
 	p.handleSoundFinished = function () {
 		this.playState = createjs.Sound.PLAY_FINISHED;
+		this._offset = 0;
 		this._cleanUp();
 		this._sendEvent("complete");
 	};

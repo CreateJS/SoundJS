@@ -270,7 +270,7 @@
 		protected function handleResumeSound(id:String):Boolean {
 			var wrapper:SoundWrapper = getWrapper(id);
 			if (wrapper == null) { return false; }
-			log("Resume",wrapper.id);
+			log("Resume",wrapper.id,wrapper.offset);
 			wrapper.resume();
 			return true;
 		}
@@ -511,7 +511,7 @@ class SoundWrapper extends EventDispatcher {
 	public function pause():void {
 		_paused = true;
 		if (channel != null) {
-			offset = channel.position;
+			offset = channel.position - _startTime;
 			channel.stop();
 		}
 	}
@@ -565,7 +565,7 @@ class SoundWrapper extends EventDispatcher {
         if (channel != null && !_paused) {
             return channel.position - this._startTime;
         }
-        return offset - this._startTime;
+        return offset;
     }
 
 	/** @private */
