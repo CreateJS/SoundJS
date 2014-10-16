@@ -256,7 +256,7 @@ this.createjs = this.createjs || {};
 		 * @type {Boolean}
 		 * @default false
 		 */
-		showOutput:false,
+		showOutput:true,
 
 		/**
 		 * An initialization function run by the constructor
@@ -700,17 +700,20 @@ this.createjs = this.createjs || {};
 		this.playState = createjs.Sound.PLAY_INTERRUPTED;
 		this._flash.interrupt(this.flashId);
 		this._cleanUp();
-		this.paused = this._paused = false;
 		this._sendEvent("interrupted");
 	};
 
 	p._cleanUp = function () {
+		this.paused = this._paused = false;
+		this._flash.stopSound(this.flashId);
+
 		clearTimeout(this._delayTimeoutId);
 		this._owner.unregisterSoundInstance(this.flashId);
 		createjs.Sound._playFinished(this);
 	};
 
 	p.play = function (interrupt, delay, offset, loop, volume, pan) {
+		this._cleanUp();
 		createjs.Sound._playInstance(this, interrupt, delay, offset, loop, volume, pan);
 	};
 

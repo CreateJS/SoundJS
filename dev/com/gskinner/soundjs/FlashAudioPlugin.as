@@ -1,5 +1,5 @@
 ﻿package com.gskinner.soundjs {
-	
+
 	import flash.display.Sprite;
 	import flash.external.ExternalInterface;
 	import flash.events.Event;
@@ -13,11 +13,11 @@
 	import flash.events.TimerEvent;
 
 	public class FlashAudioPlugin extends Sprite {
-		
+
 	// Constants:
 		/** The maximum concurrent sounds that can play */
 		public static const MAX_INSTANCES:uint = 255;
-	
+
 		/** Generic ExternalInterface callback string to Flash. */
 		public static const FLASH_CALLBACK:String = "createjs.Sound.activePlugin.handleEvent";
 		/** Generic ExternalInterface error callback string to Flash. */
@@ -29,11 +29,11 @@
 		/** Output method */
 		public static const LOG_CALLBACK:String = "createjs.Sound.activePlugin.flashLog";
 
-		
+
 	// Public Properties:
 		/** The list instance to log errors to. Will be removed for production. */
 		public var list:*;
-		
+
 	// Protected Properties:
 		protected var lookup:Object;
 		protected var preloadLookup:Dictionary;
@@ -41,35 +41,35 @@
 		protected var nextId:int = 0;
 		protected var playbackTimer:Timer = new Timer(50);
 		public var masterVolume:Number = 1;
-		
+
 	// UI Elements:
 	// ** AUTO-UI ELEMENTS **
 	// ** END AUTO-UI ELEMENTS **
-		
+
 	// Initialization:
 		public function FlashAudioPlugin() {
 			configUI();
 			initializeInterface();
 		}
-		
-		protected function configUI():void { 
+
+		protected function configUI():void {
 			lookup = {};
 			preloadHash = {};
 			preloadLookup = new Dictionary();
 		}
-		
+
 	// Protected Methods:
 		/**
 		 * Add callbacks for ExternalInterface communication
 		 */
 		protected function initializeInterface():void {
 			var map:Object = {
-				
+
 				register: handleRegister,
-				
+
 				preload: handlePreload,
 				cancelPreload: handleCancelPreload,
-				
+
 				playSound: handlePlaySound,
 				stopAll: handleStopAll,
 				stopSound: handleStopSound,
@@ -88,15 +88,15 @@
 				getDuration: handleGetDuration,
 
                 setMasterVolume: handleSetMasterVolume,
-				
+
 				command: handleCommand
 			};
-			
-			if (!ExternalInterface.available) { 
+
+			if (!ExternalInterface.available) {
 				handleError({message:"ExternalInterface is not available"});
 				return;
 			}
-			
+
 			// Usually happens when running locally, or cross-scripting
 			try {
 				for (var n:String in map) {
@@ -108,7 +108,7 @@
 				handleError(e);
 			}
 		}
-		
+
 		// call to let JS know we are ready
 		protected function handleReady(evt) {
 			this.removeEventListener(Event.ENTER_FRAME, handleReady);
@@ -118,12 +118,12 @@
 			playbackTimer.start();
 			playbackTimer.addEventListener(TimerEvent.TIMER, timerHandler);
 		}
-		
+
 		// General error handler.
 		protected function handleError(e:Object):void {
 			log("*** Error:", e.message);
 		}
-		
+
 		// For now, spit out messages to a list.
 		public function log(...args:Array):void {
 			var str = args.join(" ");
@@ -132,14 +132,14 @@
 			list.addItem({label:str});
 			list.verticalScrollPosition = list.maxVerticalScrollPosition;
 		}
-		
-		
+
+
 	/******** REGISTER ********/
-		protected function handleRegister(src:String):Boolean { 
+		protected function handleRegister(src:String):Boolean {
 			log("Register", src);
 			return true;
 		}
-		
+
 	/******** PRELOAD ********/
 		protected function handlePreload(src:String):String {
 			var id:String = "p"+nextId++;
@@ -153,7 +153,7 @@
 			preloadHash[id] = sound;
 			return id;
 		}
-		
+
 		protected function handleCancelPreload(id:String):Boolean {
 			var sound:Sound = preloadHash[id] as Sound;
 			if (sound == null) { return false; }
@@ -164,12 +164,12 @@
 			delete preloadHash[id]
 			return true;
 		}
-		
+
 		protected function handleLoadProgress(event:ProgressEvent):void {
 			var id = preloadLookup[event.target];
 			ExternalInterface.call(PRELOAD_CALLBACK, id, "handleProgress", event.bytesLoaded, event.bytesTotal);
 		}
-		
+
 		protected function handleLoadComplete(event:Event):void {
 			var id = preloadLookup[event.target];
 			ExternalInterface.call(PRELOAD_CALLBACK, id, "handleComplete");
@@ -177,7 +177,7 @@
 			delete preloadHash[id];
 			log("Preload Complete", id);
 		}
-		
+
 		protected function handleLoadError(event:ErrorEvent):void {
 			var id = preloadLookup[event.target];
 			ExternalInterface.call(PRELOAD_CALLBACK, id, "handleError", event.text);
@@ -185,21 +185,21 @@
 			delete preloadHash[id];
 			log("Error Loading", id, event.text);
 		}
-		
+
 		protected function getWrapper(id:String, alwaysReturn:Boolean=false):SoundWrapper {
 			var wrapper = lookup[id] as SoundWrapper;
 			if (wrapper == null) { return null; }
 			if (!alwaysReturn && wrapper.failed) { return null; }
 			return wrapper;
 		}
-		
-	/******** PLAYBACK ********/		
+
+	/******** PLAYBACK ********/
 		protected function handlePlaySound(src:String, offset:Number=0, loop:int=0, volume:Number=1, pan:Number=0, startTime:Number=0, duration:Number=0):String {
 			var id:String = "s" + nextId++;
-			
+
 			var wrapper:SoundWrapper = new SoundWrapper(id, src, startTime,  duration,  this);
 			wrapper.play(offset, loop, volume, pan);
-			
+
 			lookup[id] = wrapper;
 			wrapper.addEventListener(Event.SOUND_COMPLETE, handleSoundFinished, false, 0, true);
             wrapper.addEventListener("loop", handleSoundLoop, false, 0, true);
@@ -207,7 +207,7 @@
 			log("Play Sound", id, src, "o:",offset, "l:",loop, "v:",volume, "p:",pan, "sT:",startTime, "d:",duration, "mv:",masterVolume);
 			return id;
 		}
-		
+
 		// An instance completed playback.
 		protected function handleSoundFinished(event:Event):void {
 			var wrapper:SoundWrapper = event.target as SoundWrapper;
@@ -232,7 +232,7 @@
 				delete(lookup[wrapper.id]);
 			}
 		}
-		
+
 		// Stop all instances
 		protected function handleStopAll():Boolean {
 			log("Stop All");
@@ -244,7 +244,7 @@
 			}
 			return true;
 		}
-		
+
 		// Stop a specific instance
 		protected function handleStopSound(id:String):Boolean {
 			var wrapper:SoundWrapper = getWrapper(id, true);
@@ -255,16 +255,17 @@
 			wrapper.destroy();
 			return true;
 		}
-		
+
 		// Pause an instance
 		protected function handlePauseSound(id:String):Boolean {
 			var wrapper:SoundWrapper = getWrapper(id, true);
 			if (wrapper == null) { return false; }
 			log("Pause",wrapper.id);
 			wrapper.pause();
+			log("Pause offset",wrapper.offset);
 			return true;
 		}
-		
+
 		// Resume a paused instance
 		protected function handleResumeSound(id:String):Boolean {
 			var wrapper:SoundWrapper = getWrapper(id);
@@ -273,16 +274,16 @@
 			wrapper.resume();
 			return true;
 		}
-		
+
 		// Mute an instance
-		protected function handleMuteSound(id:String):Boolean { 
+		protected function handleMuteSound(id:String):Boolean {
 			var wrapper:SoundWrapper = getWrapper(id);
 			if (wrapper == null) { return false; }
 			log("Mute",wrapper.id);
 			wrapper.mute(true);
 			return true;
 		}
-		
+
 		// Unmute an instance
 		protected function handleUnmuteSound(id:String):Boolean {
 			var wrapper:SoundWrapper = getWrapper(id);
@@ -291,10 +292,10 @@
 			wrapper.mute(false);
 			return true;
 		}
-		
+
 		// Get the master volume
 		protected function handleGetMasterVolume():Number { return masterVolume; }
-		
+
 		// Set the master volume
 		protected function handleSetMasterVolume(value:Number):Boolean {
 			log("Set Master Volume", value);
@@ -305,7 +306,7 @@
 			}
 			return true;
 		}
-		
+
 		// Set the volume of an instance
 		protected function handleSetVolume(id:String, value:Number):Boolean {
 			var wrapper:SoundWrapper = getWrapper(id);
@@ -314,30 +315,30 @@
 			wrapper.volume = value;
 			return true;
 		}
-		
+
 		// Get the volume of an instance
 		protected function handleGetVolume(id:String):Number {
 			var wrapper:SoundWrapper = getWrapper(id);
 			if (wrapper == null) { return -1; }
 			return wrapper.volume;
 		}
-		
+
 		// Set the pan of an instance
-		protected function handleSetPan(id:String, value:Number):Boolean { 
+		protected function handleSetPan(id:String, value:Number):Boolean {
 			var wrapper:SoundWrapper = getWrapper(id);
 			if (wrapper == null) { return false; }
 			log("SetPan", wrapper.id, value);
 			wrapper.pan = value;
 			return true;
 		}
-		
+
 		// Get the pan of an instance
 		protected function handleGetPan(id:String):Number {
 			var wrapper:SoundWrapper = getWrapper(id);
 			if (wrapper == null) { return -1; }
 			return wrapper.pan;
 		}
-		
+
 		// Set the playhead position of an instance
 		protected function handleSetPosition(id:String, value:Number):Boolean {
 			var wrapper:SoundWrapper = getWrapper(id);
@@ -346,27 +347,27 @@
 			wrapper.position = value;
 			return true;
 		}
-		
+
 		// Get the playhead position of an instance
 		protected function handleGetPosition(id:String):Number {
 			var wrapper:SoundWrapper = getWrapper(id);
 			if (wrapper == null) { return -1; }
 			return wrapper.position;
 		}
-		
+
 		// Get the duration of an instance
 		protected function handleGetDuration(id:String):Number {
 			var wrapper:SoundWrapper = getWrapper(id);
 			if (wrapper == null) { return -1; }
 			return wrapper.duration;
 		}
-		
+
 		// Call a command on an instance (currently N/A)
-		protected function handleCommand(id:String, command:String, value:*):Boolean { 
+		protected function handleCommand(id:String, command:String, value:*):Boolean {
 			log("Command", command, value);
 			return false;
 		}
-		
+
 		// Get the number of active sounds.
 		protected function get activeSoundCount():uint {
 			var count:uint = 0;
@@ -389,9 +390,9 @@
 		}
 
 		override public function toString():String { return "[FlashAudioPlugin]"; }
-		
+
 	}
-	
+
 }
 
 import flash.media.Sound;
@@ -414,7 +415,7 @@ import flash.events.SecurityErrorEvent;
  * in a new instance being created.
  */
 class SoundWrapper extends EventDispatcher {
-	
+
 	/** The unique ID of an instance */
 	public var id:String;
 	/** The path the audio source */
@@ -429,19 +430,19 @@ class SoundWrapper extends EventDispatcher {
 	public var loop:int = 0;
 	/** A reference to the Plugin owner */
 	public var owner:FlashAudioPlugin;
-	
+
 	/** Whether the audio is currently muted */
 	public var muted:Boolean = false;
 	/** If the sound failed. */
 	public var failed:Boolean = false;
-	
+
 	protected var sound:Sound;
 	protected var channel:SoundChannel;  // NOTE you can have a maximum of 32 sound channels at once
 	protected var timer:Timer;
 	protected var _volume:Number = 1;
 	protected var _pan:Number = 0;
 	protected var _paused:Boolean = false;
-	
+
 	/**
 	 * SoundInstances are alive as long as they are playing.
 	 * When they complete, or are stopped, they will be released for cleanup
@@ -464,7 +465,7 @@ class SoundWrapper extends EventDispatcher {
 		sound.addEventListener(SecurityErrorEvent.SECURITY_ERROR, handleSoundError, false, 0, true);
 		sound.addEventListener(Event.COMPLETE, handleSoundLoaded, false, 0, true);
 	}
-	
+
 	/**
 	 * Play the sound.
 	 * @param src The path the the asset source
@@ -478,7 +479,7 @@ class SoundWrapper extends EventDispatcher {
 		this.loop = loop;
 		sound.load(new URLRequest(src));
 	}
-	
+
 	/**
 	 * Clean up a sound instance.
 	 */
@@ -486,7 +487,7 @@ class SoundWrapper extends EventDispatcher {
 		sound = null;
 		channel = null;
 	}
-	
+
 	/**
 	 * Interrupt this instance
 	 */
@@ -496,14 +497,14 @@ class SoundWrapper extends EventDispatcher {
 		}
 		destroy();
 	}
-	
+
 	/**
 	 * Determine if the audio is currently paused. It is always unpaused when started, even while delaying.
 	 */
 	public function get paused():Boolean {
 		return _paused;
 	}
-	
+
 	/**
 	 * Pause sound playback.
 	 */
@@ -514,7 +515,7 @@ class SoundWrapper extends EventDispatcher {
 			channel.stop();
 		}
 	}
-	
+
 	/**
 	 * Resume sound playback.
 	 */
@@ -522,7 +523,7 @@ class SoundWrapper extends EventDispatcher {
 		_paused = false;
         startSound(offset);
 	}
-	
+
 	/**
 	 * Stop sound playback.
 	 */
@@ -533,7 +534,7 @@ class SoundWrapper extends EventDispatcher {
         offset = 0;
 		destroy();
 	}
-	
+
 	/**
 	 * Mute playback.
 	 * @param value if the audio should be muted or not.
@@ -542,15 +543,15 @@ class SoundWrapper extends EventDispatcher {
 		muted = value;
 		updateVolume();
 	}
-	
+
 	/** Get/Set the volume of the sound. */
 	public function get volume():Number { return _volume; }
 	/** @private */
-	public function set volume(value:Number):void { 
+	public function set volume(value:Number):void {
 		_volume = value;
 		updateVolume();
 	}
-	
+
 	/** Get/Set the pan of the sound. */
 	public function get pan():Number { return _pan; }
 	/** @private */
@@ -558,14 +559,13 @@ class SoundWrapper extends EventDispatcher {
 		_pan = value;
 		updateVolume();
 	}
-	
+
 	/** Get/Set the playhead position. */
 	public function get position():Number {
         if (channel != null && !_paused) {
             return channel.position - this._startTime;
         }
-
-        return offset;
+        return offset - this._startTime;
     }
 
 	/** @private */
@@ -575,12 +575,12 @@ class SoundWrapper extends EventDispatcher {
         }
 		startSound(value);
 	}
-	
+
 	/** Get the duration of the sound. */
 	public function get duration():Number {
 		return this._duration || sound.length;
 	}
-	
+
 	// Begin playing the sound at a certain position.
 	protected function startSound(startAt:Number):void {
 		startAt += this._startTime;
@@ -597,7 +597,7 @@ class SoundWrapper extends EventDispatcher {
         }
 		updateVolume();
 	}
-	
+
 	// Update the sound volume based on the volume, masterVolume, and mute settings.
 	protected function updateVolume():void {
 		if (channel == null) { return; }
@@ -606,7 +606,7 @@ class SoundWrapper extends EventDispatcher {
 		transform.pan = _pan;
 		channel.soundTransform = transform;
 	}
-	
+
 	// Sound has completed loading
 	protected function handleSoundLoaded(event:Event):void {
 		if (_paused) { return; }
@@ -614,7 +614,7 @@ class SoundWrapper extends EventDispatcher {
 	}
 
 	public function handleAudioSprite():void {
-		if (this._duration != 0 && channel != null && (channel.position - this._startTime) >= this._duration) {
+		if (this._duration > 0 && channel != null && (channel.position - this._startTime) >= this._duration) {
 			channel.stop();
 			channel = null;
 			this.handleSoundComplete(new Event(Event.SOUND_COMPLETE));
@@ -634,12 +634,12 @@ class SoundWrapper extends EventDispatcher {
             dispatchEvent(event);
         }
 	}
-	
+
 	// An error has occurred.
 	protected function handleSoundError(event:ErrorEvent):void {
 		owner.log("Error!", event.text);
 		failed = true;
 		dispatchEvent(new Event("playbackFailed"));
 	}
-	
+
 }
