@@ -31,7 +31,7 @@ CRITICAL (may break existing content):
     if playing, keep playing (aka do nothing)
     if paused, resume
     if stopped, start
-
+- fixed an issue with FlashPlugin that would set position to an incorrect value when pausing
 
 Version 0.5.2 [December 12, 2013]
 ************************************************************************************************************************
