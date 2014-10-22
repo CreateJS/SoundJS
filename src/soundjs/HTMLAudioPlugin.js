@@ -485,6 +485,10 @@ this.createjs = this.createjs || {};
 
 // Public API
 	p.play = function (interrupt, delay, offset, loop, volume, pan) {
+		if (this.playState == createjs.Sound.PLAY_SUCCEEDED) {
+			if (this._paused) {	this.resume(); }
+			return;
+		}
 		this._cleanUp();
 		createjs.Sound._playInstance(this, interrupt, delay, offset, loop, volume, pan);
 	};

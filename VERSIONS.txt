@@ -26,6 +26,11 @@ CRITICAL (may break existing content):
 - Added Bower support, including Grunt task for automatically updating the bower.json
 - Added .gitignore to subfolders under /docs (thanks mcfarljw)
 - Improved EventDispatcher's handling of redispatched event objects
+- Changed behavior of SoundInstance.play to be consistent across all plugins.
+  The new behavior is the following:
+    if playing, keep playing (aka do nothing)
+    if paused, resume
+    if stopped, start
 
 
 Version 0.5.2 [December 12, 2013]

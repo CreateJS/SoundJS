@@ -930,6 +930,8 @@ this.createjs = this.createjs || {};
 	 *      myInstance.play({offset:1, loop:2, pan:0.5});	// options as object properties
 	 *      myInstance.play(createjs.Sound.INTERRUPT_ANY);	// options as parameters
 	 *
+	 * Note that if this sound is already playing, this call will do nothing.
+	 *
 	 * @method play
 	 * @param {String | Object} [interrupt="none"|options] How to interrupt any currently playing instances of audio with the same source,
 	 * if the maximum number of instances of the sound are already playing. Values are defined as <code>INTERRUPT_TYPE</code>
@@ -945,6 +947,10 @@ this.createjs = this.createjs || {};
 	 * for HTML Audio.
 	 */
 	p.play = function (interrupt, delay, offset, loop, volume, pan) {
+		if (this.playState == createjs.Sound.PLAY_SUCCEEDED) {
+			if (this._paused) {	this.resume(); }
+			return;
+		}
 		this._cleanUp();
 		createjs.Sound._playInstance(this, interrupt, delay, offset, loop, volume, pan);
 	};
