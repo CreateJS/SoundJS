@@ -31,6 +31,7 @@
  * files of each library and are available on the createsjs namespace directly.
  *
  * <h4>Example</h4>
+ *
  *      myObject.addEventListener("change", createjs.proxy(myMethod, scope));
  *
  * @module CreateJS
@@ -46,7 +47,7 @@ this.createjs = this.createjs||{};
 /**
  * Contains properties and methods shared by all events for use with
  * {{#crossLink "EventDispatcher"}}{{/crossLink}}.
- *
+ * 
  * Note that Event objects are often reused, so you should never
  * rely on an event object's state outside of the call stack it was received in.
  * @class Event
@@ -59,7 +60,7 @@ var Event = function(type, bubbles, cancelable) {
   this.initialize(type, bubbles, cancelable);
 };
 var p = Event.prototype;
-	Event.prototype.constructor = Event;
+Event.prototype.constructor = Event;
 
 // events:
 
@@ -163,7 +164,7 @@ var p = Event.prototype;
 	 * @readonly
 	*/
 	p.immediatePropagationStopped = false;
-
+	
 	/**
 	 * Indicates if {{#crossLink "Event/remove"}}{{/crossLink}} has been called on this event.
 	 * @property removed
@@ -218,21 +219,21 @@ var p = Event.prototype;
 	p.stopImmediatePropagation = function() {
 		this.immediatePropagationStopped = this.propagationStopped = true;
 	};
-
+	
 	/**
 	 * Causes the active listener to be removed via removeEventListener();
-	 *
+	 * 
 	 * 		myBtn.addEventListener("click", function(evt) {
 	 * 			// do stuff...
 	 * 			evt.remove(); // removes this listener.
 	 * 		});
-	 *
+	 * 
 	 * @method remove
 	 **/
 	p.remove = function() {
 		this.removed = true;
 	};
-
+	
 	/**
 	 * Returns a clone of the Event instance.
 	 * @method clone
@@ -240,6 +241,18 @@ var p = Event.prototype;
 	 **/
 	p.clone = function() {
 		return new Event(this.type, this.bubbles, this.cancelable);
+	};
+	
+	/**
+	 * Provides a chainable shortcut method for setting a number of properties on the instance.
+	 *
+	 * @method set
+	 * @param {Object} props A generic object containing properties to copy to the instance.
+	 * @return {Event} Returns the instance the method is called on (useful for chaining calls.)
+	*/
+	p.set = function(props) {
+		for (var n in props) { this[n] = props[n]; }
+		return this;
 	};
 
 	/**

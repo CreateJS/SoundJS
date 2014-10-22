@@ -25,6 +25,7 @@ CRITICAL (may break existing content):
 - added readonly paused property to SoundInstance
 - Added Bower support, including Grunt task for automatically updating the bower.json
 - Added .gitignore to subfolders under /docs (thanks mcfarljw)
+- Improved EventDispatcher's handling of redispatched event objects
 
 
 Version 0.5.2 [December 12, 2013]
