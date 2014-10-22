@@ -32,6 +32,7 @@ CRITICAL (may break existing content):
     if paused, resume
     if stopped, start
 - fixed an issue with FlashPlugin that would set position to an incorrect value when pausing
+- changed FlashPlugin to grab the duration of audio as soon as a SoundInstance is created
 
 Version 0.5.2 [December 12, 2013]
 ************************************************************************************************************************

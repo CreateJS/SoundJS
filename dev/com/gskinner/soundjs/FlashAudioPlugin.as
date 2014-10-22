@@ -41,6 +41,7 @@
 		protected var nextId:int = 0;
 		protected var playbackTimer:Timer = new Timer(50);
 		public var masterVolume:Number = 1;
+		public var soundDurationHash:Object;
 
 	// UI Elements:
 	// ** AUTO-UI ELEMENTS **
@@ -55,6 +56,7 @@
 		protected function configUI():void {
 			lookup = {};
 			preloadHash = {};
+			soundDurationHash = {};
 			preloadLookup = new Dictionary();
 		}
 
@@ -86,6 +88,7 @@
 				setPosition: handleSetPosition,
 				getPosition: handleGetPosition,
 				getDuration: handleGetDuration,
+				getDurationBySrc: handleGetDurationBySrc,
 
                 setMasterVolume: handleSetMasterVolume,
 
@@ -148,9 +151,11 @@
 			sound.addEventListener(Event.COMPLETE, handleLoadComplete, false, 0, true);
 			sound.addEventListener(IOErrorEvent.IO_ERROR, handleLoadError, false, 0, true);
 			//TODO: Other Errors
-			sound.load(new URLRequest(src));
 			preloadLookup[sound] = id;
 			preloadHash[id] = sound;
+			soundDurationHash[id] = src;
+
+			sound.load(new URLRequest(src));
 			return id;
 		}
 
@@ -161,7 +166,8 @@
 				sound.close();
 			} catch(error:Error) {}
 			delete preloadLookup[sound];
-			delete preloadHash[id]
+			delete preloadHash[id];
+			delete soundDurationHash[id];
 			return true;
 		}
 
@@ -175,6 +181,9 @@
 			ExternalInterface.call(PRELOAD_CALLBACK, id, "handleComplete");
 			delete preloadLookup[event.target];
 			delete preloadHash[id];
+			var src = soundDurationHash[id];
+			soundDurationHash[src] = event.target.length;
+			delete soundDurationHash[id];
 			log("Preload Complete", id);
 		}
 
@@ -183,6 +192,7 @@
 			ExternalInterface.call(PRELOAD_CALLBACK, id, "handleError", event.text);
 			delete preloadLookup[event.target];
 			delete preloadHash[id];
+			delete soundDurationHash[id];
 			log("Error Loading", id, event.text);
 		}
 
@@ -197,7 +207,7 @@
 		protected function handlePlaySound(src:String, offset:Number=0, loop:int=0, volume:Number=1, pan:Number=0, startTime:Number=0, duration:Number=0):String {
 			var id:String = "s" + nextId++;
 
-			var wrapper:SoundWrapper = new SoundWrapper(id, src, startTime,  duration,  this);
+			var wrapper:SoundWrapper = new SoundWrapper(id, src, startTime, duration, this);
 			wrapper.play(offset, loop, volume, pan);
 
 			lookup[id] = wrapper;
@@ -262,7 +272,6 @@
 			if (wrapper == null) { return false; }
 			log("Pause",wrapper.id);
 			wrapper.pause();
-			log("Pause offset",wrapper.offset);
 			return true;
 		}
 
@@ -359,7 +368,12 @@
 		protected function handleGetDuration(id:String):Number {
 			var wrapper:SoundWrapper = getWrapper(id);
 			if (wrapper == null) { return -1; }
-			return wrapper.duration;
+			return wrapper.duration || soundDurationHash[wrapper.src];
+		}
+
+		// Get the duration of a src, returns -1 if it does not exist
+		protected function handleGetDurationBySrc(src:String):Number {
+			return soundDurationHash[src] || -1;
 		}
 
 		// Call a command on an instance (currently N/A)

@@ -256,7 +256,7 @@ this.createjs = this.createjs || {};
 		 * @type {Boolean}
 		 * @default false
 		 */
-		showOutput:true,
+		showOutput:false,
 
 		/**
 		 * An initialization function run by the constructor
@@ -685,7 +685,7 @@ this.createjs = this.createjs || {};
 	p._init = function (src, startTime, duration, owner, flash) {
 		this.src = src;
 		this._startTime = startTime || 0;
-		this._duration = duration || 0;
+		this._duration = duration || flash.getDurationBySrc(src);
 		this._owner = owner;
 		this._flash = flash;
 	};
@@ -818,9 +818,11 @@ this.createjs = this.createjs || {};
 	};
 
 	p.getDuration = function () {
+		/* no longer needed, as we grab duration on init now
 		if (!this._duration && this._flash && this.flashId) {
 			this._duration = this._flash.getDuration(this.flashId);	// this returns -1 on stopped instance
 		}
+		*/
 		return this._duration;
 	};
 
