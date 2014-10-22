@@ -9,7 +9,6 @@ module.exports = function (grunt) {
 				// Default values
 				version: 'NEXT',
 				name: 'soundjs',
-				docsZip: "<%= pkg.name %>_docs-<%= version %>.zip",
 
 				// Setup doc names / paths.
 				docsName: '<%= pkg.name %>_docs-<%= version %>',
