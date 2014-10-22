@@ -8,6 +8,7 @@ spikes/
 *.sublime-project
 *.sublime-workspace
 config.local.json
+docs/**/
 
 #-----------------------------
 # INVALID FILES
