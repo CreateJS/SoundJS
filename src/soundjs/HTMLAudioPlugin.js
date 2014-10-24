@@ -416,6 +416,28 @@ this.createjs = this.createjs || {};
 	p._duration = 0;
 	p._audioSpriteStopTime = null;	// HTMLAudioPlugin only
 	p._remainingLoops = 0;
+	if (createjs.definePropertySupported) {
+		Object.defineProperty(p, "loop", {
+			get: function() {
+				return this._remainingLoops;
+			},
+			set: function(value) {
+				if (this.tag != null) {
+					// remove looping
+					if (this._remainingLoops != 0 && value == 0) {
+						this.tag.loop = false;
+						this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
+					}
+					// add looping
+					if (this._remainingLoops == 0 && value != 0) {
+						this.tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
+						this.tag.loop = true;
+					}
+				}
+				this._remainingLoops = value;
+			}
+		});
+	}
 	p._delayTimeoutId = null;
 	p.tag = null;
 	p._muted = false;
@@ -486,6 +508,16 @@ this.createjs = this.createjs || {};
 // Public API
 	p.play = function (interrupt, delay, offset, loop, volume, pan) {
 		if (this.playState == createjs.Sound.PLAY_SUCCEEDED) {
+			if (interrupt instanceof Object) {
+				offset = interrupt.offset;
+				loop = interrupt.loop;
+				volume = interrupt.volume;
+				pan = interrupt.pan;
+			}
+			if (offset != null) { this.setPosition(offset) }
+			if (loop != null) { this.loop = loop; }
+			if (volume != null) { this.setVolume(volume); }
+			if (pan != null) { this.setPan(pan); }
 			if (this._paused) {	this.resume(); }
 			return;
 		}
@@ -544,9 +576,7 @@ this.createjs = this.createjs || {};
 			this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_ENDED, this._endedHandler, false);
 			this.tag.addEventListener(createjs.HTMLAudioPlugin._TIME_UPDATE, this.__audioSpriteEndHandler, false);
 		} else {
-			if (this._remainingLoops == -1) {
-				this.tag.loop = true;
-			} else if(this._remainingLoops != 0) {
+			if(this._remainingLoops != 0) {
 				this.tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
 				this.tag.loop = true;
 			}
@@ -647,6 +677,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p._handleSetPositionSeek = function(event) {
+		if (this.tag == null) { return; }
 		this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this._handleSetPositionSeek, false);
 		this.tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
 	};

@@ -108,7 +108,7 @@
 	            <tr>
 	                <td><label for="offset">Offset</label></td>
 	                <td><div class="offsetSlider" id="offset"></div></td>
-	                <td><label for="offset" id="offsetValue">0 seconds</label></td>
+	                <td><label for="offset" id="offsetValue">null seconds</label></td>
 	            </tr>
 			</table>
 
@@ -147,6 +147,11 @@
 	                <td><div id="volume" class="volumeSlider"></div></td>
 	                <td><label for="volume" id="volumeValue">100</label></td>
 	            </tr>
+                <tr>
+   	                <td><label for="instanceLoop">Loop</label></td>
+   	                <td><div class="instanceLoopSlider" id="instanceLoop"></div></td>
+   	                <td><label for="instanceLoop" id="instanceLoopValue">0</label></td>
+   	            </tr>
 	            <tr>
 	                <td><label for="pan">Pan</label></td>
 	                <td><div class="panSlider" id="pan"></div></td>
@@ -227,8 +232,9 @@
         pluginStatus.innerHTML = "Active Plugin is " + createjs.Sound.activePlugin.toString();  // innerText does not work in FF
 
         // Library controls
-        $(".offsetSlider").slider({value: 0,
-            min: 0,
+        // note -1 will be considered null
+        $(".offsetSlider").slider({value: -1,
+            min: -1,
             max: 10,
             disabled:false,
             change:handleSliderChange
@@ -306,6 +312,13 @@
             change:handleSliderChange
         });
 
+        $(".instanceLoopSlider").slider({value: 0,
+            min: -1,
+            max: 5,
+            disabled:true,
+            change:handleSliderChange
+        });
+
         $(".posSlider").slider({value: 0,
             min: 0,
             max: 100,
@@ -317,7 +330,16 @@
 		$("#playBtn").click(function(event){
 			var instance = getInstance();
 			if (instance == null) { return; }
-			instance.play();
+
+            var interrupt = $("#interrupt").get(0);
+            var interruptValue = interrupt.options[interrupt.selectedIndex].value;
+            var loop = $(".instanceLoopSlider").slider("option", "value");
+            var delay = $(".delaySlider").slider("option", "value") *1000;
+            var offset = $(".offsetSlider").slider("option", "value")*1000;
+            if (offset < 0) { offset = null; }
+            var volume = $(".volumeSlider").slider("option", "value");
+            var pan = $(".panSlider").slider("option", "value");
+			instance.play(interruptValue, delay, offset, loop, volume, pan);
 		});
 		$("#stopBtn").click(function(event){
             var instance = getInstance();
@@ -354,6 +376,13 @@
             if (instance == null) { return; }
             var value = $(this).slider("option", "value");
             instance.setVolume(value/100);
+        });
+
+        $(".instanceLoopSlider").on('slidestop',function(event){
+            var instance = getInstance();
+            if (instance == null) { return; }
+            var value = $(this).slider("option", "value");
+            instance.loop = value;
         });
 
         $(".panSlider").on('slidestop',function(event){
@@ -411,6 +440,7 @@
     function handleSliderChange(evt) {
         var units = $("." + this.id + "Slider").data("units");
         var value = $(this).slider("option", "value");
+        if (this.id == "offset" && value == -1) { value = null; }
         $("#"+this.id+"Value").text(value + (units ? " " + units + (value==1?"":"s"):""));
     }
 
@@ -424,6 +454,7 @@
         var loop = $(".loopSlider").slider("option", "value");
         var delay = $(".delaySlider").slider("option", "value") *1000;
         var offset = $(".offsetSlider").slider("option", "value")*1000;
+        if (offset < 0) { offset = null; }
 		var startTime = $(".startTimeSlider").slider("option", "value")*1000;
 		var duration = $(".durationSlider").slider("option", "value")*1000;
 		if (duration == 0) {
@@ -536,9 +567,14 @@
         if (list.selectedIndex > -1) {
             enableSet("instance", true);
             var instance = getInstance();
+
             var value = instance.getVolume()*100|0;
             $(".volumeSlider").slider("value", value);
             $("#volumeValue").text(value);
+
+            value = instance.loop;
+            $(".instanceLoopSlider").slider("value", value);
+            $("#instaceLoopValue").text(value);
 
             value = instance.getPan()|0;
             $(".panSlider").slider("value", value);
@@ -568,7 +604,7 @@
                 enableItems("playControls", enabled, ["playSoundBtn", "interrupt", "loop", "delay", "offset", "startTime", "duration"]);
                 break;
             case "instance":
-                enableItems("instanceControls", enabled, ["play", "pause", "stop", "clear", "volume", "pan", "pos", "mute"]);
+                enableItems("instanceControls", enabled, ["play", "pause", "stop", "clear", "volume", "instanceLoop", "pan", "pos", "mute"]);
                 break;
         }
     }

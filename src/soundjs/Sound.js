@@ -1268,7 +1268,7 @@ this.createjs = this.createjs || {};
 		interrupt = interrupt || s.defaultInterruptBehavior;
 		if (delay == null) {delay = 0;}
 		if (offset == null) {offset = instance.getPosition();}
-		if (loop == null) {loop = 0;}	// OJR consider using instance._remainingLoops
+		if (loop == null) {loop = instance.loop;}
 		if (volume == null) {volume = instance.volume;}
 		if (pan == null) {pan = instance.pan;}
 

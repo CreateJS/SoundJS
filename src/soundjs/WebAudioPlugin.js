@@ -632,12 +632,31 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * The number of play loops remaining. Negative values will loop infinitely.
-	 * @property _remainingLoops
+	 *
+	 * @property loop
 	 * @type {Number}
 	 * @default 0
-	 * @protected
+	 * @public
 	 */
 	p._remainingLoops = 0;
+	if (createjs.definePropertySupported) {
+		Object.defineProperty(p, "loop", {
+			get: function() {
+				return this._remainingLoops;
+			},
+			set: function(value) {
+				// remove looping
+				if (this._remainingLoops != 0 && value == 0) {
+					this._sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
+				}
+				// add looping
+				if (this._remainingLoops == 0 && value != 0) {
+					this._sourceNodeNext = this._createAndPlayAudioNode(this._playbackStartTime, 0);
+				}
+				this._remainingLoops = value;
+			}
+		});
+	}
 
 	/**
 	 * A Timeout created by {{#crossLink "Sound"}}{{/crossLink}} when this SoundInstance is played with a delay.
@@ -948,6 +967,16 @@ this.createjs = this.createjs || {};
 	 */
 	p.play = function (interrupt, delay, offset, loop, volume, pan) {
 		if (this.playState == createjs.Sound.PLAY_SUCCEEDED) {
+			if (interrupt instanceof Object) {
+				offset = interrupt.offset;
+				loop = interrupt.loop;
+				volume = interrupt.volume;
+				pan = interrupt.pan;
+			}
+			if (offset != null) { this.setPosition(offset) }
+			if (loop != null) { this.loop = loop; }
+			if (volume != null) { this.setVolume(volume); }
+			if (pan != null) { this.setPan(pan); }
 			if (this._paused) {	this.resume(); }
 			return;
 		}

@@ -646,7 +646,18 @@ this.createjs = this.createjs || {};
 	p._capabilities = null;
 	p._flash = null;
 	p.flashId = null; // To communicate with Flash
-	p.loop = 0;
+	p._remainingLoops = 0;
+	if (createjs.definePropertySupported) {
+		Object.defineProperty(p, "loop", {
+			get: function() {
+				return this._remainingLoops;
+			},
+			set: function(value) {
+				this._remainingLoops = value;
+				return this._flash.setLoop(this.flashId, value);
+			}
+		});
+	}
 	p._volume =  1;
 	p._pan =  0;
 	p._offset = 0; // used for setPosition on a stopped instance
@@ -714,6 +725,16 @@ this.createjs = this.createjs || {};
 
 	p.play = function (interrupt, delay, offset, loop, volume, pan) {
 		if (this.playState == createjs.Sound.PLAY_SUCCEEDED) {
+			if (interrupt instanceof Object) {
+				offset = interrupt.offset;
+				loop = interrupt.loop;
+				volume = interrupt.volume;
+				pan = interrupt.pan;
+			}
+			if (offset != null) { this.setPosition(offset) }
+			if (loop != null) { this.loop = loop; }
+			if (volume != null) { this.setVolume(volume); }
+			if (pan != null) { this.setPan(pan); }
 			if (this._paused) {	this.resume(); }
 			return;
 		}
@@ -722,7 +743,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p._beginPlaying = function (offset, loop, volume, pan) {
-		this.loop = loop;
+		this._remainingLoops = loop;
 		this.paused = this._paused = false;
 		if (!this._owner.flashReady) {return false;}
 		this._offset = offset;

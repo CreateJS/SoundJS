@@ -89,6 +89,7 @@
 				getPosition: handleGetPosition,
 				getDuration: handleGetDuration,
 				getDurationBySrc: handleGetDurationBySrc,
+				setLoop: handleSetLoop,
 
                 setMasterVolume: handleSetMasterVolume,
 
@@ -346,6 +347,15 @@
 			var wrapper:SoundWrapper = getWrapper(id);
 			if (wrapper == null) { return -1; }
 			return wrapper.pan;
+		}
+
+		// Set the loop of an instance
+		protected function handleSetLoop(id:String, value:Number):Boolean {
+			var wrapper:SoundWrapper = getWrapper(id);
+			if (wrapper == null) { return false; }
+			log("SetLoop", wrapper.id, value);
+			wrapper.loop = value;
+			return true;
 		}
 
 		// Set the playhead position of an instance
