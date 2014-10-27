@@ -1405,9 +1405,9 @@ this.createjs = this.createjs || {};
 	 * @param {Number} total The total amount.
 	 * @protected
 	 */
-	p.handleProgress = function (loaded, total) {
-		this.progress = loaded / total;
-		this.onprogress && this.onprogress({loaded:loaded, total:total, progress:this.progress});
+	p.handleProgress = function (event) {
+		this.progress = event.loaded / event.total;
+		this.onprogress && this.onprogress({loaded:event.loaded, total:event.total, progress:this.progress});
 	};
 
 	/**
