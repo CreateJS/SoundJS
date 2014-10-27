@@ -122,6 +122,7 @@
             queue.addEventListener("complete", loadComplete);
             queue.addEventListener("fileload", fileComplete);
             queue.addEventListener("error",handleFileError);
+            queue.addEventListener("fileprogress",handleFileProgress);
             queue.addEventListener("progress",handleProgress);
             queue.loadManifest(manifest);
             //queue.loadFile(item, true);  // to load a single item
@@ -131,6 +132,11 @@
             console.log("error ", evt);
             // An error occurred.
             displayStatus.innerText = "Error :("
+        }
+
+        function handleFileProgress(evt) {
+            // Progress happened.
+            displayStatus.innerText = "Event File Loading: " + (queue.progress.toFixed(2) * 100) + "%";
         }
 
         function handleProgress(evt) {
@@ -150,7 +156,7 @@
 
         function playSound(name) {
             // Play the sound using the ID created above.
-            return createjs.Sound.play(name);
+            return createjs.Sound.play(name, {volume: 0.1});
         }
 
     </script>

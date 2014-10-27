@@ -1405,6 +1405,9 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p.handleProgress = function (event) {
+		if (!event || event.loaded > 0 && event.total == 0) {
+					return; // Sometimes we get no "total", so just ignore the progress event.
+		}
 		this.progress = event.loaded / event.total;
 		this.onprogress && this.onprogress({loaded:event.loaded, total:event.total, progress:this.progress});
 	};
