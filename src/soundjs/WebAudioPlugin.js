@@ -1401,8 +1401,7 @@ this.createjs = this.createjs || {};
 	 * <strong>Note</strong>: this is not a public API, but is used to allow preloaders to subscribe to load
 	 * progress as if this is an HTML audio tag. This reason is why this still uses a callback instead of an event.
 	 * #method handleProgress
-	 * @param {Number} loaded The loaded amount.
-	 * @param {Number} total The total amount.
+	 * @param {event} event Progress event that gives event.loaded and event.total if server is configured correctly
 	 * @protected
 	 */
 	p.handleProgress = function (event) {

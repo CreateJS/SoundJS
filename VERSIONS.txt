@@ -36,6 +36,7 @@ CRITICAL (may break existing content):
 - added public loop property to SoundInstance
 - fixed an issue with FlashPlugin that would set position to an incorrect value when pausing
 - changed FlashPlugin to grab the duration of audio as soon as a SoundInstance is created
+- fixed progress event of WebAudioPlugin Loader, for use with PreloadJS
 
 Version 0.5.2 [December 12, 2013]
 ************************************************************************************************************************
