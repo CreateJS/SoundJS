@@ -34,14 +34,15 @@ this.createjs = this.createjs || {};
 	"use strict";
 
 	var DefaultSoundInstance = function () {
+		this.EventDispatcher_constructor();
 		this.init();
 	};
-	var p = DefaultSoundInstance.prototype;
+	var p = createjs.extend(DefaultSoundInstance, createjs.EventDispatcher);
 
 	p.init = function () {
 
 	};
 
-	createjs.DefaultSoundInstance = DefaultSoundInstance;
-
+	
+	createjs.DefaultSoundInstance = createjs.promote(DefaultSoundInstance, "EventDispatcher");
 }());

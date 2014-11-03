@@ -161,7 +161,7 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._handlePreloadComplete = function (loader) {
-		createjs.Sound._sendFileLoadEvent(loader.src);
+		createjs.Sound._sendFileLoadEvent(loader.src);	// OJR is this worth changing to events?
 		loader.cleanUp();
 	};
 

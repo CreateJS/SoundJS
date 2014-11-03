@@ -1,5 +1,5 @@
 /*
-* core
+* extend
 * Visit http://createjs.com/ for documentation, updates and examples.
 *
 * Copyright (c) 2010 gskinner.com, inc.
@@ -44,7 +44,7 @@ this.createjs = this.createjs||{};
  * This should be called right after creating the class constructor.
  * 
  * 	function MySubClass() {}
- * 	createjs.extend(MySubClass, MySuperClass); // returns the prototype
+ * 	createjs.extend(MySubClass, MySuperClass);
  * 	ClassB.prototype.doSomething = function() { }
  * 	
  * 	var foo = new MySubClass();
