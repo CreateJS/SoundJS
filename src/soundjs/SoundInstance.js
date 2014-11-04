@@ -222,6 +222,7 @@ this.createjs = this.createjs || {};
 				}
 			});
 		}
+		// TODO add get / set methods
 
 		/**
 		 * Determines if the audio is currently muted.
@@ -296,61 +297,6 @@ this.createjs = this.createjs || {};
 // Public Methods:
 
 
-// Private Methods:
-	/**
-	 * A helper method that dispatches all events for SoundInstance.
-	 * @method _sendEvent
-	 * @param {String} type The event type
-	 * @protected
-	 */
-	p._sendEvent = function (type) {
-		var event = new createjs.Event(type);
-		this.dispatchEvent(event);
-	};
-
-	/**
-	 * Clean up the instance. Remove references and clean up any additional properties such as timers.
-	 * @method _cleanUp
-	 * @protected
-	 */
-	p._cleanUp = function () {
-		clearTimeout(this._delayTimeoutId); // clear timeout that plays delayed sound
-		clearTimeout(this._soundCompleteTimeout);  // clear timeout that triggers sound complete
-
-		this._playbackStartTime = 0;	// This is used by getPosition
-
-		createjs.Sound._playFinished(this);	// TODO change to an event
-	};
-
-	/**
-	 * The sound has been interrupted.
-	 * @method _interrupt
-	 * @protected
-	 */
-	p._interrupt = function () {
-		this._cleanUp();
-		this.playState = createjs.Sound.PLAY_INTERRUPTED;
-		this.paused = this._paused = false;
-		this._sendEvent("interrupted");
-	};
-
-	/**
-	 * Handles starting playback when the sound is ready for playing.
-	 * @method _handleSoundReady
-	 * @protected
- 	 */
-	p._handleSoundReady = function (event) {
-		if ((this._offset*1000) > this._duration) {
-			this.playFailed();
-			return;
-		} else if (this._offset < 0) {
-			this._offset = 0;
-		}
-
-		this.playState = createjs.Sound.PLAY_SUCCEEDED;
-		this.paused = this._paused = false;
-	};
-
 	// Public API
 	/**
 	 * Play an instance. This method is intended to be called on SoundInstances that already exist (created
@@ -397,32 +343,6 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Called by the Sound class when the audio is ready to play (delay has completed). Starts sound playing if the
-	 * src is loaded, otherwise playback will fail.
-	 * @method _beginPlaying
-	 * @param {Number} offset How far into the sound to begin playback, in milliseconds.
-	 * @param {Number} loop The number of times to loop the audio. Use -1 for infinite loops.
-	 * @param {Number} volume The volume of the sound, between 0 and 1.
-	 * @param {Number} pan The pan of the sound between -1 (left) and 1 (right). Note that pan does not work for HTML Audio.
-	 * @protected
-	 */
-	p._beginPlaying = function (offset, loop, volume, pan) {
-		this._offset = offset;
-		this._remainingLoops = loop;
-		this.volume = volume;
-		this.pan = pan;
-
-		if (this._owner.isPreloadComplete(this.src)) {
-			this._handleSoundReady(null);
-			this._sendEvent("succeeded");
-			return 1;
-		} else {
-			this.playFailed();
-			return;
-		}
-	};
-
-	/**
 	 * Pause the instance. Paused audio will stop at the current time, and can be resumed using
 	 * {{#crossLink "SoundInstance/resume"}}{{/crossLink}}.
 	 *
@@ -439,13 +359,8 @@ this.createjs = this.createjs || {};
 		this.paused = this._paused = true;
 
 		this._offset = this._owner.context.currentTime - this._playbackStartTime;  // this allows us to restart the sound at the same point in playback
-		this.sourceNode = this._cleanUpAudioNode(this.sourceNode);
-		this._sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
-
-		if (this.gainNode.numberOfOutputs != 0) {this.gainNode.disconnect(0);}
 
 		clearTimeout(this._delayTimeoutId);
-		clearTimeout(this._soundCompleteTimeout);
 		return true;
 	};
 
@@ -511,16 +426,6 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Internal function used to update the volume based on the instance volume, master volume, instance mute value,
-	 * and master mute value.
-	 * @method _updateVolume
-	 * @protected
-	 */
-	p._updateVolume = function () {
-		// plugin specific code
-	};
-
-	/**
 	 * NOTE that you can access volume directly as a property, and getVolume remains to allow support for IE8 with FlashPlugin.
 	 *
 	 * Get the volume of the instance. The actual output volume of a sound can be calculated using:
@@ -530,7 +435,7 @@ this.createjs = this.createjs || {};
 	 * @return The current volume of the sound instance.
 	 */
 	p.getVolume = function () {
-		return this.volume;
+		return this._volume;
 	};
 
 	/**
@@ -567,15 +472,6 @@ this.createjs = this.createjs || {};
 	 */
 	p.getMute = function () {
 		return this._muted;
-	};
-
-	/**
-	 * Internal function used to update the pan
-	 * @method _updatePan
-	 * @protected
-	 */
-	p._updatePan = function () {
-		// plugin specific code
 	};
 
 	/**
@@ -627,13 +523,9 @@ this.createjs = this.createjs || {};
 	 * @return {Number} The position of the playhead in the sound, in milliseconds.
 	 */
 	p.getPosition = function () {
-		if (this._paused || this.sourceNode == null) {
-			var pos = this._offset;
-		} else {
-			var pos = this._owner.context.currentTime - this._playbackStartTime;
-		}
+		// plugin specific
 
-		return pos * 1000; // pos in seconds * 1000 to give milliseconds
+		return 0;
 	};
 
 	/**
@@ -662,6 +554,8 @@ this.createjs = this.createjs || {};
 		return true;
 	};
 
+	//TODO create a property with getter / setter
+
 	/**
 	 * Get the duration of the instance, in milliseconds. Note in most cases, you need to play a sound using
 	 * {{#crossLink "SoundInstance/play"}}{{/crossLink}} or the Sound API {{#crossLink "Sound/play"}}{{/crossLink}}
@@ -678,6 +572,98 @@ this.createjs = this.createjs || {};
 		return this._duration;
 	};
 
+	p.toString = function () {
+		return "[Default SoundInstance]";
+	};
+
+
+// Private Methods:
+	/**
+	 * A helper method that dispatches all events for SoundInstance.
+	 * @method _sendEvent
+	 * @param {String} type The event type
+	 * @protected
+	 */
+	p._sendEvent = function (type) {
+		var event = new createjs.Event(type);
+		this.dispatchEvent(event);
+	};
+
+	/**
+	 * Clean up the instance. Remove references and clean up any additional properties such as timers.
+	 * @method _cleanUp
+	 * @protected
+	 */
+	p._cleanUp = function () {
+		clearTimeout(this._delayTimeoutId); // clear timeout that plays delayed sound
+		clearTimeout(this._soundCompleteTimeout);  // clear timeout that triggers sound complete
+
+		createjs.Sound._playFinished(this);	// TODO change to an event
+	};
+
+	/**
+	 * The sound has been interrupted.
+	 * @method _interrupt
+	 * @protected
+	 */
+	p._interrupt = function () {
+		this._cleanUp();
+		this.playState = createjs.Sound.PLAY_INTERRUPTED;
+		this.paused = this._paused = false;
+		this._sendEvent("interrupted");
+	};
+
+	/**
+	 * Handles starting playback when the sound is ready for playing.
+	 * @method _handleSoundReady
+	 * @protected
+ 	 */
+	p._handleSoundReady = function (event) {
+		if ((this._offset*1000) > this._duration) {
+			this._playFailed();
+			return;
+		} else if (this._offset < 0) {
+			this._offset = 0;
+		}
+
+		this.playState = createjs.Sound.PLAY_SUCCEEDED;
+		this.paused = this._paused = false;
+	};
+
+	/**
+	 * Called by the Sound class when the audio is ready to play (delay has completed). Starts sound playing if the
+	 * src is loaded, otherwise playback will fail.
+	 * @method _beginPlaying
+	 * @param {Number} offset How far into the sound to begin playback, in milliseconds.
+	 * @param {Number} loop The number of times to loop the audio. Use -1 for infinite loops.
+	 * @param {Number} volume The volume of the sound, between 0 and 1.
+	 * @param {Number} pan The pan of the sound between -1 (left) and 1 (right). Note that pan does not work for HTML Audio.
+	 * @protected
+	 */
+	p._beginPlaying = function (offset, loop, volume, pan) {
+		this._offset = offset;
+		this._remainingLoops = loop;
+		this.volume = volume;
+		this.pan = pan;
+
+		// TODO add a loaded check?  maybe a source object (array buffer, tag, flash reference)
+		if (this._owner.isPreloadComplete(this.src)) {
+			this._handleSoundReady(null);
+			this._sendEvent("succeeded");
+			return 1;
+		} else {
+			this._playFailed();
+			return;
+		}
+	};
+
+	// Play has failed, which can happen for a variety of reasons.
+	p._playFailed = function () {
+		this._cleanUp();
+		this.playState = createjs.Sound.PLAY_FAILED;
+		this._sendEvent("failed");
+	};
+
 	/**
 	 * Audio has finished playing. Manually loop it if required.
 	 * @method _handleSoundComplete
@@ -691,20 +677,8 @@ this.createjs = this.createjs || {};
 		if (this._remainingLoops != 0) {
 			this._remainingLoops--;  // NOTE this introduces a theoretical limit on loops = float max size x 2 - 1
 
-			// OJR we are using a look ahead approach to ensure smooth looping.  We add _sourceNodeNext to the audio
-			// context so that it starts playing even if this callback is delayed.  This technique and the reasons for
-			// using it are described in greater detail here:  http://www.html5rocks.com/en/tutorials/audio/scheduling/
-			// NOTE the cost of this is that our audio loop may not always match the loop event timing precisely.
-			if(this._sourceNodeNext) { // this can be set to null, but this should not happen when looping
-				this._cleanUpAudioNode(this.sourceNode);
-				this.sourceNode = this._sourceNodeNext;
-				this._playbackStartTime = this.sourceNode.startTime;
-				this._sourceNodeNext = this._createAndPlayAudioNode(this._playbackStartTime, 0);
-				this._soundCompleteTimeout = setTimeout(this._endedHandler, this._duration);
-			}
-			else {
-				this._handleSoundReady();
-			}
+			// plugin specific code
+			// TODO loop method
 
 			this._sendEvent("loop");
 			return;
@@ -715,16 +689,24 @@ this.createjs = this.createjs || {};
 		this._sendEvent("complete");
 	};
 
-	// Play has failed, which can happen for a variety of reasons.
-	p.playFailed = function () {
-		this._cleanUp();
-		this.playState = createjs.Sound.PLAY_FAILED;
-		this._sendEvent("failed");
+	/**
+	 * Internal function used to update the volume based on the instance volume, master volume, instance mute value,
+	 * and master mute value.
+	 * @method _updateVolume
+	 * @protected
+	 */
+	p._updateVolume = function () {
+		// plugin specific code
 	};
 
-	p.toString = function () {
-		return "[WebAudioPlugin SoundInstance]";
+	/**
+	 * Internal function used to update the pan
+	 * @method _updatePan
+	 * @protected
+	 */
+	p._updatePan = function () {
+		// plugin specific code
 	};
 
-	createjs.Sound.DefaultPlugin.SoundInstance = createjs.promote(SoundInstance, "EventDispatcher");
+	createjs.Sound.Default.SoundInstance = createjs.promote(SoundInstance, "EventDispatcher");
 }());

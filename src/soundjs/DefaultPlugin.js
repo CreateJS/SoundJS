@@ -90,6 +90,40 @@ this.createjs = this.createjs || {};
 	};
 	var p = DefaultPlugin.prototype;
 
+
+// Static Properties:
+// NOTE THESE PROPERTIES NEED TO BE ADDED TO EACH PLUGIN
+	/**
+	 * The capabilities of the plugin. This is generated via the {{#crossLink "WebAudioPlugin/_generateCapabilities:method"}}{{/crossLink}}
+	 * method and is used internally.
+	 * @property _capabilities
+	 * @type {Object}
+	 * @default null
+	 * @protected
+	 * @static
+	 */
+	DefaultPlugin._capabilities = null;
+
+	/**
+	 * Determine if the plugin can be used in the current browser/OS.
+	 * @method isSupported
+	 * @return {Boolean} If the plugin can be initialized.
+	 * @static
+	 */
+	DefaultPlugin.isSupported = function () {
+		return true;
+	};
+
+	/**
+	 * Determine the capabilities of the plugin. Used internally. Please see the Sound API {{#crossLink "Sound/getCapabilities"}}{{/crossLink}}
+	 * method for an overview of plugin capabilities.
+	 * @method _generateCapabilities
+	 * @static
+	 * @protected
+	 */
+	DefaultPlugin._generateCapabilities = function () {
+		//
+	}
 // public methods:
 	/**
 	 * Pre-register a sound for preloading and setup. This is called by {{#crossLink "Sound"}}{{/crossLink}}.
@@ -210,7 +244,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p.toString = function () {
-		return "[DefaultAudioPlugin]";
+		return "[DefaultPlugin]";
 	};
 
 
@@ -234,5 +268,5 @@ this.createjs = this.createjs || {};
 		// Plugin Specific code
 	};
 
-	createjs.Sound.DefaultPlugin = DefaultPlugin;
+	createjs.Sound.Default.Plugin = DefaultPlugin;
 }());

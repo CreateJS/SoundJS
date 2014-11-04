@@ -132,7 +132,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p.toString = function () {
-		return "[Loader]";
+		return "[Default Loader]";
 	};
 
 
@@ -194,5 +194,5 @@ this.createjs = this.createjs || {};
 		this.onerror && this.onerror(event);
 	};
 
-	createjs.Sound.DefaultPlugin.Loader = createjs.promote(Loader, "EventDispatcher");
+	createjs.Sound.Default.Loader = createjs.promote(Loader, "EventDispatcher");
 }());
