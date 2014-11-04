@@ -59,7 +59,7 @@ this.createjs = this.createjs || {};
 		 * @type {Object}
 		 * @protected
 		 */
-		this._audioSources = null;
+		this._audioSources = {};
 
 		/**
 		 * The internal master volume value of the plugin.
@@ -83,21 +83,9 @@ this.createjs = this.createjs || {};
 		 * @protected;
 		 */
 		this._soundInstance;
-
-		this._init();
 	};
 	var p = DefaultPlugin.prototype;
 	DefaultPlugin.prototype.constructor = DefaultPlugin;
-
-	/**
-	 * An initialization function run by the constructor
-	 * @method _init
-	 * @protected
-	 */
-	p._init = function () {
-		this._capabilities = s._capabilities;
-		this._audioSources = {};
-	};
 
 	/**
 	 * Pre-register a sound for preloading and setup. This is called by {{#crossLink "Sound"}}{{/crossLink}}.

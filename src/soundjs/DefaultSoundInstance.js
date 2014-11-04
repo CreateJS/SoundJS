@@ -80,7 +80,7 @@ this.createjs = this.createjs || {};
 		 * @type {String}
 		 * @default null
 		 */
-		this.src = null;
+		this.src = src;
 
 		/**
 		 * The unique ID of the instance. This is set by {{#crossLink "Sound"}}{{/crossLink}}.
@@ -114,7 +114,7 @@ this.createjs = this.createjs || {};
 		 * @default null
 		 * @protected
 		 */
-		this._startTime = 0;
+		this._startTime = startTime || 0;
 
 		/**
 		 * The volume of the sound, between 0 and 1.
@@ -174,7 +174,7 @@ this.createjs = this.createjs || {};
 		 * @default 0
 		 * @protected
 		 */
-		this._duration = 0;
+		this._duration = duration || 0;
 
 		/**
 		 * The number of play loops remaining. Negative values will loop infinitely.
@@ -292,8 +292,6 @@ this.createjs = this.createjs || {};
 		 * @param {String} type The event type.
 		 * @since 0.4.0
 		 */
-
-		this.init(src, startTime, duration);
 	};
 
 	var p = createjs.extend(DefaultSoundInstance, createjs.EventDispatcher);
@@ -307,25 +305,6 @@ this.createjs = this.createjs || {};
 	p._sendEvent = function (type) {
 		var event = new createjs.Event(type);
 		this.dispatchEvent(event);
-	};
-
-// Constructor
-	/**
-	 * Initialize the SoundInstance. This is called from the constructor.
-	 * @method init
-	 * @param {string} src The source of the audio.
-	 * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
-	 * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
-	 * @param {Class} owner The plugin that created this instance.
-	 * @protected
-	 */
-	p_init = function (src, startTime, duration) {
-		this.src = src;
-		this._startTime = startTime || 0;
-		this._duration = duration || 0;
-
-		if (this._owner.isPreloadComplete(this.src) && !this._duration) {this._duration = this._owner._arrayBuffers[this.src].duration * 1000;}
-		// set duration
 	};
 
 	/**

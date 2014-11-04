@@ -63,7 +63,7 @@ this.createjs = this.createjs || {};
 		 * #property src
 		 * @type {String}
 		 */
-		this.src = null;
+		this.src = src;
 
 		/**
 		 * The result of the loading operation
@@ -106,16 +106,9 @@ this.createjs = this.createjs || {};
 		 * @protected
 		 */
 		this.onerror = null;
-
-		this._init(src);
 	}
 
 	var p = createjs.extend(DefaultLoader, createjs.EventDispatcher);
-
-	// constructor
-	p._init = function (src) {
-		this.src = src;
-	};
 
 	/**
 	 * Begin loading the content.
