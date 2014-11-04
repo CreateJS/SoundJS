@@ -40,54 +40,54 @@ this.createjs = this.createjs || {};
 	 */
 
 	var DefaultPlugin = function () {
+		/**
+		 * The capabilities of the plugin. This is generated via the {{#crossLink "DefaultPlugin/_generateCapabilities:method"}}{{/crossLink}}
+		 * method and is used internally.
+		 * @property _capabilities
+		 * @type {Object}
+		 * @default null
+		 * @protected
+		 * @static
+		 */
+		p._capabilities = null;
+
+		/**
+		 * Object hash indexed by the source URI of each file to indicate if an audio source has begun loading,
+		 * is currently loading, or has completed loading.  Can be used to store non boolean data after loading
+		 * is complete (for example arrayBuffers for web audio).
+		 * @property _audioSources
+		 * @type {Object}
+		 * @protected
+		 */
+		p._audioSources = null;
+
+		/**
+		 * The internal master volume value of the plugin.
+		 * @property _volume
+		 * @type {Number}
+		 * @default 1
+		 * @protected
+		 */
+		p._volume = 1;
+
+		/**
+		 * A reference to a loader class used by a plugin that must be set.
+		 * @type {Object}
+		 * @protected
+		 */
+		p._loader;
+
+		/**
+		 * A reference to a SoundInstance class used by a plugin that must be set.
+		 * @type {Object}
+		 * @protected;
+		 */
+		p._soundInstance;
+
 		this._init();
 	};
 	var p = DefaultPlugin.prototype;
 	DefaultPlugin.prototype.constructor = DefaultPlugin;
-
-	/**
-	 * The capabilities of the plugin. This is generated via the {{#crossLink "DefaultPlugin/_generateCapabilities:method"}}{{/crossLink}}
-	 * method and is used internally.
-	 * @property _capabilities
-	 * @type {Object}
-	 * @default null
-	 * @protected
-	 * @static
-	 */
-	p._capabilities = null;
-
-	/**
-	 * Object hash indexed by the source URI of each file to indicate if an audio source has begun loading,
-	 * is currently loading, or has completed loading.  Can be used to store non boolean data after loading
-	 * is complete (for example arrayBuffers for web audio).
-	 * @property _audioSources
-	 * @type {Object}
-	 * @protected
-	 */
-	p._audioSources = null;
-
-	/**
-	 * The internal master volume value of the plugin.
-	 * @property _volume
-	 * @type {Number}
-	 * @default 1
-	 * @protected
-	 */
-	p._volume = 1;
-
-	/**
-	 * A reference to a loader class used by a plugin that must be set.
-	 * @type {Object}
-	 * @protected
-	 */
-	p._loader;
-
-	/**
-	 * A reference to a SoundInstance class used by a plugin that must be set.
-	 * @type {Object}
-	 * @protected;
-	 */
-	p._soundInstance;
 
 	/**
 	 * An initialization function run by the constructor

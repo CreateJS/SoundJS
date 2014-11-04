@@ -43,72 +43,74 @@ this.createjs = this.createjs || {};
 	 */
 	function DefaultLoader(src) {
 		this.EventDispatcher_constructor();
+
+		/**
+		 * If load results in an object, it is stored as result
+		 * #property result
+		 * @type {Object}
+		 */
+		p.result = null;
+
+		/**
+		 * Indicates the percentage of loading progress, between 0 and 1.
+		 * #property progress
+		 * @type {number}
+		 */
+		p.progress = -1;
+
+		/**
+		 * The source of the sound to load. Used by callback functions when we return this class.
+		 * #property src
+		 * @type {String}
+		 */
+		p.src = null;
+
+		/**
+		 * The result of the loading operation
+		 * #property _result
+		 * @type {Object}
+		 * @protected
+		 */
+		p._result = null;
+
+		// Calbacks
+		/**
+		 * The callback that fires when the load completes.
+		 * #property onload
+		 * #event load
+		 * @type {Method}
+		 */
+		p.onload = null;
+
+		/**
+		 * The callback that fires when data is being fetched at a rate that would allow playback without interruption. This follows HTML tag naming.
+		 * #property oncanplaythrough
+		 * #event canplaythrough
+		 * @type {Method}
+		 */
+		p.oncanplaythrough = null;
+
+		/**
+		 * The callback that fires as the load progresses. This follows HTML tag naming.
+		 * #property onprogress
+		 * #event progress
+		 * @type {Method}
+		 */
+		p.onprogress = null;
+
+		/**
+		 * The callback that fires if the load hits an error.  This follows HTML tag naming.
+		 * #property onerror
+		 * #event error
+		 * @type {Method}
+		 * @protected
+		 */
+		p.onerror = null;
+
 		this._init(src);
 	}
+
 	var p = createjs.extend(DefaultLoader, createjs.EventDispatcher);
-
-	/**
-	 * If load results in an object, it is stored as result
-	 * #property result
-	 * @type {Object}
-	 */
-	p.result = null;
-
-	/**
-	 * Indicates the percentage of loading progress, between 0 and 1.
-	 * #property progress
-	 * @type {number}
-	 */
-	p.progress = -1;
-
-	/**
-	 * The source of the sound to load. Used by callback functions when we return this class.
-	 * #property src
-	 * @type {String}
-	 */
-	p.src = null;
-
-	/**
-	 * The result of the loading operation
-	 * #property _result
-	 * @type {Object}
-	 * @protected
-	 */
-	p._result = null;
-
-	// Calbacks
-	/**
-	 * The callback that fires when the load completes.
-	 * #property onload
-	 * #event load
-	 * @type {Method}
-	 */
-	p.onload = null;
-
-	/**
-	 * The callback that fires when data is being fetched at a rate that would allow playback without interruption. This follows HTML tag naming.
-	 * #property oncanplaythrough
-	 * #event canplaythrough
-	 * @type {Method}
-	 */
-	p.oncanplaythrough = null;
-
-	/**
-	 * The callback that fires as the load progresses. This follows HTML tag naming.
-	 * #property onprogress
-	 * #event progress
-	 * @type {Method}
-	 */
-	p.onprogress = null;
-
-	/**
-	 * The callback that fires if the load hits an error.  This follows HTML tag naming.
-	 * #property onerror
-	 * #event error
-	 * @type {Method}
-	 * @protected
-	 */
-	p.onerror = null;
 
 	// constructor
 	p._init = function (src) {
