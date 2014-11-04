@@ -49,7 +49,7 @@ this.createjs = this.createjs || {};
 		 * @protected
 		 * @static
 		 */
-		p._capabilities = null;
+		this._capabilities = null;
 
 		/**
 		 * Object hash indexed by the source URI of each file to indicate if an audio source has begun loading,
@@ -59,7 +59,7 @@ this.createjs = this.createjs || {};
 		 * @type {Object}
 		 * @protected
 		 */
-		p._audioSources = null;
+		this._audioSources = null;
 
 		/**
 		 * The internal master volume value of the plugin.
@@ -68,21 +68,21 @@ this.createjs = this.createjs || {};
 		 * @default 1
 		 * @protected
 		 */
-		p._volume = 1;
+		this._volume = 1;
 
 		/**
 		 * A reference to a loader class used by a plugin that must be set.
 		 * @type {Object}
 		 * @protected
 		 */
-		p._loader;
+		this._loader;
 
 		/**
 		 * A reference to a SoundInstance class used by a plugin that must be set.
 		 * @type {Object}
 		 * @protected;
 		 */
-		p._soundInstance;
+		this._soundInstance;
 
 		this._init();
 	};

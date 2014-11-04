@@ -80,7 +80,7 @@ this.createjs = this.createjs || {};
 		 * @type {String}
 		 * @default null
 		 */
-		p.src = null;
+		this.src = null;
 
 		/**
 		 * The unique ID of the instance. This is set by {{#crossLink "Sound"}}{{/crossLink}}.
@@ -88,7 +88,7 @@ this.createjs = this.createjs || {};
 		 * @type {String} | Number
 		 * @default -1
 		 */
-		p.uniqueId = -1;
+		this.uniqueId = -1;
 
 		/**
 		 * The play state of the sound. Play states are defined as constants on {{#crossLink "Sound"}}{{/crossLink}}.
@@ -96,7 +96,7 @@ this.createjs = this.createjs || {};
 		 * @type {String}
 		 * @default null
 		 */
-		p.playState = null;
+		this.playState = null;
 
 		/**
 		 * How far into the sound to begin playback in milliseconds. This is passed in when play is called and used by
@@ -106,7 +106,7 @@ this.createjs = this.createjs || {};
 		 * @default 0
 		 * @protected
 		 */
-		p._offset = 0;
+		this._offset = 0;
 
 		/**
 		 * Audio sprite property used to determine the starting offset.
@@ -114,7 +114,7 @@ this.createjs = this.createjs || {};
 		 * @default null
 		 * @protected
 		 */
-		p._startTime = 0;
+		this._startTime = 0;
 
 		/**
 		 * The volume of the sound, between 0 and 1.
@@ -128,9 +128,9 @@ this.createjs = this.createjs || {};
 		 * @type {Number}
 		 * @default 1
 		 */
-		p._volume =  1;
+		this._volume =  1;
 		if (createjs.definePropertySupported) {
-			Object.defineProperty(p, "volume", {
+			Object.defineProperty(this, "volume", {
 			get: function() {
 				return this._volume;
 			},
@@ -153,9 +153,9 @@ this.createjs = this.createjs || {};
 		 * @type {Number}
 		 * @default 0
 		 */
-		p._pan =  0;
+		this._pan =  0;
 		if (createjs.definePropertySupported) {
-			Object.defineProperty(p, "pan", {
+			Object.defineProperty(this, "pan", {
 				get: function() {
 					return this._pan;
 				},
@@ -174,7 +174,7 @@ this.createjs = this.createjs || {};
 		 * @default 0
 		 * @protected
 		 */
-		p._duration = 0;
+		this._duration = 0;
 
 		/**
 		 * The number of play loops remaining. Negative values will loop infinitely.
@@ -184,9 +184,9 @@ this.createjs = this.createjs || {};
 		 * @default 0
 		 * @public
 		 */
-		p._remainingLoops = 0;
+		this._remainingLoops = 0;
 		if (createjs.definePropertySupported) {
-			Object.defineProperty(p, "loop", {
+			Object.defineProperty(this, "loop", {
 				get: function() {
 					return this._remainingLoops;
 				},
@@ -213,7 +213,7 @@ this.createjs = this.createjs || {};
 		 * @protected
 		 * @since 0.4.0
 		 */
-		p._delayTimeoutId = null;
+		this._delayTimeoutId = null;
 
 		/**
 		 * Timeout that is created internally to handle sound playing to completion. Stored so we can remove it when
@@ -224,7 +224,7 @@ this.createjs = this.createjs || {};
 		 * @protected
 		 * @since 0.4.0
 		 */
-		p._soundCompleteTimeout = null;
+		this._soundCompleteTimeout = null;
 
 		/**
 		 * Determines if the audio is currently muted.
@@ -234,7 +234,7 @@ this.createjs = this.createjs || {};
 		 * @default false
 		 * @protected
 		 */
-		p._muted = false;
+		this._muted = false;
 
 		/**
 		 * Read only value that tells you if the audio is currently paused.
@@ -242,11 +242,11 @@ this.createjs = this.createjs || {};
 		 * @property paused
 		 * @type {Boolean}
 		 */
-		p.paused = false;	// this value will not be used, and is only set
-		p._paused = false;	// this value is used internally for setting paused
+		this.paused = false;	// this value will not be used, and is only set
+		this._paused = false;	// this value is used internally for setting paused
 
 		// Proxies, make removing listeners easier.
-		p._endedHandler = null;
+		this._endedHandler = null;
 
 	// Events
 		/**
@@ -293,7 +293,7 @@ this.createjs = this.createjs || {};
 		 * @since 0.4.0
 		 */
 
-		this._init(src, startTime, duration);
+		this.init(src, startTime, duration);
 	};
 
 	var p = createjs.extend(DefaultSoundInstance, createjs.EventDispatcher);
@@ -312,14 +312,14 @@ this.createjs = this.createjs || {};
 // Constructor
 	/**
 	 * Initialize the SoundInstance. This is called from the constructor.
-	 * @method _init
+	 * @method init
 	 * @param {string} src The source of the audio.
 	 * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
 	 * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
 	 * @param {Class} owner The plugin that created this instance.
 	 * @protected
 	 */
-	p._init = function (src, startTime, duration) {
+	p_init = function (src, startTime, duration) {
 		this.src = src;
 		this._startTime = startTime || 0;
 		this._duration = duration || 0;

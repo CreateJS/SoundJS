@@ -49,21 +49,21 @@ this.createjs = this.createjs || {};
 		 * #property result
 		 * @type {Object}
 		 */
-		p.result = null;
+		this.result = null;
 
 		/**
-		 * Indicates the percentage of loading progress, between 0 and 1.
+		 * Indicates the thisercentage of loading progress, between 0 and 1.
 		 * #property progress
 		 * @type {number}
 		 */
-		p.progress = -1;
+		this.progress = -1;
 
 		/**
 		 * The source of the sound to load. Used by callback functions when we return this class.
 		 * #property src
 		 * @type {String}
 		 */
-		p.src = null;
+		this.src = null;
 
 		/**
 		 * The result of the loading operation
@@ -71,7 +71,7 @@ this.createjs = this.createjs || {};
 		 * @type {Object}
 		 * @protected
 		 */
-		p._result = null;
+		this._result = null;
 
 		// Calbacks
 		/**
@@ -80,7 +80,7 @@ this.createjs = this.createjs || {};
 		 * #event load
 		 * @type {Method}
 		 */
-		p.onload = null;
+		this.onload = null;
 
 		/**
 		 * The callback that fires when data is being fetched at a rate that would allow playback without interruption. This follows HTML tag naming.
@@ -88,7 +88,7 @@ this.createjs = this.createjs || {};
 		 * #event canplaythrough
 		 * @type {Method}
 		 */
-		p.oncanplaythrough = null;
+		this.oncanplaythrough = null;
 
 		/**
 		 * The callback that fires as the load progresses. This follows HTML tag naming.
@@ -96,7 +96,7 @@ this.createjs = this.createjs || {};
 		 * #event progress
 		 * @type {Method}
 		 */
-		p.onprogress = null;
+		this.onprogress = null;
 
 		/**
 		 * The callback that fires if the load hits an error.  This follows HTML tag naming.
@@ -105,7 +105,7 @@ this.createjs = this.createjs || {};
 		 * @type {Method}
 		 * @protected
 		 */
-		p.onerror = null;
+		this.onerror = null;
 
 		this._init(src);
 	}
