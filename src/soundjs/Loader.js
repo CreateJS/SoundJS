@@ -33,6 +33,8 @@ this.createjs = this.createjs || {};
 (function () {
 	"use strict";
 
+
+// constructor:
 	/**
 	 * An internal helper class that preloads audio. Note that this class and its methods are not documented
 	 * properly to avoid generating HTML documentation.
@@ -44,8 +46,10 @@ this.createjs = this.createjs || {};
 	function Loader(src) {
 		this.EventDispatcher_constructor();
 
+
+// public properties:
 		/**
-		 * If load results in an object, it is stored as result
+		 * The result of the loading operation
 		 * #property result
 		 * @type {Object}
 		 */
@@ -65,15 +69,8 @@ this.createjs = this.createjs || {};
 		 */
 		this.src = src;
 
-		/**
-		 * The result of the loading operation
-		 * #property _result
-		 * @type {Object}
-		 * @protected
-		 */
-		this._result = null;
-
-		// Calbacks
+	// TODO: See if callbacks are still required for PreloadJS
+	// Callbacks / Events
 		/**
 		 * The callback that fires when the load completes.
 		 * #property onload
@@ -110,6 +107,8 @@ this.createjs = this.createjs || {};
 
 	var p = createjs.extend(Loader, createjs.EventDispatcher);
 
+
+// public methods:
 	/**
 	 * Begin loading the content.
 	 * #method load
@@ -118,63 +117,6 @@ this.createjs = this.createjs || {};
 	p.load = function (src) {
 		if (src != null) {this.src = src;}
 		// plugin specific code
-	};
-
-	/**
-	 * The Loader has reported progress.
-	 *
-	 * <strong>Note</strong>: this is not a public API, but is used to allow preloaders to subscribe to load
-	 * progress as if this is an HTML audio tag. This reason is why this still uses a callback instead of an event.
-	 * #method handleProgress
-	 * @param {event} event Progress event that gives event.loaded and event.total if server is configured correctly
-	 * @protected
-	 */
-	p.handleProgress = function (event) {
-		this.progress = event.loaded / event.total;
-		var e = new createjs.Event("progress");
-		e.loaded = event.loaded;
-		e.total = event.total;
-		e.progress = this.progress;
-
-		this.dispatchEvent(e);
-		this.onprogress && this.onprogress(e);
-	};
-
-	/**
-	 * The sound has completed loading.
-	 * #method handleLoad
-	 * @protected
-	 */
-	p.handleLoad = function (event) {
-		// TODO consider params of event
-		this.progress = 1;
-		var e = new createjs.Event("load");
-		e.target = this;
-		this.dispatchEvent(e)
-		this.onload && this.onload(e);
-	};
-
-	/**
-	 * The sound has loading enough to play through without interruption at the current download rate.
-	 * #method handleLoad
-	 * @protected
-	 */
-	p.handleCanPlayThrough = function (event) {
-		// TODO double check params of canplaythrough event
-		var e = new createjs.Event("canplaythrough");
-		e.target = this;
-		this.dispatchEvent(e)
-		this.oncanplaythrough && this.oncanplaythrough(e)
-	}
-
-	/**
-	 * Errors have been caused by the Loader.
-	 * #method handleError
-	 * @protected
-	 */
-	p.handleError = function (event) {
-		this.dispatchEvent (event);
-		this.onerror && this.onerror(event);
 	};
 
 	/**
@@ -191,6 +133,65 @@ this.createjs = this.createjs || {};
 
 	p.toString = function () {
 		return "[Loader]";
+	};
+
+
+// private methods:
+	/**
+	 * The Loader has reported progress.
+	 *
+	 * <strong>Note</strong>: this is not a public API, but is used to allow preloaders to subscribe to load
+	 * progress as if this is an HTML audio tag. This reason is why this still uses a callback instead of an event.
+	 * #method handleProgress
+	 * @param {event} event Progress event that gives event.loaded and event.total if server is configured correctly
+	 * @protected
+	 */
+	p._handleProgress = function (event) {
+		this.progress = event.loaded / event.total;
+		var e = new createjs.Event("progress");
+		e.loaded = event.loaded;
+		e.total = event.total;
+		e.progress = this.progress;
+
+		this.dispatchEvent(e);
+		this.onprogress && this.onprogress(e);
+	};
+
+	/**
+	 * The sound has loading enough to play through without interruption at the current download rate.
+	 * #method handleLoad
+	 * @protected
+	 */
+	p._handleCanPlayThrough = function (event) {
+		// TODO double check params of canplaythrough event
+		var e = new createjs.Event("canplaythrough");
+		e.target = this;
+		this.dispatchEvent(e)
+		this.oncanplaythrough && this.oncanplaythrough(e)
+	}
+
+	/**
+	 * The sound has completed loading.
+	 * #method handleLoad
+	 * @protected
+	 */
+	p._handleLoad = function (event) {
+		// TODO consider params of event
+		this.progress = 1;
+		var e = new createjs.Event("load");
+		e.target = this;
+		this.dispatchEvent(e);
+		this.onload && this.onload(e);
+	};
+
+	/**
+	 * Errors have been caused by the Loader.
+	 * #method handleError
+	 * @protected
+	 */
+	p._handleError = function (event) {
+		this.dispatchEvent (event);
+		this.onerror && this.onerror(event);
 	};
 
 	createjs.Sound.DefaultPlugin.Loader = createjs.promote(Loader, "EventDispatcher");

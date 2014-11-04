@@ -30,50 +30,55 @@
 // namespace:
 this.createjs = this.createjs || {};
 
+/**
+ * A SoundInstance is created when any calls to the Sound API method {{#crossLink "Sound/play"}}{{/crossLink}} or
+ * {{#crossLink "Sound/createInstance"}}{{/crossLink}} are made. The SoundInstance is returned by the active plugin
+ * for control by the user.
+ *
+ * <h4>Example</h4>
+ *      var myInstance = createjs.Sound.play("myAssetPath/mySrcFile.mp3");
+ *
+ * A number of additional parameters provide a quick way to determine how a sound is played. Please see the Sound
+ * API method {{#crossLink "Sound/play"}}{{/crossLink}} for a list of arguments.
+ *
+ * Once a SoundInstance is created, a reference can be stored that can be used to control the audio directly through
+ * the SoundInstance. If the reference is not stored, the SoundInstance will play out its audio (and any loops), and
+ * is then de-referenced from the {{#crossLink "Sound"}}{{/crossLink}} class so that it can be cleaned up. If audio
+ * playback has completed, a simple call to the {{#crossLink "SoundInstance/play"}}{{/crossLink}} instance method
+ * will rebuild the references the Sound class need to control it.
+ *
+ *      var myInstance = createjs.Sound.play("myAssetPath/mySrcFile.mp3", {loop:2});
+ *      myInstance.addEventListener("loop", handleLoop);
+ *      function handleLoop(event) {
+ *          myInstance.volume = myInstance.volume * 0.5;
+ *      }
+ *
+ * Events are dispatched from the instance to notify when the sound has completed, looped, or when playback fails
+ *
+ *      var myInstance = createjs.Sound.play("myAssetPath/mySrcFile.mp3");
+ *      myInstance.addEventListener("complete", handleComplete);
+ *      myInstance.addEventListener("loop", handleLoop);
+ *      myInstance.addEventListener("failed", handleFailed);
+ *
+ *
+ * @class SoundInstance
+ * @param {String} src The path to and file name of the sound.
+ * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
+ * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
+ * @extends EventDispatcher
+ * @constructor
+ */
+
 (function () {
 	"use strict";
 
-	/**
-	 * A SoundInstance is created when any calls to the Sound API method {{#crossLink "Sound/play"}}{{/crossLink}} or
-	 * {{#crossLink "Sound/createInstance"}}{{/crossLink}} are made. The SoundInstance is returned by the active plugin
-	 * for control by the user.
-	 *
-	 * <h4>Example</h4>
-	 *      var myInstance = createjs.Sound.play("myAssetPath/mySrcFile.mp3");
-	 *
-	 * A number of additional parameters provide a quick way to determine how a sound is played. Please see the Sound
-	 * API method {{#crossLink "Sound/play"}}{{/crossLink}} for a list of arguments.
-	 *
-	 * Once a SoundInstance is created, a reference can be stored that can be used to control the audio directly through
-	 * the SoundInstance. If the reference is not stored, the SoundInstance will play out its audio (and any loops), and
-	 * is then de-referenced from the {{#crossLink "Sound"}}{{/crossLink}} class so that it can be cleaned up. If audio
-	 * playback has completed, a simple call to the {{#crossLink "SoundInstance/play"}}{{/crossLink}} instance method
-	 * will rebuild the references the Sound class need to control it.
-	 *
-	 *      var myInstance = createjs.Sound.play("myAssetPath/mySrcFile.mp3", {loop:2});
-	 *      myInstance.addEventListener("loop", handleLoop);
-	 *      function handleLoop(event) {
-	 *          myInstance.volume = myInstance.volume * 0.5;
-	 *      }
-	 *
-	 * Events are dispatched from the instance to notify when the sound has completed, looped, or when playback fails
-	 *
-	 *      var myInstance = createjs.Sound.play("myAssetPath/mySrcFile.mp3");
-	 *      myInstance.addEventListener("complete", handleComplete);
-	 *      myInstance.addEventListener("loop", handleLoop);
-	 *      myInstance.addEventListener("failed", handleFailed);
-	 *
-	 *
-	 * @class SoundInstance
-	 * @param {String} src The path to and file name of the sound.
-	 * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
-	 * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
-	 * @extends EventDispatcher
-	 * @constructor
-	 */
+
+// Constructor:
 	var SoundInstance = function (src, startTime, duration) {
 		this.EventDispatcher_constructor();
 
+
+	// public properties:
 		/**
 		 * The source of the sound.
 		 * @property src
@@ -98,6 +103,7 @@ this.createjs = this.createjs || {};
 		 */
 		this.playState = null;
 
+	// private properties
 		/**
 		 * How far into the sound to begin playback in milliseconds. This is passed in when play is called and used by
 		 * pause and setPosition to track where the sound should be at.
@@ -116,6 +122,18 @@ this.createjs = this.createjs || {};
 		 */
 		this._startTime = startTime || 0;
 
+		/**
+		 * A Timeout created by {{#crossLink "Sound"}}{{/crossLink}} when this SoundInstance is played with a delay.
+		 * This allows SoundInstance to remove the delay if stop, pause, or cleanup are called before playback begins.
+		 * @property _delayTimeoutId
+		 * @type {timeoutVariable}
+		 * @default null
+		 * @protected
+		 * @since 0.4.0
+		 */
+		this._delayTimeoutId = null;
+
+	// Getter / Setter Properties
 		/**
 		 * The volume of the sound, between 0 and 1.
 		 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower and Opera versions 11.50 or lower,
@@ -206,28 +224,6 @@ this.createjs = this.createjs || {};
 		}
 
 		/**
-		 * A Timeout created by {{#crossLink "Sound"}}{{/crossLink}} when this SoundInstance is played with a delay.
-		 * This allows SoundInstance to remove the delay if stop, pause, or cleanup are called before playback begins.
-		 * @property _delayTimeoutId
-		 * @type {timeoutVariable}
-		 * @default null
-		 * @protected
-		 * @since 0.4.0
-		 */
-		this._delayTimeoutId = null;
-
-		/**
-		 * Timeout that is created internally to handle sound playing to completion. Stored so we can remove it when
-		 * stop, pause, or cleanup are called
-		 * @property _soundCompleteTimeout
-		 * @type {timeoutVariable}
-		 * @default null
-		 * @protected
-		 * @since 0.4.0
-		 */
-		this._soundCompleteTimeout = null;
-
-		/**
 		 * Determines if the audio is currently muted.
 		 * Use {{#crossLink "SoundInstance/getMute:method"}}{{/crossLink}} and {{#crossLink "SoundInstance/setMute:method"}}{{/crossLink}} to access.
 		 * @property _muted
@@ -296,6 +292,11 @@ this.createjs = this.createjs || {};
 
 	var p = createjs.extend(SoundInstance, createjs.EventDispatcher);
 
+
+// Public Methods:
+
+
+// Private Methods:
 	/**
 	 * A helper method that dispatches all events for SoundInstance.
 	 * @method _sendEvent

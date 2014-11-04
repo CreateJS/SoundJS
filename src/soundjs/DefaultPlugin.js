@@ -32,7 +32,10 @@ this.createjs = this.createjs || {};
 
 (function () {
 	"use strict";
-	/**
+
+
+// constructor:
+ 	/**
 	 * A default plugin class used as a base for all other plugins.
 	 * @class DefaultPlugin
 	 * @constructor
@@ -40,6 +43,7 @@ this.createjs = this.createjs || {};
 	 */
 
 	var DefaultPlugin = function () {
+	// private properties:
 		/**
 		 * The capabilities of the plugin. This is generated via the {{#crossLink "DefaultPlugin/_generateCapabilities:method"}}{{/crossLink}}
 		 * method and is used internally.
@@ -85,8 +89,8 @@ this.createjs = this.createjs || {};
 		this._soundInstance;
 	};
 	var p = DefaultPlugin.prototype;
-	DefaultPlugin.prototype.constructor = DefaultPlugin;
 
+// public methods:
 	/**
 	 * Pre-register a sound for preloading and setup. This is called by {{#crossLink "Sound"}}{{/crossLink}}.
 	 * Note all plugins provide a <code>Loader</code> instance, which <a href="http://preloadjs.com" target="_blank">PreloadJS</a>
@@ -144,22 +148,11 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Handles internal preload completion.
-	 * @method _handlePreloadComplete
-	 * @protected
-	 */
-	p._handlePreloadComplete = function (loader) {
-		createjs.Sound._sendFileLoadEvent(loader.src);	// OJR is this worth changing to events?
-		loader.cleanUp();
-	};
-
-	/**
 	 * Internally preload a sound.
 	 * @method preload
 	 * @param {String} src The sound URI to load.
-	 * @param {Object} tag An HTML audio tag used to load src.
 	 */
-	p.preload = function (src, tag) {
+	p.preload = function (src) {
 		this._audioSources[src] = true;
 		if (!this._loader) {return;}
 		var loader = new this._loader(src, this);
@@ -180,6 +173,7 @@ this.createjs = this.createjs || {};
 		return new this._soundInstance(src, startTime, duration, this);
 	};
 
+	// TODO Volume Getter / Setter
 	/**
 	 * Set the master volume of the plugin, which affects all SoundInstances.
 	 * @method setVolume
@@ -194,15 +188,6 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Set the gain value for master audio. Should not be called externally.
-	 * @method _updateVolume
-	 * @protected
-	 */
-	p._updateVolume = function () {
-		// Plugin Specific code
-	};
-
-	/**
 	 * Get the master volume of the plugin, which affects all SoundInstances.
 	 * @method getVolume
 	 * @return The volume level, between 0 and 1.
@@ -211,6 +196,7 @@ this.createjs = this.createjs || {};
 		return this._volume;
 	};
 
+	// TODO Mute Getter / Setter
 	/**
 	 * Mute all sounds via the plugin.
 	 * @method setMute
@@ -227,6 +213,26 @@ this.createjs = this.createjs || {};
 		return "[DefaultAudioPlugin]";
 	};
 
-	createjs.Sound.DefaultPlugin = DefaultPlugin;
 
+// private methods:
+	/**
+	 * Handles internal preload completion.
+	 * @method _handlePreloadComplete
+	 * @protected
+	 */
+	p._handlePreloadComplete = function (loader) {
+		createjs.Sound._sendFileLoadEvent(loader.src);	// OJR is this worth changing to events?
+		loader.cleanUp();
+	};
+
+	/**
+	 * Set the gain value for master audio. Should not be called externally.
+	 * @method _updateVolume
+	 * @protected
+	 */
+	p._updateVolume = function () {
+		// Plugin Specific code
+	};
+
+	createjs.Sound.DefaultPlugin = DefaultPlugin;
 }());
