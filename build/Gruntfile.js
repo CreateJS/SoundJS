@@ -100,10 +100,23 @@ module.exports = function (grunt) {
 				},
 
 				updateversion: {
-					build: {
+					sound: {
 						file: '../src/soundjs/version.js',
 						version: '<%= version %>'
 					},
+					flashplugin: {
+						file: '../src/soundjs/version_flashplugin.js',
+						version: '<%= version %>'
+					}
+				},
+
+				clearversion: {
+					sound: {
+						file: '../src/soundjs/version.js'
+					},
+					flashplugin: {
+						file: '../src/soundjs/version_flashplugin.js'
+					}
 				}
 			}
 	);
@@ -200,6 +213,14 @@ module.exports = function (grunt) {
 	]);
 
 	/**
+	 * Task for exporting only the next lib.
+	 *
+	 */
+	grunt.registerTask('nextlib', [
+		"updateversion", "combine", "uglify", "clearversion", "copy:src"
+	]);
+
+	/**
 	 * Task for exporting a release build (version based on package.json)
 	 *
 	 */
@@ -212,7 +233,7 @@ module.exports = function (grunt) {
 	 *
 	 */
 	grunt.registerTask('coreBuild', [
-		"updateversion", "combine", "uglify", "docs", "copy:src"
+		"updateversion", "combine", "uglify", "clearversion", "docs", "copy:src"
 	]);
 
 	/**
