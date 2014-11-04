@@ -36,12 +36,12 @@ this.createjs = this.createjs || {};
 	/**
 	 * An internal helper class that preloads audio. Note that this class and its methods are not documented
 	 * properly to avoid generating HTML documentation.
-	 * #class DefaultLoader
+	 * #class Loader
 	 * @param {String} src The source of the sound to load.
 	 * @param {Object} owner A reference to the class that created this instance.
 	 * @constructor
 	 */
-	function DefaultLoader(src) {
+	function Loader(src) {
 		this.EventDispatcher_constructor();
 
 		/**
@@ -108,7 +108,7 @@ this.createjs = this.createjs || {};
 		this.onerror = null;
 	}
 
-	var p = createjs.extend(DefaultLoader, createjs.EventDispatcher);
+	var p = createjs.extend(Loader, createjs.EventDispatcher);
 
 	/**
 	 * Begin loading the content.
@@ -121,7 +121,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * The DefaultLoader has reported progress.
+	 * The Loader has reported progress.
 	 *
 	 * <strong>Note</strong>: this is not a public API, but is used to allow preloaders to subscribe to load
 	 * progress as if this is an HTML audio tag. This reason is why this still uses a callback instead of an event.
@@ -168,7 +168,7 @@ this.createjs = this.createjs || {};
 	}
 
 	/**
-	 * Errors have been caused by the DefaultLoader.
+	 * Errors have been caused by the Loader.
 	 * #method handleError
 	 * @protected
 	 */
@@ -190,8 +190,8 @@ this.createjs = this.createjs || {};
 	};
 
 	p.toString = function () {
-		return "[DefaultLoader]";
+		return "[Loader]";
 	};
 
-	createjs.DefaultLoader = createjs.promote(DefaultLoader, "EventDispatcher");
+	createjs.Sound.DefaultPlugin.Loader = createjs.promote(Loader, "EventDispatcher");
 }());

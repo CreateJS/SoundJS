@@ -227,6 +227,6 @@ this.createjs = this.createjs || {};
 		return "[DefaultAudioPlugin]";
 	};
 
-	createjs.DefaultPlugin = DefaultPlugin;
+	createjs.Sound.DefaultPlugin = DefaultPlugin;
 
 }());

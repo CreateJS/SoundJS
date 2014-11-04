@@ -71,7 +71,7 @@ this.createjs = this.createjs || {};
 	 * @extends EventDispatcher
 	 * @constructor
 	 */
-	var DefaultSoundInstance = function (src, startTime, duration) {
+	var SoundInstance = function (src, startTime, duration) {
 		this.EventDispatcher_constructor();
 
 		/**
@@ -175,6 +175,7 @@ this.createjs = this.createjs || {};
 		 * @protected
 		 */
 		this._duration = duration || 0;
+		// TODO add getter / setter
 
 		/**
 		 * The number of play loops remaining. Negative values will loop infinitely.
@@ -235,6 +236,7 @@ this.createjs = this.createjs || {};
 		 * @protected
 		 */
 		this._muted = false;
+		// TODO add getter / setter
 
 		/**
 		 * Read only value that tells you if the audio is currently paused.
@@ -244,9 +246,7 @@ this.createjs = this.createjs || {};
 		 */
 		this.paused = false;	// this value will not be used, and is only set
 		this._paused = false;	// this value is used internally for setting paused
-
-		// Proxies, make removing listeners easier.
-		this._endedHandler = null;
+		// TODO add getter / setter
 
 	// Events
 		/**
@@ -294,7 +294,7 @@ this.createjs = this.createjs || {};
 		 */
 	};
 
-	var p = createjs.extend(DefaultSoundInstance, createjs.EventDispatcher);
+	var p = createjs.extend(SoundInstance, createjs.EventDispatcher);
 
 	/**
 	 * A helper method that dispatches all events for SoundInstance.
@@ -725,5 +725,5 @@ this.createjs = this.createjs || {};
 		return "[WebAudioPlugin SoundInstance]";
 	};
 
-	createjs.DefaultSoundInstance = createjs.promote(DefaultSoundInstance, "EventDispatcher");
+	createjs.Sound.DefaultPlugin.SoundInstance = createjs.promote(SoundInstance, "EventDispatcher");
 }());
