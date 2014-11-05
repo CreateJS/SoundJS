@@ -1281,7 +1281,7 @@ this.createjs = this.createjs || {};
 			var delayTimeoutId = setTimeout(function () {
 				s._beginPlaying(instance, interrupt, offset, loop, volume, pan);
 			}, delay);
-			instance._delayTimeoutId = delayTimeoutId;
+			instance.delayTimeoutId = delayTimeoutId;
 		}
 
 		this._instances.push(instance);
