@@ -1,5 +1,5 @@
 /*
- * DefaultLoader
+ * DefaultSoundLoader
  * Visit http://createjs.com/ for documentation, updates and examples.
  *
  *
@@ -38,12 +38,12 @@ this.createjs = this.createjs || {};
 	/**
 	 * An internal helper class that preloads audio. Note that this class and its methods are not documented
 	 * properly to avoid generating HTML documentation.
-	 * #class Loader
+	 * #class DefaultSoundLoader
 	 * @param {String} src The source of the sound to load.
 	 * @param {Object} owner A reference to the class that created this instance.
 	 * @constructor
 	 */
-	function Loader(src) {
+	function DefaultSoundLoader(src) {
 		this.EventDispatcher_constructor();
 
 
@@ -105,7 +105,7 @@ this.createjs = this.createjs || {};
 		this.onerror = null;
 	}
 
-	var p = createjs.extend(Loader, createjs.EventDispatcher);
+	var p = createjs.extend(DefaultSoundLoader, createjs.EventDispatcher);
 
 
 // public methods:
@@ -120,7 +120,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Remove all external references from loader
+	 * Remove all external references from DefaultSoundLoader
 	 * #method cleanUp
 	 */
 	p.cleanUp = function () {
@@ -132,13 +132,13 @@ this.createjs = this.createjs || {};
 	};
 
 	p.toString = function () {
-		return "[Default Loader]";
+		return "[DefaultSoundLoader]";
 	};
 
 
 // private methods:
 	/**
-	 * The Loader has reported progress.
+	 * The DefaultSoundLoader has reported progress.
 	 *
 	 * <strong>Note</strong>: this is not a public API, but is used to allow preloaders to subscribe to load
 	 * progress as if this is an HTML audio tag. This reason is why this still uses a callback instead of an event.
@@ -185,7 +185,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Errors have been caused by the Loader.
+	 * Errors have been caused by the DefaultSoundLoader.
 	 * #method handleError
 	 * @protected
 	 */
@@ -194,5 +194,5 @@ this.createjs = this.createjs || {};
 		this.onerror && this.onerror(event);
 	};
 
-	createjs.Sound.Default.Loader = createjs.promote(Loader, "EventDispatcher");
+	createjs.DefaultSoundLoader = createjs.promote(DefaultSoundLoader, "EventDispatcher");
 }());

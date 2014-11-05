@@ -114,16 +114,7 @@ this.createjs = this.createjs || {};
 		return true;
 	};
 
-	/**
-	 * Determine the capabilities of the plugin. Used internally. Please see the Sound API {{#crossLink "Sound/getCapabilities"}}{{/crossLink}}
-	 * method for an overview of plugin capabilities.
-	 * @method _generateCapabilities
-	 * @static
-	 * @protected
-	 */
-	DefaultPlugin._generateCapabilities = function () {
-		//
-	}
+
 // public methods:
 	/**
 	 * Pre-register a sound for preloading and setup. This is called by {{#crossLink "Sound"}}{{/crossLink}}.
@@ -268,5 +259,5 @@ this.createjs = this.createjs || {};
 		// Plugin Specific code
 	};
 
-	createjs.Sound.Default.Plugin = DefaultPlugin;
+	createjs.DefaultSoundPlugin = DefaultPlugin;
 }());

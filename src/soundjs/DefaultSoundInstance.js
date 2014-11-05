@@ -74,7 +74,7 @@ this.createjs = this.createjs || {};
 
 
 // Constructor:
-	var SoundInstance = function (src, startTime, duration) {
+	var DefaultSoundInstance = function (src, startTime, duration) {
 		this.EventDispatcher_constructor();
 
 
@@ -212,11 +212,11 @@ this.createjs = this.createjs || {};
 				set: function(value) {
 					// remove looping
 					if (this._remainingLoops != 0 && value == 0) {
-						this._sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
+						this._removeLooping();
 					}
 					// add looping
 					if (this._remainingLoops == 0 && value != 0) {
-						this._sourceNodeNext = this._createAndPlayAudioNode(this._playbackStartTime, 0);
+						this._addLooping();
 					}
 					this._remainingLoops = value;
 				}
@@ -291,7 +291,7 @@ this.createjs = this.createjs || {};
 		 */
 	};
 
-	var p = createjs.extend(SoundInstance, createjs.EventDispatcher);
+	var p = createjs.extend(DefaultSoundInstance, createjs.EventDispatcher);
 
 
 // Public Methods:
@@ -573,7 +573,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p.toString = function () {
-		return "[Default SoundInstance]";
+		return "[DefaultSoundInstance]";
 	};
 
 
@@ -708,5 +708,5 @@ this.createjs = this.createjs || {};
 		// plugin specific code
 	};
 
-	createjs.Sound.Default.SoundInstance = createjs.promote(SoundInstance, "EventDispatcher");
+	createjs.DefaultSoundInstance = createjs.promote(DefaultSoundInstance, "EventDispatcher");
 }());
