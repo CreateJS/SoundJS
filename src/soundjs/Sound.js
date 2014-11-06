@@ -226,17 +226,6 @@ this.createjs = this.createjs || {};
 
 	var s = Sound;
 
-	// TODO DEPRECATED
-	/**
-	 * REMOVED
-	 * Use {{#crossLink "Sound/alternateExtensions:property"}}{{/crossLink}} instead
-	 * @property DELIMITER
-	 * @type {String}
-	 * @default |
-	 * @static
-	 * @deprecated
-	 */
-
 	/**
 	 * The interrupt value to interrupt any currently playing instance with the same source, if the maximum number of
 	 * instances of the sound are already playing.

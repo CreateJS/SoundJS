@@ -7,6 +7,8 @@ CRITICAL (may break existing content):
   createjs.WebAudioPlugin.dynamicsCompressorNode
 - removed deprecated code and cleaned up supporting code for deprecated "|" loading approach
 - removed iOS disabling by default on HTMLAudioPlugin
+- SoundInstance stop, setVolume, setPan, setPosition
+- SoundInstance deprecated pause / resume, please use SoundInstance.paused property instead.
 
 *****
 - Added constructors to all non-static classes (Thanks kaesve)
@@ -38,7 +40,7 @@ CRITICAL (may break existing content):
 - changed FlashPlugin to grab the duration of audio as soon as a SoundInstance is created
 - fixed progress event of WebAudioPlugin Loader, for use with PreloadJS
 - Implemented new base classes for Plugin, SoundInstance, and SoundLoader.
-- SoundInstance added properties duration, loop, mute, pause (with get/set methods for browser that do not support getter/setters)
+- SoundInstance added properties duration, position, loop, mute, pause (with backup methods for browser that do not support getter/setters)
 
 Version 0.5.2 [December 12, 2013]
 ************************************************************************************************************************

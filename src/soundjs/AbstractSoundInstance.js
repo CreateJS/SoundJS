@@ -118,16 +118,6 @@ this.createjs = this.createjs || {};
 
 	// private properties
 		/**
-		 * How far into the sound to begin playback in milliseconds. This is passed in when play is called and used by
-		 * pause and setPosition to track where the sound should be at.
-		 * @property _offset
-		 * @type {Number}
-		 * @default 0
-		 * @protected
-		 */
-		this._offset = 0;
-
-		/**
 		 * Audio sprite property used to determine the starting offset.
 		 * @type {Number}
 		 * @default null
@@ -212,6 +202,33 @@ this.createjs = this.createjs || {};
 		}
 
 		/**
+		 * The position of the playhead in milliseconds. This can be set while a sound is playing, paused, or stopped.
+		 *
+		 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower, Opera versions 11.50 or lower,
+		 * and Internet Explorer 8 or lower.  Instead use {{#crossLink "SoundInstance/setPosition"}}{{/crossLink}} and {{#crossLink "SoundInstance/getPosition"}}{{/crossLink}}.
+		 *
+		 * @property position
+		 * @type {Number}
+		 * @default 0
+		 * @since 0.5.3
+		 */
+		this._position = 0;
+		if (createjs.definePropertySupported) {
+			Object.defineProperty(this, "position", {
+				get: function() {
+					if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
+						this._calculateCurrentPosition();	// sets this._position
+					}
+					return this._position;
+				},
+				set: function(value) {
+					this._position = value || 0;
+					this._updatePosition();
+				}
+			});
+		}
+
+		/**
 		 * The number of play loops remaining. Negative values will loop infinitely.
 		 *
   		 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower, Opera versions 11.50 or lower,
@@ -254,15 +271,15 @@ this.createjs = this.createjs || {};
 		 * @default false
 		 * @since 0.5.3
 		 */
-		this._mute = false;
+		this._muted = false;
 		if (createjs.definePropertySupported) {
-			Object.defineProperty(this, "mute", {
+			Object.defineProperty(this, "muted", {
 				get: function() {
-					return this._mute;
+					return this._muted;
 				},
 				set: function(value) {
 					if (value !== true || value !== false) {return;}
-					this._mute = value;
+					this._muted = value;
 					this._updateVolume();
 				}
 			});
@@ -274,21 +291,22 @@ this.createjs = this.createjs || {};
 		 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower, Opera versions 11.50 or lower,
 		 * and Internet Explorer 8 or lower.
 		 * Use {{#crossLink "SoundInstance/pause:method"}}{{/crossLink}} and {{#crossLink "SoundInstance/resume:method"}}{{/crossLink}} to set.
-		 * // TODO change pause / resume to single method?
 		 *
 		 * @property pause
 		 * @type {Boolean}
 		 */
-		this._pause = false;
+		this._paused = false;
 		if (createjs.definePropertySupported) {
-			Object.defineProperty(this, "pause", {
+			Object.defineProperty(this, "paused", {
 				get: function() {
-					return this._pause;
+					return this._paused;
 				},
 				set: function(value) {
-					if (value !== true || value !== false) {return;}
-					this._updatePause(value);
-					this._pause = value;
+					if (value !== true || value !== false || this._paused == value) {return;}
+					if (value == true && this.playState != createjs.Sound.PLAY_SUCCEEDED) {return;}
+					this._updatePaused(value);
+					this._paused = value;
+					clearTimeout(this.delayTimeoutId);
 				}
 			});
 		}
@@ -371,6 +389,7 @@ this.createjs = this.createjs || {};
 	 * @param {Number} [volume=1] The volume of the sound, between 0 and 1.
 	 * @param {Number} [pan=0] The pan of the sound between -1 (left) and 1 (right). Note that pan is not supported
 	 * for HTML Audio.
+	 * @return {SoundInstance} A reference to itself, intended for chaining calls.
 	 */
 	p.play = function (interrupt, delay, offset, loop, volume, pan) {
 		if (this.playState == createjs.Sound.PLAY_SUCCEEDED) {
@@ -381,55 +400,72 @@ this.createjs = this.createjs || {};
 				pan = interrupt.pan;
 			}
 			if (offset != null) { this.setPosition(offset) }
-			if (loop != null) { this.loop = loop; }
+			if (loop != null) { this.setLoop(loop); }
 			if (volume != null) { this.setVolume(volume); }
 			if (pan != null) { this.setPan(pan); }
-			if (this._pause) {	this.resume(); }
+			if (this._paused) {	this.resume(); }
 			return;
 		}
 		this._cleanUp();
 		createjs.Sound._playInstance(this, interrupt, delay, offset, loop, volume, pan);	// make this an event dispatch??
+		return this;
 	};
 
 	/**
-	 * Pause the instance. Paused audio will stop at the current time, and can be resumed using
-	 * {{#crossLink "SoundInstance/resume"}}{{/crossLink}}.
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *      myInstance.pause();
+	 * Deprecated, please use {{#crossLink "SoundInstance/paused:property"}}{{/crossLink}} instead.
 	 *
 	 * @method pause
 	 * @return {Boolean} If the pause call succeeds. This will return false if the sound isn't currently playing.
+	 * @deprecated
 	 */
 	p.pause = function () {
-		if (this._pause || this.playState != createjs.Sound.PLAY_SUCCEEDED) {return false;}
-
-		this._pause = true;
-
-		this._offset = this._owner.context.currentTime - this._playbackStartTime;  // this allows us to restart the sound at the same point in playback
-
-		clearTimeout(this.delayTimeoutId);
+		if (this._paused || this.playState != createjs.Sound.PLAY_SUCCEEDED) {return false;}
+		this.setPaused(true);
 		return true;
 	};
 
 	/**
-	 * Resume an instance that has been paused using {{#crossLink "SoundInstance/pause"}}{{/crossLink}}. Audio that
-	 * has not been paused will not playback when this method is called.
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *     myInstance.pause();
-	 *     // do some stuff
-	 *     myInstance.resume();
+	 * Deprecated, please use {{#crossLink "SoundInstance/paused:property"}}{{/crossLink}} instead.
 	 *
 	 * @method resume
 	 * @return {Boolean} If the resume call succeeds. This will return false if called on a sound that is not paused.
+	 * @deprecated
 	 */
 	p.resume = function () {
-		if (!this._pause) {return false;}
-		this._handleSoundReady();
+		if (!this._paused) {return false;}
+		this.setPaused(false);
 		return true;
+	};
+
+	/**
+	 * NOTE that you can get paused directly as a property, and getPaused remains to allow support for IE8 with FlashPlugin.
+	 *
+	 * Returns true if the instance is currently paused.
+	 *
+	 * @method getPaused
+	 * @returns {boolean} If the instance is currently paused
+	 * @since 0.5.3
+	 */
+	p.getPaused = function() {
+		return this._paused;
+	};
+
+	/**
+	 * NOTE that you can set paused directly as a property, and setPaused remains to allow support for IE8 with FlashPlugin.
+	 *
+	 * Pause or resume the instance.  Note you can also resume playback with {{#crossLink "SoundInstance/play"}}{{/crossLink}}.
+	 *
+	 * @param {boolean} value
+	 * @since 0.5.3
+	 * @return {SoundInstance} A reference to itself, intended for chaining calls.
+	 */
+	p.setPaused = function (value) {
+		if (value !== true || value !== false || this._paused == value) {return;}
+		if (value == true && this.playState != createjs.Sound.PLAY_SUCCEEDED) {return;}
+		this._updatePaused(value);
+		this._paused = value;
+		clearTimeout(this.delayTimeoutId);
+		return this;
 	};
 
 	/**
@@ -441,14 +477,15 @@ this.createjs = this.createjs || {};
 	 *     myInstance.stop();
 	 *
 	 * @method stop
-	 * @return {Boolean} If the stop call succeeds.
+	 * @return {SoundInstance} A reference to itself, intended for chaining calls.
 	 */
 	p.stop = function () {
-		this._pause = false;
+		this._position = 0;
+		this._paused = false;
+		this._handleStop();
 		this._cleanUp();
 		this.playState = createjs.Sound.PLAY_FINISHED;
-		this._offset = 0;  // set audio to start at the beginning
-		return true;
+		return this;
 	};
 
 	/**
@@ -456,7 +493,6 @@ this.createjs = this.createjs || {};
 	 * Set the volume of the instance. You can retrieve the volume using {{#crossLink "SoundInstance/getVolume"}}{{/crossLink}}.
 	 *
 	 * <h4>Example</h4>
-	 *
 	 *      myInstance.setVolume(0.5);
 	 *
 	 * Note that the master volume set using the Sound API method {{#crossLink "Sound/setVolume"}}{{/crossLink}}
@@ -464,11 +500,11 @@ this.createjs = this.createjs || {};
 	 *
 	 * @method setVolume
 	 * @param value The volume to set, between 0 and 1.
-	 * @return {SoundInstance} Returns reference to itself for chaining calls
+	 * @return {SoundInstance} A reference to itself, intended for chaining calls.
 	 */
 	p.setVolume = function (value) {
 		this._volume = Math.max(0, Math.min(1, value));
-		if (!this._mute) {
+		if (!this._muted) {
 			this._updateVolume();
 		}
 		return this;
@@ -487,44 +523,69 @@ this.createjs = this.createjs || {};
 		return this._volume;
 	};
 
+	// TODO setMuted etc?
 	/**
-	 * NOTE that you can set mute directly as a property, and setMute remains to allow support for IE8 with FlashPlugin.
-	 *
-	 * Mute and unmute the sound. Muted sounds will still play at 0 volume. Note that an unmuted sound may still be
-	 * silent depending on {{#crossLink "Sound"}}{{/crossLink}} volume, instance volume, and Sound mute.
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *     myInstance.setMute(true);
+	 * Deprecated, please use {{#crossLink "SoundInstance/muted:property"}}{{/crossLink}} instead.
 	 *
 	 * @method setMute
 	 * @param {Boolean} value If the sound should be muted.
 	 * @return {Boolean} If the mute call succeeds.
-	 * @since 0.4.0
+	 * @deprecated
 	 */
 	p.setMute = function (value) {
 		if (value == null) {return false;}
 
-		this._mute = value;
+		this._muted = value;
 		this._updateVolume();
 		return true;
 	};
 
 	/**
-	 * NOTE that you can access mute directly as a property, and getMute remains to allow support for IE8 with FlashPlugin.
+	 * Deprecated, please use {{#crossLink "SoundInstance/muted:property"}}{{/crossLink}} instead.
+	 *
+	 * @method getMute
+	 * @return {Boolean} If the sound is muted.
+	 * @deprecated
+	 */
+	p.getMute = function () {
+		return this._muted;
+	};
+
+	/**
+	 * NOTE that you can set muted directly as a property, and setMuted exists to allow support for IE8 with FlashPlugin.
+	 *
+	 * Mute and unmute the sound. Muted sounds will still play at 0 volume. Note that an unmuted sound may still be
+	 * silent depending on {{#crossLink "Sound"}}{{/crossLink}} volume, instance volume, and Sound muted.
+	 *
+	 * <h4>Example</h4>
+	 *     myInstance.setMuted(true);
+	 *
+	 * @method setMute
+	 * @param {Boolean} value If the sound should be muted.
+	 * @return {SoundInstance} A reference to itself, intended for chaining calls.
+	 * @since 0.5.3
+	 */
+	p.setMuted = function (value) {
+		if (value !== true || value !== false) {return;}
+		this._muted = value;
+		this._updateVolume();
+		return this;
+	};
+
+	/**
+	 * NOTE that you can access muted directly as a property, and getMuted remains to allow support for IE8 with FlashPlugin.
 	 *
 	 * Get the mute value of the instance.
 	 *
 	 * <h4>Example</h4>
-	 *
-	 *      var isMuted = myInstance.getMute();
+	 *      var isMuted = myInstance.getMuted();
 	 *
 	 * @method getMute
 	 * @return {Boolean} If the sound is muted.
-	 * @since 0.4.0
+	 * @since 0.5.3
 	 */
-	p.getMute = function () {
-		return this._mute;
+	p.getMuted = function () {
+		return this._muted;
 	};
 
 	/**
@@ -566,47 +627,41 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
+	 * NOTE that you can access position directly as a property, and getPosition remains to allow support for IE8 with FlashPlugin.
+	 *
 	 * Get the position of the playhead of the instance in milliseconds.
 	 *
 	 * <h4>Example</h4>
-	 *
 	 *     var currentOffset = myInstance.getPosition();
 	 *
 	 * @method getPosition
 	 * @return {Number} The position of the playhead in the sound, in milliseconds.
 	 */
 	p.getPosition = function () {
-		// plugin specific
-
-		return 0;
+		if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
+			this._calculateCurrentPosition();	// sets this._position
+		}
+		return this._position;
 	};
 
 	/**
+	 * NOTE that you can access position directly as a property, and setPosition remains to allow support for IE8 with FlashPlugin.
+	 *
 	 * Set the position of the playhead in the instance. This can be set while a sound is playing, paused, or
 	 * stopped.
 	 *
 	 * <h4>Example</h4>
-	 *
 	 *      myInstance.setPosition(myInstance.getDuration()/2); // set audio to its halfway point.
 	 *
 	 * @method setPosition
 	 * @param {Number} value The position to place the playhead, in milliseconds.
+	 * @return {SoundInstance} Returns reference to itself for chaining calls
 	 */
 	p.setPosition = function (value) {
-		this._offset = value * 0.001; // convert milliseconds to seconds
-
-		if (this.sourceNode && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-			// we need to stop this sound from continuing to play, as we need to recreate the sourceNode to change position
-			this.sourceNode = this._cleanUpAudioNode(this.sourceNode);
-			this._sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
-			clearTimeout(this._soundCompleteTimeout);  // clear timeout that triggers sound complete
-		}  // NOTE we cannot just call cleanup because it also calls the Sound function _playFinished which releases this instance in SoundChannel
-
-		if (!this._pause && this.playState == createjs.Sound.PLAY_SUCCEEDED) {this._handleSoundReady();}
-
-		return true;
+		this._position = value || 0;
+		this._updatePosition();
+		return this;
 	};
-	//TODO create a position property with getter / setter
 
 	/**
 	 * NOTE that you can access duration directly as a property, and getDuration exists to allow support for IE8 with FlashPlugin.
@@ -631,7 +686,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * @method setDuration
 	 * @param {number} value The new duration time in milli seconds.
-	 * @return {SoundInstance}
+	 * @return {SoundInstance} Returns reference to itself for chaining calls
 	 * @since 0.5.3
 	 */
 	p.setDuration = function (value) {
@@ -697,7 +752,6 @@ this.createjs = this.createjs || {};
 	 */
 	p._cleanUp = function () {
 		clearTimeout(this.delayTimeoutId); // clear timeout that plays delayed sound
-		clearTimeout(this._soundCompleteTimeout);  // clear timeout that triggers sound complete
 
 		createjs.Sound._playFinished(this);	// TODO change to an event
 	};
@@ -710,7 +764,7 @@ this.createjs = this.createjs || {};
 	p._interrupt = function () {
 		this._cleanUp();
 		this.playState = createjs.Sound.PLAY_INTERRUPTED;
-		this._pause = false;
+		this._paused = false;
 		this._sendEvent("interrupted");
 	};
 
@@ -720,15 +774,15 @@ this.createjs = this.createjs || {};
 	 * @protected
  	 */
 	p._handleSoundReady = function (event) {
-		if ((this._offset*1000) > this._duration) {
+		if ((this._position*1000) > this._duration) {
 			this._playFailed();
 			return;
-		} else if (this._offset < 0) {
-			this._offset = 0;
+		} else if (this._position < 0) {
+			this._position = 0;
 		}
 
 		this.playState = createjs.Sound.PLAY_SUCCEEDED;
-		this._pause = false;
+		this._paused = false;
 	};
 
 	/**
@@ -742,7 +796,7 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._beginPlaying = function (offset, loop, volume, pan) {
-		this._offset = offset;
+		this._position = offset;
 		this._loop = loop;
 		this.volume = volume;
 		this.pan = pan;
@@ -751,7 +805,7 @@ this.createjs = this.createjs || {};
 		if (this._owner.isPreloadComplete(this.src)) {
 			this._handleSoundReady(null);
 			this._sendEvent("succeeded");
-			return 1;
+			return;
 		} else {
 			this._playFailed();
 			return;
@@ -773,7 +827,7 @@ this.createjs = this.createjs || {};
 	 */
 	 // called internally by _soundCompleteTimeout in WebAudioPlugin
 	p._handleSoundComplete = function (event) {
-		this._offset = 0;  // have to set this as it can be set by pause during playback
+		this._position = 0;  // have to set this as it can be set by pause during playback
 
 		if (this._loop != 0) {
 			this._loop--;  // NOTE this introduces a theoretical limit on loops = float max size x 2 - 1
@@ -804,6 +858,7 @@ this.createjs = this.createjs || {};
 	 * Internal function used to update the pan
 	 * @method _updatePan
 	 * @protected
+	 * @since 0.5.3
 	 */
 	p._updatePan = function () {
 		// plugin specific code
@@ -813,8 +868,29 @@ this.createjs = this.createjs || {};
 	 * Internal function used to update the duration of the audio.
 	 * @method _updateDuration
 	 * @protected
+	 * @since 0.5.3
 	 */
 	p._updateDuration = function () {
+		// plugin specific code
+	};
+
+	/**
+	 * Internal function that calculates the current position of the playhead and sets it on this._position
+	 * @method _updatePosition
+	 * @protected
+	 * @since 0.5.3
+	 */
+	p._calculateCurrentPosition = function () {
+		// plugin specific code that sets this.position
+	};
+
+	/**
+	 * Internal function used to update the position of the playhead.
+	 * @method _updatePosition
+	 * @protected
+	 * @since 0.5.3
+	 */
+	p._updatePosition = function () {
 		// plugin specific code
 	};
 
@@ -822,6 +898,7 @@ this.createjs = this.createjs || {};
 	 * Internal function called when looping is removed during playback.
 	 * @method _removeLooping
 	 * @protected
+	 * @since 0.5.3
 	 */
 	p._removeLooping = function () {
 		// plugin specific code
@@ -831,8 +908,29 @@ this.createjs = this.createjs || {};
 	 * Internal function called when looping is added during playback.
 	 * @method _addLooping
 	 * @protected
+	 * @since 0.5.3
 	 */
 	p._addLooping = function () {
+		// plugin specific code
+	};
+
+	/**
+	 * Internal function called when pausing or resuming playback
+	 * @method _updatePaused
+	 * @protected
+	 * @since 0.5.3
+	 */
+	p._updatePaused = function (value) {
+		// plugin specific code
+	};
+
+	/**
+	 * Internal function called when stopping playback
+	 * @method _handleStop
+	 * @protected
+	 * @since 0.5.3
+	 */
+	p._handleStop = function() {
 		// plugin specific code
 	};
 
