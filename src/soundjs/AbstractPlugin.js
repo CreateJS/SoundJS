@@ -1,5 +1,5 @@
 /*
- * DefaultPlugin
+ * AbstractPlugin
  * Visit http://createjs.com/ for documentation, updates and examples.
  *
  *
@@ -37,15 +37,15 @@ this.createjs = this.createjs || {};
 // constructor:
  	/**
 	 * A default plugin class used as a base for all other plugins.
-	 * @class DefaultPlugin
+	 * @class AbstractPlugin
 	 * @constructor
 	 * @since 0.5.3
 	 */
 
-	var DefaultPlugin = function () {
+	var AbstractPlugin = function () {
 	// private properties:
 		/**
-		 * The capabilities of the plugin. This is generated via the {{#crossLink "DefaultPlugin/_generateCapabilities:method"}}{{/crossLink}}
+		 * The capabilities of the plugin.
 		 * method and is used internally.
 		 * @property _capabilities
 		 * @type {Object}
@@ -88,7 +88,7 @@ this.createjs = this.createjs || {};
 		 */
 		this._soundInstance;
 	};
-	var p = DefaultPlugin.prototype;
+	var p = AbstractPlugin.prototype;
 
 
 // Static Properties:
@@ -102,7 +102,7 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 * @static
 	 */
-	DefaultPlugin._capabilities = null;
+	AbstractPlugin._capabilities = null;
 
 	/**
 	 * Determine if the plugin can be used in the current browser/OS.
@@ -110,7 +110,7 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} If the plugin can be initialized.
 	 * @static
 	 */
-	DefaultPlugin.isSupported = function () {
+	AbstractPlugin.isSupported = function () {
 		return true;
 	};
 
@@ -235,7 +235,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p.toString = function () {
-		return "[DefaultPlugin]";
+		return "[AbstractPlugin]";
 	};
 
 
@@ -259,5 +259,5 @@ this.createjs = this.createjs || {};
 		// Plugin Specific code
 	};
 
-	createjs.DefaultSoundPlugin = DefaultPlugin;
+	createjs.AbstractPlugin = AbstractPlugin;
 }());

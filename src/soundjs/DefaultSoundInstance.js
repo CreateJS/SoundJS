@@ -1,5 +1,5 @@
 /*
- * DefaultSoundInstance
+ * AbstractSoundInstance
  * Visit http://createjs.com/ for documentation, updates and examples.
  *
  *
@@ -74,7 +74,7 @@ this.createjs = this.createjs || {};
 
 
 // Constructor:
-	var DefaultSoundInstance = function (src, startTime, duration) {
+	var AbstractSoundInstance = function (src, startTime, duration) {
 		this.EventDispatcher_constructor();
 
 
@@ -340,7 +340,7 @@ this.createjs = this.createjs || {};
 		 */
 	};
 
-	var p = createjs.extend(DefaultSoundInstance, createjs.EventDispatcher);
+	var p = createjs.extend(AbstractSoundInstance, createjs.EventDispatcher);
 
 
 // Public Methods:
@@ -488,6 +488,8 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
+	 * NOTE that you can set mute directly as a property, and setMute remains to allow support for IE8 with FlashPlugin.
+	 *
 	 * Mute and unmute the sound. Muted sounds will still play at 0 volume. Note that an unmuted sound may still be
 	 * silent depending on {{#crossLink "Sound"}}{{/crossLink}} volume, instance volume, and Sound mute.
 	 *
@@ -509,6 +511,8 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
+	 * NOTE that you can access mute directly as a property, and getMute remains to allow support for IE8 with FlashPlugin.
+	 *
 	 * Get the mute value of the instance.
 	 *
 	 * <h4>Example</h4>
@@ -605,6 +609,8 @@ this.createjs = this.createjs || {};
 	//TODO create a position property with getter / setter
 
 	/**
+	 * NOTE that you can access duration directly as a property, and getDuration exists to allow support for IE8 with FlashPlugin.
+	 *
 	 * Get the duration of the instance, in milliseconds.
 	 * Note a sound needs to be loaded before it will have duration, unless it was set manually to create an audio sprite.
 	 *
@@ -619,7 +625,10 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
+	 * NOTE that you can set duration directly as a property, and setDuration exists to allow support for IE8 with FlashPlugin.
+	 *
 	 * Set the duration of the audio.  Generally this is not called, but it can be used to create an audio sprite out of an existing SoundInstance.
+	 *
 	 * @method setDuration
 	 * @param {number} value The new duration time in milli seconds.
 	 * @return {SoundInstance}
@@ -632,6 +641,8 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
+	 * NOTE that you can access loop directly as a property, and getLoop exists to allow support for IE8 with FlashPlugin.
+	 *
 	 * The number of play loops remaining. Negative values will loop infinitely.
 	 *
 	 * @method getLoop
@@ -643,7 +654,10 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
+	 * NOTE that you can set loop directly as a property, and setLoop exists to allow support for IE8 with FlashPlugin.
+	 *
 	 * Set the number of play loops remaining.
+	 *
 	 * @param {number} value The number of times to loop after play.
 	 * @since 0.5.3
 	 */
@@ -660,7 +674,7 @@ this.createjs = this.createjs || {};
 	}
 
 	p.toString = function () {
-		return "[DefaultSoundInstance]";
+		return "[AbstractSoundInstance]";
 	};
 
 
@@ -822,5 +836,6 @@ this.createjs = this.createjs || {};
 		// plugin specific code
 	};
 
-	createjs.DefaultSoundInstance = createjs.promote(DefaultSoundInstance, "EventDispatcher");
+	createjs.AbstractSoundInstance = createjs.promote(AbstractSoundInstance, "EventDispatcher");
+	createjs.DefaultSoundInstance = createjs.AbstractSoundInstance;	// used when no plugin is supported
 }());
