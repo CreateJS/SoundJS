@@ -35,7 +35,35 @@ module.exports = function (grunt) {
 
 				concat: {
 					options: {
-						separator: ''
+						separator: '',
+						process: function(src, filepath) {
+							// Remove a few things from each file, they will be added back at the end.
+
+							// Strip the license header.
+							var file = src.replace(/^(\/\*\s)[\s\S]+?\*\//, "")
+
+							// Strip namespace
+							// file = file.replace(/(this.createjs)\s=\s\1.*/, "");
+
+							// Strip namespace label
+							file = file.replace(/\/\/\s*namespace:/, "");
+
+							// Strip @module
+							file = file.replace(/\/\*\*[\s\S]+?@module[\s\S]+?\*\//, "");
+
+							// Clean up white space
+							file = file.replace(/^\s*/, "");
+							file = file.replace(/\s*$/, "");
+
+							// Append on the class name
+							file =
+								"\n\n//##############################################################################\n"+
+								"// " + path.basename(filepath) + "\n" +
+								"//##############################################################################\n\n"+
+							  	file;
+
+							return file;
+						}
 					},
 					build: {
 						files: {
@@ -84,7 +112,7 @@ module.exports = function (grunt) {
 				copy: {
 					docsZip: {
 						files: [
-							{expand:true, cwd:'output/', src:'<%= docsZip %>', dest:'../docs/'}
+							{expand: true, cwd:'output/', src:'<%= docsZip %>', dest:'../docs/'}
 						]
 					},
 					docsSite: {
@@ -145,6 +173,14 @@ module.exports = function (grunt) {
 		return config[name];
 	}
 
+	function getCombinedSource() {
+		var configs = [
+			{cwd: '', config:'config.json', source:'source'}
+		];
+
+		return combineSource(configs);
+	}
+
 	function combineSource(configs) {
 		// Pull out all the source paths.
 		var sourcePaths = [];
@@ -173,6 +209,15 @@ module.exports = function (grunt) {
 		return clean;
 	}
 
+	function getBuildArgs() {
+		var banner = "";
+		if (grunt.config("buildArgs")[0] != "all") {
+			banner = grunt.file.read("BANNER");
+		}
+
+		grunt.config("concat.options.banner", banner);
+	}
+
 	// Load all the tasks we need
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -197,6 +242,7 @@ module.exports = function (grunt) {
 	grunt.registerTask('docs', [
 		"setDocsBase", "yuidoc", "resetBase", "compress", "copy:docsZip"
 	]);
+
 	/**
 	 * Sets out version to the version in package.json (defaults to NEXT)
 	 */
@@ -208,9 +254,12 @@ module.exports = function (grunt) {
 	 * Task for exporting a next build.
 	 *
 	 */
-	grunt.registerTask('next', [
-		"coreBuild"
-	]);
+	grunt.registerTask('next', function() {
+		grunt.config("buildArgs", this.args || []);
+
+		getBuildArgs();
+		grunt.task.run(["coreBuild", "clearBuildArgs"]);
+	});
 
 	/**
 	 * Task for exporting only the next lib.
@@ -224,9 +273,16 @@ module.exports = function (grunt) {
 	 * Task for exporting a release build (version based on package.json)
 	 *
 	 */
-	grunt.registerTask('build', [
-		"setVersion", "coreBuild", "updatebower", "copy:docsSite"
-	]);
+	grunt.registerTask('build', function() {
+		grunt.config("buildArgs", this.args || []);
+
+		getBuildArgs();
+		grunt.task.run(["setVersion", "coreBuild", "updatebower", "copy:docsSite", "clearBuildArgs"]);
+	});
+
+	grunt.registerTask('clearBuildArgs', function() {
+		grunt.config("buildArgs", []);
+	});
 
 	/**
 	 * Main build task, always runs after next or build.
@@ -243,4 +299,5 @@ module.exports = function (grunt) {
 	grunt.registerTask('combine', 'Combine all source into a single, un-minified file.', [
 		"concat"
 	]);
+
 };
