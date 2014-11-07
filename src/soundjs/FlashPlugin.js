@@ -709,7 +709,7 @@ this.createjs = this.createjs || {};
 
 	p._interrupt = function () {
 		this.playState = createjs.Sound.PLAY_INTERRUPTED;
-		this._flash.interrupt(this.flashId);
+		this._flash.interrupt(this.flashId);	// OJR this is redundant, cleanup calls stop that does the same thing anyway
 		this._cleanUp();
 		this._sendEvent("interrupted");
 	};

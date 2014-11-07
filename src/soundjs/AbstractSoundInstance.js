@@ -65,6 +65,7 @@ this.createjs = this.createjs || {};
  * @param {String} src The path to and file name of the sound.
  * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
  * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
+ * @param {Object} playbackResource Any resource needed by plugin to support audio playback.
  * @extends EventDispatcher
  * @constructor
  */
@@ -74,7 +75,7 @@ this.createjs = this.createjs || {};
 
 
 // Constructor:
-	var AbstractSoundInstance = function (src, startTime, duration) {
+	var AbstractSoundInstance = function (src, startTime, duration, playbackResource) {
 		this.EventDispatcher_constructor();
 
 
@@ -195,11 +196,34 @@ this.createjs = this.createjs || {};
 					return this._duration;
 				},
 				set: function(value) {
-					this._duration = value || 0;
+					this._duration = Math.max(0, value);
 					this._updateDuration();
 				}
 			});
 		}
+
+		/**
+		 * Object that holds plugin specific resource need for audio playback.
+		 * This is set internally by the plugin.  For example, WebAudioPlugin will set an array buffer,
+		 * HTMLAudioPlugin will set a tag, FlashPlugin will set a flash reference.
+		 *
+		 * @property playbackResource
+		 * @type {Object}
+		 * @default null
+		 */
+		this._playbackResource = playbackResource;
+		if (createjs.definePropertySupported) {
+			Object.defineProperty(this, "playbackResource", {
+				get: function() {
+					return this._playbackResource;
+				},
+				set: function(value) {
+					this._playbackResource = value;
+					if (this._duration == 0) { this._setDurationFromSource(); }
+				}
+			});
+		}
+		if(playbackResource) { this.setPlaybackResource(playbackResource); }
 
 		/**
 		 * The position of the playhead in milliseconds. This can be set while a sound is playing, paused, or stopped.
@@ -222,7 +246,7 @@ this.createjs = this.createjs || {};
 					return this._position;
 				},
 				set: function(value) {
-					this._position = value || 0;
+					this._position = Math.max(0, value)
 					this._updatePosition();
 				}
 			});
@@ -403,7 +427,7 @@ this.createjs = this.createjs || {};
 			if (loop != null) { this.setLoop(loop); }
 			if (volume != null) { this.setVolume(volume); }
 			if (pan != null) { this.setPan(pan); }
-			if (this._paused) {	this.resume(); }
+			if (this._paused) {	this.setPaused(false); }
 			return;
 		}
 		this._cleanUp();
@@ -658,7 +682,7 @@ this.createjs = this.createjs || {};
 	 * @return {SoundInstance} Returns reference to itself for chaining calls
 	 */
 	p.setPosition = function (value) {
-		this._position = value || 0;
+		this._position = Math.max(0, value);
 		this._updatePosition();
 		return this;
 	};
@@ -690,9 +714,29 @@ this.createjs = this.createjs || {};
 	 * @since 0.5.3
 	 */
 	p.setDuration = function (value) {
-		this._duration = value || 0;
+		this._duration = Math.max(0, value);
 		this._updateDuration();
 		return this;
+	};
+
+	/**
+	 * NOTE that you can access playbackResource directly as a property, and setPlaybackResource exists to allow support for IE8 with FlashPlugin.
+	 *
+	 * An object containing any resources needed for audio playback, usually set by the plugin.
+	 *
+	 * @method setPlayback
+	 * @param {Object} value The new playback resource.
+	 * @return {SoundInstance} Returns reference to itself for chaining calls
+	 * @since 0.5.3
+	 **/
+	p.setPlaybackResource = function (value) {
+		this._playbackResource = value;
+		if (this._duration == 0) { this._setDurationFromSource(); }
+		return this;
+	};
+
+	p.getPlaybackResource = function () {
+		return this._playbackResource;
 	};
 
 	/**
@@ -726,7 +770,7 @@ this.createjs = this.createjs || {};
 			this._addLooping(value);
 		}
 		this._loop = value;
-	}
+	};
 
 	p.toString = function () {
 		return "[AbstractSoundInstance]";
@@ -752,6 +796,8 @@ this.createjs = this.createjs || {};
 	 */
 	p._cleanUp = function () {
 		clearTimeout(this.delayTimeoutId); // clear timeout that plays delayed sound
+		this._handleCleanUp();
+		this._paused = false;
 
 		createjs.Sound._playFinished(this);	// TODO change to an event
 	};
@@ -764,7 +810,6 @@ this.createjs = this.createjs || {};
 	p._interrupt = function () {
 		this._cleanUp();
 		this.playState = createjs.Sound.PLAY_INTERRUPTED;
-		this._paused = false;
 		this._sendEvent("interrupted");
 	};
 
@@ -774,11 +819,9 @@ this.createjs = this.createjs || {};
 	 * @protected
  	 */
 	p._handleSoundReady = function (event) {
-		if ((this._position*1000) > this._duration) {
+		if (this._position >= this._duration) {
 			this._playFailed();
 			return;
-		} else if (this._position < 0) {
-			this._position = 0;
 		}
 
 		this.playState = createjs.Sound.PLAY_SUCCEEDED;
@@ -796,13 +839,12 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._beginPlaying = function (offset, loop, volume, pan) {
-		this._position = offset;
-		this._loop = loop;
-		this.volume = volume;
-		this.pan = pan;
+		this.setPosition(offset);
+		this.setLoop(loop);
+		this.setVolume(volume);
+		this.setPan(pan);
 
-		// TODO add a loaded check?  maybe a source object (array buffer, tag, flash reference)
-		if (this._owner.isPreloadComplete(this.src)) {
+		if (this.playbackResource != null) {
 			this._handleSoundReady(null);
 			this._sendEvent("succeeded");
 			return;
@@ -825,16 +867,12 @@ this.createjs = this.createjs || {};
 	 * @param event
 	 * @protected
 	 */
-	 // called internally by _soundCompleteTimeout in WebAudioPlugin
 	p._handleSoundComplete = function (event) {
 		this._position = 0;  // have to set this as it can be set by pause during playback
 
 		if (this._loop != 0) {
 			this._loop--;  // NOTE this introduces a theoretical limit on loops = float max size x 2 - 1
-
-			// plugin specific code
-			// TODO loop method
-
+			this._handleLoop();
 			this._sendEvent("loop");
 			return;
 		}
@@ -844,6 +882,7 @@ this.createjs = this.createjs || {};
 		this._sendEvent("complete");
 	};
 
+// Plugin specific code
 	/**
 	 * Internal function used to update the volume based on the instance volume, master volume, instance mute value,
 	 * and master mute value.
@@ -871,6 +910,16 @@ this.createjs = this.createjs || {};
 	 * @since 0.5.3
 	 */
 	p._updateDuration = function () {
+		// plugin specific code
+	};
+
+	/**
+	 * Internal function used to get the duration of the audio from the source we'll be playing.
+	 * @method _updateDuration
+	 * @protected
+	 * @since 0.5.3
+	 */
+	p._setDurationFromSource = function () {
 		// plugin specific code
 	};
 
@@ -931,6 +980,26 @@ this.createjs = this.createjs || {};
 	 * @since 0.5.3
 	 */
 	p._handleStop = function() {
+		// plugin specific code
+	};
+
+	/**
+	 * Internal function called when SoundInstance is being cleaned up
+	 * @method _handleCleanUp
+	 * @protected
+	 * @since 0.5.3
+	 */
+	p._handleCleanUp = function() {
+		// plugin specific code
+	};
+
+	/**
+	 * Internal function called when SoundInstance has played to end and is looping
+	 * @method _handleCleanUp
+	 * @protected
+	 * @since 0.5.3
+	 */
+	p._handleLoop = function () {
 		// plugin specific code
 	};
 
