@@ -189,7 +189,7 @@ this.createjs = this.createjs || {};
 		 * @default 0
 		 * @since 0.5.3
 		 */
-		this._duration = duration || 0;
+		this._duration = Math.max(0, duration);
 		if (createjs.definePropertySupported) {
 			Object.defineProperty(this, "duration", {
 				get: function() {
@@ -211,7 +211,7 @@ this.createjs = this.createjs || {};
 		 * @type {Object}
 		 * @default null
 		 */
-		this._playbackResource = playbackResource;
+		this._playbackResource = null;
 		if (createjs.definePropertySupported) {
 			Object.defineProperty(this, "playbackResource", {
 				get: function() {
@@ -223,7 +223,7 @@ this.createjs = this.createjs || {};
 				}
 			});
 		}
-		if(playbackResource) { this.setPlaybackResource(playbackResource); }
+		if(playbackResource != false && playbackResource !== false) { this.setPlaybackResource(playbackResource); }
 
 		/**
 		 * The position of the playhead in milliseconds. This can be set while a sound is playing, paused, or stopped.
@@ -757,6 +757,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * Set the number of play loops remaining.
 	 *
+	 * @method setLoop
 	 * @param {number} value The number of times to loop after play.
 	 * @since 0.5.3
 	 */
@@ -770,6 +771,19 @@ this.createjs = this.createjs || {};
 			this._addLooping(value);
 		}
 		this._loop = value;
+	};
+
+	/**
+	 * Remove all external references and resources from SoundInstance.  Note this is irreversible and SoundInstance will no longer work
+	 * @method destroy
+	 * @since 0.5.3
+	 */
+	p.destroy = function() {
+		this._cleanUp();
+		this.src = null;
+		this.playbackResource = null;
+
+		this.removeAllEventListeners();
 	};
 
 	p.toString = function () {
@@ -814,21 +828,6 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Handles starting playback when the sound is ready for playing.
-	 * @method _handleSoundReady
-	 * @protected
- 	 */
-	p._handleSoundReady = function (event) {
-		if (this._position >= this._duration) {
-			this._playFailed();
-			return;
-		}
-
-		this.playState = createjs.Sound.PLAY_SUCCEEDED;
-		this._paused = false;
-	};
-
-	/**
 	 * Called by the Sound class when the audio is ready to play (delay has completed). Starts sound playing if the
 	 * src is loaded, otherwise playback will fail.
 	 * @method _beginPlaying
@@ -844,8 +843,10 @@ this.createjs = this.createjs || {};
 		this.setVolume(volume);
 		this.setPan(pan);
 
-		if (this.playbackResource != null) {
-			this._handleSoundReady(null);
+		if (this.playbackResource != null && this._position < this._duration) {
+			this._paused = false;
+			this._handleSoundReady();
+			this.playState = createjs.Sound.PLAY_SUCCEEDED;
 			this._sendEvent("succeeded");
 			return;
 		} else {
@@ -854,7 +855,12 @@ this.createjs = this.createjs || {};
 		}
 	};
 
-	// Play has failed, which can happen for a variety of reasons.
+	/**
+	 * Play has failed, which can happen for a variety of reasons.
+	 * Cleans up instance and dispatches failed event
+	 * @method _playFailed
+	 * @private
+	 */
 	p._playFailed = function () {
 		this._cleanUp();
 		this.playState = createjs.Sound.PLAY_FAILED;
@@ -883,6 +889,15 @@ this.createjs = this.createjs || {};
 	};
 
 // Plugin specific code
+	/**
+	 * Handles starting playback when the sound is ready for playing.
+	 * @method _handleSoundReady
+	 * @protected
+ 	 */
+	p._handleSoundReady = function () {
+		// plugin specific code
+	};
+
 	/**
 	 * Internal function used to update the volume based on the instance volume, master volume, instance mute value,
 	 * and master mute value.

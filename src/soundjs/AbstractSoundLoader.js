@@ -121,9 +121,9 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Remove all external references from AbstractSoundLoader
-	 * #method cleanUp
+	 * #method destroy
 	 */
-	p.cleanUp = function () {
+	p.destroy = function () {
 		this.src = null;
 		this.onload = null;
 		this.onprogress = null;

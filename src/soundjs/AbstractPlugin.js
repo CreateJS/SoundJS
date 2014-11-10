@@ -66,6 +66,14 @@ this.createjs = this.createjs || {};
 		this._audioSources = {};
 
 		/**
+		 * Object hash indexed by the source URI of all created SoundInstances, update the playbackResource if it loads after they are created,
+		 * and properly destroy them if sources are removed
+		 * @type {Object}
+		 * @protected
+		 */
+		this._soundInstances = {};
+
+		/**
 		 * The internal master volume value of the plugin.
 		 * @property _volume
 		 * @type {Number}
@@ -161,6 +169,11 @@ this.createjs = this.createjs || {};
 	 */
 	p.removeSound = function (src) {
 		delete(this._audioSources[src]);
+		for (var i = this._soundInstances[src].length; i--; ) {
+			var item = this._soundInstances[src][i];
+			item.destroy();
+		}
+		delete(this._soundInstances[src]);
 	};
 
 	/**
@@ -169,7 +182,9 @@ this.createjs = this.createjs || {};
 	 * @param {String} src The sound URI to unload.
 	 */
 	p.removeAllSounds = function () {
-		this._audioSources = {};
+		for(var key in this._audioSources) {
+			this.removeSound(key);
+		}
 	};
 
 	/**
@@ -179,6 +194,7 @@ this.createjs = this.createjs || {};
 	 */
 	p.preload = function (src) {
 		this._audioSources[src] = true;
+		this._soundInstances[src] = [];
 		if (!this._loader) {return;}
 		var loader = new this._loader(src, this);
 		loader.onload = this._handlePreloadComplete;
@@ -195,7 +211,9 @@ this.createjs = this.createjs || {};
 	 */
 	p.create = function (src, startTime, duration) {
 		if (!this.isPreloadStarted(src)) {this.preload(src);}
-		return new this._soundInstance(src, startTime, duration, this);
+		var si = new this._soundInstance(src, startTime, duration, this._audioSources[src]);
+		this._soundInstances[src].push(si);
+		return si;
 	};
 
 	// TODO Volume Getter / Setter
@@ -246,8 +264,14 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._handlePreloadComplete = function (loader) {
-		createjs.Sound._sendFileLoadEvent(loader.src);	// OJR is this worth changing to events?
-		loader.cleanUp();
+		// plugin should override this method, set _audioSources, then call super method
+		var scr = loader.src;
+		createjs.Sound._sendFileLoadEvent(src);	// OJR is this worth changing to events?
+		for (var i = 0, l = this._soundInstances[src].length; i < l; i++) {
+			var item = this._soundInstances[src][i];
+			item.setPlaybackResource(this._audioSources[src]);
+		}
+		loader.destroy();
 	};
 
 	/**
