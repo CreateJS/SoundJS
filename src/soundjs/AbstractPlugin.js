@@ -197,7 +197,7 @@ this.createjs = this.createjs || {};
 		this._soundInstances[src] = [];
 		if (!this._loader) {return;}
 		var loader = new this._loader(src, this);
-		loader.onload = this._handlePreloadComplete;
+		loader.onload = this._handlePreloadComplete;	//TODO change to event listener
 		loader.load();
 	};
 

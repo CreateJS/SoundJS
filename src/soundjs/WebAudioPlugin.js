@@ -63,12 +63,56 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	function WebAudioPlugin() {
-		this._init();
+		this.AbstractPlugin_constructor();
+
+
+// Private Properties
+		/**
+		 * Value to set panning model to equal power for SoundInstance.  Can be "equalpower" or 0 depending on browser implementation.
+		 * @property _panningModel
+		 * @type {Number / String}
+		 * @protected
+		 */
+		this._panningModel = s._panningModel;;
+
+		/**
+		 * The web audio context, which WebAudio uses to play audio. All nodes that interact with the WebAudioPlugin
+		 * need to be created within this context.
+		 * @property context
+		 * @type {AudioContext}
+		 */
+		this.context = s.context;
+
+		/**
+		 * A DynamicsCompressorNode, which is used to improve sound quality and prevent audio distortion.
+		 * It is connected to <code>context.destination</code>.
+		 *
+		 * Can be accessed by advanced users through createjs.Sound.activePlugin.dynamicsCompressorNode.
+		 * @property dynamicsCompressorNode
+		 * @type {AudioNode}
+		 */
+		this.dynamicsCompressorNode = this.context.createDynamicsCompressor();
+		this.dynamicsCompressorNode.connect(this.context.destination);
+
+		/**
+		 * A GainNode for controlling master volume. It is connected to {{#crossLink "WebAudioPlugin/dynamicsCompressorNode:property"}}{{/crossLink}}.
+		 *
+		 * Can be accessed by advanced users through createjs.Sound.activePlugin.gainNode.
+		 * @property gainNode
+		 * @type {AudioGainNode}
+		 */
+		this.gainNode = this.context.createGain();
+		this.gainNode.connect(this.dynamicsCompressorNode);
+
+		this._capabilities = s._capabilities;
+		this._loader = createjs.WebAudioLoader;
+		this._soundInstance = createjs.WebAudioSoundInstance;
 	}
+	var p = createjs.extend(WebAudioPlugin, createjs.AbstractPlugin);
 
 
+// Static Properties
 	var s = WebAudioPlugin;
-
 	/**
 	 * The capabilities of the plugin. This is generated via the {{#crossLink "WebAudioPlugin/_generateCapabilities:method"}}{{/crossLink}}
 	 * method and is used internally.
@@ -80,6 +124,25 @@ this.createjs = this.createjs || {};
 	 */
 	s._capabilities = null;
 
+	/**
+	 * Value to set panning model to equal power for SoundInstance.  Can be "equalpower" or 0 depending on browser implementation.
+	 * @property _panningModel
+	 * @type {Number / String}
+	 * @protected
+	 * @static
+	 */
+	s._panningModel = "equalpower";
+
+	/**
+	 * The web audio context, which WebAudio uses to play audio. All nodes that interact with the WebAudioPlugin
+	 * need to be created within this context.
+	 * @property context
+	 * @type {AudioContext}
+	 * @static
+	 */
+	s.context = null;
+
+// Static Methods
 	/**
 	 * Determine if the plugin can be used in the current browser/OS.
 	 * @method isSupported
@@ -228,173 +291,16 @@ this.createjs = this.createjs || {};
 	};
 
 
-	var p = WebAudioPlugin.prototype;
-	p.constructor = WebAudioPlugin;
-
-	p._capabilities = null; // doc'd above
-
-	/**
-	 * The internal master volume value of the plugin.
-	 * @property _volume
-	 * @type {Number}
-	 * @default 1
-	 * @protected
-	 */
-	p._volume = 1;
-
-	/**
-	 * The web audio context, which WebAudio uses to play audio. All nodes that interact with the WebAudioPlugin
-	 * need to be created within this context.
-	 * @property context
-	 * @type {AudioContext}
-	 */
-	p.context = null;
-
-	/**
-	 * Value to set panning model to equal power for SoundInstance.  Can be "equalpower" or 0 depending on browser implementation.
-	 * @property _panningModel
-	 * @type {Number / String}
-	 * @protected
-	 */
-	p._panningModel = "equalpower";
-
-	/**
-	 * A DynamicsCompressorNode, which is used to improve sound quality and prevent audio distortion.
-	 * It is connected to <code>context.destination</code>.
-	 *
-	 * Can be accessed by advanced users through createjs.Sound.activePlugin.dynamicsCompressorNode.
-	 * @property dynamicsCompressorNode
-	 * @type {AudioNode}
-	 */
-	p.dynamicsCompressorNode = null;
-
-	/**
-	 * A GainNode for controlling master volume. It is connected to {{#crossLink "WebAudioPlugin/dynamicsCompressorNode:property"}}{{/crossLink}}.
-	 *
-	 * Can be accessed by advanced users through createjs.Sound.activePlugin.gainNode.
-	 * @property gainNode
-	 * @type {AudioGainNode}
-	 */
-	p.gainNode = null;
-
-	/**
-	 * An object hash used internally to store ArrayBuffers, indexed by the source URI used to load it. This
-	 * prevents having to load and decode audio files more than once. If a load has been started on a file,
-	 * <code>arrayBuffers[src]</code> will be set to true. Once load is complete, it is set the the loaded
-	 * ArrayBuffer instance.
-	 * @property _arrayBuffers
-	 * @type {Object}
-	 * @protected
-	 */
-	p._arrayBuffers = null;
-
-	/**
-	 * An initialization function run by the constructor
-	 * @method _init
-	 * @protected
-	 */
-	p._init = function () {
-		this._capabilities = s._capabilities;
-		this._arrayBuffers = {};
-
-		this.context = s.context;
-		this._panningModel = s._panningModel;
-
-		// set up AudioNodes that all of our source audio will connect to
-		this.dynamicsCompressorNode = this.context.createDynamicsCompressor();
-		this.dynamicsCompressorNode.connect(this.context.destination);
-		this.gainNode = this.context.createGain();
-		this.gainNode.connect(this.dynamicsCompressorNode);
-	};
-
-	/**
-	 * Pre-register a sound for preloading and setup. This is called by {{#crossLink "Sound"}}{{/crossLink}}.
-	 * Note that WebAudio provides a <code>Loader</code> instance, which <a href="http://preloadjs.com" target="_blank">PreloadJS</a>
-	 * can use to assist with preloading.
-	 * @method register
-	 * @param {String} src The source of the audio
-	 * @param {Number} instances The number of concurrently playing instances to allow for the channel at any time.
-	 * Note that the WebAudioPlugin does not manage this property.
-	 * @return {Object} A result object, containing a "tag" for preloading purposes.
-	 */
-	p.register = function (src, instances) {
-		this._arrayBuffers[src] = true;
-		var loader = {tag: new createjs.WebAudioPlugin.Loader(src, this)};
-		return loader;
-	};
-
-	/**
-	 * Checks if preloading has started for a specific source. If the source is found, we can assume it is loading,
-	 * or has already finished loading.
-	 * @method isPreloadStarted
-	 * @param {String} src The sound URI to check.
-	 * @return {Boolean}
-	 */
-	p.isPreloadStarted = function (src) {
-		return (this._arrayBuffers[src] != null);
-	};
-
-	/**
-	 * Checks if preloading has finished for a specific source.
-	 * @method isPreloadComplete
-	 * @param {String} src The sound URI to load.
-	 * @return {Boolean}
-	 */
-	p.isPreloadComplete = function (src) {
-		return (!(this._arrayBuffers[src] == null || this._arrayBuffers[src] == true));
-	};
-
-	/**
-	 * Remove a sound added using {{#crossLink "WebAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel a preload.
-	 * @method removeSound
-	 * @param {String} src The sound URI to unload.
-	 * @since 0.4.1
-	 */
-	p.removeSound = function (src) {
-		delete(this._arrayBuffers[src]);
-	};
-
-	/**
-	 * Remove all sounds added using {{#crossLink "WebAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel a preload.
-	 * @method removeAllSounds
-	 * @param {String} src The sound URI to unload.
-	 * @since 0.4.1
-	 */
-	p.removeAllSounds = function () {
-		this._arrayBuffers = {};
-	};
-
-	/**
-	 * Add loaded results to the preload object hash.
-	 * @method addPreloadResults
-	 * @param {String} src The sound URI to unload.
-	 * @return {Boolean}
-	 */
-	p.addPreloadResults = function (src, result) {
-		this._arrayBuffers[src] = result;
-	};
-
+// Public Methods
 	/**
 	 * Handles internal preload completion.
 	 * @method _handlePreloadComplete
 	 * @protected
 	 */
 	p._handlePreloadComplete = function (loader) {
-		createjs.Sound._sendFileLoadEvent(loader.src);
-		loader.cleanUp();
-	};
+		this._audioSources[loader.src] = loader.result;
 
-	/**
-	 * Internally preload a sound. Loading uses XHR2 to load an array buffer for use with WebAudio.
-	 * @method preload
-	 * @param {String} src The sound URI to load.
-	 * @param {Object} tag Not used in this plugin.
-	 */
-	p.preload = function (src, tag) {
-		this._arrayBuffers[src] = true;
-		var loader = new createjs.WebAudioPlugin.Loader(src, this);
-		loader.onload = this._handlePreloadComplete;
-		loader.load();
+		this.AbstractPlugin__handlePreloadComplete(loader);
 	};
 
 	/**
@@ -460,7 +366,7 @@ this.createjs = this.createjs || {};
 		return "[WebAudioPlugin]";
 	};
 
-	createjs.WebAudioPlugin = WebAudioPlugin;
+	createjs.WebAudioPlugin = createjs.promote(WebAudioPlugin, "AbstractPlugin");
 }());
 
 (function () {
@@ -834,7 +740,7 @@ this.createjs = this.createjs || {};
 		this.panNode.panningModel = this._owner._panningModel;
 		this.panNode.connect(this.gainNode);
 
-		if (this._owner.isPreloadComplete(this.src) && !this._duration) {this._duration = this._owner._arrayBuffers[this.src].duration * 1000;}
+		if (this._owner.isPreloadComplete(this.src) && !this._duration) {this._duration = this._owner._audioSources[this.src].duration * 1000;}
 
 		this._endedHandler = createjs.proxy(this._handleSoundComplete, this);
 	};
@@ -896,7 +802,7 @@ this.createjs = this.createjs || {};
 	 * @protected
  	 */
 	p._handleSoundReady = function (event) {
-		if (!this._duration) {this._duration = this._owner._arrayBuffers[this.src].duration * 1000;} // NOTE *1000 because WebAudio reports everything in seconds but js uses milliseconds
+		if (!this._duration) {this._duration = this._owner._audioSources[this.src].duration * 1000;} // NOTE *1000 because WebAudio reports everything in seconds but js uses milliseconds
 		if ((this._offset*1000) > this._duration) {
 			this.playFailed();
 			return;
@@ -931,7 +837,7 @@ this.createjs = this.createjs || {};
 	 */
 	p._createAndPlayAudioNode = function(startTime, offset) {
 		var audioNode = this._owner.context.createBufferSource();
-		audioNode.buffer = this._owner._arrayBuffers[this.src];
+		audioNode.buffer = this._owner._audioSources[this.src];
 		audioNode.connect(this.panNode);
 		var dur = this._duration * 0.001;
 		audioNode.startTime = startTime + dur;
@@ -1309,81 +1215,17 @@ this.createjs = this.createjs || {};
 }());
 
 (function () {
-
 	"use strict";
+	function Loader(src) {
+		this.AbstractSoundLoader_constructor(src);
 
-	/**
-	 * An internal helper class that preloads web audio via XHR. Note that this class and its methods are not documented
-	 * properly to avoid generating HTML documentation.
-	 * #class Loader
-	 * @param {String} src The source of the sound to load.
-	 * @param {Object} owner A reference to the class that created this instance.
-	 * @constructor
-	 */
-	function Loader(src, owner) {
-		this._init(src, owner);
-	}
-
-	var p = Loader.prototype;
-	p.constructor = Loader;
-
-	// the request object for or XHR2 request
-	p.request = null;
-
-	p.owner = null;
-	p.progress = -1;
-
-	/**
-	 * The source of the sound to load. Used by callback functions when we return this class.
-	 * #property src
-	 * @type {String}
-	 */
-	p.src = null;
-
-	/**
-	 * The decoded AudioBuffer array that is returned when loading is complete.
-	 * #property result
-	 * @type {AudioBuffer}
-	 * @protected
-	 */
-	p.result = null;
-
-	// Calbacks
-	/**
-	 * The callback that fires when the load completes. This follows HTML tag naming.
-	 * #property onload
-	 * @type {Method}
-	 */
-	p.onload = null;
-
-	/**
-	 * The callback that fires as the load progresses. This follows HTML tag naming.
-	 * #property onprogress
-	 * @type {Method}
-	 */
-	p.onprogress = null;
-
-	/**
-	 * The callback that fires if the load hits an error.  This follows HTML tag naming.
-	 * #property onerror
-	 * @type {Method}
-	 * @protected
-	 */
-	p.onerror = null;
-
-	// constructor
-	p._init = function (src, owner) {
-		this.src = src;
-		this.owner = owner;
+		// the request object for or XHR2 request
+		this.request = null;
 	};
+	var p = createjs.extend(Loader, createjs.AbstractSoundLoader);
 
-	/**
-	 * Begin loading the content.
-	 * #method load
-	 * @param {String} src The path to the sound.
-	 */
-	p.load = function (src) {
-		if (src != null) {this.src = src;}
+	p.load = function(src) {
+		this.AbstractSoundLoader_load(src);
 
 		this.request = new XMLHttpRequest();
 		this.request.open("GET", this.src, true);
@@ -1391,81 +1233,41 @@ this.createjs = this.createjs || {};
 		this.request.onload = createjs.proxy(this.handleLoad, this);
 		this.request.onerror = createjs.proxy(this.handleError, this);
 		this.request.onprogress = createjs.proxy(this.handleProgress, this);
-
-		this.request.send();
 	};
 
-	/**
-	 * The loader has reported progress.
-	 *
-	 * <strong>Note</strong>: this is not a public API, but is used to allow preloaders to subscribe to load
-	 * progress as if this is an HTML audio tag. This reason is why this still uses a callback instead of an event.
-	 * #method handleProgress
-	 * @param {event} event Progress event that gives event.loaded and event.total if server is configured correctly
-	 * @protected
-	 */
-	p.handleProgress = function (event) {
+	p._handleProgress = function(event) {
 		if (!event || event.loaded > 0 && event.total == 0) {
 					return; // Sometimes we get no "total", so just ignore the progress event.
 		}
-		this.progress = event.loaded / event.total;
-		this.onprogress && this.onprogress({loaded:event.loaded, total:event.total, progress:this.progress});
+		this.AbstractSoundLoader__handleProgress(event);
 	};
 
-	/**
-	 * The sound has completed loading.
-	 * #method handleLoad
-	 * @protected
-	 */
-	p.handleLoad = function () {
+	p.handleLoad = function (event) {
 		this.owner.context.decodeAudioData(this.request.response,
-				createjs.proxy(this.handleAudioDecoded, this),
-				createjs.proxy(this.handleError, this));
+	         createjs.proxy(this.handleAudioDecoded, this),
+	         createjs.proxy(this.handleError, this));
+
+		//this.AbstractSoundLoader_handleLoad(event);
 	};
 
+
 	/**
-	 * The audio has been decoded.
-	 * #method handleAudioDecoded
-	 * @protected
-	 */
+	* The audio has been decoded.
+	* #method handleAudioDecoded
+	* @protected
+	*/
 	p.handleAudioDecoded = function (decodedAudio) {
-		this.progress = 1;
 		this.result = decodedAudio;
-		this.owner.addPreloadResults(this.src, this.result);
-		this.onload && this.onload(this);
+		this.AbstractSoundLoader_handleLoad(event);
 	};
 
-	/**
-	 * Errors have been caused by the loader.
-	 * #method handleError
-	 * @protected
-	 */
-	p.handleError = function (evt) {
-		this.owner.removeSound(this.src);
-		this.onerror && this.onerror(evt);
-	};
-
-	/**
-	 * Remove all external references from loader
-	 * #method cleanUp
-	 */
-	p.cleanUp = function () {
-		if(!this.request) {return;}
-		this.src = null;
-		this.owner = null;
-		this.request.onload = null;
-		this.request.onerror = null;
-		this.request.onprogress = null;
+	p.destroy = function () {
 		this.request = null;
-		this.onload = null;
-		this.onprogress = null;
-		this.onerror = null;
+		this.AbstractSoundLoader_destroy();
 	};
-
 	p.toString = function () {
-		return "[WebAudioPlugin Loader]";
+		return "[WebAudioLoader]";
 	};
 
-	createjs.WebAudioPlugin.Loader = Loader;
-
+	createjs.WebAudioLoader = createjs.promote(Loader, "AbstractSoundLoader");
 }());

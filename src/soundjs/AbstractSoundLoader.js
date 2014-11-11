@@ -103,7 +103,7 @@ this.createjs = this.createjs || {};
 		 * @protected
 		 */
 		this.onerror = null;
-	}
+	};
 
 	var p = createjs.extend(AbstractSoundLoader, createjs.EventDispatcher);
 
