@@ -217,6 +217,7 @@ this.createjs = this.createjs || {};
 	};
 
 	// TODO Volume Getter / Setter
+	// TODO change calls to return nothing or this for chaining
 	/**
 	 * Set the master volume of the plugin, which affects all SoundInstances.
 	 * @method setVolume
@@ -240,6 +241,7 @@ this.createjs = this.createjs || {};
 	};
 
 	// TODO Mute Getter / Setter
+	// TODO change to return nothing or this for chaining
 	/**
 	 * Mute all sounds via the plugin.
 	 * @method setMute
@@ -252,6 +254,7 @@ this.createjs = this.createjs || {};
 		return true;
 	};
 
+	// plugins should overwrite this method
 	p.toString = function () {
 		return "[AbstractPlugin]";
 	};
@@ -270,6 +273,7 @@ this.createjs = this.createjs || {};
 		for (var i = 0, l = this._soundInstances[src].length; i < l; i++) {
 			var item = this._soundInstances[src][i];
 			item.setPlaybackResource(this._audioSources[src]);
+			// ToDo consider adding play call here if playstate == playfailed
 		}
 		loader.destroy();
 	};
