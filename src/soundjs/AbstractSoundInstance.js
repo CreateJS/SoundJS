@@ -128,6 +128,7 @@ this.createjs = this.createjs || {};
 
 
 	// Getter / Setter Properties
+		// OJR TODO find original reason that we didn't use defined functions.  I think it was performance related
 		/**
 		 * The volume of the sound, between 0 and 1.
 		 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower and Opera versions 11.50 or lower,
@@ -147,6 +148,7 @@ this.createjs = this.createjs || {};
 				return this._volume;
 			},
 			set: function(value) {
+				if (value == this._volume) { return; }
 				this._volume = Math.max(0, Math.min(1, value));
 				if(this._mute) {return;}
 				this._updateVolume();
@@ -172,6 +174,7 @@ this.createjs = this.createjs || {};
 					return this._pan;
 				},
 				set: function(value) {
+					if(value == this._pan) { return; }
 					this._pan = Math.max(-1, Math.min(1, value));
 					this._updatePan();
 				}
@@ -196,6 +199,7 @@ this.createjs = this.createjs || {};
 					return this._duration;
 				},
 				set: function(value) {
+					if (value == this._duration) { return; }
 					this._duration = Math.max(0, value);
 					this._updateDuration();
 				}
@@ -328,8 +332,12 @@ this.createjs = this.createjs || {};
 				set: function(value) {
 					if (value !== true || value !== false || this._paused == value) {return;}
 					if (value == true && this.playState != createjs.Sound.PLAY_SUCCEEDED) {return;}
-					this._updatePaused(value);
 					this._paused = value;
+					if(value) {
+						this._pause();
+					} else {
+						this._resume();
+					}
 					clearTimeout(this.delayTimeoutId);
 				}
 			});
@@ -486,8 +494,12 @@ this.createjs = this.createjs || {};
 	p.setPaused = function (value) {
 		if (value !== true || value !== false || this._paused == value) {return;}
 		if (value == true && this.playState != createjs.Sound.PLAY_SUCCEEDED) {return;}
-		this._updatePaused(value);
 		this._paused = value;
+		if(value) {
+			this._pause();
+		} else {
+			this._resume();
+		}
 		clearTimeout(this.delayTimeoutId);
 		return this;
 	};
@@ -527,6 +539,7 @@ this.createjs = this.createjs || {};
 	 * @return {SoundInstance} A reference to itself, intended for chaining calls.
 	 */
 	p.setVolume = function (value) {
+		if (value == this._volume) { return this; }
 		this._volume = Math.max(0, Math.min(1, value));
 		if (!this._muted) {
 			this._updateVolume();
@@ -547,7 +560,6 @@ this.createjs = this.createjs || {};
 		return this._volume;
 	};
 
-	// TODO setMuted etc?
 	/**
 	 * Deprecated, please use {{#crossLink "SoundInstance/muted:property"}}{{/crossLink}} instead.
 	 *
@@ -557,11 +569,7 @@ this.createjs = this.createjs || {};
 	 * @deprecated
 	 */
 	p.setMute = function (value) {
-		if (value == null) {return false;}
-
-		this._muted = value;
-		this._updateVolume();
-		return true;
+		this.setMuted(value);
 	};
 
 	/**
@@ -628,6 +636,7 @@ this.createjs = this.createjs || {};
 	 * @return {SoundInstance} Returns reference to itself for chaining calls
 	 */
 	p.setPan = function (value) {
+		if(value == this._pan) { return this; }
 		this._pan = Math.max(-1, Math.min(1, value));
 		this._updatePan();
 		return this;
@@ -683,7 +692,9 @@ this.createjs = this.createjs || {};
 	 */
 	p.setPosition = function (value) {
 		this._position = Math.max(0, value);
-		this._updatePosition();
+		if (this.playState == createjs.Sound.PLAY_SUCCEEDED) {
+			this._updatePosition();
+		}
 		return this;
 	};
 
@@ -714,6 +725,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.5.3
 	 */
 	p.setDuration = function (value) {
+		if (value == this._duration) { return this; }
 		this._duration = Math.max(0, value);
 		this._updateDuration();
 		return this;
@@ -979,12 +991,22 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Internal function called when pausing or resuming playback
-	 * @method _updatePaused
+	 * Internal function called when pausing playback
+	 * @method _pause
 	 * @protected
 	 * @since 0.5.3
 	 */
-	p._updatePaused = function (value) {
+	p._pause = function () {
+		// plugin specific code
+	};
+
+	/**
+	 * Internal function called when resuming playback
+	 * @method _resume
+	 * @protected
+	 * @since 0.5.3
+	 */
+	p._resume = function () {
 		// plugin specific code
 	};
 
