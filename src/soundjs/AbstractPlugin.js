@@ -137,7 +137,8 @@ this.createjs = this.createjs || {};
 	p.register = function (src, instances) {
 		this._audioSources[src] = true;
 		if (!this._loader) {return;}
-		var loader = {tag: new this._loader(src, this)};
+		var loader = {tag: new this._loader(src)};
+		loader.onload = createjs.proxy(this._handlePreloadComplete, this);	//TODO change to event listener
 		return loader;
 	};
 
@@ -196,8 +197,8 @@ this.createjs = this.createjs || {};
 		this._audioSources[src] = true;
 		this._soundInstances[src] = [];
 		if (!this._loader) {return;}
-		var loader = new this._loader(src, this);
-		loader.onload = this._handlePreloadComplete;	//TODO change to event listener
+		var loader = new this._loader(src);
+		loader.onload = createjs.proxy(this._handlePreloadComplete, this);	//TODO change to event listener
 		loader.load();
 	};
 
@@ -266,16 +267,16 @@ this.createjs = this.createjs || {};
 	 * @method _handlePreloadComplete
 	 * @protected
 	 */
-	p._handlePreloadComplete = function (loader) {
+	p._handlePreloadComplete = function (event) {
 		// plugin should override this method, set _audioSources, then call super method
-		var scr = loader.src;
+		var src = event.target.src;
 		createjs.Sound._sendFileLoadEvent(src);	// OJR is this worth changing to events?
 		for (var i = 0, l = this._soundInstances[src].length; i < l; i++) {
 			var item = this._soundInstances[src][i];
 			item.setPlaybackResource(this._audioSources[src]);
 			// ToDo consider adding play call here if playstate == playfailed
 		}
-		loader.destroy();
+		event.target.destroy();
 	};
 
 	/**

@@ -300,6 +300,22 @@ this.createjs = this.createjs || {};
 		return si;
 	};
 
+	p.register = function (src, instances) {
+		this._audioSources[src] = true;
+		if (!this._loader) {return;}
+		var loader = {tag: new this._loader(src, this.context)};
+		return loader;
+	};
+
+	p.preload = function (src) {
+		this._audioSources[src] = true;
+		this._soundInstances[src] = [];
+		if (!this._loader) {return;}
+		var loader = new this._loader(src, this.context);
+		loader.onload = createjs.proxy(this._handlePreloadComplete, this);	//TODO change to event listener
+		loader.load();
+	};
+
 	p.toString = function () {
 		return "[WebAudioPlugin]";
 	};
@@ -311,10 +327,10 @@ this.createjs = this.createjs || {};
 	 * @method _handlePreloadComplete
 	 * @protected
 	 */
-	p._handlePreloadComplete = function (loader) {
-		this._audioSources[loader.src] = loader.result;
+	p._handlePreloadComplete = function (event) {
+		this._audioSources[event.target.src] = event.target.result;
 
-		this.AbstractPlugin__handlePreloadComplete(loader);
+		this.AbstractPlugin__handlePreloadComplete(event);
 	};
 
 	/**
@@ -601,25 +617,42 @@ this.createjs = this.createjs || {};
 //=======================================================================================
 (function () {
 	"use strict";
-	function Loader(src) {
+	function Loader(src, context) {
 		this.AbstractSoundLoader_constructor(src);
+
+		// web audio context required for decoding audio
+		this.context = context;
 
 		// the request object for or XHR2 request
 		this.request = null;
 	};
 	var p = createjs.extend(Loader, createjs.AbstractSoundLoader);
 
+
+// public methods
 	p.load = function(src) {
 		this.AbstractSoundLoader_load(src);
 
 		this.request = new XMLHttpRequest();
 		this.request.open("GET", this.src, true);
 		this.request.responseType = "arraybuffer";
-		this.request.onload = createjs.proxy(this.handleLoad, this);
-		this.request.onerror = createjs.proxy(this.handleError, this);
-		this.request.onprogress = createjs.proxy(this.handleProgress, this);
+		this.request.onload = createjs.proxy(this._handleLoad, this);
+		this.request.onerror = createjs.proxy(this._handleError, this);
+		this.request.onprogress = createjs.proxy(this._handleProgress, this);
+		this.request.send();
 	};
 
+	p.destroy = function () {
+		this.context = null;
+		this.request = null;
+		this.AbstractSoundLoader_destroy();
+	};
+	p.toString = function () {
+		return "[WebAudioLoader]";
+	};
+
+
+// private methods
 	p._handleProgress = function(event) {
 		if (!event || event.loaded > 0 && event.total == 0) {
 					return; // Sometimes we get no "total", so just ignore the progress event.
@@ -627,10 +660,11 @@ this.createjs = this.createjs || {};
 		this.AbstractSoundLoader__handleProgress(event);
 	};
 
-	p.handleLoad = function (event) {
-		this.owner.context.decodeAudioData(this.request.response,
-	         createjs.proxy(this.handleAudioDecoded, this),
-	         createjs.proxy(this.handleError, this));
+	p._handleLoad = function (event) {
+		// OJR we leave this wrapped in Loader because we need to reference src
+		this.context.decodeAudioData(this.request.response,
+	         createjs.proxy(this._handleAudioDecoded, this),
+	         createjs.proxy(this._handleError, this));
 
 		//this.AbstractSoundLoader_handleLoad(event);
 	};
@@ -641,17 +675,9 @@ this.createjs = this.createjs || {};
 	* #method handleAudioDecoded
 	* @protected
 	*/
-	p.handleAudioDecoded = function (decodedAudio) {
+	p._handleAudioDecoded = function (decodedAudio) {
 		this.result = decodedAudio;
-		this.AbstractSoundLoader_handleLoad(event);
-	};
-
-	p.destroy = function () {
-		this.request = null;
-		this.AbstractSoundLoader_destroy();
-	};
-	p.toString = function () {
-		return "[WebAudioLoader]";
+		this.AbstractSoundLoader__handleLoad(event);
 	};
 
 	createjs.WebAudioLoader = createjs.promote(Loader, "AbstractSoundLoader");
