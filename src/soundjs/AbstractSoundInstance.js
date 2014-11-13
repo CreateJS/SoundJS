@@ -124,7 +124,8 @@ this.createjs = this.createjs || {};
 		 * @default null
 		 * @protected
 		 */
-		this._startTime = startTime || 0;
+		this._startTime = Math.max(0, startTime || 0);
+		//TODO add a getter / setter for startTime?
 
 
 	// Getter / Setter Properties
@@ -192,7 +193,7 @@ this.createjs = this.createjs || {};
 		 * @default 0
 		 * @since 0.5.3
 		 */
-		this._duration = Math.max(0, duration);
+		this._duration = Math.max(0, duration || 0);
 		if (createjs.definePropertySupported) {
 			Object.defineProperty(this, "duration", {
 				get: function() {
@@ -200,7 +201,7 @@ this.createjs = this.createjs || {};
 				},
 				set: function(value) {
 					if (value == this._duration) { return; }
-					this._duration = Math.max(0, value);
+					this._duration = Math.max(0, value || 0);
 					this._updateDuration();
 				}
 			});
@@ -227,7 +228,7 @@ this.createjs = this.createjs || {};
 				}
 			});
 		}
-		if(playbackResource != false && playbackResource !== false) { this.setPlaybackResource(playbackResource); }
+		if(playbackResource !== false && playbackResource !== true) { this.setPlaybackResource(playbackResource); }
 
 		/**
 		 * The position of the playhead in milliseconds. This can be set while a sound is playing, paused, or stopped.
@@ -726,7 +727,7 @@ this.createjs = this.createjs || {};
 	 */
 	p.setDuration = function (value) {
 		if (value == this._duration) { return this; }
-		this._duration = Math.max(0, value);
+		this._duration = Math.max(0, value || 0);
 		this._updateDuration();
 		return this;
 	};
