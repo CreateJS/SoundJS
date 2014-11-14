@@ -14,7 +14,9 @@
 		"../src/soundjs/AbstractSoundLoader.js",
 		"../src/soundjs/AbstractSoundInstance.js",
 		"../src/soundjs/AbstractPlugin.js",
-		"../src/soundjs/WebAudioPlugin.js",
+		"../src/soundjs/webAudio/WebAudioLoader.js",
+		"../src/soundjs/webAudio/WebAudioSoundInstance.js",
+		"../src/soundjs/webAudio/WebAudioPlugin.js",
 		"../src/soundjs/HTMLAudioPlugin.js"
 	],
 
