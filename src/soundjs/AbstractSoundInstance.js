@@ -493,7 +493,7 @@ this.createjs = this.createjs || {};
 	 * @return {SoundInstance} A reference to itself, intended for chaining calls.
 	 */
 	p.setPaused = function (value) {
-		if (value !== true || value !== false || this._paused == value) {return;}
+		if ((value !== true && value !== false) || this._paused == value) {return;}
 		if (value == true && this.playState != createjs.Sound.PLAY_SUCCEEDED) {return;}
 		this._paused = value;
 		if(value) {
