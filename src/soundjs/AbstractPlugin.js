@@ -276,7 +276,7 @@ this.createjs = this.createjs || {};
 			item.setPlaybackResource(this._audioSources[src]);
 			// ToDo consider adding play call here if playstate == playfailed
 		}
-		event.target.destroy();
+		event.target.destroy();		// TODO consider how this could impact PreloadJS
 	};
 
 	/**

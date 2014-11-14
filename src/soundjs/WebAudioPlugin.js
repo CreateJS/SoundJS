@@ -103,11 +103,14 @@ this.createjs = this.createjs || {};
 		 */
 		this.gainNode = this.context.createGain();
 		this.gainNode.connect(this.dynamicsCompressorNode);
+		createjs.WebAudioSoundInstance.destinationNode = this.gainNode;
 
 		this._capabilities = s._capabilities;
 
 		this._loader = createjs.WebAudioLoader;
 		this._soundInstance = createjs.WebAudioSoundInstance;
+
+		this._addPropsToClasses();
 	}
 	var p = createjs.extend(WebAudioPlugin, createjs.AbstractPlugin);
 
@@ -142,6 +145,7 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.context = null;
+
 
 // Static Methods
 	/**
@@ -323,6 +327,23 @@ this.createjs = this.createjs || {};
 
 // Private Methods
 	/**
+	 * Set up needed properties on supported classes WebAudioSoundInstance and WebAudioLoader.
+	 * @method _addPropsToClasses
+	 * @static
+	 * @protected
+	 * @since 0.5.3
+	 */
+	p._addPropsToClasses = function() {
+		var c = this._soundInstance;
+		c.context = this.context;
+		c.destinationNode = this.gainNode;
+		c._panningModel = this._panningModel;
+
+		this._loader.context = this.context;
+	};
+
+
+	/**
 	 * Handles internal preload completion.
 	 * @method _handlePreloadComplete
 	 * @protected
@@ -359,29 +380,11 @@ this.createjs = this.createjs || {};
 (function () {
 	"use strict";
 
-	function SoundInstance(src, startTime, duration, playbackResource, plugin) {
+	function SoundInstance(src, startTime, duration, playbackResource) {
 		this.AbstractSoundInstance_constructor(src, startTime, duration, playbackResource);
 
 
 // public properties
-		/**
-		 * Note this is only intended for use by advanced users.
-		 * <br />Audio context used to create nodes.  This is and needs to be the same context used by {{#crossLink "WebAudioPlugin"}}{{/crossLink}}.
-	  	 * @property context
-		 * @type {AudioContext}
-		 * @since 0.5.3
-		 */
-		this.context = plugin.context;
-
-		/**
-		 * Note this is only inteded for use by advanced users.
-		 * <br /> Audio node from WebAudioPlugin that sequences to <code>context.destination</code>
-		 * @property destinationNode
-		 * @type {AudioNode}
-		 * @since 0.5.3
-		 */
-		this.destinationNode = plugin.gainNode;
-
 		/**
 		 * NOTE this is only intended for use by advanced users.
 		 * <br />GainNode for controlling <code>SoundInstance</code> volume. Connected to the {{#crossLink "WebAudioSoundInstance/destinationNode:property"}}{{/crossLink}}.
@@ -390,7 +393,7 @@ this.createjs = this.createjs || {};
 		 * @since 0.4.0
 		 *
 		 */
-		this.gainNode = this.context.createGain();
+		this.gainNode = s.context.createGain();
 
 		/**
 		 * NOTE this is only intended for use by advanced users.
@@ -399,8 +402,8 @@ this.createjs = this.createjs || {};
 		 * @type {AudioPannerNode}
 		 * @since 0.4.0
 		 */
-		this.panNode = this.context.createPanner();
-		this.panNode.panningModel = plugin._panningModel;
+		this.panNode = s.context.createPanner();
+		this.panNode.panningModel = s._panningModel;
 		this.panNode.connect(this.gainNode);
 
 		/**
@@ -453,16 +456,45 @@ this.createjs = this.createjs || {};
 		this._endedHandler = createjs.proxy(this._handleSoundComplete, this);
 	};
 	var p = createjs.extend(SoundInstance, createjs.AbstractSoundInstance);
+	var s = SoundInstance;
+
+	/**
+	 * Note this is only intended for use by advanced users.
+	 * <br />Audio context used to create nodes.  This is and needs to be the same context used by {{#crossLink "WebAudioPlugin"}}{{/crossLink}}.
+  	 * @property context
+	 * @type {AudioContext}
+	 * @static
+	 * @since 0.5.3
+	 */
+	s.context = null;
+
+	/**
+	 * Note this is only inteded for use by advanced users.
+	 * <br /> Audio node from WebAudioPlugin that sequences to <code>context.destination</code>
+	 * @property destinationNode
+	 * @type {AudioNode}
+	 * @static
+	 * @since 0.5.3
+	 */
+	s.destinationNode = null;
+
+	/**
+	 * Value to set panning model to equal power for SoundInstance.  Can be "equalpower" or 0 depending on browser implementation.
+	 * @property _panningModel
+	 * @type {Number / String}
+	 * @protected
+	 * @static
+	 */
+	s._panningModel = "equalpower";
 
 
 // Public methods
 	p.destroy = function() {
 		this.AbstractSoundInstance_destroy();
 
-		this.context = null;
-		this.destinationNode = null;
 		this.panNode.disconnect(0);
 		this.panNode = null;
+		this.gainNode.disconnect(0);
 		this.gainNode = null;
 	};
 
@@ -521,11 +553,11 @@ this.createjs = this.createjs || {};
 	};
 
 	p._handleSoundReady = function (event) {
-		this.gainNode.connect(this.destinationNode);  // this line can cause a memory leak.  Nodes need to be disconnected from the audioDestination or any sequence that leads to it.
+		this.gainNode.connect(s.destinationNode);  // this line can cause a memory leak.  Nodes need to be disconnected from the audioDestination or any sequence that leads to it.
 
 		var dur = this._duration * 0.001;
 		var pos = this._position * 0.001;
-		this.sourceNode = this._createAndPlayAudioNode((this.context.currentTime - dur), pos);
+		this.sourceNode = this._createAndPlayAudioNode((s.context.currentTime - dur), pos);
 		this._playbackStartTime = this.sourceNode.startTime - pos;
 
 		this._soundCompleteTimeout = setTimeout(this._endedHandler, (dur - pos) * 1000);
@@ -545,7 +577,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 	p._createAndPlayAudioNode = function(startTime, offset) {
-		var audioNode = this.context.createBufferSource();
+		var audioNode = s.context.createBufferSource();
 		audioNode.buffer = this.playbackResource;
 		audioNode.connect(this.panNode);
 		var dur = this._duration * 0.001;
@@ -555,7 +587,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p._pause = function () {
-		this._position = this.context.currentTime - this._playbackStartTime;  // this allows us to restart the sound at the same point in playback
+		this._position = s.context.currentTime - this._playbackStartTime;  // this allows us to restart the sound at the same point in playback
 		this.sourceNode = this._cleanUpAudioNode(this.sourceNode);
 		this._sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
 
@@ -582,7 +614,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p._calculateCurrentPosition = function () {
-		return ((this.context.currentTime - this._playbackStartTime) * 1000); // pos in seconds * 1000 to give milliseconds
+		return ((s.context.currentTime - this._playbackStartTime) * 1000); // pos in seconds * 1000 to give milliseconds
 	};
 
 	p._updatePosition = function () {
@@ -618,16 +650,16 @@ this.createjs = this.createjs || {};
 //=======================================================================================
 (function () {
 	"use strict";
-	function Loader(src, context) {
+	function Loader(src) {
 		this.AbstractSoundLoader_constructor(src);
-
-		// web audio context required for decoding audio
-		this.context = context;
 
 		// the request object for or XHR2 request
 		this.request = null;
 	};
 	var p = createjs.extend(Loader, createjs.AbstractSoundLoader);
+
+	// web audio context required for decoding audio
+	Loader.context = null;
 
 
 // public methods
@@ -644,7 +676,6 @@ this.createjs = this.createjs || {};
 	};
 
 	p.destroy = function () {
-		this.context = null;
 		this.request = null;
 		this.AbstractSoundLoader_destroy();
 	};
@@ -662,12 +693,10 @@ this.createjs = this.createjs || {};
 	};
 
 	p._handleLoad = function (event) {
-		// OJR we leave this wrapped in Loader because we need to reference src
-		this.context.decodeAudioData(this.request.response,
+		// OJR we leave this wrapped in Loader because we need to reference src and the handler only receives a single argument, the decodedAudio
+		Loader.context.decodeAudioData(this.request.response,
 	         createjs.proxy(this._handleAudioDecoded, this),
 	         createjs.proxy(this._handleError, this));
-
-		//this.AbstractSoundLoader_handleLoad(event);
 	};
 
 
