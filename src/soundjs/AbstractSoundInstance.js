@@ -848,6 +848,7 @@ this.createjs = this.createjs || {};
 	 * @param {Number} loop The number of times to loop the audio. Use -1 for infinite loops.
 	 * @param {Number} volume The volume of the sound, between 0 and 1.
 	 * @param {Number} pan The pan of the sound between -1 (left) and 1 (right). Note that pan does not work for HTML Audio.
+	 * @return {Boolean} If playback succeeded.
 	 * @protected
 	 */
 	p._beginPlaying = function (offset, loop, volume, pan) {
@@ -861,10 +862,10 @@ this.createjs = this.createjs || {};
 			this._handleSoundReady();
 			this.playState = createjs.Sound.PLAY_SUCCEEDED;
 			this._sendEvent("succeeded");
-			return;
+			return true;
 		} else {
 			this._playFailed();
-			return;
+			return false;
 		}
 	};
 
