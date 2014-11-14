@@ -297,29 +297,6 @@ this.createjs = this.createjs || {};
 
 
 // Public Methods
-	p.create = function (src, startTime, duration) {
-		if (!this.isPreloadStarted(src)) {this.preload(src);}
-		var si = new this._soundInstance(src, startTime, duration, this._audioSources[src], this);
-		this._soundInstances[src].push(si);
-		return si;
-	};
-
-	p.register = function (src, instances) {
-		this._audioSources[src] = true;
-		if (!this._loader) {return;}
-		var loader = {tag: new this._loader(src, this.context)};
-		return loader;
-	};
-
-	p.preload = function (src) {
-		this._audioSources[src] = true;
-		this._soundInstances[src] = [];
-		if (!this._loader) {return;}
-		var loader = new this._loader(src, this.context);
-		loader.onload = createjs.proxy(this._handlePreloadComplete, this);	//TODO change to event listener
-		loader.load();
-	};
-
 	p.toString = function () {
 		return "[WebAudioPlugin]";
 	};

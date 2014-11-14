@@ -138,7 +138,7 @@ this.createjs = this.createjs || {};
 		this._audioSources[src] = true;
 		if (!this._loader) {return;}
 		var loader = {tag: new this._loader(src)};
-		loader.onload = createjs.proxy(this._handlePreloadComplete, this);	//TODO change to event listener
+		loader.onload = createjs.proxy(this._handlePreloadComplete);	//TODO change to event listener
 		return loader;
 	};
 

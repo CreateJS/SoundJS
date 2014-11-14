@@ -1068,7 +1068,7 @@ this.createjs = this.createjs || {};
 		}
 		var instance = s.createInstance(src, startTime, duration);
 		var ok = s._playInstance(instance, interrupt, delay, offset, loop, volume, pan);
-		if (!ok) {instance.playFailed();}
+		//if (!ok) {instance.playFailed();}
 		return instance;
 	};
 
