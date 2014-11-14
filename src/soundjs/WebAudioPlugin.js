@@ -524,10 +524,11 @@ this.createjs = this.createjs || {};
 		this.gainNode.connect(this.destinationNode);  // this line can cause a memory leak.  Nodes need to be disconnected from the audioDestination or any sequence that leads to it.
 
 		var dur = this._duration * 0.001;
-		this.sourceNode = this._createAndPlayAudioNode((this.context.currentTime - dur), this._position);
-		this._playbackStartTime = this.sourceNode.startTime - this._position;
+		var pos = this._position * 0.001;
+		this.sourceNode = this._createAndPlayAudioNode((this.context.currentTime - dur), pos);
+		this._playbackStartTime = this.sourceNode.startTime - pos;
 
-		this._soundCompleteTimeout = setTimeout(this._endedHandler, (dur - this._position) * 1000);
+		this._soundCompleteTimeout = setTimeout(this._endedHandler, (dur - pos) * 1000);
 
 		if(this._loop != 0) {
 			this._sourceNodeNext = this._createAndPlayAudioNode(this._playbackStartTime, 0);
@@ -549,7 +550,7 @@ this.createjs = this.createjs || {};
 		audioNode.connect(this.panNode);
 		var dur = this._duration * 0.001;
 		audioNode.startTime = startTime + dur;
-		audioNode.start(audioNode.startTime, offset+this._startTime, dur - offset);
+		audioNode.start(audioNode.startTime, offset+(this._startTime*0.001), dur - offset);
 		return audioNode;
 	};
 
