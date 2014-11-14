@@ -1,17 +1,18 @@
 {
-  "name": "SoundJS",
-  "version": "0.5.2",
-  "description": "SoundJS Docs",
-  "url": "http://www.createjs.com/#!/SoundJS",
-  "logo": "assets/docs-icon-SoundJS.png",
-  "devDependencies": {
-    "grunt": "~0.4.1",
-	"grunt-contrib-concat": "~0.3.0",
-    "grunt-contrib-uglify": "~0.2.1",
-    "grunt-contrib-yuidoc": "~0.4.0",
-    "grunt-contrib-compress": "~0.5.0",
-	"grunt-contrib-copy": "~0.4.1",
-	"lodash": "~0.9.0"
-  },
-  "engine": "node >= 0.10.2"
+	"name": "SoundJS",
+	"version": "0.5.2",
+	"description": "SoundJS Docs",
+	"url": "http://www.createjs.com/#!/SoundJS",
+	"logo": "assets/docs-icon-SoundJS.png",
+	"repository": "git@github.com:CreateJS/SoundJS.git",
+	"devDependencies": {
+		"grunt": "~0.4.5",
+		"grunt-contrib-concat": "~0.5.0",
+		"grunt-contrib-uglify": "~0.6.0",
+		"grunt-contrib-yuidoc": "~0.5.2",
+		"grunt-contrib-compress": "~0.12.0",
+		"grunt-contrib-copy": "~0.7.0",
+		"lodash": "~2.4.1"
+	},
+	"engine": "node >= 0.10.22"
 }
