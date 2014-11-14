@@ -599,7 +599,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.5.3
 	 */
 	p.setMuted = function (value) {
-		if (value !== true || value !== false) {return;}
+		if (value !== true && value !== false) {return;}
 		this._muted = value;
 		this._updateVolume();
 		return this;

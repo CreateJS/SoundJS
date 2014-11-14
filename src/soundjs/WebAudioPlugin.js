@@ -587,7 +587,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p._pause = function () {
-		this._position = (s.context.currentTime - this._playbackStartTime) * 1000;  // this allows us to restart the sound at the same point in playback
+		this._position = (s.context.currentTime - this._playbackStartTime) * 1000;  // * 1000 to give milliseconds, lets us restart at same point
 		this.sourceNode = this._cleanUpAudioNode(this.sourceNode);
 		this._sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
 
