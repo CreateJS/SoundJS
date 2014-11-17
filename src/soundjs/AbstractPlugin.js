@@ -74,15 +74,6 @@ this.createjs = this.createjs || {};
 		this._soundInstances = {};
 
 		/**
-		 * The internal master volume value of the plugin.
-		 * @property _volume
-		 * @type {Number}
-		 * @default 1
-		 * @protected
-		 */
-		this._volume = 1;
-
-		/**
 		 * A reference to a loader class used by a plugin that must be set.
 		 * @type {Object}
 		 * @protected
@@ -136,10 +127,22 @@ this.createjs = this.createjs || {};
 	 */
 	p.register = function (src, instances) {
 		this._audioSources[src] = true;
+		this._soundInstances[src] = [];
 		if (!this._loader) {return;}
-		var loader = {tag: new this._loader(src)};
-		loader.onload = createjs.proxy(this._handlePreloadComplete);	//TODO change to event listener
-		return loader;
+		var loader = new this._loader(src);
+		loader.onload = createjs.proxy(this._handlePreloadComplete, this);	//TODO change to event listener
+		return { tag: loader, loader:loader };
+	};
+
+	// note sound calls register before calling preload
+	/**
+	 * Internally preload a sound.
+	 * @method preload
+	 * @param {Loader} loader The sound URI to load.
+	 */
+	p.preload = function (loader) {
+		//loader.onload = createjs.proxy(this._handlePreloadComplete, this);	//TODO change to event listener
+		loader.load();
 	};
 
 	/**
@@ -189,20 +192,6 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Internally preload a sound.
-	 * @method preload
-	 * @param {String} src The sound URI to load.
-	 */
-	p.preload = function (src) {
-		this._audioSources[src] = true;
-		this._soundInstances[src] = [];
-		if (!this._loader) {return;}
-		var loader = new this._loader(src);
-		loader.onload = createjs.proxy(this._handlePreloadComplete, this);	//TODO change to event listener
-		loader.load();
-	};
-
-	/**
 	 * Create a sound instance. If the sound has not been preloaded, it is internally preloaded here.
 	 * @method create
 	 * @param {String} src The sound source to use.
@@ -211,48 +200,12 @@ this.createjs = this.createjs || {};
 	 * @return {SoundInstance} A sound instance for playback and control.
 	 */
 	p.create = function (src, startTime, duration) {
-		if (!this.isPreloadStarted(src)) {this.preload(src);}
+		if (!this.isPreloadStarted(src)) {
+			this.preload(this.register(src).tag);
+		}
 		var si = new this._soundInstance(src, startTime, duration, this._audioSources[src]);
 		this._soundInstances[src].push(si);
 		return si;
-	};
-
-	// TODO Volume Getter / Setter
-	// TODO change calls to return nothing or this for chaining
-	/**
-	 * Set the master volume of the plugin, which affects all SoundInstances.
-	 * @method setVolume
-	 * @param {Number} value The volume to set, between 0 and 1.
-	 * @return {Boolean} If the plugin processes the setVolume call (true). The Sound class will affect all the
-	 * instances manually otherwise.
-	 */
-	p.setVolume = function (value) {
-		this._volume = value;
-		this._updateVolume();
-		return true;
-	};
-
-	/**
-	 * Get the master volume of the plugin, which affects all SoundInstances.
-	 * @method getVolume
-	 * @return The volume level, between 0 and 1.
-	 */
-	p.getVolume = function () {
-		return this._volume;
-	};
-
-	// TODO Mute Getter / Setter
-	// TODO change to return nothing or this for chaining
-	/**
-	 * Mute all sounds via the plugin.
-	 * @method setMute
-	 * @param {Boolean} value If all sound should be muted or not. Note that plugin-level muting just looks up
-	 * the mute value of Sound {{#crossLink "Sound/getMute"}}{{/crossLink}}, so this property is not used here.
-	 * @return {Boolean} If the mute call succeeds.
-	 */
-	p.setMute = function (value) {
-		this._updateVolume();
-		return true;
 	};
 
 	// plugins should overwrite this method

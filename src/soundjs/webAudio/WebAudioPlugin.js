@@ -76,6 +76,15 @@ this.createjs = this.createjs || {};
 		this._panningModel = s._panningModel;;
 
 		/**
+		 * The internal master volume value of the plugin.
+		 * @property _volume
+		 * @type {Number}
+		 * @default 1
+		 * @protected
+		 */
+		this._volume = 1;
+
+		/**
 		 * The web audio context, which WebAudio uses to play audio. All nodes that interact with the WebAudioPlugin
 		 * need to be created within this context.
 		 * @property context
@@ -299,6 +308,42 @@ this.createjs = this.createjs || {};
 // Public Methods
 	p.toString = function () {
 		return "[WebAudioPlugin]";
+	};
+
+	// TODO Volume & mute Getter / Setter??
+	// TODO change calls to return nothing or this for chaining??
+	/**
+	 * Set the master volume of the plugin, which affects all SoundInstances.
+	 * @method setVolume
+	 * @param {Number} value The volume to set, between 0 and 1.
+	 * @return {Boolean} If the plugin processes the setVolume call (true). The Sound class will affect all the
+	 * instances manually otherwise.
+	 */
+	p.setVolume = function (value) {
+		this._volume = value;
+		this._updateVolume();
+		return true;
+	};
+
+	/**
+	 * Get the master volume of the plugin, which affects all SoundInstances.
+	 * @method getVolume
+	 * @return The volume level, between 0 and 1.
+	 */
+	p.getVolume = function () {
+		return this._volume;
+	};
+
+	/**
+	 * Mute all sounds via the plugin.
+	 * @method setMute
+	 * @param {Boolean} value If all sound should be muted or not. Note that plugin-level muting just looks up
+	 * the mute value of Sound {{#crossLink "Sound/getMute"}}{{/crossLink}}, so this property is not used here.
+	 * @return {Boolean} If the mute call succeeds.
+	 */
+	p.setMute = function (value) {
+		this._updateVolume();
+		return true;
 	};
 
 

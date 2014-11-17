@@ -47,11 +47,57 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	function TagPool(src) {
-		this._init(src);
-	}
+		/**
+		 * The source of the tag pool.
+		 * #property src
+		 * @type {String}
+		 * @protected
+		 */
+		this.src = src;
 
+		/**
+		 * The total number of HTMLAudio tags in this pool. This is the maximum number of instance of a certain sound
+		 * that can play at one time.
+		 * #property length
+		 * @type {Number}
+		 * @default 0
+		 * @protected
+		 */
+		this.length = 0;
+
+		/**
+		 * The number of unused HTMLAudio tags.
+		 * #property available
+		 * @type {Number}
+		 * @default 0
+		 * @protected
+		 */
+		this.available = 0;
+
+		/**
+		 * A list of all available tags in the pool.
+		 * #property tags
+		 * @type {Array}
+		 * @protected
+		 */
+		this.tags = [];
+
+		/**
+		 * The duration property of all audio tags, converted to milliseconds, which originally is only available on the
+		 * last tag in the tags array because that is the one that is loaded.
+		 * #property
+		 * @type {Number}
+		 * @protected
+		 */
+		this.duration = 0;
+	};
+
+	var p = TagPool.prototype;
+	p.constructor = TagPool;
 	var s = TagPool;
 
+
+// Static Properties
 	/**
 	 * A hash lookup of each sound channel, indexed by the audio source.
 	 * #property tags
@@ -60,6 +106,8 @@ this.createjs = this.createjs || {};
 	 */
 	s.tags = {};
 
+
+// Static Methods
 	/**
 	 * Get a tag pool. If the pool doesn't exist, create it.
 	 * #method get
@@ -88,18 +136,6 @@ this.createjs = this.createjs || {};
 		channel.removeAll();
 		delete(s.tags[src]);
 		return true;
-	};
-
-	/**
-	 * Delete all TagPools and all related tags.
-	 * #method removeAll
-	 * @static
-	 */
-	s.removeAll = function () {
-		for(var channel in s.tags) {
-			s.tags[channel].removeAll();	// this stops and removes all active instances
-		}
-		s.tags = {};
 	};
 
 	/**
@@ -141,59 +177,8 @@ this.createjs = this.createjs || {};
 		return channel.getDuration();
 	};
 
-	var p = TagPool.prototype;
-	p.constructor = TagPool;
 
-	/**
-	 * The source of the tag pool.
-	 * #property src
-	 * @type {String}
-	 * @protected
-	 */
-	p.src = null;
-
-	/**
-	 * The total number of HTMLAudio tags in this pool. This is the maximum number of instance of a certain sound
-	 * that can play at one time.
-	 * #property length
-	 * @type {Number}
-	 * @default 0
-	 * @protected
-	 */
-	p.length = 0;
-
-	/**
-	 * The number of unused HTMLAudio tags.
-	 * #property available
-	 * @type {Number}
-	 * @default 0
-	 * @protected
-	 */
-	p.available = 0;
-
-	/**
-	 * A list of all available tags in the pool.
-	 * #property tags
-	 * @type {Array}
-	 * @protected
-	 */
-	p.tags = null;
-
-	/**
-	 * The duration property of all audio tags, converted to milliseconds, which originally is only available on the
-	 * last tag in the tags array because that is the one that is loaded.
-	 * #property
-	 * @type {Number}
-	 * @protected
-	 */
-	p.duration = 0;
-
-	// constructor
-	p._init = function (src) {
-		this.src = src;
-		this.tags = [];
-	};
-
+// Pulic Methods
 	/**
 	 * Add an HTMLAudio tag into the pool.
 	 * #method add
@@ -261,6 +246,6 @@ this.createjs = this.createjs || {};
 		return "[HTMLAudioPlugin TagPool]";
 	};
 
-	createjs.HTMLAudioPlugin.TagPool = TagPool;
+	createjs.HTMLAudioTagPool = TagPool;
 
 }());

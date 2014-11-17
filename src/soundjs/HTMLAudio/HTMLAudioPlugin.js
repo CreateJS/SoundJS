@@ -92,14 +92,38 @@ this.createjs = this.createjs || {};
 	 * @constructor
 	 */
 	function HTMLAudioPlugin() {
-		this._init();
+		this.AbstractPlugin_constructor();
+
+
+	// Public Properties
+		/**
+		 * The default number of instances to allow.  Used by {{#crossLink "Sound"}}{{/crossLink}} when a source
+		 * is registered using the {{#crossLink "Sound/register"}}{{/crossLink}} method.  This is only used if
+		 * a value is not provided.
+		 *
+		 * <b>NOTE this property only exists as a limitation of HTML audio.</b>
+		 * @property defaultNumChannels
+		 * @type {Number}
+		 * @default 2
+		 * @since 0.4.0
+		 */
+		this.defaultNumChannels = 2;
+
+		this._capabilities = s._capabilities;
+
+		this._loader = createjs.HTMLAudioLoader;
+		this._soundInstance = createjs.HTMLAudioSoundInstance;
 	}
 
+	var p = createjs.extend(HTMLAudioPlugin, createjs.AbstractPlugin);
 	var s = HTMLAudioPlugin;
 
+
+// Static Properties
 	/**
 	 * The maximum number of instances that can be loaded and played. This is a browser limitation, primarily limited to IE9.
 	 * The actual number varies from browser to browser (and is largely hardware dependant), but this is a safe estimate.
+	 * Audio sprites work around this limitation.
 	 * @property MAX_INSTANCES
 	 * @type {Number}
 	 * @default 30
@@ -170,7 +194,7 @@ this.createjs = this.createjs || {};
 	s._capabilities = null;
 
 	/**
-	 * Deprecated now that we have audio sprite support.  Audio sprites are strongly recommend on iOS.
+	 * Deprecated now that we have audio sprite support.  Audio sprites are strongly recommend on iOS for the following reasons:
 	 * <li>it can only have one &lt;audio&gt; tag</li>
 	 * <li>can not preload or autoplay the audio</li>
 	 * <li>can not cache the audio</li>
@@ -183,6 +207,8 @@ this.createjs = this.createjs || {};
 	 */
 	s.enableIOS = false;
 
+
+// Static Methods
 	/**
 	 * Determine if the plugin can be used in the current browser/OS. Note that HTML audio is available in most modern
 	 * browsers, but is disabled in iOS because of its limitations.
@@ -224,57 +250,16 @@ this.createjs = this.createjs || {};
 		}  // OJR another way to do this might be canPlayType:"m4a", codex: mp4
 	}
 
-	var p = HTMLAudioPlugin.prototype;
-	p.constructor = HTMLAudioPlugin;
 
-	// doc'd above
-	p._capabilities = null;
-
-	/**
-	 * Object hash indexed by the source of each file to indicate if an audio source is loaded, or loading.
-	 * @property _audioSources
-	 * @type {Object}
-	 * @protected
-	 * @since 0.4.0
-	 */
-	p._audioSources = null;
-
-	/**
-	 * The default number of instances to allow.  Used by {{#crossLink "Sound"}}{{/crossLink}} when a source
-	 * is registered using the {{#crossLink "Sound/register"}}{{/crossLink}} method.  This is only used if
-	 * a value is not provided.
-	 *
-	 * <b>NOTE this property only exists as a limitation of HTML audio.</b>
-	 * @property defaultNumChannels
-	 * @type {Number}
-	 * @default 2
-	 * @since 0.4.0
-	 */
-	p.defaultNumChannels = 2;
-
-	/**
-	 * An initialization function run by the constructor
-	 * @method _init
-	 * @protected
-	 */
-	p._init = function () {
-		this._capabilities = s._capabilities;
-		this._audioSources = {};
+// public methods
+	p.toString = function () {
+		return "[HTMLAudioPlugin]";
 	};
 
-	/**
-	 * Pre-register a sound instance when preloading/setup. This is called by {{#crossLink "Sound"}}{{/crossLink}}.
-	 * Note that this provides an object containing a tag used for preloading purposes, which
-	 * <a href="http://preloadjs.com" target="_blank">PreloadJS</a> can use to assist with preloading.
-	 * @method register
-	 * @param {String} src The source of the audio
-	 * @param {Number} instances The number of concurrently playing instances to allow for the channel at any time.
-	 * @return {Object} A result object, containing a tag for preloading purposes and a numChannels value for internally
-	 * controlling how many instances of a source can be played by default.
-	 */
+
+// private methods
 	p.register = function (src, instances) {
-		this._audioSources[src] = true;  // Note this does not mean preloading has started
-		var channel = createjs.HTMLAudioPlugin.TagPool.get(src);
+		var channel = createjs.HTMLAudioTagPool.get(src);
 		var tag = null;
 		var l = instances;
 		for (var i = 0; i < l; i++) {
@@ -282,11 +267,12 @@ this.createjs = this.createjs || {};
 			channel.add(tag);
 		}
 
-		return {
-			tag:tag // Return one instance for preloading purposes
-		};
-	};
+		var l = AbstractPlugin_register(src, instances);
+		l.loader.tag = tag;
+		l.tag = tag;
 
+		return l;
+	};
 	/**
 	 * Create an HTML audio tag.
 	 * @method _createTag
@@ -303,76 +289,10 @@ this.createjs = this.createjs || {};
 		return tag;
 	};
 
-	/**
-	 * Remove a sound added using {{#crossLink "HTMLAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel
-	 * a preload.
-	 * @method removeSound
-	 * @param {String} src The sound URI to unload.
-	 * @since 0.4.1
-	 */
-	p.removeSound = function (src) {
-		delete(this._audioSources[src]);
-		createjs.HTMLAudioPlugin.TagPool.remove(src);
+ 	p.removeSound = function (src) {
+		this.AbstractPlugin_removeSound(src);
+		createjs.HTMLAudioTagPool.remove(src);
 	};
 
-	/**
-	 * Remove all sounds added using {{#crossLink "HTMLAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel a preload.
-	 * @method removeAllSounds
-	 * @param {String} src The sound URI to unload.
-	 * @since 0.4.1
-	 */
-	p.removeAllSounds = function () {
-		this._audioSources = {};
-		createjs.HTMLAudioPlugin.TagPool.removeAll();
-	};
-
-	/**
-	 * Create a sound instance. If the sound has not been preloaded, it is internally preloaded here.
-	 * @method create
-	 * @param {String} src The sound source to use.
-	 * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
-	 * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
-	 * @return {SoundInstance} A sound instance for playback and control.
-	 */
-	p.create = function (src, startTime, duration) {
-		// if this sound has not be registered, create a tag and preload it
-		if (!this.isPreloadStarted(src)) {
-			var channel = createjs.HTMLAudioPlugin.TagPool.get(src);
-			var tag = this._createTag(src);
-			tag.id = src;
-			channel.add(tag);
-			this.preload(src, {tag:tag});
-		}
-
-		return new createjs.HTMLAudioPlugin.SoundInstance(src, startTime, duration, this);
-	};
-
-	/**
-	 * Checks if preloading has started for a specific source.
-	 * @method isPreloadStarted
-	 * @param {String} src The sound URI to check.
-	 * @return {Boolean} If the preload has started.
-	 * @since 0.4.0
-	 */
-	p.isPreloadStarted = function (src) {
-		return (this._audioSources[src] != null);
-	};
-
-	/**
-	 * Internally preload a sound.
-	 * @method preload
-	 * @param {String} src The sound URI to load.
-	 * @param {Object} tag An HTML audio tag used to load src.
-	 * @since 0.4.0
-	 */
-	p.preload = function (src, tag) {
-		this._audioSources[src] = true;
-		new createjs.HTMLAudioPlugin.Loader(src, tag);
-	};
-
-	p.toString = function () {
-		return "[HTMLAudioPlugin]";
-	};
-
-	createjs.HTMLAudioPlugin = HTMLAudioPlugin;
+	createjs.HTMLAudioPlugin = createjs.promote(HTMLAudioPlugin, "AbstractPlugin");;
 }());

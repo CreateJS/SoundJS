@@ -766,8 +766,10 @@ this.createjs = this.createjs || {};
 			details.data.channels = numChannels || SoundChannel.maxPerChannel();
 		}
 
+		// TODO figure out if we can ditch this whole tag setup
 		details.tag = loader.tag;
-		if (loader.completeHandler) {details.completeHandler = loader.completeHandler;}
+		details.loader = loader.loader;
+		if (loader.onload) {details.completeHandler = loader.onload;}	// used by preloadJS
 		if (loader.type) {details.type = loader.type;}
 
 		return details;
@@ -818,7 +820,7 @@ this.createjs = this.createjs || {};
 		s._preloadHash[details.src].push({src:src, id:id, data:details.data});
 		if (s._preloadHash[details.src].length == 1) {
 			// OJR note this will disallow reloading a sound if loading fails or the source changes
-			s.activePlugin.preload(details.src, details.tag);
+			s.activePlugin.preload(details.loader);
 		} else {
 			if (s._preloadHash[details.src][0] == true) {return true;}
 		}
