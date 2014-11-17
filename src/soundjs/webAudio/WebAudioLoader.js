@@ -27,6 +27,10 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @module SoundJS
+ */
+
 // namespace:
 this.createjs = this.createjs || {};
 
