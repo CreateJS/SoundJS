@@ -75,7 +75,7 @@ this.createjs = this.createjs || {};
 
 	// Private Properties
 		// Proxies, make removing listeners easier.
-		this._loadedHandler = createjs.proxy(this._handleCanPlayThrough, this);;
+		this._loadedHandler = createjs.proxy(this._canPlayThroughHandler, this);;
 	};
 	var p = createjs.extend(Loader, createjs.AbstractSoundLoader);
 
@@ -99,7 +99,6 @@ this.createjs = this.createjs || {};
 	p.destroy = function() {
 		clearInterval(this.preloadTimer);
 		this.tag.removeEventListener && this.tag.removeEventListener("canplaythrough", this._loadedHandler);
-		this.tag.removeEventListener("canplaythrough", this_loadedHandler);
 		this.tag.onreadystatechange = null;
 
 		this.tag = null;
@@ -108,6 +107,23 @@ this.createjs = this.createjs || {};
 
 	p.toString = function () {
 		return "[HTMLAudioPlugin Loader]";
+	};
+
+
+// Private Methods
+	/**
+	 * handle when sound is ready
+	 * #method _canPlayThroughHandler
+	 * @param event
+	 * @protected
+	 */
+	p._canPlayThroughHandler = function(event) {
+		clearInterval(this.preloadTimer);
+		this.tag.removeEventListener && this.tag.removeEventListener("canplaythrough", this._loadedHandler);
+		this.tag.onreadystatechange = null;
+
+		this._handleCanPlayThrough(event);
+		this._handleLoad(event);
 	};
 
 	/**
