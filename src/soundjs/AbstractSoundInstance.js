@@ -884,7 +884,7 @@ this.createjs = this.createjs || {};
 		this.setVolume(volume);
 		this.setPan(pan);
 
-		if (this.playbackResource != null && this._position < this._duration) {
+		if (this._playbackResource != null && this._position < this._duration) {
 			this._paused = false;
 			this._handleSoundReady();
 			this.playState = createjs.Sound.PLAY_SUCCEEDED;
