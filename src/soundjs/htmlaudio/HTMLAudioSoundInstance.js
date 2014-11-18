@@ -47,7 +47,7 @@ this.createjs = this.createjs || {};
 
 		// Proxies, make removing listeners easier.
 		this._endedHandler = createjs.proxy(this._handleSoundComplete, this);
-		this._readyHandler = createjs.proxy(this._handleSoundReady, this);
+		this._readyHandler = createjs.proxy(this._handleTagReady, this);
 		this._stalledHandler = createjs.proxy(this.playFailed, this);
 		this._audioSpriteEndHandler = createjs.proxy(this._handleAudioSpriteLoop, this);
 		this._loopHandler = createjs.proxy(this._handleSoundComplete, this);
@@ -126,9 +126,9 @@ this.createjs = this.createjs || {};
 		if (this._audioSpriteStopTime) {
 			this._playbackResource.addEventListener(createjs.HTMLAudioPlugin._TIME_UPDATE, this._audioSpriteEndHandler, false);
 		} else {
+			this._playbackResource.addEventListener(createjs.HTMLAudioPlugin._AUDIO_ENDED, this._endedHandler, false);
 			if(this._loop != 0) {
 				this._playbackResource.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this._loopHandler, false);
-				this._playbackResource.addEventListener(createjs.HTMLAudioPlugin._AUDIO_ENDED, this._endedHandler, false);
 				this._playbackResource.loop = true;
 			}
 		}
@@ -140,7 +140,7 @@ this.createjs = this.createjs || {};
 		this._playbackResource.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_READY, this._readyHandler, false);
 		this._playbackResource.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_STALLED, this._stalledHandler, false);
 
-		this.handleSoundReady();
+		this._handleSoundReady();
 	};
 
 	p._pause = function () {
