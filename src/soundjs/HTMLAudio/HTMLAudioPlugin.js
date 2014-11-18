@@ -248,16 +248,10 @@ this.createjs = this.createjs || {};
 			var playType = extensionMap[ext] || ext;
 			s._capabilities[ext] = (t.canPlayType("audio/" + ext) != "no" && t.canPlayType("audio/" + ext) != "") || (t.canPlayType("audio/" + playType) != "no" && t.canPlayType("audio/" + playType) != "");
 		}  // OJR another way to do this might be canPlayType:"m4a", codex: mp4
-	}
-
-
-// public methods
-	p.toString = function () {
-		return "[HTMLAudioPlugin]";
 	};
 
 
-// private methods
+// public methods
 	p.register = function (src, instances) {
 		var channel = createjs.HTMLAudioTagPool.get(src);
 		var tag = null;
@@ -273,6 +267,18 @@ this.createjs = this.createjs || {};
 
 		return l;
 	};
+
+	p.removeSound = function (src) {
+		this.AbstractPlugin_removeSound(src);
+		createjs.HTMLAudioTagPool.remove(src);
+	};
+
+	p.toString = function () {
+		return "[HTMLAudioPlugin]";
+	};
+
+
+// private methods
 	/**
 	 * Create an HTML audio tag.
 	 * @method _createTag
@@ -280,6 +286,7 @@ this.createjs = this.createjs || {};
 	 * @return {HTMLElement} Returns an HTML audio tag.
 	 * @protected
 	 */
+	// TODO move this to tagpool when it changes to be a standard object pool
 	p._createTag = function (src) {
 		var tag = document.createElement("audio");
 		tag.autoplay = false;
@@ -289,10 +296,14 @@ this.createjs = this.createjs || {};
 		return tag;
 	};
 
- 	p.removeSound = function (src) {
-		this.AbstractPlugin_removeSound(src);
-		createjs.HTMLAudioTagPool.remove(src);
+	p._handlePreloadComplete = function (event) {
+		var src = event.target.src;
+		this._audioSources[src] = event.target.tag;
+
+		// this.AbstractPlugin__handlePreloadComplete(event);
+		createjs.Sound._sendFileLoadEvent(src);
+		event.target.destroy();
 	};
 
-	createjs.HTMLAudioPlugin = createjs.promote(HTMLAudioPlugin, "AbstractPlugin");;
+	createjs.HTMLAudioPlugin = createjs.promote(HTMLAudioPlugin, "AbstractPlugin");
 }());

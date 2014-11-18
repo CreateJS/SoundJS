@@ -34,8 +34,9 @@
 // namespace:
 this.createjs = this.createjs || {};
 
+//TODO verify that tags no longer need to be precreated
+//TODO modify this now that tags do not need to be precreated (for Chrome?)
 (function () {
-
 	"use strict";
 
 	/**
@@ -47,6 +48,9 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	function TagPool(src) {
+
+
+//Public Properties
 		/**
 		 * The source of the tag pool.
 		 * #property src
@@ -178,7 +182,7 @@ this.createjs = this.createjs || {};
 	};
 
 
-// Pulic Methods
+// Public Methods
 	/**
 	 * Add an HTMLAudio tag into the pool.
 	 * #method add
@@ -247,5 +251,4 @@ this.createjs = this.createjs || {};
 	};
 
 	createjs.HTMLAudioTagPool = TagPool;
-
 }());
