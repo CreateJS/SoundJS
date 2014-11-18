@@ -50,7 +50,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	function Loader(src) {
-		this.AbstractSoundLoader_contructor();
+		this.AbstractSoundLoader_constructor();
 
 
 	// Public properties
@@ -82,7 +82,7 @@ this.createjs = this.createjs || {};
 
 // Public methods
 	p.load = function(src) {
-		this.AbstractSoundLoader.load(src);
+		this.AbstractSoundLoader_load(src);
 
 		this.preloadTimer = setInterval(createjs.proxy(this._preloadTick, this), 200);
 

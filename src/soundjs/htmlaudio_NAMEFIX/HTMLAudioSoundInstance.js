@@ -208,5 +208,5 @@ this.createjs = this.createjs || {};
 
 	 */
 
-	createjs.HTMLAudioPlugin.SoundInstance = SoundInstance;
+	createjs.HTMLAudioSoundInstance = createjs.promote(SoundInstance, "AbstractSoundInstance");
 }());

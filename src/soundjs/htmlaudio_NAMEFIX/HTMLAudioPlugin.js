@@ -261,7 +261,7 @@ this.createjs = this.createjs || {};
 			channel.add(tag);
 		}
 
-		var l = AbstractPlugin_register(src, instances);
+		var l = this.AbstractPlugin_register(src, instances);
 		l.loader.tag = tag;
 		l.tag = tag;
 
