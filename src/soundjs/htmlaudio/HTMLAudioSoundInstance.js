@@ -40,22 +40,23 @@ this.createjs = this.createjs || {};
 	function SoundInstance(src, startTime, duration, playbackResource) {
 		this.AbstractSoundInstance_constructor(src, startTime, duration, playbackResource);
 
+
 // Private Properties
 		this._audioSpriteStopTime = null;
 		this._delayTimeoutId = null;
 
 		// Proxies, make removing listeners easier.
 		this._endedHandler = createjs.proxy(this._handleSoundComplete, this);
-		this._stalledHandler = createjs.proxy(this._handleSoundStalled, this);
+		this._readyHandler = createjs.proxy(this._handleSoundReady, this);
+		this._stalledHandler = createjs.proxy(this.playFailed, this);
 		this._audioSpriteEndHandler = createjs.proxy(this._handleAudioSpriteLoop, this);
 		this._loopHandler = createjs.proxy(this._handleSoundComplete, this);
 
 		if (duration) {
 			this._audioSpriteStopTime = (startTime + duration) * 0.001;
 		} else {
-			this._duration = createjs.HTMLAudioPlugin.TagPool.getDuration(this.src);
+			this._duration = createjs.HTMLAudioTagPool.getDuration(this.src);
 		}
-		this._init(src, startTime, duration);
 	}
 	var p = createjs.extend(SoundInstance, createjs.AbstractSoundInstance);
 
@@ -92,6 +93,8 @@ this.createjs = this.createjs || {};
 			tag.pause();
 			tag.loop = false;
 			tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_ENDED, this._endedHandler, false);
+			tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_READY, this._readyHandler, false);
+			tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_STALLED, this._stalledHandler, false);
 			tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this._loopHandler, false);
 			tag.removeEventListener(createjs.HTMLAudioPlugin._TIME_UPDATE, this._audioSpriteEndHandler, false);
 
@@ -99,33 +102,31 @@ this.createjs = this.createjs || {};
 				tag.currentTime = this._startTime;
 			} catch (e) {
 			} // Reset Position
-			createjs.HTMLAudioPlugin.TagPool.setInstance(this.src, tag);
+			createjs.HTMLAudioTagPool.setInstance(this.src, tag);
 			this._playbackResource = null;
 		}
 	};
 
 	p._beginPlaying = function (offset, loop, volume, pan) {
-		this._playbackResource = createjs.HTMLAudioPlugin.TagPool.getInstance(this.src);
-		this.AbstractSoundInstance__beginPlaying(offset, loop, volume, pan);
-		/*
-		if (tag.readyState !== 4) {
+		this._playbackResource = createjs.HTMLAudioTagPool.getInstance(this.src);
+		return this.AbstractSoundInstance__beginPlaying(offset, loop, volume, pan);
+	};
+
+	p._handleSoundReady = function (event) {
+		if (this._playbackResource.readyState !== 4) {
+			var tag = this._playbackResource;
 			tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_READY, this._readyHandler, false);
 			tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_STALLED, this._stalledHandler, false);
 			tag.preload = "auto"; // This is necessary for Firefox, as it won't ever "load" until this is set.
 			tag.load();
-		} else {
-			this._handleSoundReady(null);
+			return;
 		}
-		*/
-	};
 
-	p._handleSoundReady = function (event) {
 		this._playbackResource.currentTime = (this._startTime + this._position) * 0.001;
-
 		if (this._audioSpriteStopTime) {
 			this._playbackResource.addEventListener(createjs.HTMLAudioPlugin._TIME_UPDATE, this._audioSpriteEndHandler, false);
 		} else {
-			if(this._remainingLoops != 0) {
+			if(this._loop != 0) {
 				this._playbackResource.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this._loopHandler, false);
 				this._playbackResource.addEventListener(createjs.HTMLAudioPlugin._AUDIO_ENDED, this._endedHandler, false);
 				this._playbackResource.loop = true;
@@ -135,11 +136,11 @@ this.createjs = this.createjs || {};
 		this._playbackResource.play();
 	};
 
-	// Note: Sounds stall when trying to begin playback of a new audio instance when the existing instances
-	//  has not loaded yet. This doesn't mean the sound will not play.
-	p._handleSoundStalled = function (event) {
-		this._cleanUp();  // OJR this will stop playback, we could remove this and let the developer decide how to handle stalled instances
-		this._sendEvent("failed");
+	p._handleTagReady = function (event) {
+		this._playbackResource.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_READY, this._readyHandler, false);
+		this._playbackResource.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_STALLED, this._stalledHandler, false);
+
+		this.handleSoundReady();
 	};
 
 	p._pause = function () {
@@ -182,11 +183,11 @@ this.createjs = this.createjs || {};
 	p._handleAudioSpriteLoop = function (event) {
 		if(this._playbackResource.currentTime <= this._audioSpriteStopTime) {return;}
 		this._playbackResource.pause();
-		if(this._remainingLoops == 0) {
+		if(this._loop == 0) {
 			this._handleSoundComplete(null);
 		} else {
 			this._position = 0;
-			this._remainingLoops--;
+			this._loop--;
 			this._playbackResource.currentTime = this._startTime * 0.001;
 			if(!this._paused) {this._playbackResource.play();}
 			this._sendEvent("loop");

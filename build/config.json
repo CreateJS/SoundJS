@@ -17,7 +17,10 @@
 		"../src/soundjs/webAudio/WebAudioLoader.js",
 		"../src/soundjs/webAudio/WebAudioSoundInstance.js",
 		"../src/soundjs/webAudio/WebAudioPlugin.js",
-		"../src/soundjs/HTMLAudioPlugin.js"
+    	"../src/soundjs/htmlaudio/HTMLAudioTagPool.js",
+		"../src/soundjs/htmlaudio/HTMLAudioLoader.js",
+    	"../src/soundjs/htmlaudio/HTMLAudioSoundInstance.js",
+    	"../src/soundjs/htmlaudio/HTMLAudioPlugin.js"
 	],
 
 	"flashplugin_source": [

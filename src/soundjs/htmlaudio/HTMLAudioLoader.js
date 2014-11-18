@@ -50,7 +50,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	function Loader(src) {
-		this.AbstractSoundLoader_constructor();
+		this.AbstractSoundLoader_constructor(src);
 
 
 	// Public properties

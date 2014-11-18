@@ -273,6 +273,12 @@ this.createjs = this.createjs || {};
 		createjs.HTMLAudioTagPool.remove(src);
 	};
 
+	p.create = function (src, startTime, duration) {
+		var si = this.AbstractPlugin_create(src, startTime, duration);
+		si.setPlaybackResource(null);
+		return si;
+	};
+
 	p.toString = function () {
 		return "[HTMLAudioPlugin]";
 	};
@@ -301,7 +307,7 @@ this.createjs = this.createjs || {};
 		this._audioSources[src] = event.target.tag;
 
 		// this.AbstractPlugin__handlePreloadComplete(event);
-		createjs.Sound._sendFileLoadEvent(src);
+		createjs.Sound._sendFileLoadEvent(src)
 		event.target.destroy();
 	};
 

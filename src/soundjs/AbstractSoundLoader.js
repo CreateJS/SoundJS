@@ -115,7 +115,7 @@ this.createjs = this.createjs || {};
 	 * @param {String} src The path to the sound.
 	 */
 	p.load = function (src) {
-		if (src != null) {this.src = src;}
+		if (src) {this.src = src;}
 		// plugin specific code
 	};
 
