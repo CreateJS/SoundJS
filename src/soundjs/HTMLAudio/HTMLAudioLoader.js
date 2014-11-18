@@ -91,6 +91,7 @@ this.createjs = this.createjs || {};
 		// Note that canplaythrough callback doesn't work in Chrome, we have to use the event.
 		this.tag.addEventListener && this.tag.addEventListener("canplaythrough", this._loadedHandler);
 		this.tag.onreadystatechange = this._loadedHandler;
+		this.tag.onerror = this._handleError;
 		this.tag.preload = "auto";
 		//this.tag.src = src;  // already set
 		this.tag.load();
@@ -100,6 +101,7 @@ this.createjs = this.createjs || {};
 		clearInterval(this.preloadTimer);
 		this.tag.removeEventListener && this.tag.removeEventListener("canplaythrough", this._loadedHandler);
 		this.tag.onreadystatechange = null;
+		this.tag.onerror = null;
 
 		this.tag = null;
 		this.AbstractSoundLoader_destroy();
@@ -121,6 +123,7 @@ this.createjs = this.createjs || {};
 		clearInterval(this.preloadTimer);
 		this.tag.removeEventListener && this.tag.removeEventListener("canplaythrough", this._loadedHandler);
 		this.tag.onreadystatechange = null;
+		this.tag.onerror = null;
 
 		this._handleCanPlayThrough(event);
 		this._handleLoad(event);
