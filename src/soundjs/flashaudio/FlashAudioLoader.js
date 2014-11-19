@@ -35,7 +35,6 @@
 this.createjs = this.createjs || {};
 
 (function () {
-
 	"use strict";
 
 	/**
@@ -50,142 +49,73 @@ this.createjs = this.createjs || {};
 	 * @param {Object} flash The flash instance that will do the preloading.
 	 * @protected
 	 */
-	function Loader(src, owner, flash) {
-		this._init(src, owner, flash);
+	function Loader(src) {
+		this.AbstractSoundLoader_constructor(src);
+
+
+// Public properties
+		/**
+		 * ID used to facilitate communication with flash.
+		 * #property flashId
+		 * @type {String}
+		 */
+		this.flashId = null;
+
 	}
+	var p = createjs.extend(Loader, createjs.AbstractSoundLoader);
+	// TODO make this extend PreloadJS Loader so we can be compatible
 
-	var p = Loader.prototype;
-	p.constructor = Loader;
 
+// Static Properties
+	var s = Loader;
 	/**
 	 * A reference to the Flash instance that gets created.
 	 * #property flash
 	 * @type {Object | Embed}
 	 */
-	p._flash = null;
+	s._flash = null;
 
 	/**
-	 * The source file to be loaded.
-	 * #property src
-	 * @type {String}
+	 * A list of loader instances that tried to load before _flash was set
+	 * #property _preloadInstances
+	 * @type {Array}
+	 * @private
 	 */
-	p.src = null;
+	s._preloadInstances = [];
 
 	/**
-	 * ID used to facilitate communication with flash.
-	 * #property flashId
-	 * @type {String}
+	 * Set the Flash instance on the class, and start loading on any instances that had load called
+	 * before flash was ready
+	 * #method setFlash
+	 * @param flash Flash instance that handles loading and playback
 	 */
-	p.flashId = null;
-
-	/**
-	 * The percentage of progress.
-	 * #property progress
-	 * @type {Number}
-	 * @default -1
-	 */
-	p.progress = -1;
-
-	/**
-	 * Used to report if audio is ready.  Value of 4 indicates ready.
-	 * #property readyState
-	 * @type {Number}
-	 * @default 0
-	 */
-	p.readyState = 0;
-
-	/**
-	 * Indicates if <code>load</code> has been called on this.
-	 * #property loading
-	 * @type {Boolean}
-	 * @default false
-	 */
-	p.loading = false;
-
-	/**
-	 * Plugin that created this.  This will be an instance of <code>FlashAudioPlugin</code>.
-	 * #property owner
-	 * @type {Object}
-	 */
-	p.owner = null;
-
-// Calbacks
-	/**
-	 * The callback that fires when the load completes. This follows HTML tag name conventions.
-	 * #property onload
-	 * @type {Method}
-	 */
-	p.onload = null;
-
-	/**
-	 * The callback that fires as the load progresses. This follows HTML tag name conventions.
-	 * #property onprogress
-	 * @type {Method}
-	 */
-	p.onprogress = null;
-
-	/**
-	 * The callback that fires if the load hits an error. This follows HTML tag name conventions.
-	 * #property onerror
-	 * @type {Method}
-	 */
-	p.onerror = null;
-
-	// constructor
-	p._init = function (src, owner, flash) {
-		this.src = src;
-		this.owner = owner;
-		this._flash = flash;
-	};
-
-	/**
-	 * Called when Flash has been initialized. If a load call was made before this, call it now.
-	 * #method initialize
-	 * @param {Object | Embed} flash A reference to the Flash instance.
-	 */
-	p.initialize = function (flash) {
-		this._flash = flash;
-		if (this.loading) {
-			this.loading = false;
-			this.load(this.src);
+	s.setFlash = function(flash) {
+		s._flash = flash;
+		for(var i = s._preloadInstances; i--; ) {
+			var loader = s._preloadInstances.pop();
+			loader.load();
 		}
 	};
 
-	/**
-	 * Start loading.
-	 * #method load
-	 * @param {String} src The path to the sound.
-	 * @return {Boolean} If the load was started. If Flash has not been initialized, the load will fail.
-	 */
+// public methods
 	p.load = function (src) {
-		if (src != null) {
-			this.src = src;
-		}
-		if (this._flash == null || !this.owner.flashReady) {
-			this.loading = true;
+		this.AbstractSoundLoader_load(src);
+
+		if (Loader._flash == null) {
 			// register for future preloading
-			this.owner._preloadInstances[this.src] = this;
-			return false;
+			s._preloadInstances.push(this);
+			return;
 		}
 
 		this.flashId = this._flash.preload(this.src);
 		// Associate this preload instance with the FlashID, so callbacks can route here.
-		this.owner.registerPreloadInstance(this.flashId, this);
-		return true;
+		// TODO change this to an event
+		createjs.Sound.activePlugin.registerPreloadInstance(this.flashId, this);
 	};
 
-	/**
-	 * Receive progress from Flash and pass it to callback.
-	 *
-	 * <strong>Note</strong>: this is not a public API, but is used to allow preloaders to subscribe to load
-	 * progress as if this is an HTML audio tag. This reason is why this still uses a callback instead of an event.
-	 * #method handleProgress
-	 * @param {Number} loaded Amount loaded
-	 * @param {Number} total Total amount to be loaded.
-	 */
 	p.handleProgress = function (loaded, total) {
 		this.progress = loaded / total;
-		this.onprogress && this.onprogress({loaded:loaded, total:total, progress:this.progress});
+		this.AbstractSoundLoader__handleProgress({loaded: loaded, total: total});
 	};
 
 	/**
@@ -193,11 +123,7 @@ this.createjs = this.createjs || {};
 	 * #method handleComplete
 	 */
 	p.handleComplete = function () {
-		this.progress = 1;
-		this.readyState = 4;
-		this.owner._registerLoadedSrc(this.src);
-		createjs.Sound._sendFileLoadEvent(this.src);
-		this.onload && this.onload();
+		this.AbstractSoundLoader__handleLoad();
 	};
 
 	/**
@@ -205,13 +131,13 @@ this.createjs = this.createjs || {};
 	 * @param {Event} error
 	 */
 	p.handleError = function (error) {
-		this.onerror && this.onerror(error);
+		this.AbstractSoundLoader__handleError(error);
 	};
 
 	p.toString = function () {
 		return "[FlashAudioLoader]";
 	};
 
-	createjs.FlashAudioLoader = Loader;
+	createjs.FlashAudioLoader = createjs.promote(Loader, "AbstractSoundLoader");
 
 }());

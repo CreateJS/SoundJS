@@ -151,16 +151,6 @@ this.createjs = this.createjs || {};
 		this._flashPreloadInstances = {};
 
 		/**
-		 * A hash of Sound Preload instances indexed by the src. This lookup is required to load sounds if internal
-		 * preloading is tried when flash is not ready.
-		 * @property _preloadInstances
-		 * @type {Object}
-		 * @protected
-		 * @since 0.4.0
-		 */
-		this._preloadInstances = {};
-
-		/**
 		 * An array of Sound Preload instances that are waiting to preload. Once Flash is initialized, the queued
 		 * instances are preloaded.
 		 * @property _queuedInstances
@@ -286,7 +276,6 @@ this.createjs = this.createjs || {};
 		this._queuedInstances.length = 0;
 		this._flashInstances = {};
 		this._flashPreloadInstances = {};
-		this._preloadInstances = {};
 		// NOTE sound cannot be removed from a swf
 
 		this.AbstractPlugin_removeAllSounds();
@@ -306,7 +295,7 @@ this.createjs = this.createjs || {};
 	 */
 	p._handleSWFReady = function (event) {
 		this._flash = event.ref;
-		this._loader.flash = event.ref;
+		this._loader.setFlash(event.ref);
 		this._soundInstance.flash = event.ref;
 	};
 
@@ -329,12 +318,6 @@ this.createjs = this.createjs || {};
 		for (var n in this._flashPreloadInstances) {
 			this._flashPreloadInstances[n].initialize(this._flash);
 		}
-
-		// load sounds that tried to preload before flash was ready
-		for (var n in this._preloadInstances) {
-			this._preloadInstances[n].initialize(this._flash);
-		}
-		this._preloadInstances = {};
 
 		// Associate flash instance with any sound instance that has already been played.
 		for (var n in this._flashInstances) {
@@ -419,7 +402,7 @@ this.createjs = this.createjs || {};
 
 	/*
 	 * Handles events from Flash, and routes communication to a {{#crossLink "SoundInstance"}}{{/crossLink}} via
-	 * the Flash ID. The method and arguments from Flash are run directly on the sound instance.
+	 * the Flash ID. The method and arguments from Flash are run directly on the loader or sound instance.
 	 * @method handleSoundEvent
 	 * @param {String} flashId Used to identify the SoundInstance.
 	 * @param {String} method Indicates the method to run.
