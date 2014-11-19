@@ -177,8 +177,12 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
 
+    <!--
     <script type="text/javascript" src="../lib/soundjs-NEXT.combined.js"></script>
-    <!-- Note: FlashPlugin is only needed to support older browsers -->
+    <!-- Note: FlashPlugin is only needed to support older browsers --
+    <script type="text/javascript" src="../lib/flashplugin-NEXT.combined.js"></script>
+    -->
+    <script type="text/javascript" src="../lib/soundjs-NEXT.combined.js"></script>
     <script type="text/javascript" src="../lib/flashplugin-NEXT.combined.js"></script>
 
     <!-- We also provide hosted minified versions of all CreateJS libraries.
@@ -327,7 +331,7 @@
             var delay = $(".delaySlider").slider("option", "value") *1000;
             var offset = $(".offsetSlider").slider("option", "value")*1000;
             if (offset < 0) { offset = null; }
-            var volume = $(".volumeSlider").slider("option", "value");
+            var volume = $(".volumeSlider").slider("option", "value") / 100;
             var pan = $(".panSlider").slider("option", "value");
 			instance.play(interruptValue, delay, offset, loop, volume, pan);
 		});

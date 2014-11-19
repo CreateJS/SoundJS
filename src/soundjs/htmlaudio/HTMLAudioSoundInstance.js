@@ -122,6 +122,7 @@ this.createjs = this.createjs || {};
 			return;
 		}
 
+		this._updateVolume();
 		this._playbackResource.currentTime = (this._startTime + this._position) * 0.001;
 		if (this._audioSpriteStopTime) {
 			this._playbackResource.addEventListener(createjs.HTMLAudioPlugin._TIME_UPDATE, this._audioSpriteEndHandler, false);
