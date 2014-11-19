@@ -28,7 +28,7 @@ module.exports = function (grunt) {
 					build: {
 						files: {
 							'output/<%= pkg.name.toLowerCase() %>-<%= version %>.min.js': getConfigValue('source'),
-							'output/flashplugin-<%= version %>.min.js': getConfigValue('flashplugin_source'),
+							'output/flashaudioplugin-<%= version %>.min.js': getConfigValue('flashaudioplugin_source'),
 						}
 					}
 				},
@@ -70,8 +70,8 @@ module.exports = function (grunt) {
 							'output/<%= pkg.name.toLowerCase() %>-<%= version %>.combined.js': combineSource([
 										{cwd: '', config:'config.json', source:'source'}
 									]),
-							'output/flashplugin-<%= version %>.combined.js': combineSource([
-																	{cwd: '', config:'config.json', source:'flashplugin_source'}
+							'output/flashaudioplugin-<%= version %>.combined.js': combineSource([
+																	{cwd: '', config:'config.json', source:'flashaudioplugin_source'}
 																])
 						}
 					}
@@ -132,8 +132,8 @@ module.exports = function (grunt) {
 						file: '../src/soundjs/version.js',
 						version: '<%= version %>'
 					},
-					flashplugin: {
-						file: '../src/soundjs/version_flashplugin.js',
+					flashaudioplugin: {
+						file: '../src/soundjs/version_flashaudioplugin.js',
 						version: '<%= version %>'
 					}
 				},
@@ -142,8 +142,8 @@ module.exports = function (grunt) {
 					sound: {
 						file: '../src/soundjs/version.js'
 					},
-					flashplugin: {
-						file: '../src/soundjs/version_flashplugin.js'
+					flashaudioplugin: {
+						file: '../src/soundjs/version_flashaudioplugin.js'
 					}
 				}
 			}

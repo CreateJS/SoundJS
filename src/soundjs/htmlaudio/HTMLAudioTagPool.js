@@ -247,7 +247,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p.toString = function () {
-		return "[HTMLAudioPlugin TagPool]";
+		return "[HTMLAudioTagPool]";
 	};
 
 	createjs.HTMLAudioTagPool = TagPool;

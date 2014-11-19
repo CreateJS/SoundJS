@@ -161,7 +161,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p.toString = function () {
-		return "[WebAudioPlugin SoundInstance]";
+		return "[WebAudioSoundInstance]";
 	};
 
 

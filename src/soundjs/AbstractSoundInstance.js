@@ -210,7 +210,7 @@ this.createjs = this.createjs || {};
 		/**
 		 * Object that holds plugin specific resource need for audio playback.
 		 * This is set internally by the plugin.  For example, WebAudioPlugin will set an array buffer,
-		 * HTMLAudioPlugin will set a tag, FlashPlugin will set a flash reference.
+		 * HTMLAudioPlugin will set a tag, FlashAudioPlugin will set a flash reference.
 		 *
 		 * @property playbackResource
 		 * @type {Object}
@@ -508,7 +508,7 @@ this.createjs = this.createjs || {};
 // get/set methods that allow support for IE8
 	/**
 	 * NOTE {{#crossLink "SoundInstance/paused:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * and getPaused remains to allow support for IE8 with FlashPlugin.
+	 * and getPaused remains to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * Returns true if the instance is currently paused.
 	 *
@@ -522,7 +522,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/paused:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * setPaused remains to allow support for IE8 with FlashPlugin.
+	 * setPaused remains to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * Pause or resume the instance.  Note you can also resume playback with {{#crossLink "SoundInstance/play"}}{{/crossLink}}.
 	 *
@@ -545,7 +545,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/volume:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * setVolume remains to allow support for IE8 with FlashPlugin.
+	 * setVolume remains to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * Set the volume of the instance.
 	 *
@@ -570,7 +570,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/volume:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getVolume remains to allow support for IE8 with FlashPlugin.
+	 * getVolume remains to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * Get the volume of the instance. The actual output volume of a sound can be calculated using:
 	 * <code>myInstance.getVolume() * createjs.Sound.getVolume();</code>
@@ -607,7 +607,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/muted:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * setMuted exists to allow support for IE8 with FlashPlugin.
+	 * setMuted exists to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * Mute and unmute the sound. Muted sounds will still play at 0 volume. Note that an unmuted sound may still be
 	 * silent depending on {{#crossLink "Sound"}}{{/crossLink}} volume, instance volume, and Sound muted.
@@ -629,7 +629,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/muted:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getMuted remains to allow support for IE8 with FlashPlugin.
+	 * getMuted remains to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * Get the mute value of the instance.
 	 *
@@ -646,7 +646,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/pan:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getPan remains to allow support for IE8 with FlashPlugin.
+	 * getPan remains to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * Set the left(-1)/right(+1) pan of the instance. Note that {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}} does not
 	 * support panning, and only simple left/right panning has been implemented for {{#crossLink "WebAudioPlugin"}}{{/crossLink}}.
@@ -669,7 +669,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/pan:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getPan remains to allow support for IE8 with FlashPlugin.
+	 * getPan remains to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * Get the left/right pan of the instance. Note in WebAudioPlugin this only gives us the "x" value of what is
 	 * actually 3D audio.
@@ -687,7 +687,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/position:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getPosition remains to allow support for IE8 with FlashPlugin.
+	 * getPosition remains to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * Get the position of the playhead of the instance in milliseconds.
 	 *
@@ -706,7 +706,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/position:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * setPosition remains to allow support for IE8 with FlashPlugin.
+	 * setPosition remains to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * Set the position of the playhead in the instance. This can be set while a sound is playing, paused, or
 	 * stopped.
@@ -728,7 +728,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/duration:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getDuration exists to allow support for IE8 with FlashPlugin.
+	 * getDuration exists to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * Get the duration of the instance, in milliseconds.
 	 * Note a sound needs to be loaded before it will have duration, unless it was set manually to create an audio sprite.
@@ -745,7 +745,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/duration:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * setDuration exists to allow support for IE8 with FlashPlugin.
+	 * setDuration exists to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * Set the duration of the audio.  Generally this is not called, but it can be used to create an audio sprite out of an existing SoundInstance.
 	 *
@@ -763,7 +763,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/playbackResource:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * setPlaybackResource exists to allow support for IE8 with FlashPlugin.
+	 * setPlaybackResource exists to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * An object containing any resources needed for audio playback, set by the plugin.
 	 * Only meant for use by advanced users.
@@ -781,7 +781,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/playbackResource:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getPlaybackResource exists to allow support for IE8 with FlashPlugin.
+	 * getPlaybackResource exists to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * An object containing any resources needed for audio playback, usually set by the plugin.
 	 *
@@ -796,7 +796,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/loop:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getLoop exists to allow support for IE8 with FlashPlugin.
+	 * getLoop exists to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * The number of play loops remaining. Negative values will loop infinitely.
 	 *
@@ -810,7 +810,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * NOTE {{#crossLink "SoundInstance/loop:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * setLoop exists to allow support for IE8 with FlashPlugin.
+	 * setLoop exists to allow support for IE8 with FlashAudioPlugin.
 	 *
 	 * Set the number of play loops remaining.
 	 *

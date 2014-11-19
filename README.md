@@ -46,7 +46,7 @@ run locally, and the HTML audio plugin will be used instead.
 The fallback built-in plugin, which manages audio playback via the HTML5 <audio> tag. This will be used in instances
 where the WebAudio plugin is not available.
 
-### [FlashPlugin](http://createjs.com/Docs/SoundJS/classes/FlashPlugin.html)
+### [FlashAudioPlugin](http://createjs.com/Docs/SoundJS/classes/FlashAudioPlugin.html)
 An additional plugin which uses a flash shim (and SWFObject) to playback audio using Flash. You must manually set up and
 register this plugin.
 

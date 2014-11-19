@@ -45,8 +45,8 @@
 	<script type="text/javascript" src="./assets/easeljs-NEXT.min.js"></script> <!-- note tweenjs needs easeljs ticker -->
 	<script type="text/javascript" src="./assets/tweenjs-NEXT.min.js"></script>
     <script type="text/javascript" src="../lib/soundjs-NEXT.combined.js"></script>
-	<!-- Note: FlashPlugin is only needed to support older browsers -->
-    <script type="text/javascript" src="../lib/flashplugin-NEXT.combined.js"></script>
+	<!-- Note: FlashAudioPlugin is only needed to support older browsers -->
+    <script type="text/javascript" src="../lib/FlashAudioPlugin-NEXT.combined.js"></script>
 
     <!-- We also provide hosted minified versions of all CreateJS libraries.
         http://code.createjs.com -->
@@ -70,13 +70,13 @@
 		var volume, pan;		// 2 easeljs shapes to represent these values
 
 		function init() {
-			createjs.FlashPlugin.swfPath = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
+			createjs.FlashAudioPlugin.swfPath = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
 			if (params.type == "flash") {
-				createjs.Sound.registerPlugins([createjs.FlashPlugin]);
+				createjs.Sound.registerPlugins([createjs.FlashAudioPlugin]);
 			} else if (params.type == "html5") {
 				createjs.Sound.registerPlugins([createjs.HTMLAudioPlugin]);
 			} else {
-				createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
+				createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin]);
 			}
 
 			if (!createjs.Sound.isReady()) {

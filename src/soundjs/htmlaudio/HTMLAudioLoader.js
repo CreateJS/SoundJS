@@ -108,7 +108,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p.toString = function () {
-		return "[HTMLAudioPlugin Loader]";
+		return "[HTMLAudioLoader]";
 	};
 
 

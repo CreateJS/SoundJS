@@ -23,9 +23,11 @@
     	"../src/soundjs/htmlaudio/HTMLAudioPlugin.js"
 	],
 
-	"flashplugin_source": [
+	"flashaudioplugin_source": [
 		"../src/swfobject.js",
-        "../src/soundjs/FlashPlugin.js",
+        "../src/soundjs/flashaudio/FlashAudioLoader.js",
+		"../src/soundjs/flashaudio/FlashAudioSoundInstance.js",
+		"../src/soundjs/flashaudio/FlashAudioPlugin.js",
         "../src/soundjs/version_flashplugin.js"
 	],
 

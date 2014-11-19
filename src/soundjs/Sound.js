@@ -94,12 +94,12 @@ this.createjs = this.createjs || {};
 	 * <b>Plugins</b><br />
 	 * By default, the {{#crossLink "WebAudioPlugin"}}{{/crossLink}} or the {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}
 	 * are used (when available), although developers can change plugin priority or add new plugins (such as the
-	 * provided {{#crossLink "FlashPlugin"}}{{/crossLink}}). Please see the {{#crossLink "Sound"}}{{/crossLink}} API
+	 * provided {{#crossLink "FlashAudioPlugin"}}{{/crossLink}}). Please see the {{#crossLink "Sound"}}{{/crossLink}} API
 	 * methods for more on the playback and plugin APIs. To install plugins, or specify a different plugin order, see
 	 * {{#crossLink "Sound/installPlugins"}}{{/crossLink}}.
 	 *
 	 * <h4>Example</h4>
-	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashPlugin]);
+	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashAudioPlugin]);
 	 *      createjs.Sound.alternateExtensions = ["mp3"];
 	 *      createjs.Sound.addEventListener("fileload", createjs.proxy(this.loadHandler, (this));
 	 *      createjs.Sound.registerSound("path/to/mySound.ogg", "sound");
@@ -112,7 +112,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * The maximum number of concurrently playing instances of the same sound can be specified in the "data" argument
 	 * of {{#crossLink "Sound/registerSound"}}{{/crossLink}}.  Note that if not specified, the active plugin will apply
-	 * a default limit.  Currently HTMLAudioPlugin sets a default limit of 2, while WebAudioPlugin and FlashPlugin set a
+	 * a default limit.  Currently HTMLAudioPlugin sets a default limit of 2, while WebAudioPlugin and FlashAudioPlugin set a
 	 * default limit of 100.
 	 *
 	 *      createjs.Sound.registerSound("sound.mp3", "soundId", 4);
@@ -318,7 +318,7 @@ this.createjs = this.createjs || {};
 	 * can play these types, so modifying this list before a plugin is initialized will allow the plugins to try to
 	 * support additional media types.
 	 *
-	 * NOTE this does not currently work for {{#crossLink "FlashPlugin"}}{{/crossLink}}.
+	 * NOTE this does not currently work for {{#crossLink "FlashAudioPlugin"}}{{/crossLink}}.
 	 *
 	 * More details on file formats can be found at <a href="http://en.wikipedia.org/wiki/Audio_file_format" target="_blank">http://en.wikipedia.org/wiki/Audio_file_format</a>.<br />
 	 * A very detailed list of file formats can be found at <a href="http://www.fileinfo.com/filetypes/audio" target="_blank">http://www.fileinfo.com/filetypes/audio</a>.
@@ -585,8 +585,8 @@ this.createjs = this.createjs || {};
 	 * Register a list of Sound plugins, in order of precedence. To register a single plugin, pass a single element in the array.
 	 *
 	 * <h4>Example</h4>
-	 *      createjs.FlashPlugin.swfPath = "../src/SoundJS/";
-	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
+	 *      createjs.FlashAudioPlugin.swfPath = "../src/SoundJS/";
+	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin]);
 	 *
 	 * @method registerPlugins
 	 * @param {Array} plugins An array of plugins classes to install.
@@ -629,8 +629,8 @@ this.createjs = this.createjs || {};
 	 * This example sets up a Flash fallback, but only if there is no plugin specified yet.
 	 *
 	 * 	if (!createjs.Sound.isReady()) {
-	 *		createjs.FlashPlugin.swfPath = "../src/SoundJS/";
-	 * 		createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashPlugin]);
+	 *		createjs.FlashAudioPlugin.swfPath = "../src/SoundJS/";
+	 * 		createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin]);
 	 *	}
 	 *
 	 * @method isReady

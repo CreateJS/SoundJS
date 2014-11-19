@@ -5,7 +5,7 @@ this.createjs = this.createjs || {};
 
 (function () {
 
-	var s = createjs.FlashPlugin = createjs.FlashPlugin || {};
+	var s = createjs.FlashAudioPlugin = createjs.FlashAudioPlugin || {};
 
 	/**
 	 * The version string for this release.

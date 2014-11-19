@@ -71,7 +71,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p.toString = function () {
-		return "[HTMLAudioPlugin SoundInstance]";
+		return "[HTMLAudioSoundInstance]";
 	};
 
 //Private Methods

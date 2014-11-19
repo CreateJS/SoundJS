@@ -9,6 +9,8 @@ CRITICAL (may break existing content):
 - removed iOS disabling by default on HTMLAudioPlugin
 - SoundInstance stop, setVolume, setPan, setPosition
 - SoundInstance deprecated pause / resume, please use SoundInstance.paused property instead.
+- renamed FlashPlugin to FlashAudioPlugin, deprecated FlashPlugin for next release.
+  Note this means FlashPlugin-NEXT has also changed to FlashAudioPlugin-NEXT.
 
 *****
 - Added constructors to all non-static classes (Thanks kaesve)
@@ -36,8 +38,8 @@ CRITICAL (may break existing content):
   Note this will still accept and apply play call arguments, so you can change offset, volume, etc
 - Changed SoundInstance.play to handle all arguments on playing, paused, and stopped instances
 - added public loop property to SoundInstance
-- fixed an issue with FlashPlugin that would set position to an incorrect value when pausing
-- changed FlashPlugin to grab the duration of audio as soon as a SoundInstance is created
+- fixed an issue with FlashAudioPlugin that would set position to an incorrect value when pausing
+- changed FlashAudioPlugin to grab the duration of audio as soon as a SoundInstance is created
 - fixed progress event of WebAudioPlugin Loader, for use with PreloadJS
 - Implemented new base classes for Plugin, SoundInstance, and SoundLoader.
 - SoundInstance added properties duration, position, loop, mute, pause (with backup methods for browser that do not support getter/setters)
