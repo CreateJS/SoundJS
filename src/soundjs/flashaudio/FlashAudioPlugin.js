@@ -39,6 +39,12 @@ this.createjs = this.createjs || {};
 	"use strict";
 
 	/**
+	 * FlashPlugin has been renamed to {{#crossLink "FlashAudioPlugin"}}{{/crossLink}}.
+	 * @class FlashPlugin
+	 * @deprecated
+	 */
+
+	/**
 	 * Play sounds using a Flash instance. This plugin is not used by default, and must be registered manually in
 	 * {{#crossLink "Sound"}}{{/crossLink}} using the {{#crossLink "Sound/registerPlugins"}}{{/crossLink}} method. This
 	 * plugin is recommended to be included if sound support is required in older browsers such as IE8.
@@ -67,11 +73,134 @@ this.createjs = this.createjs || {};
 	function FlashAudioPlugin() {
 		this.AbstractPlugin_constructor();
 
-		this._init();
+
+// Public Properties
+		/**
+		 * A developer flag to output all flash events to the console (if it exists).  Used for debugging.
+		 *
+		 *      createjs.Sound.activePlugin.showOutput = true;
+		 *
+		 * @property showOutput
+		 * @type {Boolean}
+		 * @default false
+		 */
+		this.showOutput = false;
+
+
+//Private Properties
+		/**
+		 * The id name of the DIV that gets created for Flash content.
+		 * @property _CONTAINER_ID
+		 * @type {String}
+		 * @default flashAudioContainer
+		 * @protected
+		 */
+		this._CONTAINER_ID = "flashAudioContainer";
+
+		/**
+		 * The id name of the DIV wrapper that contains the Flash content.
+		 * @property _WRAPPER_ID
+		 * @type {String}
+		 * @default SoundJSFlashContainer
+		 * @protected
+		 * @since 0.4.1
+		 */
+		this._WRAPPER_ID = "SoundJSFlashContainer";
+
+		/**
+		 * A reference to the DIV container that gets created to hold the Flash instance.
+		 * @property _container
+		 * @type {HTMLDivElement}
+		 * @protected
+		 */
+		this._container = null,
+
+		/**
+		 * A reference to the Flash instance that gets created.
+		 * @property flash
+		 * @type {Object | Embed}
+		 * @protected
+		 */
+		this._flash = null;
+
+		/**
+		 * Determines if the Flash object has been created and initialized. This is required to make <code>ExternalInterface</code>
+		 * calls from JavaScript to Flash.
+		 * @property flashReady
+		 * @type {Boolean}
+		 * @default false
+		 */
+		this.flashReady = false;
+
+		/**
+		 * A hash of SoundInstances indexed by the related ID in Flash. This lookup is required to connect sounds in
+		 * JavaScript to their respective instances in Flash.
+		 * @property _flashInstances
+		 * @type {Object}
+		 * @protected
+		 */
+		this._flashInstances = {};
+
+		/**
+		 * A hash of Sound Preload instances indexed by the related ID in Flash. This lookup is required to connect
+		 * a preloading sound in Flash with its respective instance in JavaScript.
+		 * @property _flashPreloadInstances
+		 * @type {Object}
+		 * @protected
+		 */
+		this._flashPreloadInstances = {};
+
+		/**
+		 * A hash of Sound Preload instances indexed by the src. This lookup is required to load sounds if internal
+		 * preloading is tried when flash is not ready.
+		 * @property _preloadInstances
+		 * @type {Object}
+		 * @protected
+		 * @since 0.4.0
+		 */
+		this._preloadInstances = {};
+
+		/**
+		 * An array of Sound Preload instances that are waiting to preload. Once Flash is initialized, the queued
+		 * instances are preloaded.
+		 * @property _queuedInstances
+		 * @type {Object}
+		 * @protected
+		 */
+		this._queuedInstances = [];
+
+
+		this._capabilities = s._capabilities;
+
+		this._loader = createjs.FlashAudioLoader;
+		this._soundInstance = createjs.FlashAudioSoundInstance;
+
+		// Create DIV
+		var w = this.wrapper = document.createElement("div");
+		w.id = this._WRAPPER_ID;
+		w.style.position = "absolute";
+		w.style.marginLeft = "-1px";
+		w.className = this._WRAPPER_ID;
+		document.body.appendChild(w);
+
+		// Create Placeholder
+		var c = this._container = document.createElement("div");
+		c.id = this._CONTAINER_ID;
+		c.appendChild(document.createTextNode("SoundJS Flash Container"));
+		w.appendChild(c);
+
+		var path = s.swfPath;
+		var val = swfobject.embedSWF(path + "FlashAudioPlugin.swf", this._CONTAINER_ID, "1", "1",
+				"9.0.0", null, null, {"AllowScriptAccess" : "always"}, null,
+				createjs.proxy(this._handleSWFReady, this)
+		);
 	};
+
 	var p = createjs.extend(FlashAudioPlugin, createjs.AbstractPlugin);
 	var s = FlashAudioPlugin;
 
+
+// Static properties
 	/**
 	 * The capabilities of the plugin. This is generated via the {{#crossLink "WebAudioPlugin/_generateCapabilities"}}{{/crossLink}}
 	 * method. Please see the Sound {{#crossLink "Sound/getCapabilities"}}{{/crossLink}} method for a list of available
@@ -82,16 +211,6 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s._capabilities = null;
-
-	// TODO DEPRECATED
-	/**
-	 * REMOVED in favor of {{#crossLink "FlashAudioPlugin/swfPath:property"}}{{/crossLink}}
-	 * @property BASE_PATH
-	 * @type {String}
-	 * @default null
-	 * @static
-	 * @deprecated
-	 */
 
 	/**
 	 * The path relative to the HTML page that the FlashAudioPlugin.swf resides. Note if this is not correct, this
@@ -104,6 +223,8 @@ this.createjs = this.createjs || {};
 	 */
 	s.swfPath = "src/SoundJS/";
 
+
+// Static Methods
 	/**
 	 * Determine if the plugin can be used in the current browser/OS.
 	 * @method isSupported
@@ -145,484 +266,230 @@ this.createjs = this.createjs || {};
 	};
 
 
-	var p = s.prototype = {
+//public methods
+	p.register = function (src, instances) {
+		if (!this.flashReady) {
+			this._queuedInstances.push(src);
+		}
+		return this.AbstractPlugin_register(src, instances);
+	};
 
-		/**
-		 * An object hash indexed by ID that indicates if each source is loaded or loading.
-		 * @property _audioSources
-		 * @type {Object}
-		 * @protected
-		 */
-		_audioSources:null,
+	p.removeSound = function (src) {
+		var i = createjs.indexOf(this._queuedInstances, src);
+		if(i != -1) {this._queuedInstances.splice(i,1);}
+		// NOTE sound cannot be removed from a swf
 
-		/**
-		 * The internal volume value of the plugin.
-		 * @property _volume
-		 * @type {Number}
-		 * @default 1
-		 * @protected
-		 */
-		_volume:1,
+		this.AbstractPlugin_removeSound(src);
+	};
 
-		/**
-		 * The id name of the DIV that gets created for Flash content.
-		 * @property _CONTAINER_ID
-		 * @type {String}
-		 * @default flashAudioContainer
-		 * @protected
-		 */
-		_CONTAINER_ID:"flashAudioContainer",
+	p.removeAllSounds = function () {
+		this._queuedInstances.length = 0;
+		this._flashInstances = {};
+		this._flashPreloadInstances = {};
+		this._preloadInstances = {};
+		// NOTE sound cannot be removed from a swf
 
-		/**
-		 * The id name of the DIV wrapper that contains the Flash content.
-		 * @property _WRAPPER_ID
-		 * @type {String}
-		 * @default SoundJSFlashContainer
-		 * @protected
-		 * @since 0.4.1
-		 */
-		_WRAPPER_ID:"SoundJSFlashContainer",
+		this.AbstractPlugin_removeAllSounds();
+	};
 
-		// doc'd above
-		_capabilities:null,
-
-// FlashAudioPlugin Specifics
-		/**
-		 * A reference to the DIV container that gets created to hold the Flash instance.
-		 * @property _container
-		 * @type {HTMLDivElement}
-		 * @protected
-		 */
-		_container:null,
-
-		/**
-		 * A reference to the Flash instance that gets created.
-		 * @property flash
-		 * @type {Object | Embed}
-		 * @protected
-		 */
-		_flash:null,
-
-		/**
-		 * Determines if the Flash object has been created and initialized. This is required to make <code>ExternalInterface</code>
-		 * calls from JavaScript to Flash.
-		 * @property flashReady
-		 * @type {Boolean}
-		 * @default false
-		 */
-		flashReady:false,
-
-		/**
-		 * A hash of SoundInstances indexed by the related ID in Flash. This lookup is required to connect sounds in
-		 * JavaScript to their respective instances in Flash.
-		 * @property _flashInstances
-		 * @type {Object}
-		 * @protected
-		 */
-		_flashInstances:null,
-
-		/**
-		 * A hash of Sound Preload instances indexed by the related ID in Flash. This lookup is required to connect
-		 * a preloading sound in Flash with its respective instance in JavaScript.
-		 * @property _flashPreloadInstances
-		 * @type {Object}
-		 * @protected
-		 */
-		_flashPreloadInstances:null,
-
-		/**
-		 * A hash of Sound Preload instances indexed by the src. This lookup is required to load sounds if internal
-		 * preloading is tried when flash is not ready.
-		 * @property _preloadInstances
-		 * @type {Object}
-		 * @protected
-		 * @since 0.4.0
-		 */
-		_preloadInstances:null,
-
-		/**
-		 * An array of Sound Preload instances that are waiting to preload. Once Flash is initialized, the queued
-		 * instances are preloaded.
-		 * @property _queuedInstances
-		 * @type {Object}
-		 * @protected
-		 */
-		_queuedInstances:null,
-
-		/**
-		 * A developer flag to output all flash events to the console (if it exists).  Used for debugging.
-		 *
-		 *      createjs.Sound.activePlugin.showOutput = true;
-		 *
-		 * @property showOutput
-		 * @type {Boolean}
-		 * @default false
-		 */
-		showOutput:false,
-
-		/**
-		 * An initialization function run by the constructor
-		 * @method _init
-		 * @protected
-		 */
-		_init:function () {
-			this._capabilities = s._capabilities;
-			this._audioSources = {};
-
-			this._flashInstances = {};
-			this._flashPreloadInstances = {};
-			this._preloadInstances = {};
-			this._queuedInstances = [];
-
-			// Create DIV
-			var w = this.wrapper = document.createElement("div");
-			w.id = this._WRAPPER_ID;
-			w.style.position = "absolute";
-			w.style.marginLeft = "-1px";
-			w.className = this._WRAPPER_ID;
-			document.body.appendChild(w);
-
-			// Create Placeholder
-			var c = this._container = document.createElement("div");
-			c.id = this._CONTAINER_ID;
-			c.appendChild(document.createTextNode("SoundJS Flash Container"));
-			w.appendChild(c);
-
-			var path = s.swfPath;
-			var val = swfobject.embedSWF(path + "FlashAudioPlugin.swf", this._CONTAINER_ID, "1", "1",
-					"9.0.0", null, null, {"AllowScriptAccess" : "always"}, null,
-					createjs.proxy(this._handleSWFReady, this)
-			);
-		},
-
-		/**
-		 * The SWF used for sound preloading and playback has been initialized.
-		 * @method _handleSWFReady
-		 * @param {Object} event Contains a reference to the swf.
-		 * @protected
-		 */
-		_handleSWFReady:function (event) {
-			this._flash = event.ref;
-		},
-
-		/**
-		 * The Flash application that handles preloading and playback is ready. We wait for a callback from Flash to
-		 * ensure that everything is in place before playback begins.
-		 * @method _handleFlashReady
-		 * @protected
-		 */
-		_handleFlashReady:function () {
-			this.flashReady = true;
-
-			// Anything that needed to be preloaded, can now do so.
-			for (var i = 0, l = this._queuedInstances.length; i < l; i++) {
-				this._flash.register(this._queuedInstances[i]);  // NOTE this flash function currently does nothing
-			}
-			this._queuedInstances.length = 0;
-
-			// Associate flash instance with any preloadInstance that already exists.
-			for (var n in this._flashPreloadInstances) {
-				this._flashPreloadInstances[n].initialize(this._flash);
-			}
-
-			// load sounds that tried to preload before flash was ready
-			for (var n in this._preloadInstances) {
-				this._preloadInstances[n].initialize(this._flash);
-			}
-			this._preloadInstances = {};
-
-			// Associate flash instance with any sound instance that has already been played.
-			for (var n in this._flashInstances) {
-				this._flashInstances[n].initialize(this._flash);
-			}
-		},
-
-		/**
-		 * Pre-register a sound instance when preloading/setup. Note that the FlashAudioPlugin will return a Loader
-		 * instance for preloading since Flash can not access the browser cache consistently.
-		 * @method register
-		 * @param {String} src The source of the audio
-		 * @param {Number} instances The number of concurrently playing instances to allow for the channel at any time.
-		 * @return {Object} A result object, containing a tag for preloading purposes.
-		 */
-		register:function (src, instances) {
-			//Note that currently, registering with the flash instance does nothing.
-			this._audioSources[src] = true;  // NOTE this does not mean preloading has started
-			if (!this.flashReady) {
-				this._queuedInstances.push(src);
-			} else {
-				this._flash.register(src);  // NOTE this flash function currently does nothing  // OJR remove this entire thing, as it does nothing?
-			}
-			var loader = {tag: new createjs.FlashAudioPlugin.Loader(src, this, this._flash)};
-			return loader;
-		},
+	p.toString = function () {
+		return "[FlashAudioPlugin]";
+	};
 
 
-		/**
-		 * Remove a sound added using {{#crossLink "FlashAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel a
-		 * preload.
-		 * @method removeSound
-		 * @param {String} src The sound URI to unload.
-		 * @since 0.4.1
-		 */
-		removeSound:function (src) {
-			delete(this._audioSources[src]);
-			var i = createjs.indexOf(this._queuedInstances, src);
-			if(i != -1) {this._queuedInstances.splice(i,1);}
-			// NOTE sound cannot be removed from a swf
-		},
+// private methods
+	/**
+	 * The SWF used for sound preloading and playback has been initialized.
+	 * @method _handleSWFReady
+	 * @param {Object} event Contains a reference to the swf.
+	 * @protected
+	 */
+	p._handleSWFReady = function (event) {
+		this._flash = event.ref;
+		this._loader.flash = event.ref;
+		this._soundInstance.flash = event.ref;
+	};
 
-		/**
-		 * Remove all sounds added using {{#crossLink "FlashAudioPlugin/register"}}{{/crossLink}}. Note this does not cancel a preload.
-		 * @method removeAllSounds
-		 * @param {String} src The sound URI to unload.
-		 * @since 0.4.1
-		 */
-		removeAllSounds:function () {
-			this._audioSources = {};
-			this._queuedInstances.length = 0;
+	/**
+	 * The Flash application that handles preloading and playback is ready. We wait for a callback from Flash to
+	 * ensure that everything is in place before playback begins.
+	 * @method _handleFlashReady
+	 * @protected
+	 */
+	p._handleFlashReady = function () {
+		this.flashReady = true;
 
-			this._flashInstances = {};
-			this._flashPreloadInstances = {};
-			this._preloadInstances = {};
-			// NOTE sound cannot be removed from a swf
-		},
+		// Anything that needed to be preloaded, can now do so.
+		for (var i = 0, l = this._queuedInstances.length; i < l; i++) {
+			this._flash.register(this._queuedInstances[i]);  // NOTE this flash function currently does nothing
+		}
+		this._queuedInstances.length = 0;
 
-		/**
-		 * Create a sound instance. If the sound has not been preloaded, it is internally preloaded here.
-		 * @method create
-		 * @param {String} src The sound source to use.
-		 * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
-		 * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
-		 * @return {SoundInstance} A sound instance for playback and control.
-		 */
-		create:function (src, startTime, duration) {
-			if (!this.isPreloadStarted(src)) {this.preload(src);}
+		// Associate flash instance with any preloadInstance that already exists.
+		for (var n in this._flashPreloadInstances) {
+			this._flashPreloadInstances[n].initialize(this._flash);
+		}
 
-			try {
-				var instance = new createjs.FlashAudioPlugin.SoundInstance(src, startTime, duration, this, this._flash);
-				return instance;
-			} catch (err) {
-				//console.log("Error: Please ensure you have permission to play audio from this location.", err);
-			}
-			return null;
-		},
+		// load sounds that tried to preload before flash was ready
+		for (var n in this._preloadInstances) {
+			this._preloadInstances[n].initialize(this._flash);
+		}
+		this._preloadInstances = {};
 
-		/**
-		 * Checks if preloading has started for a specific source. If the source is found, we can assume it is loading,
-		 * or has already finished loading.
-		 * @method isPreloadStarted
-		 * @param {String} src The sound URI to check.
-		 * @return {Boolean}
-		 */
-		isPreloadStarted:function (src) {
-			return (this._audioSources[src] != null);
-		},
+		// Associate flash instance with any sound instance that has already been played.
+		for (var n in this._flashInstances) {
+			this._flashInstances[n].initialize(this._flash);
+		}
+	};
 
-		/**
-		 * Preload a sound instance. This plugin uses Flash to preload and play all sounds.
-		 * @method preload
-		 * @param {String} src The path to the Sound
-		 * @param {Object} tag Not used in this plugin.
-		 */
-		preload:function (src, tag) {
-			this._audioSources[src] = true;  // NOTE this does not mean preloading has started, just that it will
-			var loader = new createjs.FlashAudioPlugin.Loader(src, this, this._flash);
-			loader.load();
-		},
+	p._handlePreloadComplete = function(event) {
+		this._audioSources[src] = event.target.src;
 
-		/**
-		 * Registers loaded source files.
-		 * @method _registerLoadedSrc
-		 * @param src
-		 * @protected
-		 */
-		_registerLoadedSrc: function(src) {
-			this._audioSources[src] = src;
-		},
+		this.AbstractPlugin__handlePreloadComplete(event);
+	};
 
-		/**
-		 * Set the master volume of the plugin, which affects all SoundInstances.
-		 * @method setVolume
-		 * @param {Number} value The volume to set, between 0 and 1.
-		 * @return {Boolean} If the plugin processes the setVolume call (true). The Sound class will affect all the
-		 * instances manually otherwise.
-		 * @since 0.4.0
-		 */
-		setVolume:function (value) {
-			this._volume = value;
-			return this._updateVolume();
-		},
+	/**
+	 * Internal function used to set the gain value for master audio.  Should not be called externally.
+	 * @method _updateVolume
+	 * @return {Boolean}
+	 * @protected
+	 * @since 0.4.0
+	 */
+	p._updateVolume = function () {
+		var newVolume = createjs.Sound._masterMute ? 0 : this._volume;
+		return this._flash.setMasterVolume(newVolume);
+	};
 
-		/**
-		 * Internal function used to set the gain value for master audio.  Should not be called externally.
-		 * @method _updateVolume
-		 * @return {Boolean}
-		 * @protected
-		 * @since 0.4.0
-		 */
-		_updateVolume:function () {
-			var newVolume = createjs.Sound._masterMute ? 0 : this._volume;
-			return this._flash.setMasterVolume(newVolume);
-		},
-
-		/**
-		 * Get the master volume of the plugin, which affects all SoundInstances.
-		 * @method getVolume
-		 * @return The volume level, between 0 and 1.
-		 * @since 0.4.0
-		 */
-		getVolume:function () {
-			return this._volume;
-		},
-
-		/**
-		 * Mute all sounds via the plugin.
-		 * @method setMute
-		 * @param {Boolean} value If all sound should be muted or not. Note that plugin-level muting just looks up
-		 * the mute value of Sound {{#crossLink "Sound/getMute"}}{{/crossLink}}, so this property is not used here.
-		 * @return {Boolean} If the mute call succeeds.
-		 * @since 0.4.0
-		 */
-		setMute:function (isMuted) {
-			return this._updateVolume();
-		},
 
 // Flash Communication
 // Note we have decided not to include these in the docs
-		/*
-		 * Used to couple a Flash loader instance with a <code>Loader</code> instance
-		 * @method registerPreloadInstance
-		 * @param {String} flashId Used to identify the Loader.
-		 * @param {Loader} instance The actual instance.
-		 */
-		registerPreloadInstance:function (flashId, instance) {
-			this._flashPreloadInstances[flashId] = instance;
-		},
+	/*
+	 * Used to couple a Flash loader instance with a <code>Loader</code> instance
+	 * @method registerPreloadInstance
+	 * @param {String} flashId Used to identify the Loader.
+	 * @param {Loader} instance The actual instance.
+	 */
+	p.registerPreloadInstance = function (flashId, instance) {
+		this._flashPreloadInstances[flashId] = instance;
+	};
 
-		/*
-		 * Used to decouple a <code>Loader</code> instance from Flash.
-		 * @method unregisterPreloadInstance
-		 * @param {String} flashId Used to identify the Loader.
-		 */
-		unregisterPreloadInstance:function (flashId) {
-			delete this._flashPreloadInstances[flashId];
-		},
+	/*
+	 * Used to decouple a <code>Loader</code> instance from Flash.
+	 * @method unregisterPreloadInstance
+	 * @param {String} flashId Used to identify the Loader.
+	 */
+	p.unregisterPreloadInstance = function (flashId) {
+		delete this._flashPreloadInstances[flashId];
+	};
 
-		/*
-		 * Used to couple a Flash sound instance with a {{#crossLink "SoundInstance"}}{{/crossLink}}.
-		 * @method registerSoundInstance
-		 * @param {String} flashId Used to identify the SoundInstance.
-		 * @param {Loader} instance The actual instance.
-		 */
-		registerSoundInstance:function (flashId, instance) {
-			this._flashInstances[flashId] = instance;
-		},
+	/*
+	 * Used to couple a Flash sound instance with a {{#crossLink "SoundInstance"}}{{/crossLink}}.
+	 * @method registerSoundInstance
+	 * @param {String} flashId Used to identify the SoundInstance.
+	 * @param {Loader} instance The actual instance.
+	 */
+	p.registerSoundInstance = function (flashId, instance) {
+		this._flashInstances[flashId] = instance;
+	};
 
-		/*
-		 * Used to decouple a {{#crossLink "SoundInstance"}}{{/crossLink}} from Flash.
-		 * instance.
-		 * @method unregisterSoundInstance
-		 * @param {String} flashId Used to identify the SoundInstance.
-		 * @param {Loader} instance The actual instance.
-		 */
-		unregisterSoundInstance:function (flashId) {
-			delete this._flashInstances[flashId];
-		},
+	/*
+	 * Used to decouple a {{#crossLink "SoundInstance"}}{{/crossLink}} from Flash.
+	 * instance.
+	 * @method unregisterSoundInstance
+	 * @param {String} flashId Used to identify the SoundInstance.
+	 * @param {Loader} instance The actual instance.
+	 */
+	p.unregisterSoundInstance = function (flashId) {
+		delete this._flashInstances[flashId];
+	};
 
-		/*
-		 * Used to output traces from Flash to the console, if {{#crossLink "FlashAudioPlugin/showOutput"}}{{/crossLink}} is
-		 * <code>true</code>.
-		 * @method flashLog
-		 * @param {String} data The information to be output.
-		 */
-		flashLog:function (data) {
-			try {
-				this.showOutput && console.log(data);
-			} catch (error) {
-				// older IE will cause error if console is not open
-			}
-		},
-
-		/*
-		 * Handles events from Flash, and routes communication to a {{#crossLink "SoundInstance"}}{{/crossLink}} via
-		 * the Flash ID. The method and arguments from Flash are run directly on the sound instance.
-		 * @method handleSoundEvent
-		 * @param {String} flashId Used to identify the SoundInstance.
-		 * @param {String} method Indicates the method to run.
-		 */
-		handleSoundEvent:function (flashId, method) {
-			var instance = this._flashInstances[flashId];
-			if (instance == null) {return;}
-			var args = [];
-			for (var i = 2, l = arguments.length; i < l; i++) {
-				args.push(arguments[i]);
-			}
-			try {
-				if (args.length == 0) {
-					instance[method]();
-				} else {
-					instance[method].apply(instance, args);
-				}
-			} catch (error) {
-			}
-		},
-
-		/*
-		 * Handles events from Flash and routes communication to a <code>Loader</code> via the Flash ID. The method
-		 * and arguments from Flash are run directly on the sound loader.
-		 * @method handlePreloadEvent
-		 * @param {String} flashId Used to identify the loader instance.
-		 * @param {String} method Indicates the method to run.
-		 */
-		handlePreloadEvent:function (flashId, method) {
-			var instance = this._flashPreloadInstances[flashId];
-			if (instance == null) {
-				return;
-			}
-			var args = [];
-			for (var i = 2, l = arguments.length; i < l; i++) {
-				args.push(arguments[i]);
-			}
-			try {
-				if (args.length == 0) {
-					instance[method]();
-				} else {
-					instance[method].apply(instance, args);
-				}
-			} catch (error) {
-			}
-		},
-
-		/*
-		 * Handles events from Flash intended for the FlashAudioPlugin class. Currently only a "ready" event is processed.
-		 * @method handleEvent
-		 * @param {String} method Indicates the method to run.
-		 */
-		handleEvent:function (method) {
-			//Sound.log("Handle Event", method);
-			switch (method) {
-				case "ready":
-					clearTimeout(this.loadTimeout);
-					this._handleFlashReady();
-					break;
-			}
-		},
-
-		/*
-		 * Handles error events from Flash. Note this function currently does not process any events.
-		 * @method handleErrorEvent
-		 * @param {String} error Indicates the error.
-		 */
-		handleErrorEvent:function (error) {
-		},
-
-		toString:function () {
-			return "[FlashAudioPlugin]";
+	/*
+	 * Used to output traces from Flash to the console, if {{#crossLink "FlashAudioPlugin/showOutput"}}{{/crossLink}} is
+	 * <code>true</code>.
+	 * @method flashLog
+	 * @param {String} data The information to be output.
+	 */
+	p.flashLog = function (data) {
+		try {
+			this.showOutput && console.log(data);
+		} catch (error) {
+			// older IE will cause error if console is not open
 		}
-	}
-	p.constructor = FlashAudioPlugin;
+	};
 
-	createjs.FlashAudioPlugin = FlashAudioPlugin;
+	/*
+	 * Handles events from Flash, and routes communication to a {{#crossLink "SoundInstance"}}{{/crossLink}} via
+	 * the Flash ID. The method and arguments from Flash are run directly on the sound instance.
+	 * @method handleSoundEvent
+	 * @param {String} flashId Used to identify the SoundInstance.
+	 * @param {String} method Indicates the method to run.
+	 */
+	p.handleSoundEvent = function (flashId, method) {
+		var instance = this._flashInstances[flashId];
+		if (instance == null) {return;}
+		var args = [];
+		for (var i = 2, l = arguments.length; i < l; i++) {
+			args.push(arguments[i]);
+		}
+		try {
+			if (args.length == 0) {
+				instance[method]();
+			} else {
+				instance[method].apply(instance, args);
+			}
+		} catch (error) {
+		}
+	};
 
+	/*
+	 * Handles events from Flash and routes communication to a <code>Loader</code> via the Flash ID. The method
+	 * and arguments from Flash are run directly on the sound loader.
+	 * @method handlePreloadEvent
+	 * @param {String} flashId Used to identify the loader instance.
+	 * @param {String} method Indicates the method to run.
+	 */
+	p.handlePreloadEvent = function (flashId, method) {
+		var instance = this._flashPreloadInstances[flashId];
+		if (instance == null) {
+			return;
+		}
+		var args = [];
+		for (var i = 2, l = arguments.length; i < l; i++) {
+			args.push(arguments[i]);
+		}
+		try {
+			if (args.length == 0) {
+				instance[method]();
+			} else {
+				instance[method].apply(instance, args);
+			}
+		} catch (error) {
+		}
+	};
+
+	/*
+	 * Handles events from Flash intended for the FlashAudioPlugin class. Currently only a "ready" event is processed.
+	 * @method handleEvent
+	 * @param {String} method Indicates the method to run.
+	 */
+	p.handleEvent = function (method) {
+		switch (method) {
+			case "ready":
+				clearTimeout(this.loadTimeout);
+				this._handleFlashReady();
+				break;
+		}
+	};
+
+	/*
+	 * Handles error events from Flash. Note this function currently does not process any events.
+	 * @method handleErrorEvent
+	 * @param {String} error Indicates the error.
+	 */
+	p.handleErrorEvent = function (error) {
+
+	};
+
+	createjs.FlashAudioPlugin = createjs.promote(FlashAudioPlugin, "AbstractPlugin");
+	createjs.FlashPlugin = createjs.FlashAudioPlugin;		// TODO remove deprecated
 }());

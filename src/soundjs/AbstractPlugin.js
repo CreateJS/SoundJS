@@ -208,6 +208,43 @@ this.createjs = this.createjs || {};
 		return si;
 	};
 
+	// TODO Volume & mute Getter / Setter??
+	// TODO change calls to return nothing or this for chaining??
+	// if a plugin does not support volume and mute, it should set these to null
+	/**
+	 * Set the master volume of the plugin, which affects all SoundInstances.
+	 * @method setVolume
+	 * @param {Number} value The volume to set, between 0 and 1.
+	 * @return {Boolean} If the plugin processes the setVolume call (true). The Sound class will affect all the
+	 * instances manually otherwise.
+	 */
+	p.setVolume = function (value) {
+		this._volume = value;
+		this._updateVolume();
+		return true;
+	};
+
+	/**
+	 * Get the master volume of the plugin, which affects all SoundInstances.
+	 * @method getVolume
+	 * @return The volume level, between 0 and 1.
+	 */
+	p.getVolume = function () {
+		return this._volume;
+	};
+
+	/**
+	 * Mute all sounds via the plugin.
+	 * @method setMute
+	 * @param {Boolean} value If all sound should be muted or not. Note that plugin-level muting just looks up
+	 * the mute value of Sound {{#crossLink "Sound/getMute"}}{{/crossLink}}, so this property is not used here.
+	 * @return {Boolean} If the mute call succeeds.
+	 */
+	p.setMute = function (value) {
+		this._updateVolume();
+		return true;
+	};
+
 	// plugins should overwrite this method
 	p.toString = function () {
 		return "[AbstractPlugin]";

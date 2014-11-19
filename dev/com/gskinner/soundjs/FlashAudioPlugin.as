@@ -67,8 +67,6 @@
 		protected function initializeInterface():void {
 			var map:Object = {
 
-				register: handleRegister,
-
 				preload: handlePreload,
 				cancelPreload: handleCancelPreload,
 
@@ -137,12 +135,6 @@
 			list.verticalScrollPosition = list.maxVerticalScrollPosition;
 		}
 
-
-	/******** REGISTER ********/
-		protected function handleRegister(src:String):Boolean {
-			log("Register", src);
-			return true;
-		}
 
 	/******** PRELOAD ********/
 		protected function handlePreload(src:String):String {

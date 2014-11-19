@@ -283,6 +283,9 @@ this.createjs = this.createjs || {};
 		return "[HTMLAudioPlugin]";
 	};
 
+	// plugin does not support these
+	p.setVolume = p.getVolume = p.setMute = null;
+
 
 // private methods
 	/**
