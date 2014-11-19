@@ -82,7 +82,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p._addLooping = function() {
-		if(this._playbackResource == null) {return;}
+		if(this._playbackResource == null  || this._audioSpriteStopTime) {return;}
 		this._playbackResource.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this._loopHandler, false);
 		this._playbackResource.loop = true;
 	};
