@@ -111,7 +111,6 @@ this.createjs = this.createjs || {};
 		// Associate this preload instance with the FlashID, so callbacks can route here.
 		// TODO change this to an event
 		createjs.Sound.activePlugin.registerPreloadInstance(this.flashId, this);
-		console.log("loading ",this.src, this);
 	};
 
 	p.handleProgress = function (loaded, total) {

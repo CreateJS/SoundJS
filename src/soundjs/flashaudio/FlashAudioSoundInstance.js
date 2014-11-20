@@ -110,7 +110,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p._setDurationFromSource = function() {
-		this._duration = s.flash.getDurationBySrc(this.src);
+		this._duration = s._flash.getDurationBySrc(this.src);
 	};
 
 	p._interrupt = function () {
@@ -129,7 +129,13 @@ this.createjs = this.createjs || {};
 	p._beginPlaying = function (offset, loop, volume, pan) {
 		if (s._flash == null) { return false; }
 
-		this.flashId = s._flash.playSound(this.src, offset, loop, volume, pan, this._startTime, this._duration);
+		this.setPosition(offset);
+		this.setLoop(loop);
+		this.setVolume(volume);
+		this.setPan(pan);
+		this._paused = false;
+
+		this.flashId = s._flash.playSound(this.src, this._position, this._loop, this._volume, this._pan, this._startTime, this._duration);
 		if (this.flashId == null) {
 			this._playFailed();
 			return false;
@@ -137,11 +143,15 @@ this.createjs = this.createjs || {};
 
 		if (this._muted) {this.setMute(true);}
 		createjs.Sound.activePlugin.registerSoundInstance(this.flashId, this);
-		return this.AbstractSoundInstance__beginPlaying(offset, loop, volume, pan);
+
+		this.playState = createjs.Sound.PLAY_SUCCEEDED;
+		this._sendEvent("succeeded");
+		return true;
 	};
 
 	p._pause = function () {
 		if(this.flashId == null) { return; }
+		this._position = this._calculateCurrentPosition();
 		s._flash.pauseSound(this.flashId);
 	};
 
@@ -167,7 +177,7 @@ this.createjs = this.createjs || {};
 
 	p._updatePosition = function() {
 		if(this.flashId == null) { return; }
-		s._flash.setPosition(this.flashId, value);
+		s._flash.setPosition(this.flashId, this._position);
 	};
 
 // Flash callbacks, only exist in FlashAudioPlugin
