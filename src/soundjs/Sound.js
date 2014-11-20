@@ -585,7 +585,7 @@ this.createjs = this.createjs || {};
 	 * Register a list of Sound plugins, in order of precedence. To register a single plugin, pass a single element in the array.
 	 *
 	 * <h4>Example</h4>
-	 *      createjs.FlashAudioPlugin.swfPath = "../src/SoundJS/";
+	 *      createjs.FlashAudioPlugin.swfPath = "../src/soundjs/flashaudio/";
 	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin]);
 	 *
 	 * @method registerPlugins
@@ -629,7 +629,7 @@ this.createjs = this.createjs || {};
 	 * This example sets up a Flash fallback, but only if there is no plugin specified yet.
 	 *
 	 * 	if (!createjs.Sound.isReady()) {
-	 *		createjs.FlashAudioPlugin.swfPath = "../src/SoundJS/";
+	 *		createjs.FlashAudioPlugin.swfPath = "../src/soundjs/flashaudio/";
 	 * 		createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin]);
 	 *	}
 	 *

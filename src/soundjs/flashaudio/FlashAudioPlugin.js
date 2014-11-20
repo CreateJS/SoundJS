@@ -54,7 +54,7 @@ this.createjs = this.createjs || {};
 	 * is set when using this plugin, so that the script can find the swf.
 	 *
 	 * <h4>Example</h4>
-	 *      createjs.FlashAudioPlugin.swfPath = "../src/SoundJS/";
+	 *      createjs.FlashAudioPlugin.swfPath = "../src/soundjs/flashaudio";
 	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin]);
 	 *      // Adds FlashAudioPlugin as a fallback if WebAudio and HTMLAudio do not work.
 	 *
@@ -213,7 +213,7 @@ this.createjs = this.createjs || {};
 	 * @static
 	 * @since 0.5.2
 	 */
-	s.swfPath = "src/SoundJS/";
+	s.swfPath = "src/soundjs/flashaudio/";
 
 
 // Static Methods

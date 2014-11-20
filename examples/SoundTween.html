@@ -70,7 +70,7 @@
 		var volume, pan;		// 2 easeljs shapes to represent these values
 
 		function init() {
-			createjs.FlashAudioPlugin.swfPath = "../src/soundjs/" // Initialize the base path from this document to the Flash Plugin
+			createjs.FlashAudioPlugin.swfPath = "../src/soundjs/flashaudio/" // Initialize the base path from this document to the Flash Plugin
 			if (params.type == "flash") {
 				createjs.Sound.registerPlugins([createjs.FlashAudioPlugin]);
 			} else if (params.type == "html5") {
