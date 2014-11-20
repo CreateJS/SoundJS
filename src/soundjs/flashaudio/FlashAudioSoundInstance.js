@@ -35,241 +35,150 @@
 this.createjs = this.createjs || {};
 
 (function () {
-
 	"use strict";
 
-	// NOTE documentation for this class can be found online or in WebAudioPlugin.SoundInstance
 	// NOTE audio control is shuttled to a flash player instance via the flash reference.
-	function SoundInstance(src, startTime, duration, owner, flash) {
-		this._init(src, startTime, duration, owner, flash);
-	}
+	function SoundInstance(src, startTime, duration, playbackResource) {
+		this.AbstractSoundInstance_constructor(src, startTime, duration, playbackResource);
 
-	var p = SoundInstance.prototype = new createjs.EventDispatcher();
-	p.constructor = SoundInstance;
 
-	p.src = null;
-	p.uniqueId = -1;
-	p._owner = null;
-	p._capabilities = null;
-	p._flash = null;
-	p.flashId = null; // To communicate with Flash
-	p._remainingLoops = 0;
-	if (createjs.definePropertySupported) {
-		Object.defineProperty(p, "loop", {
-			get: function() {
-				return this._remainingLoops;
-			},
-			set: function(value) {
-				this._remainingLoops = value;
-				return this._flash.setLoop(this.flashId, value);
-			}
-		});
-	}
-	p._volume =  1;
-	p._pan =  0;
-	p._offset = 0; // used for setPosition on a stopped instance
-	p._startTime = 0;
-	p._duration = 0;
-	p._delayTimeoutId = null;
-	p._muted = false;
-	p.paused = false;
-	p._paused = false;
+// Public Properties
+		this.flashId = null; // To communicate with Flash
 
-	if (createjs.definePropertySupported) {
-		Object.defineProperty(p, "volume", {
-			get: function() {
-				return this._volume;
-			},
-			set: function(value) {
-				if (Number(value) == null) {return;}
-				value = Math.max(0, Math.min(1, value));
-				this._volume = value;
-				return this._flash.setVolume(this.flashId, value)
-			}
-		});
-		Object.defineProperty(p, "pan", {
-			get: function() {
-				return this._pan;
-			},
-			set: function(value) {
-				if (Number(value)==null) {return;}
-				value = Math.max(-1, Math.min(1, value));	// force pan to stay in the -1 to 1 range
-				this._pan = value;
-				return this._flash.setPan(this.flashId, value);
-			}
-		});
-	}
-// Constructor
-	p._init = function (src, startTime, duration, owner, flash) {
-		this.src = src;
-		this._startTime = startTime || 0;
-		this._duration = duration || flash.getDurationBySrc(src);
-		this._owner = owner;
-		this._flash = flash;
+		if(s._flash == null) { s._instances.push(this); }
+	};
+	var p = createjs.extend(SoundInstance, createjs.AbstractSoundInstance);
+
+// Static Propeties
+	var s = SoundInstance;
+	/**
+	 * A reference to the Flash instance that gets created.
+	 * #property flash
+	 * @type {Object | Embed}
+	 */
+	s._flash = null;
+
+	/**
+	 * A list of loader instances that tried to load before _flash was set
+	 * #property _preloadInstances
+	 * @type {Array}
+	 * @private
+	 */
+	s._instances = [];
+
+	/**
+	 * Set the Flash instance on the class, and start loading on any instances that had load called
+	 * before flash was ready
+	 * #method setFlash
+	 * @param flash Flash instance that handles loading and playback
+	 */
+	s.setFlash = function(flash) {
+		s._flash = flash;
+		for(var i = s._instances; i--; ) {
+			var o = s._instances.pop();
+			o._setDurationFromSource();
+		}
 	};
 
-	p.initialize = function (flash) {
-		this._flash = flash;
+
+// Public Methods
+	p.toString = function () {
+		return "[FlashAudioSoundInstance]"
 	};
 
-// Public API
+
+// Private Methods
+	// TODO change flash.setLoop to mimic remove and add
+	p._removeLooping = function () {
+		if (this.flashId == null) { return; }
+		s._flash.setLoop(this.flashId, this._loop);
+	};
+
+	p._addLooping = function () {
+		if (this.flashId == null) { return; }
+		s._flash.setLoop(this.flashId, this._loop);
+	};
+
+	p._updateVolume = function() {
+		if (this.flashId == null) { return; }
+		s._flash.setVolume(this.flashId, this._volume)
+	};
+
+	p._updatePan = function () {
+		if (this.flashId == null) { return; }
+		s._flash.setPan(this.flashId, this._pan);
+	};
+
+	p._setDurationFromSource = function() {
+		this._duration = s.flash.getDurationBySrc(this.src);
+	};
 
 	p._interrupt = function () {
-		this.playState = createjs.Sound.PLAY_INTERRUPTED;
-		this._flash.interrupt(this.flashId);	// OJR this is redundant, cleanup calls stop that does the same thing anyway
-		this._cleanUp();
-		this._sendEvent("interrupted");
+		if(this.flashId == null) { return; }
+		s._flash.interrupt(this.flashId);	// OJR this is redundant, cleanup calls stop that does the same thing anyway
+		this.AbstractSoundInstance__interrupt();
 	};
 
-	p._cleanUp = function () {
-		this.paused = this._paused = false;
-		this._flash.stopSound(this.flashId);
+	p._handleCleanUp = function () {
+		s._flash.stopSound(this.flashId);
 
-		clearTimeout(this._delayTimeoutId);
-		this._owner.unregisterSoundInstance(this.flashId);
-		createjs.Sound._playFinished(this);
-	};
-
-	p.play = function (interrupt, delay, offset, loop, volume, pan) {
-		if (this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-			if (interrupt instanceof Object) {
-				offset = interrupt.offset;
-				loop = interrupt.loop;
-				volume = interrupt.volume;
-				pan = interrupt.pan;
-			}
-			if (offset != null) { this.setPosition(offset) }
-			if (loop != null) { this.loop = loop; }
-			if (volume != null) { this.setVolume(volume); }
-			if (pan != null) { this.setPan(pan); }
-			if (this._paused) {	this.resume(); }
-			return;
-		}
-		this._cleanUp();
-		createjs.Sound._playInstance(this, interrupt, delay, offset, loop, volume, pan);
+		createjs.Sound.activePlugin.unregisterSoundInstance(this.flashId);	// TODO move this to plugin
+		this.flashId = null;
 	};
 
 	p._beginPlaying = function (offset, loop, volume, pan) {
-		this._remainingLoops = loop;
-		this.paused = this._paused = false;
-		if (!this._owner.flashReady) {return false;}
-		this._offset = offset;
+		if (s._flash == null) { return false; }
 
-		this.flashId = this._flash.playSound(this.src, offset, loop, volume, pan, this._startTime, this._duration);
+		this.flashId = s._flash.playSound(this.src, offset, loop, volume, pan, this._startTime, this._duration);
 		if (this.flashId == null) {
-			this._cleanUp();
+			this._playFailed();
 			return false;
 		}
 
-		//this._duration = this._flash.getDuration(this.flashId);  // this is 0 at this point
 		if (this._muted) {this.setMute(true);}
-		this.playState = createjs.Sound.PLAY_SUCCEEDED;
-		this._owner.registerSoundInstance(this.flashId, this);
-		this._sendEvent("succeeded");
-		return true;
+		createjs.Sound.activePlugin.registerSoundInstance(this.flashId, this);
+		return this.AbstractSoundInstance__beginPlaying(offset, loop, volume, pan);
 	};
 
-	p.playFailed = function () {
-		this.playState = createjs.Sound.PLAY_FAILED;
-		this._cleanUp();
-		this._sendEvent("failed");
+	p._pause = function () {
+		if(this.flashId == null) { return; }
+		s._flash.pauseSound(this.flashId);
 	};
 
-	p.pause = function () {
-		if (this._paused || this.playState != createjs.Sound.PLAY_SUCCEEDED) {return false;}
-		this.paused = this._paused = true;
-		clearTimeout(this._delayTimeoutId);
-		return this._flash.pauseSound(this.flashId);
+	p._resume = function () {
+		if(this.flashId == null) { return; }
+		s._flash.resumeSound(this.flashId);
 	};
 
-	p.resume = function () {
-		if (!this._paused) {return false;}
-		this.paused = this._paused = false;
-		return this._flash.resumeSound(this.flashId);
+	p._handleStop = function () {
+		if(this.flashId == null) { return; }
+		s._flash.stopSound(this.flashId);
 	};
 
-	p.stop = function () {
-		this.playState = createjs.Sound.PLAY_FINISHED;
-		this.paused = this._paused = false;
-		this._offset = 0;
-		var ok = this._flash.stopSound(this.flashId);
-		this._cleanUp();
-		return ok;
+	p._updateVolume = function () {
+		var newVolume = this._muted ? 0 : this._volume;
+		s._flash.setVolume(this.flashId, newVolume);
+	};
+	// TODO remove unused .muteSound and .unmuteSound from Flash
+
+	p._calculateCurrentPosition = function() {
+		return s._flash.getPosition(this.flashId);
 	};
 
-	// leaving functionality in so IE8 will work
-	p.setVolume = function (value) {
-		if (Number(value) == null) {return;}
-		value = Math.max(0, Math.min(1, value));
-		this._volume = value;
-		return this._flash.setVolume(this.flashId, value)
-	};
-
-	p.getVolume = function () {
-		return this._volume;
-	};
-
-	p.setMute = function (value) {
-		this._muted = value;
-		return value ? this._flash.muteSound(this.flashId) : this._flash.unmuteSound(this.flashId);
-	};
-
-	p.getMute = function () {
-		return this._muted;
-	};
-
-	p.getPan = function () {
-		return this._pan;
-	};
-
-	// duplicating functionality to support IE8
-	p.setPan = function (value) {
-		if (Number(value)==null) {return;}
-		value = Math.max(-1, Math.min(1, value));
-		this._pan = value;
-		return this._flash.setPan(this.flashId, value);
-	};
-
-	p.getPosition = function () {
-		var value = -1;
-		if (this._flash && this.flashId) {
-			value = this._flash.getPosition(this.flashId);	// this returns -1 on stopped instance
-		}
-		if (value != -1) {this._offset = value;}
-		return this._offset;
-	};
-
-	p.setPosition = function (value) {
-		this._offset = value;
-		this._flash && this.flashId && this._flash.setPosition(this.flashId, value);
-		return true;
-	};
-
-	p.getDuration = function () {
-		/* no longer needed, as we grab duration on init now
-		if (!this._duration && this._flash && this.flashId) {
-			this._duration = this._flash.getDuration(this.flashId);	// this returns -1 on stopped instance
-		}
-		*/
-		return this._duration;
+	p._updatePosition = function() {
+		if(this.flashId == null) { return; }
+		s._flash.setPosition(this.flashId, value);
 	};
 
 // Flash callbacks, only exist in FlashAudioPlugin
-	p._sendEvent = function (type) {
-		var event = new createjs.Event(type);
-		this.dispatchEvent(event);
-	};
-
 	/**
 	 * Called from Flash.  Lets us know flash has finished playing a sound.
 	 * #method handleSoundFinished
 	 * @protected
 	 */
 	p.handleSoundFinished = function () {
-		this.playState = createjs.Sound.PLAY_FINISHED;
-		this._offset = 0;
-		this._cleanUp();
-		this._sendEvent("complete");
+		this._loop = 0;
+		this._handleSoundComplete();
 	};
 
 	/**
@@ -278,12 +187,9 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p.handleSoundLoop = function () {
+		this._loop--;
 		this._sendEvent("loop");
 	};
 
-	p.toString = function () {
-		return "[FlashAudioSoundInstance]"
-	};
-
-	createjs.FlashAudioSoundInstance = SoundInstance;
+	createjs.FlashAudioSoundInstance = createjs.promote(SoundInstance, "AbstractSoundInstance");
 }());

@@ -149,7 +149,9 @@ this.createjs = this.createjs || {};
 		 * @protected
 		 */
 		this._flashPreloadInstances = {};
+		//TODO consider combining _flashInstances and _flashPreloadInstances into a single has
 
+		// TODO remove _queuedInstances
 		/**
 		 * An array of Sound Preload instances that are waiting to preload. Once Flash is initialized, the queued
 		 * instances are preloaded.
@@ -295,8 +297,6 @@ this.createjs = this.createjs || {};
 	 */
 	p._handleSWFReady = function (event) {
 		this._flash = event.ref;
-		this._loader.setFlash(event.ref);
-		this._soundInstance.flash = event.ref;
 	};
 
 	/**
@@ -308,21 +308,15 @@ this.createjs = this.createjs || {};
 	p._handleFlashReady = function () {
 		this.flashReady = true;
 
+		this._loader.setFlash(this._flash);
+		this._soundInstance.setFlash(this._flash);
+
 		// Anything that needed to be preloaded, can now do so.
 		for (var i = 0, l = this._queuedInstances.length; i < l; i++) {
 			this._flash.register(this._queuedInstances[i]);  // NOTE this flash function currently does nothing
 		}
 		this._queuedInstances.length = 0;
 
-		// Associate flash instance with any preloadInstance that already exists.
-		for (var n in this._flashPreloadInstances) {
-			this._flashPreloadInstances[n].initialize(this._flash);
-		}
-
-		// Associate flash instance with any sound instance that has already been played.
-		for (var n in this._flashInstances) {
-			this._flashInstances[n].initialize(this._flash);
-		}
 	};
 
 	p._handlePreloadComplete = function(event) {
