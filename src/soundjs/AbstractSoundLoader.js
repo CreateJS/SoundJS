@@ -159,7 +159,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * The sound has loading enough to play through without interruption at the current download rate.
-	 * #method handleLoad
+	 * #method handleCanPlayThrough
 	 * @protected
 	 */
 	p._handleCanPlayThrough = function (event) {
@@ -168,7 +168,7 @@ this.createjs = this.createjs || {};
 		e.target = this;
 		this.dispatchEvent(e)
 		this.oncanplaythrough && this.oncanplaythrough(e)
-	}
+	};
 
 	/**
 	 * The sound has completed loading.

@@ -91,7 +91,7 @@ this.createjs = this.createjs || {};
 	 */
 	s.setFlash = function(flash) {
 		s._flash = flash;
-		for(var i = s._preloadInstances; i--; ) {
+		for(var i = s._preloadInstances.length; i--; ) {
 			var loader = s._preloadInstances.pop();
 			loader.load();
 		}
@@ -101,20 +101,20 @@ this.createjs = this.createjs || {};
 	p.load = function (src) {
 		this.AbstractSoundLoader_load(src);
 
-		if (Loader._flash == null) {
+		if (s._flash == null) {
 			// register for future preloading
 			s._preloadInstances.push(this);
 			return;
 		}
 
-		this.flashId = this._flash.preload(this.src);
+		this.flashId = s._flash.preload(this.src);
 		// Associate this preload instance with the FlashID, so callbacks can route here.
 		// TODO change this to an event
 		createjs.Sound.activePlugin.registerPreloadInstance(this.flashId, this);
+		console.log("loading ",this.src, this);
 	};
 
 	p.handleProgress = function (loaded, total) {
-		this.progress = loaded / total;
 		this.AbstractSoundLoader__handleProgress({loaded: loaded, total: total});
 	};
 
@@ -123,7 +123,7 @@ this.createjs = this.createjs || {};
 	 * #method handleComplete
 	 */
 	p.handleComplete = function () {
-		this.AbstractSoundLoader__handleLoad();
+		this._handleLoad();
 	};
 
 	/**

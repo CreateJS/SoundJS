@@ -320,7 +320,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p._handlePreloadComplete = function(event) {
-		this._audioSources[src] = event.target.src;
+		this._audioSources[event.target.src] = event.target.src;
 
 		this.AbstractPlugin__handlePreloadComplete(event);
 	};
@@ -452,7 +452,6 @@ this.createjs = this.createjs || {};
 	p.handleEvent = function (method) {
 		switch (method) {
 			case "ready":
-				clearTimeout(this.loadTimeout);
 				this._handleFlashReady();
 				break;
 		}

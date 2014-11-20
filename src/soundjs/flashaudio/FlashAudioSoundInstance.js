@@ -74,7 +74,7 @@ this.createjs = this.createjs || {};
 	 */
 	s.setFlash = function(flash) {
 		s._flash = flash;
-		for(var i = s._instances; i--; ) {
+		for(var i = s._instances.length; i--; ) {
 			var o = s._instances.pop();
 			o._setDurationFromSource();
 		}
