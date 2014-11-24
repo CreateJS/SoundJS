@@ -78,9 +78,7 @@ this.createjs = this.createjs || {};
 	 * <ul><li>We have no control over audio volume. Only the user can set volume on their device.</li>
 	 *      <li>We can only play audio inside a user event (touch/click).  This currently means you cannot loop sound or use a delay.</li></ul>
 	 * <b> Android Chrome 26.0.1410.58 specific limitations</b><br />
-	 * <ul><li>Chrome reports true when you run createjs.Sound.BrowserDetect.isChrome, but is a different browser
-	 *      with different abilities.</li>
-	 *      <li>Can only play 1 sound at a time.</li>
+	 * <ul> <li>Can only play 1 sound at a time.</li>
 	 *      <li>Sound is not cached.</li>
 	 *      <li>Sound can only be loaded in a user initiated touch/click event.</li>
 	 *      <li>There is a delay before a sound is played, presumably while the src is loaded.</li>

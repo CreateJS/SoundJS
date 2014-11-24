@@ -7,6 +7,7 @@
 		"../src/createjs/utils/IndexOf.js",
 		"../src/createjs/utils/Proxy.js",
 		"../src/createjs/utils/definePropertySupported.js",
+		"../src/createjs/utils/BrowserDetect.js",
 		"../src/createjs/events/EventDispatcher.js",
 		"../src/createjs/events/Event.js",
 

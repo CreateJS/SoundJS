@@ -245,7 +245,7 @@ this.createjs = this.createjs || {};
 	 */
 	s.isSupported = function () {
 		// there is no flash player on mobile devices
-		if (createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid || createjs.Sound.BrowserDetect.isBlackberry || createjs.Sound.BrowserDetect.isWindowsPhone) {return false;}
+		if (createjs.BrowserDetect.isIOS || createjs.BrowserDetect.isAndroid || createjs.BrowserDetect.isBlackberry || createjs.BrowserDetect.isWindowsPhone) {return false;}
 		s._generateCapabilities();
 		if (swfobject == null) {return false;}
 		return swfobject.hasFlashPlayerVersion("9.0.0");

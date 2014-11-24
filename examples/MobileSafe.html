@@ -40,7 +40,7 @@
 			displayMessage = document.getElementById("status");
 
 			// if this is on mobile, sounds need to be played inside of a touch event
-			if (createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid || createjs.Sound.BrowserDetect.isBlackberry || createjs.Sound.BrowserDetect.isWindowPhone) {
+			if (createjs.BrowserDetect.isIOS || createjs.BrowserDetect.isAndroid || createjs.BrowserDetect.isBlackberry || createjs.BrowserDetect.isWindowPhone) {
 				//document.addEventListener("click", handleTouch, false);	// works on Android, does not work on iOS
 				displayMessage.addEventListener("click", handleTouch, false);	// works on Android and iPad
 				displayMessage.innerHTML = "Touch to Start";

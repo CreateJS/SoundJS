@@ -89,7 +89,7 @@
 			pluginStatus.innerHTML = "Active Plugin is " + createjs.Sound.activePlugin.toString();  // innerText does not work in FF
 
             // check if we are on a mobile device, as these currently require us to launch sound inside of a user event
-            if (createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid) {  // || createjs.Sound.BrowserDetect.isBlackberry  OJR blackberry has not been tested yet
+            if (createjs.BrowserDetect.isIOS || createjs.BrowserDetect.isAndroid || createjs.BrowserDetect.isBlackberry) {
                 document.getElementById("mobile").style.display = "block";
                 document.getElementById("content").style.display = "none";
                 return;

@@ -225,6 +225,8 @@ this.createjs = this.createjs || {};
 
 	var s = Sound;
 
+
+// Static Properties
 	/**
 	 * The interrupt value to interrupt any currently playing instance with the same source, if the maximum number of
 	 * instances of the sound are already playing.
@@ -265,7 +267,6 @@ this.createjs = this.createjs || {};
 	 */
 	s.INTERRUPT_NONE = "none";
 
-// The playState in plugins should be implemented with these values.
 	/**
 	 * Defines the playState of an instance that is still initializing.
 	 * @property PLAY_INITED
@@ -353,6 +354,8 @@ this.createjs = this.createjs || {};
 	 */
 	s.FILE_PATTERN = /^(?:(\w+:)\/{2}(\w+(?:\.\w+)*\/?))?([/.]*?(?:[^?]+)?\/)?((?:[^/?]+)\.(\w+))(?:\?(\S+)?)?$/;
 
+
+// Class Public properties
 	/**
 	 * Determines the default behavior for interrupting other currently playing instances with the same source, if the
 	 * maximum number of instances of the sound are already playing.  Currently the default is {{#crossLink "Sound/INTERRUPT_NONE:property"}}{{/crossLink}}
@@ -391,15 +394,6 @@ this.createjs = this.createjs || {};
 	s.alternateExtensions = [];
 
 	/**
-	 * Used internally to assign unique IDs to each SoundInstance.
-	 * @property _lastID
-	 * @type {Number}
-	 * @static
-	 * @protected
-	 */
-	s._lastID = 0;
-
-	/**
 	 * The currently active plugin. If this is null, then no plugin could be initialized. If no plugin was specified,
 	 * Sound attempts to apply the default plugins: {{#crossLink "WebAudioPlugin"}}{{/crossLink}}, followed by
 	 * {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}.
@@ -409,6 +403,8 @@ this.createjs = this.createjs || {};
 	 */
     s.activePlugin = null;
 
+
+// Class Private properties
 	/**
 	 * Determines if the plugins have been registered. If false, the first call to play() will instantiate the default
 	 * plugins ({{#crossLink "WebAudioPlugin"}}{{/crossLink}}, followed by {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}).
@@ -420,6 +416,15 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	s._pluginsRegistered = false;
+
+	/**
+	 * Used internally to assign unique IDs to each SoundInstance.
+	 * @property _lastID
+	 * @type {Number}
+	 * @static
+	 * @protected
+	 */
+	s._lastID = 0;
 
 	/**
 	 * The master volume value, which affects all sounds. Use {{#crossLink "Sound/getVolume"}}{{/crossLink}} and
@@ -478,8 +483,7 @@ this.createjs = this.createjs || {};
 	s._preloadHash = {};
 
 
-// mix-ins:
-	// EventDispatcher methods:
+// EventDispatcher methods:
 	s.addEventListener = null;
 	s.removeEventListener = null;
 	s.removeAllEventListeners = null;
@@ -502,6 +506,30 @@ this.createjs = this.createjs || {};
 	 * @param {Number|Object} [data] Any additional data associated with the item. If not provided, it will be undefined.
 	 * @since 0.4.1
 	 */
+
+
+// Class Public Methods
+	/**
+	 * Get the preload rules to allow Sound to be used as a plugin by <a href="http://preloadjs.com" target="_blank">PreloadJS</a>.
+	 * Any load calls that have the matching type or extension will fire the callback method, and use the resulting
+	 * object, which is potentially modified by Sound. This helps when determining the correct path, as well as
+	 * registering the audio instance(s) with Sound. This method should not be called, except by PreloadJS.
+	 * @method getPreloadHandlers
+	 * @return {Object} An object containing:
+	 * <ul><li>callback: A preload callback that is fired when a file is added to PreloadJS, which provides
+	 *      Sound a mechanism to modify the load parameters, select the correct file format, register the sound, etc.</li>
+	 *      <li>types: A list of file types that are supported by Sound (currently supports "sound").</li>
+	 *      <li>extensions: A list of file extensions that are supported by Sound (see {{#crossLink "Sound.SUPPORTED_EXTENSIONS"}}{{/crossLink}}).</li></ul>
+	 * @static
+	 * @protected
+	 */
+	s.getPreloadHandlers = function () {
+		return {
+			callback:createjs.proxy(s.initLoad, s),
+			types:["sound"],
+			extensions:s.SUPPORTED_EXTENSIONS
+		};
+	};
 
 	/**
 	 * Used by external plugins to dispatch file load events.
@@ -528,28 +556,6 @@ this.createjs = this.createjs || {};
 
 			s.dispatchEvent(event);
 		}
-	};
-
-	/**
-	 * Get the preload rules to allow Sound to be used as a plugin by <a href="http://preloadjs.com" target="_blank">PreloadJS</a>.
-	 * Any load calls that have the matching type or extension will fire the callback method, and use the resulting
-	 * object, which is potentially modified by Sound. This helps when determining the correct path, as well as
-	 * registering the audio instance(s) with Sound. This method should not be called, except by PreloadJS.
-	 * @method getPreloadHandlers
-	 * @return {Object} An object containing:
-	 * <ul><li>callback: A preload callback that is fired when a file is added to PreloadJS, which provides
-	 *      Sound a mechanism to modify the load parameters, select the correct file format, register the sound, etc.</li>
-	 *      <li>types: A list of file types that are supported by Sound (currently supports "sound").</li>
-	 *      <li>extensions: A list of file extensions that are supported by Sound (see {{#crossLink "Sound.SUPPORTED_EXTENSIONS"}}{{/crossLink}}).</li></ul>
-	 * @static
-	 * @protected
-	 */
-	s.getPreloadHandlers = function () {
-		return {
-			callback:createjs.proxy(s.initLoad, s),
-			types:["sound"],
-			extensions:s.SUPPORTED_EXTENSIONS
-		};
 	};
 
 	/**
@@ -1600,38 +1606,5 @@ this.createjs = this.createjs || {};
 		return "[Sound SoundChannel]";
 	};
 	// do not add SoundChannel to namespace
-
-
-	/**
-	 * An additional module to determine the current browser, version, operating system, and other environment
-	 * variables. It is not publically documented.
-	 * #class BrowserDetect
-	 * @param {Boolean} isFirefox True if our browser is Firefox.
-	 * @param {Boolean} isOpera True if our browser is opera.
-	 * @param {Boolean} isChrome True if our browser is Chrome.  Note that Chrome for Android returns true, but is a
-	 * completely different browser with different abilities.
-	 * @param {Boolean} isIOS True if our browser is safari for iOS devices (iPad, iPhone, and iPad).
-	 * @param {Boolean} isAndroid True if our browser is Android.
-	 * @param {Boolean} isBlackberry True if our browser is Blackberry.
-	 * @constructor
-	 * @static
-	 */
-	function BrowserDetect() {
-	}
-
-	BrowserDetect.init = function () {
-		var agent = window.navigator.userAgent;
-		BrowserDetect.isWindowPhone =  (agent.indexOf("IEMobile") > -1) || (agent.indexOf("Windows Phone") > -1);
-		BrowserDetect.isFirefox = (agent.indexOf("Firefox") > -1);
-		BrowserDetect.isOpera = (window.opera != null);
-		BrowserDetect.isChrome = (agent.indexOf("Chrome") > -1);  // NOTE that Chrome on Android returns true but is a completely different browser with different abilities
-		BrowserDetect.isIOS = (agent.indexOf("iPod") > -1 || agent.indexOf("iPhone") > -1 || agent.indexOf("iPad") > -1) && !BrowserDetect.isWindowPhone;
-		BrowserDetect.isAndroid = (agent.indexOf("Android") > -1);
-		BrowserDetect.isBlackberry = (agent.indexOf("Blackberry") > -1);
-	};
-
-	BrowserDetect.init();
-
-	createjs.Sound.BrowserDetect = BrowserDetect;
 
 }());

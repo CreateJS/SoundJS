@@ -54,7 +54,7 @@
             }
 
             // if this is a mobile device, we reduce the number of sparkles per click for performance reasons
-            if (createjs.Sound.BrowserDetect.isIOS || createjs.Sound.BrowserDetect.isAndroid || createjs.Sound.BrowserDetect.isBlackberry){
+            if (createjs.BrowserDetect.isIOS || createjs.BrowserDetect.isAndroid || createjs.BrowserDetect.isBlackberry){
                 sparksPerClick = sparksPerClick >> 1;
             }
 
