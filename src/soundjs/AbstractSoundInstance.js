@@ -145,15 +145,8 @@ this.createjs = this.createjs || {};
 		this._volume =  1;
 		if (createjs.definePropertySupported) {
 			Object.defineProperty(this, "volume", {
-			get: function() {
-				return this._volume;
-			},
-			set: function(value) {
-				if (value == this._volume) { return; }
-				this._volume = Math.max(0, Math.min(1, value));
-				if(this._mute) {return;}
-				this._updateVolume();
-			}
+			get: this.getVolume,
+			set: this.setVolume
 			});
 		}
 
@@ -171,14 +164,8 @@ this.createjs = this.createjs || {};
 		this._pan =  0;
 		if (createjs.definePropertySupported) {
 			Object.defineProperty(this, "pan", {
-				get: function() {
-					return this._pan;
-				},
-				set: function(value) {
-					if(value == this._pan) { return; }
-					this._pan = Math.max(-1, Math.min(1, value));
-					this._updatePan();
-				}
+				get: this.getPan,
+				set: this.setPan
 			});
 		}
 
@@ -196,14 +183,8 @@ this.createjs = this.createjs || {};
 		this._duration = Math.max(0, duration || 0);
 		if (createjs.definePropertySupported) {
 			Object.defineProperty(this, "duration", {
-				get: function() {
-					return this._duration;
-				},
-				set: function(value) {
-					if (value == this._duration) { return; }
-					this._duration = Math.max(0, value || 0);
-					this._updateDuration();
-				}
+				get: this.getDuration,
+				set: this.setDuration
 			});
 		}
 
@@ -219,13 +200,8 @@ this.createjs = this.createjs || {};
 		this._playbackResource = null;
 		if (createjs.definePropertySupported) {
 			Object.defineProperty(this, "playbackResource", {
-				get: function() {
-					return this._playbackResource;
-				},
-				set: function(value) {
-					this._playbackResource = value;
-					if (this._duration == 0) { this._setDurationFromSource(); }
-				}
+				get: this.getPlaybackResource,
+				set: this.setPlaybackResource
 			});
 		}
 		if(playbackResource !== false && playbackResource !== true) { this.setPlaybackResource(playbackResource); }
@@ -244,16 +220,8 @@ this.createjs = this.createjs || {};
 		this._position = 0;
 		if (createjs.definePropertySupported) {
 			Object.defineProperty(this, "position", {
-				get: function() {
-					if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-						this._calculateCurrentPosition();	// sets this._position
-					}
-					return this._position;
-				},
-				set: function(value) {
-					this._position = Math.max(0, value)
-					this._updatePosition();
-				}
+				get: this.getPosition,
+				set: this.setPosition
 			});
 		}
 
@@ -272,20 +240,8 @@ this.createjs = this.createjs || {};
 		this._loop = 0;
 		if (createjs.definePropertySupported) {
 			Object.defineProperty(this, "loop", {
-				get: function() {
-					return this._loop;
-				},
-				set: function(value) {
-					// remove looping
-					if (this._loop != 0 && value == 0) {
-						this._removeLooping(value);
-					}
-					// add looping
-					if (this._loop == 0 && value != 0) {
-						this._addLooping(value);
-					}
-					this._loop = value;
-				}
+				get: this.getLoop,
+				set: this.setLoop
 			});
 		}
 
@@ -303,14 +259,8 @@ this.createjs = this.createjs || {};
 		this._muted = false;
 		if (createjs.definePropertySupported) {
 			Object.defineProperty(this, "muted", {
-				get: function() {
-					return this._muted;
-				},
-				set: function(value) {
-					if (value !== true || value !== false) {return;}
-					this._muted = value;
-					this._updateVolume();
-				}
+				get: this.getMuted,
+				set: this.setMuted
 			});
 		}
 
@@ -327,20 +277,8 @@ this.createjs = this.createjs || {};
 		this._paused = false;
 		if (createjs.definePropertySupported) {
 			Object.defineProperty(this, "paused", {
-				get: function() {
-					return this._paused;
-				},
-				set: function(value) {
-					if (value !== true || value !== false || this._paused == value) {return;}
-					if (value == true && this.playState != createjs.Sound.PLAY_SUCCEEDED) {return;}
-					this._paused = value;
-					if(value) {
-						this._pause();
-					} else {
-						this._resume();
-					}
-					clearTimeout(this.delayTimeoutId);
-				}
+				get: this.getPaused,
+				set: this.setPaused
 			});
 		}
 
