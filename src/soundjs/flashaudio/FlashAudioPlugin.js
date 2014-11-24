@@ -194,6 +194,26 @@ this.createjs = this.createjs || {};
 
 // Static properties
 	/**
+	 * Event constant for the "registerFlashID" event for cleaner code.
+	 * @property _REG_FLASHID
+	 * @type {String}
+	 * @default registerflashid
+	 * @static
+	 * @protected
+	 */
+	s._REG_FLASHID = "registerflashid";
+
+	/**
+	 * Event constant for the "unregisterFlashID" event for cleaner code.
+	 * @property _UNREG_FLASHID
+	 * @type {String}
+	 * @default unregisterflashid
+	 * @static
+	 * @protected
+	 */
+	s._UNREG_FLASHID = "unregisterflashid";
+
+	/**
 	 * The capabilities of the plugin. This is generated via the {{#crossLink "WebAudioPlugin/_generateCapabilities"}}{{/crossLink}}
 	 * method. Please see the Sound {{#crossLink "Sound/getCapabilities"}}{{/crossLink}} method for a list of available
 	 * capabilities.
@@ -263,7 +283,10 @@ this.createjs = this.createjs || {};
 		if (!this.flashReady) {
 			this._queuedInstances.push(src);
 		}
-		return this.AbstractPlugin_register(src, instances);
+		var o = this.AbstractPlugin_register(src, instances);
+		o.loader.addEventListener(s._REG_FLASHID, createjs.proxy(this.registerPreloadInstance, this));
+		o.loader.addEventListener(s._UNREG_FLASHID, createjs.proxy(this.unregisterPreloadInstance, this));
+		return o;
 	};
 
 	p.removeSound = function (src) {
@@ -281,6 +304,13 @@ this.createjs = this.createjs || {};
 		// NOTE sound cannot be removed from a swf
 
 		this.AbstractPlugin_removeAllSounds();
+	};
+
+	p.create = function (src, startTime, duration) {
+		var si = this.AbstractPlugin_create(src, startTime, duration);
+		si.addEventListener(s._REG_FLASHID, createjs.proxy(this.registerSoundInstance, this));
+		si.addEventListener(s._UNREG_FLASHID, createjs.proxy(this.unregisterSoundInstance, this));
+		return si;
 	};
 
 	p.toString = function () {
@@ -346,8 +376,8 @@ this.createjs = this.createjs || {};
 	 * @param {String} flashId Used to identify the Loader.
 	 * @param {Loader} instance The actual instance.
 	 */
-	p.registerPreloadInstance = function (flashId, instance) {
-		this._flashPreloadInstances[flashId] = instance;
+	p.registerPreloadInstance = function (event) {
+		this._flashPreloadInstances[event.target.flashId] = event.target;
 	};
 
 	/*
@@ -355,8 +385,8 @@ this.createjs = this.createjs || {};
 	 * @method unregisterPreloadInstance
 	 * @param {String} flashId Used to identify the Loader.
 	 */
-	p.unregisterPreloadInstance = function (flashId) {
-		delete this._flashPreloadInstances[flashId];
+	p.unregisterPreloadInstance = function (event) {
+		delete this._flashPreloadInstances[event.target.flashId];
 	};
 
 	/*
@@ -365,8 +395,8 @@ this.createjs = this.createjs || {};
 	 * @param {String} flashId Used to identify the SoundInstance.
 	 * @param {Loader} instance The actual instance.
 	 */
-	p.registerSoundInstance = function (flashId, instance) {
-		this._flashInstances[flashId] = instance;
+	p.registerSoundInstance = function (event) {
+		this._flashInstances[event.target.flashId] = event.target;
 	};
 
 	/*
@@ -376,8 +406,8 @@ this.createjs = this.createjs || {};
 	 * @param {String} flashId Used to identify the SoundInstance.
 	 * @param {Loader} instance The actual instance.
 	 */
-	p.unregisterSoundInstance = function (flashId) {
-		delete this._flashInstances[flashId];
+	p.unregisterSoundInstance = function (event) {
+		delete this._flashInstances[event.target.flashId];
 	};
 
 	/*

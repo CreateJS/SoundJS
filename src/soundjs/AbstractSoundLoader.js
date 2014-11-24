@@ -165,7 +165,6 @@ this.createjs = this.createjs || {};
 	p._handleCanPlayThrough = function (event) {
 		// TODO double check params of canplaythrough event
 		var e = new createjs.Event("canplaythrough");
-		e.target = this;
 		this.dispatchEvent(e)
 		this.oncanplaythrough && this.oncanplaythrough(e)
 	};
@@ -179,7 +178,6 @@ this.createjs = this.createjs || {};
 		// TODO consider params of event
 		this.progress = 1;
 		var e = new createjs.Event("load");
-		e.target = this;
 		this.dispatchEvent(e);
 		this.onload && this.onload(e);
 	};

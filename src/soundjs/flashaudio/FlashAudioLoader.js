@@ -109,8 +109,8 @@ this.createjs = this.createjs || {};
 
 		this.flashId = s._flash.preload(this.src);
 		// Associate this preload instance with the FlashID, so callbacks can route here.
-		// TODO change this to an event
-		createjs.Sound.activePlugin.registerPreloadInstance(this.flashId, this);
+		var e = new createjs.Event(createjs.FlashAudioPlugin._REG_FLASHID);
+		this.dispatchEvent(e);
 	};
 
 	p.handleProgress = function (loaded, total) {
@@ -131,6 +131,12 @@ this.createjs = this.createjs || {};
 	 */
 	p.handleError = function (error) {
 		this.AbstractSoundLoader__handleError(error);
+	};
+
+	p.destroy = function () {
+		var e = new createjs.Event(createjs.FlashAudioPlugin._UNREG_FLASHID);
+		this.dispatchEvent(e);
+		this.AbstractSoundLoader_destroy();
 	};
 
 	p.toString = function () {

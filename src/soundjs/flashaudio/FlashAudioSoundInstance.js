@@ -122,7 +122,7 @@ this.createjs = this.createjs || {};
 	p._handleCleanUp = function () {
 		s._flash.stopSound(this.flashId);
 
-		createjs.Sound.activePlugin.unregisterSoundInstance(this.flashId);	// TODO move this to plugin
+		this._sendEvent(createjs.FlashAudioPlugin._UNREG_FLASHID);
 		this.flashId = null;
 	};
 
@@ -142,7 +142,7 @@ this.createjs = this.createjs || {};
 		}
 
 		if (this._muted) {this.setMute(true);}
-		createjs.Sound.activePlugin.registerSoundInstance(this.flashId, this);
+		this._sendEvent(createjs.FlashAudioPlugin._REG_FLASHID);
 
 		this.playState = createjs.Sound.PLAY_SUCCEEDED;
 		this._sendEvent("succeeded");
