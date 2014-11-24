@@ -70,7 +70,6 @@ this.createjs = this.createjs || {};
  */
 
 (function () {
-
 	"use strict";
 
 	/**
@@ -478,16 +477,6 @@ this.createjs = this.createjs || {};
 	 */
 	s._preloadHash = {};
 
-	/**
-	 * An object that stands in for audio that fails to play. This allows developers to continue to call methods
-	 * on the failed instance without having to check if it is valid first. The instance is instantiated once, and
-	 * shared to keep the memory footprint down.
-	 * @property _defaultSoundInstance
-	 * @type {Object}
-	 * @protected
-	 * @static
-	 */
-	s._defaultSoundInstance = null;
 
 // mix-ins:
 	// EventDispatcher methods:
@@ -1070,7 +1059,7 @@ this.createjs = this.createjs || {};
 		}
 		var instance = s.createInstance(src, startTime, duration);
 		var ok = s._playInstance(instance, interrupt, delay, offset, loop, volume, pan);
-		if (!ok) {instance.playFailed();}
+		if (!ok) {instance._playFailed();}
 		return instance;
 	};
 
@@ -1101,7 +1090,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	s.createInstance = function (src, startTime, duration) {
-		if (!s.initializeDefaultPlugins()) {return s._defaultSoundInstance;}
+		if (!s.initializeDefaultPlugins()) {return new createjs.DefaultSoundInstance(src, startTime, duration);}
 
 		src = s._getSrcById(src);
 
@@ -1113,7 +1102,7 @@ this.createjs = this.createjs || {};
 			if (startTime == null) {startTime = src.startTime;}
 			instance = s.activePlugin.create(details.src, startTime, duration || src.duration);
 		} else {
-			instance = Sound._defaultSoundInstance;
+			instance = new createjs.DefaultSoundInstance(src, startTime, duration);;
 		}
 
 		instance.uniqueId = s._lastID++;
@@ -1610,26 +1599,7 @@ this.createjs = this.createjs || {};
 	p.toString = function () {
 		return "[Sound SoundChannel]";
 	};
-
 	// do not add SoundChannel to namespace
-
-
-	// This is a dummy sound instance, which allows Sound to return something so developers don't need to check nulls.
-	function SoundInstance() {
-		this.isDefault = true;
-		this.addEventListener = this.on = this.off = this.removeEventListener = this.removeAllEventListeners = this.dispatchEvent = this.hasEventListener = this._listeners = this._interrupt = this._playFailed = this.pause = this.resume = this.play = this._beginPlaying = this._cleanUp = this.stop = this.setMasterVolume = this.setVolume = this.mute = this.setMute = this.getMute = this.setPan = this.getPosition = this.setPosition = this.playFailed = function () {
-			return false;
-		};
-		this.getVolume = this.getPan = this.getDuration = function () {
-			return 0;
-		}
-		this.playState = Sound.PLAY_FAILED;
-		this.toString = function () {
-			return "[Sound Default Sound Instance]";
-		}
-	}
-
-	Sound._defaultSoundInstance = new SoundInstance();
 
 
 	/**
