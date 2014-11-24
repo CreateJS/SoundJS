@@ -155,7 +155,7 @@
     </p>
     <textarea class="brush: js;" readonly>
         var audioPath = "assets/";
-        var manifest = [
+        var sounds = [
         	{id:"Music", src:"18-machinae_supremacy-lord_krutors_dominion.ogg},
         	{id:"Thunder", src:"Thunder1.ogg"}
         ];
@@ -163,18 +163,18 @@
     </textarea>
 
     <p>
-        With our audio comfortably defined in a manifest, let's move on to loading the audio. SoundJS uses an
+        With our audio comfortably defined in a, let's move on to loading the audio. SoundJS uses an
         Event model, so we can add an event listener for the <a href="http://www.createjs.com/Docs/SoundJS/classes/Sound.html#event_fileload" target="_blank">
         <code>fileload</code> event</a>. It is a best practice to add this <em>before</em> we begin loading the audio to avoid a race
         condition where audio can load from cache immediately. The second parameter of the listener is the function to
-        call back. Once this is ready, the audio load can be kicked off using the <a href="http://www.createjs.com/Docs/SoundJS/classes/Sound.html#method_registerManifest" target="_blank">
-        <code>registerManifest</code> method</a>. Our deceptively simple and clean code should look like this:
+        call back. Once this is ready, the audio load can be kicked off using the <a href="http://www.createjs.com/Docs/SoundJS/classes/Sound.html#method_registerSounds" target="_blank">
+        <code>registerSounds</code> method</a>. Our deceptively simple and clean code should look like this:
     </p>
     <textarea class="brush: js;" readonly>
         function init() {
-        	// create a manifest and audioPath (above)
+        	// create an array and audioPath (above)
         	createjs.Sound.addEventListener("fileload", handleLoad);
-        	createjs.Sound.registerManifest(manifest, audioPath);
+        	createjs.Sound.registerSounds(sounds, audioPath);
         }
 
         function handleLoad(event) {
@@ -213,14 +213,14 @@
 			if (!createjs.Sound.initializeDefaultPlugins()) {return;}
 
 			var audioPath = "assets/";
-			var manifest = [
+			var sounds = [
 				{id:"Music", src:"18-machinae_supremacy-lord_krutors_dominion.ogg"},
 				{id:"Thunder", src:"Thunder1.ogg"}
 			];
 
 			createjs.Sound.alternateExtensions = ["mp3"];
 			createjs.Sound.addEventListener("fileload", handleLoad);
-			createjs.Sound.registerManifest(manifest, audioPath);
+			createjs.Sound.registerSounds(sounds, audioPath);
         }
 
         function handleLoad(event) {

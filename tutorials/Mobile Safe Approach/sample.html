@@ -39,7 +39,7 @@
 						if (!createjs.Sound.initializeDefaultPlugins()) {return;}
 
 						var audioPath = "../_assets_soundjs/";
-						var manifest = [
+						var sounds = [
 							{id:"Music", src:"18-machinae_supremacy-lord_krutors_dominion.ogg"},
 							{id:"Thunder", src:"Thunder1.ogg"}
 						];
@@ -48,7 +48,7 @@
 						createjs.Sound.alternateExtensions = ["mp3"];
 						var loadProxy = createjs.proxy(this.handleLoad, this);
 						createjs.Sound.addEventListener("fileload", loadProxy);
-						createjs.Sound.registerManifest(manifest, audioPath);
+						createjs.Sound.registerSounds(sounds, audioPath);
 					},
 
 					handleLoad: function(event) {

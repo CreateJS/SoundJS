@@ -56,14 +56,14 @@
 						if (!createjs.Sound.initializeDefaultPlugins()) {return;}
 
 						var audioPath = "assets/";
-						var manifest = [
+						var sounds = [
 							{id:"Music", src:"18-machinae_supremacy-lord_krutors_dominion.ogg"},
 							{id:"Thunder", src:"Thunder1.ogg"}
 						];
 
 						createjs.Sound.alternateExtensions = ["mp3"];
 						createjs.Sound.addEventListener("fileload", handleLoad);
-						createjs.Sound.registerManifest(manifest, audioPath);
+						createjs.Sound.registerSounds(sounds, audioPath);
 					}
 
 					function handleLoad(event) {
@@ -171,7 +171,7 @@
 				if (!createjs.Sound.initializeDefaultPlugins()) {return;}
 
 				var audioPath = "assets/";
-				var manifest = [
+				var sounds = [
 					{id:"Music", src:"18-machinae_supremacy-lord_krutors_dominion.ogg"},
 					{id:"Thunder", src:"Thunder1.ogg"}
 				];
@@ -179,7 +179,7 @@
 				displayMessage.innerHTML = "Loading Audio";
 				createjs.Sound.alternateExtensions = ["mp3"];
 				createjs.Sound.addEventListener("fileload", handleLoad);
-				createjs.Sound.registerManifest(manifest, audioPath);
+				createjs.Sound.registerSounds(sounds, audioPath);
 			}
 
 			function handleLoad(event) {
@@ -276,7 +276,7 @@
 			if (!createjs.Sound.initializeDefaultPlugins()) {return;}
 
 			var audioPath = "assets/";
-			var manifest = [
+			var sounds = [
 				{id:"Music", src:"18-machinae_supremacy-lord_krutors_dominion.ogg"},
 				{id:"Thunder", src:"Thunder1.ogg"}
 			];
@@ -284,7 +284,7 @@
 			this.displayMessage.innerHTML = "Loading Audio";
 			createjs.Sound.alternateExtensions = ["mp3"];
 			createjs.Sound.addEventListener("fileload", handleLoad);
-			createjs.Sound.registerManifest(manifest, audioPath);
+			createjs.Sound.registerSounds(sounds, audioPath);
 		}
 
 		handleLoad: function(event) {
@@ -382,7 +382,7 @@
 							if (!createjs.Sound.initializeDefaultPlugins()) {return;}
 
 							var audioPath = "assets/";
-							var manifest = [
+							var sounds = [
 								{id:"Music", src:"18-machinae_supremacy-lord_krutors_dominion.ogg"},
 								{id:"Thunder", src:"Thunder1.ogg"}
 							];
@@ -391,7 +391,7 @@
 							createjs.Sound.alternateExtensions = ["mp3"];
 							var loadProxy = createjs.proxy(this.handleLoad, this);
 							createjs.Sound.addEventListener("fileload", loadProxy);
-							createjs.Sound.registerManifest(manifest, audioPath);
+							createjs.Sound.registerSounds(sounds, audioPath);
 						},
 
 						handleLoad: function(event) {

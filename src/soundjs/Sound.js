@@ -78,7 +78,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * <b>Registering and Preloading</b><br />
 	 * Before you can play a sound, it <b>must</b> be registered. You can do this with {{#crossLink "Sound/registerSound"}}{{/crossLink}},
-	 * or register multiple sounds using {{#crossLink "Sound/registerManifest"}}{{/crossLink}}. If you don't register a
+	 * or register multiple sounds using {{#crossLink "Sound/registerSounds"}}{{/crossLink}}. If you don't register a
 	 * sound prior to attempting to play it using {{#crossLink "Sound/play"}}{{/crossLink}} or create it using {{#crossLink "Sound/createInstance"}}{{/crossLink}},
 	 * the sound source will be automatically registered but playback will fail as the source will not be ready. If you use
 	 * <a href="http://preloadjs.com" target="_blank">PreloadJS</a>, registration is handled for you when the sound is
@@ -149,7 +149,7 @@ this.createjs = this.createjs || {};
 	 * <h4>Example</h4>
 	 *      createjs.Sound.initializeDefaultPlugins();
 	 *		var assetsPath = "./assets/";
-	 *		var manifest = [{
+	 *		var sounds = [{
 	 *			src:"MyAudioSprite.ogg", data: {
 	 *				audioSprite: [
 	 *					{id:"sound1", startTime:0, duration:500},
@@ -160,7 +160,7 @@ this.createjs = this.createjs || {};
 	 *		];
 	 *		createjs.Sound.alternateExtensions = ["mp3"];
 	 *		createjs.Sound.addEventListener("fileload", loadSound);
-	 *		createjs.Sound.registerManifest(manifest, assetsPath);
+	 *		createjs.Sound.registerSounds(sounds, assetsPath);
 	 *		// after load is complete
 	 *		createjs.Sound.play("sound2");
 	 *
@@ -378,12 +378,12 @@ this.createjs = this.createjs || {};
 	 * Note that regardless of which file is loaded, you can call {{#crossLink "Sound/createInstance"}}{{/crossLink}}
 	 * and {{#crossLink "Sound/play"}}{{/crossLink}} using the same id or full source path passed for loading.
 	 * <h4>Example</h4>
-	 *	var manifest = [
+	 *	var sounds = [
 	 *		{src:"myPath/mySound.ogg", id:"example"},
 	 *	];
 	 *	createjs.Sound.alternateExtensions = ["mp3"]; // now if ogg is not supported, SoundJS will try asset0.mp3
 	 *	createjs.Sound.addEventListener("fileload", handleLoad); // call handleLoad when each sound loads
-	 *	createjs.Sound.registerManifest(manifest, assetPath);
+	 *	createjs.Sound.registerSounds(sounds, assetPath);
 	 *	// ...
 	 *	createjs.Sound.play("myPath/mySound.ogg"); // works regardless of what extension is supported.  Note calling with ID is a better approach
 	 *
@@ -824,22 +824,22 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Register a manifest of audio files for loading and future playback in Sound. It is recommended to register all
+	 * Register an array of audio files for loading and future playback in Sound. It is recommended to register all
 	 * sounds that need to be played back in order to properly prepare and preload them. Sound does internal preloading
 	 * when required.
 	 *
 	 * <h4>Example</h4>
-	 *      var manifest = [
+	 *      var sounds = [
 	 *          {src:"asset0.ogg", id:"example"},
 	 *          {src:"asset1.ogg", id:"1", data:6},
 	 *          {src:"asset2.mp3", id:"works"}
 	 *      ];
 	 *      createjs.Sound.alternateExtensions = ["mp3"];	// if the passed extension is not supported, try this extension
 	 *      createjs.Sound.addEventListener("fileload", handleLoad); // call handleLoad when each sound loads
-	 *      createjs.Sound.registerManifest(manifest, assetPath);
+	 *      createjs.Sound.registerSounds(sounds, assetPath);
 	 *
-	 * @method registerManifest
-	 * @param {Array} manifest An array of objects to load. Objects are expected to be in the format needed for
+	 * @method registerSounds
+	 * @param {Array} sounds An array of objects to load. Objects are expected to be in the format needed for
 	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}}: <code>{src:srcURI, id:ID, data:Data}</code>
 	 * with "id" and "data" being optional.
 	 * @param {string} basePath Set a path that will be prepended to each src when loading.  When creating, playing, or removing
@@ -848,19 +848,43 @@ this.createjs = this.createjs || {};
 	 * Like registerSound, it will return false for any values when the source cannot be parsed or if no plugins can be initialized.
 	 * Also, it will return true for any values when the source is already loaded.
 	 * @static
-	 * @since 0.4.0
+	 * @since 0.5.3
 	 */
-	s.registerManifest = function (manifest, basePath) {
+	s.registerSounds = function (sounds, basePath) {
 		var returnValues = [];
-		for (var i = 0, l = manifest.length; i < l; i++) {
-			returnValues[i] = createjs.Sound.registerSound(manifest[i].src, manifest[i].id, manifest[i].data, basePath);
+		for (var i = 0, l = sounds.length; i < l; i++) {
+			returnValues[i] = createjs.Sound.registerSound(sounds[i].src, sounds[i].id, sounds[i].data, basePath);
 		}
 		return returnValues;
 	};
 
 	/**
+	 * Deprecated.  Please use {{#crossLink "Sound/registerSounds"}}{{/crossLink} instead.
+	 *
+	 * @method registerManifest
+	 * @param {Array} sounds An array of objects to load. Objects are expected to be in the format needed for
+	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}}: <code>{src:srcURI, id:ID, data:Data}</code>
+	 * with "id" and "data" being optional.
+	 * @param {string} basePath Set a path that will be prepended to each src when loading.  When creating, playing, or removing
+	 * audio that was loaded with a basePath by src, the basePath must be included.
+	 * @return {Object} An array of objects with the modified values that were passed in, which defines each sound.
+	 * Like registerSound, it will return false for any values when the source cannot be parsed or if no plugins can be initialized.
+	 * Also, it will return true for any values when the source is already loaded.
+	 * @since 0.4.0
+	 * @depreacted
+ 	 */
+	s.registerManifest = function(manifest, basePath) {
+		try {
+			console.log("createjs.Sound.registerManifest is deprecated, please use createjs.Sound.registerSounds.")
+		} catch (error) {
+
+		};
+		return this.registerSounds(manifest, basePath);
+	};
+
+	/**
 	 * Remove a sound that has been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
-	 * {{#crossLink "Sound/registerManifest"}}{{/crossLink}}.
+	 * {{#crossLink "Sound/registerSounds"}}{{/crossLink}}.
 	 * <br />Note this will stop playback on active instances playing this sound before deleting them.
 	 * <br />Note if you passed in a basePath, you need to pass it or prepend it to the src here.
 	 *
@@ -903,18 +927,38 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Remove a manifest of audio files that have been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
-	 * {{#crossLink "Sound/registerManifest"}}{{/crossLink}}.
+	 * Remove an array of audio files that have been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
+	 * {{#crossLink "Sound/registerSounds"}}{{/crossLink}}.
 	 * <br />Note this will stop playback on active instances playing this audio before deleting them.
 	 * <br />Note if you passed in a basePath, you need to pass it or prepend it to the src here.
 	 *
 	 * <h4>Example</h4>
-	 *      var manifest = [
+	 *      var sounds = [
 	 *          {src:"asset0.ogg", id:"example"},
 	 *          {src:"asset1.ogg", id:"1", data:6},
 	 *          {src:"asset2.mp3", id:"works"}
 	 *      ];
-	 *      createjs.Sound.removeManifest(manifest, assetPath);
+	 *      createjs.Sound.removeSounds(sounds, assetPath);
+	 *
+	 * @method removeSounds
+	 * @param {Array} sounds An array of objects to remove. Objects are expected to be in the format needed for
+	 * {{#crossLink "Sound/removeSound"}}{{/crossLink}}: <code>{srcOrID:srcURIorID}</code>
+	 * @param {string} basePath Set a path that will be prepended to each src when removing.
+	 * @return {Object} An array of Boolean values representing if the sounds with the same array index were
+	 * successfully removed.
+	 * @static
+	 * @since 0.4.1
+	 */
+	s.removeSounds = function (sounds, basePath) {
+		var returnValues = [];
+		for (var i = 0, l = sounds.length; i < l; i++) {
+			returnValues[i] = createjs.Sound.removeSound(sounds[i].src, basePath);
+		}
+		return returnValues;
+	};
+
+	/**
+	 * Deprecated.  Please use {{#crossLink "Sound/removeSounds"}}{{/crossLink}} instead.
 	 *
 	 * @method removeManifest
 	 * @param {Array} manifest An array of objects to remove. Objects are expected to be in the format needed for
@@ -924,18 +968,20 @@ this.createjs = this.createjs || {};
 	 * successfully removed.
 	 * @static
 	 * @since 0.4.1
+	 * @deprecated
 	 */
 	s.removeManifest = function (manifest, basePath) {
-		var returnValues = [];
-		for (var i = 0, l = manifest.length; i < l; i++) {
-			returnValues[i] = createjs.Sound.removeSound(manifest[i].src, basePath);
-		}
-		return returnValues;
+		try {
+			console.log("createjs.Sound.removeManifest is deprecated, please use createjs.Sound.removeSounds.");
+		} catch (error) {
+
+		};
+		return s.removeSounds(manifest, basePath);
 	};
 
 	/**
 	 * Remove all sounds that have been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
-	 * {{#crossLink "Sound/registerManifest"}}{{/crossLink}}.
+	 * {{#crossLink "Sound/registerSounds"}}{{/crossLink}}.
 	 * <br />Note this will stop playback on all active sound instances before deleting them.
 	 *
 	 * <h4>Example</h4>
@@ -979,7 +1025,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Parse the path of a sound, usually from a manifest item. alternate extensions will be attempted in order if the
+	 * Parse the path of a sound. alternate extensions will be attempted in order if the
 	 * current extension is not supported
 	 * @method _parsePath
 	 * @param {String} value The path to an audio source.
