@@ -145,6 +145,17 @@ module.exports = function (grunt) {
 					flashaudioplugin: {
 						file: '../src/soundjs/version_flashaudioplugin.js'
 					}
+				},
+
+				mxmlc: {
+					options: {
+						"rawConfig": '--source-path=../dev'
+					},
+					sound: {
+						files: {
+							'../src/soundjs/flashaudio/FlashAudioPlugin.swf': ['../dev/com/createjs/soundjs/FlashAudioPlugin.as']
+						}
+					}
 				}
 			}
 	);
@@ -220,6 +231,7 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-yuidoc');
 	grunt.loadNpmTasks('grunt-contrib-compress');
 	grunt.loadNpmTasks('grunt-contrib-copy');
+	grunt.loadNpmTasks('grunt-mxmlc');
 	grunt.loadTasks('tasks/');
 
 	grunt.registerTask('setDocsBase', "Internal utility task to set a correct base for YUIDocs.", function() {
@@ -294,6 +306,14 @@ module.exports = function (grunt) {
 	 */
 	grunt.registerTask('combine', 'Combine all source into a single, un-minified file.', [
 		"concat"
+	]);
+
+	/**
+	 * Task for building the FlashAudioPlugin
+	 *
+	 */
+	grunt.registerTask('flash', 'Compile the FlashAudioPlugin.', [
+		"mxmlc"
 	]);
 
 };
