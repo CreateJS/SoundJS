@@ -434,6 +434,17 @@ this.createjs = this.createjs||{};
 		return "[PreloadJS AbstractLoader]";
 	};
 
+	// stubbed in, waiting for full implementation
+	p.destroy = function() {
+		this.cancel();
+		this._rawResult = null;
+		this._result = null;
+		this._tag = null;
+		this._xhr = null;	// todo if _xhr remove all listeners
+		this._item = null;
+		this.removeAllEventListeners();
+	};
+
 	createjs.AbstractLoader = createjs.promote(AbstractLoader, "EventDispatcher");
 
 }());

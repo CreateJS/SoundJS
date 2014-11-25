@@ -349,12 +349,6 @@ this.createjs = this.createjs || {};
 
 	};
 
-	p._handlePreloadComplete = function(event) {
-		this._audioSources[event.target.src] = event.target.src;
-
-		this.AbstractPlugin__handlePreloadComplete(event);
-	};
-
 	/**
 	 * Internal function used to set the gain value for master audio.  Should not be called externally.
 	 * @method _updateVolume

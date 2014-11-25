@@ -138,7 +138,7 @@ this.createjs = this.createjs || {};
 		if(this._loaders[src]) {return this._loaders[src];}	// already loading/loaded this, so don't load twice
 		// OJR potential issue that we won't be firing loaded event, might need to trigger if this is already loaded?
 		var loader = new this._loaderClass(src);
-		loader.onload = createjs.proxy(this._handlePreloadComplete, this);	//TODO change to event listener
+		loader.on("complete", createjs.proxy(this._handlePreloadComplete, this));
 		this._loaders[src] = loader;
 		return loader;
 	};
@@ -150,7 +150,6 @@ this.createjs = this.createjs || {};
 	 * @param {Loader} loader The sound URI to load.
 	 */
 	p.preload = function (loader) {
-		//loader.onload = createjs.proxy(this._handlePreloadComplete, this);	//TODO change to event listener
 		loader.load();
 	};
 
@@ -269,15 +268,14 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._handlePreloadComplete = function (event) {
-		// plugin should override this method, set _audioSources, then call super method
-		var src = event.target.src;
+		var src = event.target.getItem().src;
+		this._audioSources[src] = event.target.getResult(true);
 		createjs.Sound._sendFileLoadEvent(src);	// OJR is this worth changing to events?
 		for (var i = 0, l = this._soundInstances[src].length; i < l; i++) {
 			var item = this._soundInstances[src][i];
 			item.setPlaybackResource(this._audioSources[src]);
 			// ToDo consider adding play call here if playstate == playfailed
 		}
-		//event.target.destroy();		// TODO consider how this could impact PreloadJS  // move to removeSound and removeSounds
 	};
 
 	/**

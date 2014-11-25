@@ -50,7 +50,7 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	function Loader(src) {
-		this.AbstractSoundLoader_constructor(src);
+		this.AbstractLoader_constructor(src, false, createjs.DataTypes.SOUND);
 
 
 // Public properties
@@ -62,7 +62,7 @@ this.createjs = this.createjs || {};
 		this.flashId = null;
 
 	}
-	var p = createjs.extend(Loader, createjs.AbstractSoundLoader);
+	var p = createjs.extend(Loader, createjs.AbstractLoader);
 	// TODO make this extend PreloadJS Loader so we can be compatible
 
 
@@ -98,23 +98,21 @@ this.createjs = this.createjs || {};
 	};
 
 // public methods
-	p.load = function (src) {
-		this.AbstractSoundLoader_load(src);
-
+	p.load = function () {
 		if (s._flash == null) {
 			// register for future preloading
 			s._preloadInstances.push(this);
 			return;
 		}
 
-		this.flashId = s._flash.preload(this.src);
+		this.flashId = s._flash.preload(this._item.src);
 		// Associate this preload instance with the FlashID, so callbacks can route here.
 		var e = new createjs.Event(createjs.FlashAudioPlugin._REG_FLASHID);
 		this.dispatchEvent(e);
 	};
 
 	p.handleProgress = function (loaded, total) {
-		this.AbstractSoundLoader__handleProgress({loaded: loaded, total: total});
+		this._sendProgress(loaded/total);
 	};
 
 	/**
@@ -122,7 +120,8 @@ this.createjs = this.createjs || {};
 	 * #method handleComplete
 	 */
 	p.handleComplete = function () {
-		this._handleLoad();
+		this._rawResult = this._item.src;
+		this._sendComplete();
 	};
 
 	/**
@@ -130,19 +129,19 @@ this.createjs = this.createjs || {};
 	 * @param {Event} error
 	 */
 	p.handleError = function (error) {
-		this.AbstractSoundLoader__handleError(error);
+		this._handleError(error);
 	};
 
 	p.destroy = function () {
 		var e = new createjs.Event(createjs.FlashAudioPlugin._UNREG_FLASHID);
 		this.dispatchEvent(e);
-		this.AbstractSoundLoader_destroy();
+		this.AbstractLoader_destroy();
 	};
 
 	p.toString = function () {
 		return "[FlashAudioLoader]";
 	};
 
-	createjs.FlashAudioLoader = createjs.promote(Loader, "AbstractSoundLoader");
+	createjs.FlashAudioLoader = createjs.promote(Loader, "AbstractLoader");
 
 }());
