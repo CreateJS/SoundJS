@@ -44,6 +44,8 @@ CRITICAL (may break existing content):
 - Implemented new base classes for Plugin, SoundInstance, and SoundLoader.
 - SoundInstance added properties duration, position, loop, mute, pause (with backup methods for browser that do not support getter/setters)
 - SoundInstance added method destroy
+- deprecated registerManifest and removeManifest in favor of registerSounds and removeSounds
+- moved BrowserDetect into a util and changed namespace to createjs.BrowserDetect
 
 Version 0.5.2 [December 12, 2013]
 ************************************************************************************************************************

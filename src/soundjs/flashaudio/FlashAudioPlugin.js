@@ -283,10 +283,10 @@ this.createjs = this.createjs || {};
 		if (!this.flashReady) {
 			this._queuedInstances.push(src);
 		}
-		var o = this.AbstractPlugin_register(src, instances);
-		o.loader.addEventListener(s._REG_FLASHID, createjs.proxy(this.registerPreloadInstance, this));
-		o.loader.addEventListener(s._UNREG_FLASHID, createjs.proxy(this.unregisterPreloadInstance, this));
-		return o;
+		var loader = this.AbstractPlugin_register(src, instances);
+		loader.addEventListener(s._REG_FLASHID, createjs.proxy(this.registerPreloadInstance, this));
+		loader.addEventListener(s._UNREG_FLASHID, createjs.proxy(this.unregisterPreloadInstance, this));
+		return loader;
 	};
 
 	p.removeSound = function (src) {

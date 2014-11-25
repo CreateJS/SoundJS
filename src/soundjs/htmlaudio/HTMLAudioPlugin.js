@@ -253,17 +253,15 @@ this.createjs = this.createjs || {};
 	p.register = function (src, instances) {
 		var channel = createjs.HTMLAudioTagPool.get(src);
 		var tag = null;
-		var l = instances;
-		for (var i = 0; i < l; i++) {
+		for (var i = 0; i < instances; i++) {
 			tag = this._createTag(src);
 			channel.add(tag);
 		}
 
-		var l = this.AbstractPlugin_register(src, instances);
-		l.loader.tag = tag;
-		l.tag = tag;
+		var loader = this.AbstractPlugin_register(src, instances);
+		loader.tag = tag;
 
-		return l;
+		return loader;
 	};
 
 	p.removeSound = function (src) {

@@ -762,8 +762,7 @@ this.createjs = this.createjs || {};
 		}
 
 		// TODO figure out if we can ditch this whole tag setup
-		details.tag = loader.tag;
-		details.loader = loader.loader;
+		details.loader = loader;
 		if (loader.onload) {details.completeHandler = loader.onload;}	// used by preloadJS
 		if (loader.type) {details.type = loader.type;}
 

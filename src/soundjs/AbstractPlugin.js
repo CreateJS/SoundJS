@@ -56,6 +56,13 @@ this.createjs = this.createjs || {};
 		this._capabilities = null;
 
 		/**
+		 * Object hash indexed by the source URI of all created loaders, used to properly destroy them if sources are removed.
+		 * @type {Object}
+		 * @protected
+		 */
+		this._loaders = {};
+
+		/**
 		 * Object hash indexed by the source URI of each file to indicate if an audio source has begun loading,
 		 * is currently loading, or has completed loading.  Can be used to store non boolean data after loading
 		 * is complete (for example arrayBuffers for web audio).
@@ -66,7 +73,7 @@ this.createjs = this.createjs || {};
 		this._audioSources = {};
 
 		/**
-		 * Object hash indexed by the source URI of all created SoundInstances, update the playbackResource if it loads after they are created,
+		 * Object hash indexed by the source URI of all created SoundInstances, updates the playbackResource if it loads after they are created,
 		 * and properly destroy them if sources are removed
 		 * @type {Object}
 		 * @protected
@@ -129,9 +136,12 @@ this.createjs = this.createjs || {};
 		this._audioSources[src] = true;
 		this._soundInstances[src] = [];
 		if (!this._loader) {return;}
+		if(this._loaders[src]) {return this._loaders[src];}	// already loading/loaded this, so don't load twice
+		// OJR potential issue that we won't be firing loaded event, might need to trigger if this is already loaded?
 		var loader = new this._loader(src);
 		loader.onload = createjs.proxy(this._handlePreloadComplete, this);	//TODO change to event listener
-		return { tag: loader, loader:loader };
+		this._loaders[src] = loader;
+		return loader;
 	};
 
 	// note sound calls register before calling preload
@@ -172,12 +182,14 @@ this.createjs = this.createjs || {};
 	 * @param {String} src The sound URI to unload.
 	 */
 	p.removeSound = function (src) {
-		delete(this._audioSources[src]);
 		for (var i = this._soundInstances[src].length; i--; ) {
 			var item = this._soundInstances[src][i];
 			item.destroy();
 		}
 		delete(this._soundInstances[src]);
+		delete(this._audioSources[src]);
+		this._loaders[src].destroy();
+		delete(this._loaders[src]);
 	};
 
 	/**
@@ -266,7 +278,7 @@ this.createjs = this.createjs || {};
 			item.setPlaybackResource(this._audioSources[src]);
 			// ToDo consider adding play call here if playstate == playfailed
 		}
-		event.target.destroy();		// TODO consider how this could impact PreloadJS
+		//event.target.destroy();		// TODO consider how this could impact PreloadJS  // move to removeSound and removeSounds
 	};
 
 	/**
