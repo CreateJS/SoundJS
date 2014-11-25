@@ -207,13 +207,13 @@
 	 * Determine the type of the object using common extensions. Note that the type can be passed in with the load item
 	 * if it is an unusual extension.
 	 * @param {String} extension The file extension to use to determine the load type.
-	 * @return {String} The determined load type (for example, <code>LoadQueue.IMAGE</code> or null if it can not be
+	 * @return {String} The determined load type (for example, <code>DataTypes.IMAGE</code> or null if it can not be
 	 * determined by the extension.
 	 * @private
 	 */
 	s.getTypeByExtension = function (extension) {
 		if (extension == null) {
-			return createjs.LoadQueue.TEXT;
+			return createjs.DataTypes.TEXT;
 		}
 		switch (extension.toLowerCase()) {
 			case "jpeg":
@@ -222,27 +222,27 @@
 			case "png":
 			case "webp":
 			case "bmp":
-				return createjs.LoadQueue.IMAGE;
+				return createjs.DataTypes.IMAGE;
 			case "ogg":
 			case "mp3":
 			case "webm":
-				return createjs.LoadQueue.SOUND;
+				return createjs.DataTypes.SOUND;
 			case "mp4":
 			case "webm":
 			case "ts":
-				return createjs.LoadQueue.VIDEO;
+				return createjs.DataTypes.VIDEO;
 			case "json":
-				return createjs.LoadQueue.JSON;
+				return createjs.DataTypes.JSON;
 			case "xml":
-				return createjs.LoadQueue.XML;
+				return createjs.DataTypes.XML;
 			case "css":
-				return createjs.LoadQueue.CSS;
+				return createjs.DataTypes.CSS;
 			case "js":
-				return createjs.LoadQueue.JAVASCRIPT;
+				return createjs.DataTypes.JAVASCRIPT;
 			case 'svg':
-				return createjs.LoadQueue.SVG;
+				return createjs.DataTypes.SVG;
 			default:
-				return createjs.LoadQueue.TEXT;
+				return createjs.DataTypes.TEXT;
 		}
 	};
 

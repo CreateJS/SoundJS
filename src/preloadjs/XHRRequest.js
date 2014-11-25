@@ -188,7 +188,7 @@ this.createjs = this.createjs || {};
 
 		// Set up a timeout if we don't have XHR2
 		if (this._xhrLevel == 1) {
-			this._loadTimeout = setTimeout(createjs.proxy(this._handleTimeout, this), createjs.LoadQueue.loadTimeout);
+			this._loadTimeout = setTimeout(createjs.proxy(this._handleTimeout, this), this.getItem().loadTimeout);
 		}
 
 		// Note: We don't get onload in all browsers (earlier FF and IE). onReadyStateChange handles these.
@@ -198,9 +198,9 @@ this.createjs = this.createjs || {};
 
 		// Sometimes we get back 404s immediately, particularly when there is a cross origin request.  // note this does not catch in Chrome
 		try {
-			if (!this._item.values || this._item.method == createjs.LoadQueue.GET) {
+			if (!this._item.values || this._item.method == createjs.RequestMethods.GET) {
 				this._request.send();
-			} else if (this._item.method == createjs.LoadQueue.POST) {
+			} else if (this._item.method == createjs.RequestMethods.POST) {
 				this._request.send(createjs.RequestUtils.formatQueryString(this._item.values));
 			}
 		} catch (error) {

@@ -109,8 +109,8 @@ this.createjs = this.createjs || {};
 
 		this._capabilities = s._capabilities;
 
-		this._loader = createjs.HTMLAudioLoader;
-		this._soundInstance = createjs.HTMLAudioSoundInstance;
+		this._loaderClass = createjs.HTMLAudioLoader;
+		this._soundInstanceClass = createjs.HTMLAudioSoundInstance;
 	}
 
 	var p = createjs.extend(HTMLAudioPlugin, createjs.AbstractPlugin);

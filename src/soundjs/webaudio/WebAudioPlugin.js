@@ -116,8 +116,8 @@ this.createjs = this.createjs || {};
 
 		this._capabilities = s._capabilities;
 
-		this._loader = createjs.WebAudioLoader;
-		this._soundInstance = createjs.WebAudioSoundInstance;
+		this._loaderClass = createjs.WebAudioLoader;
+		this._soundInstanceClass = createjs.WebAudioSoundInstance;
 
 		this._addPropsToClasses();
 	}
@@ -320,12 +320,12 @@ this.createjs = this.createjs || {};
 	 * @since 0.5.3
 	 */
 	p._addPropsToClasses = function() {
-		var c = this._soundInstance;
+		var c = this._soundInstanceClass;
 		c.context = this.context;
 		c.destinationNode = this.gainNode;
 		c._panningModel = this._panningModel;
 
-		this._loader.context = this.context;
+		this._loaderClass.context = this.context;
 	};
 
 

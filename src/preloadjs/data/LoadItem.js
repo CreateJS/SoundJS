@@ -130,6 +130,13 @@ this.createjs = this.createjs||{};
 		 * @type {String}
 		 */
 		this.mimeType = null;
+
+		/**
+		 * how long before we stop a request.  Only applies to Tag loading and XHR level one loading.
+		 *
+		 * @type {number}
+		 */
+		this.loadTimeout = 8000;
 	};
 
 	var p = LoadItem.prototype = {};

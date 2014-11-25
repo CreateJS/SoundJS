@@ -164,8 +164,8 @@ this.createjs = this.createjs || {};
 
 		this._capabilities = s._capabilities;
 
-		this._loader = createjs.FlashAudioLoader;
-		this._soundInstance = createjs.FlashAudioSoundInstance;
+		this._loaderClass = createjs.FlashAudioLoader;
+		this._soundInstanceClass = createjs.FlashAudioSoundInstance;
 
 		// Create DIV
 		var w = this.wrapper = document.createElement("div");
@@ -338,8 +338,8 @@ this.createjs = this.createjs || {};
 	p._handleFlashReady = function () {
 		this.flashReady = true;
 
-		this._loader.setFlash(this._flash);
-		this._soundInstance.setFlash(this._flash);
+		this._loaderClass.setFlash(this._flash);
+		this._soundInstanceClass.setFlash(this._flash);
 
 		// Anything that needed to be preloaded, can now do so.
 		for (var i = 0, l = this._queuedInstances.length; i < l; i++) {

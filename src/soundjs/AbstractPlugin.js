@@ -85,14 +85,14 @@ this.createjs = this.createjs || {};
 		 * @type {Object}
 		 * @protected
 		 */
-		this._loader;
+		this._loaderClass;
 
 		/**
 		 * A reference to a SoundInstance class used by a plugin that must be set.
 		 * @type {Object}
 		 * @protected;
 		 */
-		this._soundInstance;
+		this._soundInstanceClass;
 	};
 	var p = AbstractPlugin.prototype;
 
@@ -135,10 +135,9 @@ this.createjs = this.createjs || {};
 	p.register = function (src, instances) {
 		this._audioSources[src] = true;
 		this._soundInstances[src] = [];
-		if (!this._loader) {return;}
 		if(this._loaders[src]) {return this._loaders[src];}	// already loading/loaded this, so don't load twice
 		// OJR potential issue that we won't be firing loaded event, might need to trigger if this is already loaded?
-		var loader = new this._loader(src);
+		var loader = new this._loaderClass(src);
 		loader.onload = createjs.proxy(this._handlePreloadComplete, this);	//TODO change to event listener
 		this._loaders[src] = loader;
 		return loader;
@@ -215,7 +214,7 @@ this.createjs = this.createjs || {};
 		if (!this.isPreloadStarted(src)) {
 			this.preload(this.register(src).tag);
 		}
-		var si = new this._soundInstance(src, startTime, duration, this._audioSources[src]);
+		var si = new this._soundInstanceClass(src, startTime, duration, this._audioSources[src]);
 		this._soundInstances[src].push(si);
 		return si;
 	};
