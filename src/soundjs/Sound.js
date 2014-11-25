@@ -761,7 +761,6 @@ this.createjs = this.createjs || {};
 			details.data.channels = numChannels || SoundChannel.maxPerChannel();
 		}
 
-		// TODO figure out if we can ditch this whole tag setup
 		details.loader = loader;
 		if (loader.onload) {details.completeHandler = loader.onload;}	// used by preloadJS
 		if (loader.type) {details.type = loader.type;}

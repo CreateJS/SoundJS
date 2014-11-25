@@ -11,6 +11,13 @@
 		"../src/createjs/events/EventDispatcher.js",
 		"../src/createjs/events/Event.js",
 
+		"../src/preloadjs/data/DataTypes.js",
+		"../src/preloadjs/data/LoadItem.js",
+		"../src/preloadjs/utils/RequestUtils.js",
+		"../src/preloadjs/AbstractLoader.js",
+		"../src/preloadjs/XHRRequest.js",
+		"../src/preloadjs/SoundLoader.js",
+
 		"../src/soundjs/Sound.js",
 		"../src/soundjs/AbstractSoundLoader.js",
 		"../src/soundjs/AbstractSoundInstance.js",
