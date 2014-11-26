@@ -269,7 +269,7 @@ this.createjs = this.createjs || {};
 	 */
 	p._handlePreloadComplete = function (event) {
 		var src = event.target.getItem().src;
-		this._audioSources[src] = event.target.getResult(true);
+		this._audioSources[src] = event.target.getResult(false);
 		createjs.Sound._sendFileLoadEvent(src);	// OJR is this worth changing to events?
 		for (var i = 0, l = this._soundInstances[src].length; i < l; i++) {
 			var item = this._soundInstances[src][i];

@@ -38,50 +38,27 @@ this.createjs = this.createjs || {};
 	"use strict";
 
 	function Loader(src) {
-		this.AbstractSoundLoader_constructor(src);
+		var loaditem = createjs.LoadItem.create(src);
+		this.XHRRequest_constructor(loaditem, true, createjs.DataTypes.SOUND);
 
-		// the request object for or XHR2 request
-		this.request = null;
+		this._request.responseType = "arraybuffer";
 	};
-	var p = createjs.extend(Loader, createjs.AbstractSoundLoader);
+	var p = createjs.extend(Loader, createjs.XHRRequest);
 
 	// web audio context required for decoding audio
 	Loader.context = null;
 
 
 // public methods
-	p.load = function(src) {
-		this.AbstractSoundLoader_load(src);
-
-		this.request = new XMLHttpRequest();
-		this.request.open("GET", this.src, true);
-		this.request.responseType = "arraybuffer";
-		this.request.onload = createjs.proxy(this._handleLoad, this);
-		this.request.onerror = createjs.proxy(this._handleError, this);
-		this.request.onprogress = createjs.proxy(this._handleProgress, this);
-		this.request.send();
-	};
-
-	p.destroy = function () {
-		this.request = null;
-		this.AbstractSoundLoader_destroy();
-	};
 	p.toString = function () {
 		return "[WebAudioLoader]";
 	};
 
 
 // private methods
-	p._handleProgress = function(event) {
-		if (!event || event.loaded > 0 && event.total == 0) {
-					return; // Sometimes we get no "total", so just ignore the progress event.
-		}
-		this.AbstractSoundLoader__handleProgress(event);
-	};
-
 	p._handleLoad = function (event) {
 		// OJR we leave this wrapped in Loader because we need to reference src and the handler only receives a single argument, the decodedAudio
-		Loader.context.decodeAudioData(this.request.response,
+		Loader.context.decodeAudioData(this._request.response,
 	         createjs.proxy(this._handleAudioDecoded, this),
 	         createjs.proxy(this._handleError, this));
 	};
@@ -93,9 +70,9 @@ this.createjs = this.createjs || {};
 	* @protected
 	*/
 	p._handleAudioDecoded = function (decodedAudio) {
-		this.result = decodedAudio;
-		this.AbstractSoundLoader__handleLoad(event);
+		this._response = decodedAudio;
+		this.XHRRequest__handleLoad();
 	};
 
-	createjs.WebAudioLoader = createjs.promote(Loader, "AbstractSoundLoader");
+	createjs.WebAudioLoader = createjs.promote(Loader, "XHRRequest");
 }());

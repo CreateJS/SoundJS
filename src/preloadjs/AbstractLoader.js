@@ -1,42 +1,41 @@
 /*
-* AbstractLoader
-* Visit http://createjs.com/ for documentation, updates and examples.
-*
-*
-* Copyright (c) 2012 gskinner.com, inc.
-*
-* Permission is hereby granted, free of charge, to any person
-* obtaining a copy of this software and associated documentation
-* files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use,
-* copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following
-* conditions:
-*
-* The above copyright notice and this permission notice shall be
-* included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-* OTHER DEALINGS IN THE SOFTWARE.
-*/
+ * AbstractLoader
+ * Visit http://createjs.com/ for documentation, updates and examples.
+ *
+ *
+ * Copyright (c) 2012 gskinner.com, inc.
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
 
 /**
  * @module PreloadJS
  */
 
 // namespace:
-this.createjs = this.createjs||{};
+this.createjs = this.createjs || {};
 
-(function() {
+(function () {
 	"use strict";
-
 
 // constructor
 	/**
@@ -48,7 +47,7 @@ this.createjs = this.createjs||{};
 	function AbstractLoader(loadItem, useXHR, type) {
 		this.EventDispatcher_constructor();
 
-	// public properties
+		// public properties
 		/**
 		 * If the loader has completed loading. This provides a quick check, but also ensures that the different approaches
 		 * used for loading do not pile up resulting in more than one <code>complete</code> event.
@@ -93,7 +92,7 @@ this.createjs = this.createjs||{};
 		 */
 		this.type = type;
 
-	// protected properties
+		// protected properties
 		/**
 		 * The item this loader represents. Note that this is null in a {{#crossLink "LoadQueue"}}{{/crossLink}}, but will
 		 * be available on loaders such as {{#crossLink "XHRLoader"}}{{/crossLink}} and {{#crossLink "TagLoader"}}{{/crossLink}}.
@@ -103,9 +102,14 @@ this.createjs = this.createjs||{};
 		 */
 		if (loadItem) {
 			this._item = createjs.LoadItem.create(loadItem);
+		} else {
+			this._item = null;
 		}
 
 		this._useXHR = useXHR;
+
+		this._rawResult = null;
+
 	};
 
 	var p = createjs.extend(AbstractLoader, createjs.EventDispatcher);
@@ -200,15 +204,15 @@ this.createjs = this.createjs||{};
 	 * be an Object created by the LoadQueue.
 	 * @return {Object} The manifest item that this loader is responsible for loading.
 	 */
-	p.getItem = function() {
+	p.getItem = function () {
 		return this._item;
 	};
 
-	p.getResult = function(raw) {
-		return raw?this._rawResult:this._result;
+	p.getResult = function (raw) {
+		return raw ? this._rawResult : this._result;
 	};
 
-	p.getTag = function() {
+	p.getTag = function () {
 		return this._tag;
 	};
 
@@ -222,7 +226,7 @@ this.createjs = this.createjs||{};
 	 *      queue.load();
 	 * @method load
 	 */
-	p.load = function() {
+	p.load = function () {
 		if (!this._useXHR) {
 			this._loadTag()
 		} else {
@@ -237,12 +241,13 @@ this.createjs = this.createjs||{};
 	 * To stop and restart a queue, use the {{#crossLink "LoadQueue/setPaused"}}{{/crossLink}} method instead.
 	 * @method close
 	 */
-	p.close = function() {};
+	p.close = function () {
+	};
 
 	/**
 	 *
 	 */
-	p.cancel = function() {
+	p.cancel = function () {
 		this.canceled = true;
 
 		if (this._xhr != null) {
@@ -258,7 +263,7 @@ this.createjs = this.createjs||{};
 	 * @method _sendLoadStart
 	 * @protected
 	 */
-	p._sendLoadStart = function() {
+	p._sendLoadStart = function () {
 		if (this._isCanceled()) { return; }
 		this.dispatchEvent("loadstart");
 	};
@@ -271,7 +276,7 @@ this.createjs = this.createjs||{};
 	 * and <code>total</code> properties.
 	 * @protected
 	 */
-	p._sendProgress = function(value) {
+	p._sendProgress = function (value) {
 		if (this._isCanceled()) { return; }
 		var event = null;
 		if (typeof(value) == "number") {
@@ -294,7 +299,7 @@ this.createjs = this.createjs||{};
 	 * @method _sendComplete
 	 * @protected
 	 */
-	p._sendComplete = function() {
+	p._sendComplete = function () {
 		if (this._isCanceled()) { return; }
 
 		var event = new createjs.Event("complete");
@@ -314,7 +319,7 @@ this.createjs = this.createjs||{};
 	 * @param {Object} event The event object containing specific error properties.
 	 * @protected
 	 */
-	p._sendError = function(event) {
+	p._sendError = function (event) {
 		if (this._isCanceled() || !this.hasEventListener("error")) { return; }
 		if (event == null) {
 			event = new createjs.Event("error");
@@ -329,15 +334,15 @@ this.createjs = this.createjs||{};
 	 * @return {Boolean} If the loader has been canceled.
 	 * @protected
 	 */
-	p._isCanceled = function() {
+	p._isCanceled = function () {
 		if (window.createjs == null || this.canceled) {
 			return true;
 		}
 		return false;
 	};
 
-	p._loadWithXHR = function() {
-		this._xhr = new createjs.XHRRequest(this._item, false, this.type);
+	p._loadWithXHR = function () {
+		this._xhr = new createjs.XHRRequest(this._item, false);
 		this._xhr.on("complete", this, this);
 		this._xhr.on("progress", this, this);
 		this._xhr.on("loadStart", this, this);
@@ -363,7 +368,7 @@ this.createjs = this.createjs||{};
 	 */
 	p.resultFormatter = null;
 
-	p.handleEvent = function(event) {
+	p.handleEvent = function (event) {
 		switch (event.type) {
 			case "complete":
 				this._rawResult = event.target._response;
@@ -377,17 +382,22 @@ this.createjs = this.createjs||{};
 				this._sendError(event);
 				break;
 			case "loadstart":
+				this._sendLoadStart();
+				break;
 			case "abort":
 			case "timeout":
-				console.warn("Event not supported yet.");
+				if (!this._isCanceled()) {
+					this.dispatchEvent(event.type);
+				}
+				break;
 		}
 	};
 
-	p._loadTag = function() {
+	p._loadTag = function () {
 		window.document.body.appendChild(this._tag);
 
-		this._tag.onload = createjs.proxy(this._handleTagComplete,  this);
-		this._tag.onreadystatechange = createjs.proxy(this._handleReadyStateChange,  this);
+		this._tag.onload = createjs.proxy(this._handleTagComplete, this);
+		this._tag.onreadystatechange = createjs.proxy(this._handleReadyStateChange, this);
 
 		var evt = new createjs.Event("initialize");
 		evt.loader = this._tag;
@@ -413,7 +423,7 @@ this.createjs = this.createjs||{};
 		}
 	};
 
-	p._handleTagComplete = function() {
+	p._handleTagComplete = function () {
 		this._rawResult = this._tag;
 		this._result = this.resultFormatter && this.resultFormatter(this) || this._rawResult;
 		this._sendComplete();
@@ -422,7 +432,7 @@ this.createjs = this.createjs||{};
 	/**
 	 * @deprecated Prefer RequestUtils.buildPath instead of this method.
 	 */
-	p.buildPath = function(src, data) {
+	p.buildPath = function (src, data) {
 		return createjs.RequestUtils.buildPath(src, data);
 	};
 
@@ -430,19 +440,8 @@ this.createjs = this.createjs||{};
 	 * @method toString
 	 * @return {String} a string representation of the instance.
 	 */
-	p.toString = function() {
+	p.toString = function () {
 		return "[PreloadJS AbstractLoader]";
-	};
-
-	// stubbed in, waiting for full implementation
-	p.destroy = function() {
-		this.cancel();
-		this._rawResult = null;
-		this._result = null;
-		this._tag = null;
-		this._xhr = null;	// todo if _xhr remove all listeners
-		this._item = null;
-		this.removeAllEventListeners();
 	};
 
 	createjs.AbstractLoader = createjs.promote(AbstractLoader, "EventDispatcher");

@@ -55,7 +55,7 @@ this.createjs = this.createjs || {};
 	function XHRRequest(item, crossOrigin) {
 		this.AbstractLoader_constructor();
 
-	// protected properties
+		// protected properties
 		/**
 		 * A reference to the XHR request used to load the content.
 		 * @property _request
@@ -111,6 +111,17 @@ this.createjs = this.createjs || {};
 		 */
 		this._crossOrigin = crossOrigin;
 
+		this._canceled = false;
+
+		// Setup our event handlers now.
+		this._handleLoadStartProxy = createjs.proxy(this._handleLoadStart, this);
+		this._handleProgressProxy = createjs.proxy(this._handleProgress, this);
+		this._handleAbortProxy = createjs.proxy(this._handleAbort, this);
+		this._handleErrorProxy = createjs.proxy(this._handleError, this);
+		this._handleTimeoutProxy = createjs.proxy(this._handleTimeout, this);
+		this._handleLoadProxy = createjs.proxy(this._handleLoad, this);
+		this._handleReadyStateChangeProxy = createjs.proxy(this._handleReadyStateChange, this);
+
 		this._item = item;
 		if (!this._createXHR(item)) {
 			//TODO: Throw error?
@@ -118,7 +129,6 @@ this.createjs = this.createjs || {};
 	};
 
 	var p = createjs.extend(XHRRequest, createjs.AbstractLoader);
-
 
 // static properties
 	/**
@@ -136,7 +146,6 @@ this.createjs = this.createjs || {};
 		"MSXML2.XMLHTTP",
 		"Microsoft.XMLHTTP"
 	];
-
 
 // Public methods
 	/**
@@ -180,21 +189,20 @@ this.createjs = this.createjs || {};
 		}
 
 		//Events
-		this._request.onloadstart = createjs.proxy(this._handleLoadStart, this);
-		this._request.onprogress = createjs.proxy(this._handleProgress, this);
-		this._request.onabort = createjs.proxy(this._handleAbort, this);
-		this._request.onerror = createjs.proxy(this._handleError, this);
-		this._request.ontimeout = createjs.proxy(this._handleTimeout, this);
+		this._request.addEventListener("loadstart", this._handleLoadStartProxy);
+		this._request.addEventListener("progress", this._handleProgressProxy);
+		this._request.addEventListener("abort", this._handleAbortProxy);
+		this._request.addEventListener("error",this._handleErrorProxy);
+		this._request.addEventListener("timeout", this._handleTimeoutProxy);
+
+		// Note: We don't get onload in all browsers (earlier FF and IE). onReadyStateChange handles these.
+		this._request.addEventListener("load", this._handleLoadProxy);
+		this._request.addEventListener("readystatechange", this._handleReadyStateChangeProxy);
 
 		// Set up a timeout if we don't have XHR2
 		if (this._xhrLevel == 1) {
 			this._loadTimeout = setTimeout(createjs.proxy(this._handleTimeout, this), this.getItem().loadTimeout);
 		}
-
-		// Note: We don't get onload in all browsers (earlier FF and IE). onReadyStateChange handles these.
-		this._request.onload = createjs.proxy(this._handleLoad, this);
-
-		this._request.onreadystatechange = createjs.proxy(this._handleReadyStateChange, this);
 
 		// Sometimes we get back 404s immediately, particularly when there is a cross origin request.  // note this does not catch in Chrome
 		try {
@@ -226,7 +234,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 	p.getAllResponseHeaders = function () {
-		if  (this._request.getAllResponseHeaders instanceof Function) {
+		if (this._request.getAllResponseHeaders instanceof Function) {
 			return this._request.getAllResponseHeaders();
 		} else {
 			return null;
@@ -250,7 +258,6 @@ this.createjs = this.createjs || {};
 			return null;
 		}
 	};
-
 
 // protected methods
 	/**
@@ -361,7 +368,6 @@ this.createjs = this.createjs || {};
 		this._sendError(event);
 	};
 
-
 // Protected
 	/**
 	 * Determine if there is an error in the current load. This checks the status of the request for problem codes. Note
@@ -443,13 +449,13 @@ this.createjs = this.createjs || {};
 				req = new XDomainRequest();
 			}
 		} else { // Old IE versions use a different approach
-			for (var i = 0, l=s.ACTIVEX_VERSIONS.length; i<l; i++) {
-	            var axVersion = s.ACTIVEX_VERSIONS[i];
-	            try {
-	                req = new ActiveXObject(axVersions);
-		            break;
-	            } catch (e) {}
-	        }
+			for (var i = 0, l = s.ACTIVEX_VERSIONS.length; i < l; i++) {
+				var axVersion = s.ACTIVEX_VERSIONS[i];
+				try {
+					req = new ActiveXObject(axVersions);
+					break;
+				} catch (e) {}
+			}
 			if (req == null) { return false; }
 		}
 
@@ -511,15 +517,13 @@ this.createjs = this.createjs || {};
 	p._clean = function () {
 		clearTimeout(this._loadTimeout);
 
-		var req = this._request;
-		req.onloadstart = null;
-		req.onprogress = null;
-		req.onabort = null;
-		req.onerror = null;
-		req.onload = null;
-		req.ontimeout = null;
-		req.onloadend = null;
-		req.onreadystatechange = null;
+		this._request.removeEventListener("loadstart", this._handleLoadStartProxy);
+		this._request.removeEventListener("progress", this._handleProgressProxy);
+		this._request.removeEventListener("abort", this._handleAbortProxy);
+		this._request.removeEventListener("error",this._handleErrorProxy);
+		this._request.removeEventListener("timeout", this._handleTimeoutProxy);
+		this._request.removeEventListener("load", this._handleLoadProxy);
+		this._request.removeEventListener("readystatechange", this._handleReadyStateChangeProxy);
 	};
 
 	p.toString = function () {

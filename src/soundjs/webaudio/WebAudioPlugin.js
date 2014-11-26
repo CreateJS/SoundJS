@@ -330,17 +330,6 @@ this.createjs = this.createjs || {};
 
 
 	/**
-	 * Handles internal preload completion.
-	 * @method _handlePreloadComplete
-	 * @protected
-	 */
-	p._handlePreloadComplete = function (event) {
-		this._audioSources[event.target.src] = event.target.result;
-
-		this.AbstractPlugin__handlePreloadComplete(event);
-	};
-
-	/**
 	 * Set the gain value for master audio. Should not be called externally.
 	 * @method _updateVolume
 	 * @protected

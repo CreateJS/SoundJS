@@ -12,6 +12,7 @@
 		"../src/createjs/events/Event.js",
 
 		"../src/preloadjs/data/DataTypes.js",
+		"../src/preloadjs/data/RequestMethods.js",
 		"../src/preloadjs/data/LoadItem.js",
 		"../src/preloadjs/utils/RequestUtils.js",
 		"../src/preloadjs/AbstractLoader.js",

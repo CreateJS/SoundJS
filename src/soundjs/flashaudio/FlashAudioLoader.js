@@ -120,7 +120,7 @@ this.createjs = this.createjs || {};
 	 * #method handleComplete
 	 */
 	p.handleComplete = function () {
-		this._rawResult = this._item.src;
+		this._result = this._item.src;
 		this._sendComplete();
 	};
 
