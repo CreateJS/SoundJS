@@ -422,18 +422,6 @@ this.createjs = this.createjs || {};
 				return this._remainingLoops;
 			},
 			set: function(value) {
-				if (this.tag != null) {
-					// remove looping
-					if (this._remainingLoops != 0 && value == 0) {
-						this.tag.loop = false;
-						this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
-					}
-					// add looping
-					if (this._remainingLoops == 0 && value != 0) {
-						this.tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
-						this.tag.loop = true;
-					}
-				}
 				this._remainingLoops = value;
 			}
 		});
@@ -449,7 +437,6 @@ this.createjs = this.createjs || {};
 	p._readyHandler = null;
 	p._stalledHandler = null;
 	p._audioSpriteEndHandler = null;
-	p.loopHandler = null;
 
 // Constructor
 	p._init = function (src, startTime, duration, owner) {
@@ -466,8 +453,7 @@ this.createjs = this.createjs || {};
 		this._endedHandler = createjs.proxy(this._handleSoundComplete, this);
 		this._readyHandler = createjs.proxy(this._handleSoundReady, this);
 		this._stalledHandler = createjs.proxy(this._handleSoundStalled, this);
-		this.__audioSpriteEndHandler = createjs.proxy(this._handleAudioSpriteLoop, this);
-		this.loopHandler = createjs.proxy(this.handleSoundLoop, this);
+		this._audioSpriteEndHandler = createjs.proxy(this._handleAudioSpriteLoop, this);
 	};
 
 	p._sendEvent = function (type) {
@@ -482,8 +468,7 @@ this.createjs = this.createjs || {};
 			this.tag.loop = false;
 			tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_ENDED, this._endedHandler, false);
 			tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_READY, this._readyHandler, false);
-			tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
-			tag.removeEventListener(createjs.HTMLAudioPlugin._TIME_UPDATE, this.__audioSpriteEndHandler, false);
+			tag.removeEventListener(createjs.HTMLAudioPlugin._TIME_UPDATE, this._audioSpriteEndHandler, false);
 
 			try {
 				tag.currentTime = this._startTime;
@@ -564,7 +549,6 @@ this.createjs = this.createjs || {};
 		this.playState = createjs.Sound.PLAY_SUCCEEDED;
 		this.paused = this._paused = false;
 		this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_READY, this._readyHandler, false);
-		this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
 
 		if (this._offset >= this.getDuration()) {
 			this.playFailed();
@@ -574,12 +558,7 @@ this.createjs = this.createjs || {};
 
 		if (this._audioSpriteStopTime) {
 			this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_ENDED, this._endedHandler, false);
-			this.tag.addEventListener(createjs.HTMLAudioPlugin._TIME_UPDATE, this.__audioSpriteEndHandler, false);
-		} else {
-			if(this._remainingLoops != 0) {
-				this.tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
-				this.tag.loop = true;
-			}
+			this.tag.addEventListener(createjs.HTMLAudioPlugin._TIME_UPDATE, this._audioSpriteEndHandler, false);
 		}
 
 		this.tag.play();
@@ -663,23 +642,14 @@ this.createjs = this.createjs || {};
 		if (this.tag == null) {
 			this._offset = value
 		} else {
-			this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
-			this.tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this._handleSetPositionSeek, false);
 			try {
 				value = value + this._startTime;
 				this.tag.currentTime = value * 0.001;
 			} catch (error) { // Out of range
-				this._handleSetPositionSeek(null);
 				return false;
 			}
 		}
 		return true;
-	};
-
-	p._handleSetPositionSeek = function(event) {
-		if (this.tag == null) { return; }
-		this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this._handleSetPositionSeek, false);
-		this.tag.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
 	};
 
 	p.getDuration = function () {  // NOTE this will always return 0 until sound has been played unless it is set
@@ -688,6 +658,13 @@ this.createjs = this.createjs || {};
 
 	p._handleSoundComplete = function (event) {
 		this._offset = 0;
+		if (this._remainingLoops != 0) {
+			this._remainingLoops--;
+			this.tag.currentTime = this._startTime * 0.001;
+			if (!this._paused) { this.tag.play(); }
+			this._sendEvent("loop");
+			return;
+		}
 		this.playState = createjs.Sound.PLAY_FINISHED;
 		this._cleanUp();
 		this._sendEvent("complete");
@@ -707,18 +684,6 @@ this.createjs = this.createjs || {};
 			if(!this._paused) {this.tag.play();}
 			this._sendEvent("loop");
 		}
-	};
-
-	// NOTE with this approach audio will loop as reliably as the browser allows
-	// but we could end up sending the loop event after next loop playback begins
-	p.handleSoundLoop = function (event) {
-		this._offset = 0;
-		this._remainingLoops--;
-		if(this._remainingLoops == 0) {
-			this.tag.loop = false;
-			this.tag.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this.loopHandler, false);
-		}
-		this._sendEvent("loop");
 	};
 
 	p.playFailed = function () {
