@@ -216,6 +216,10 @@ this.createjs = this.createjs || {};
 		return this._tag;
 	};
 
+	p.setTag = function(tag) {
+	  this._tag = tag;
+	};
+
 	/**
 	 * Begin loading the queued items. This method can be called when a {{#crossLink "LoadQueue"}}{{/crossLink}} is set
 	 * up but not started immediately.
@@ -255,6 +259,28 @@ this.createjs = this.createjs || {};
 			this._xhr.off("progress", this, this);
 		}
 	};
+
+	p.destroy = function() {
+	  this.cancel();
+	  if(this._tag) {
+	   this._tag.onload = null;
+	   this._tag.onreadystatechange = null;
+	   this._tag = null;
+	  }
+	  if(this._xhr) {
+	   this._xhr.off("complete", this, this);
+	   this._xhr.off("progress", this, this);
+	   this._xhr.off("loadStart", this, this);
+	   this._xhr.off("abort", this, this);
+	   this._xhr.off("timeout", this, this);
+	   this._xhr.off("error", this, this);
+	   this._xhr = null;
+	  }
+	  this._item = null;
+	  this._rawResult = null;
+	  this._result = null;
+	  this.removeAllEventListeners();
+	 };
 
 // Callback proxies
 	/**
@@ -424,6 +450,8 @@ this.createjs = this.createjs || {};
 	};
 
 	p._handleTagComplete = function () {
+		this._tag.onload = null;
+		this._tag.onreadystatechange = null;
 		this._rawResult = this._tag;
 		this._result = this.resultFormatter && this.resultFormatter(this) || this._rawResult;
 		this._sendComplete();

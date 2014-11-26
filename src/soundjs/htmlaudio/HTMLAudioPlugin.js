@@ -109,7 +109,7 @@ this.createjs = this.createjs || {};
 
 		this._capabilities = s._capabilities;
 
-		this._loaderClass = createjs.HTMLAudioLoader;
+		this._loaderClass = createjs.SoundLoader;
 		this._soundInstanceClass = createjs.HTMLAudioSoundInstance;
 	}
 
@@ -259,7 +259,7 @@ this.createjs = this.createjs || {};
 		}
 
 		var loader = this.AbstractPlugin_register(src, instances);
-		loader.tag = tag;
+		loader.setTag(tag);
 
 		return loader;
 	};
@@ -299,15 +299,6 @@ this.createjs = this.createjs || {};
 		//LM: Firefox fails when this the preload="none" for other tags, but it needs to be "none" to ensure PreloadJS works.
 		tag.src = src;
 		return tag;
-	};
-
-	p._handlePreloadComplete = function (event) {
-		var src = event.target.src;
-		this._audioSources[src] = event.target.tag;
-
-		// this.AbstractPlugin__handlePreloadComplete(event);
-		createjs.Sound._sendFileLoadEvent(src)
-		event.target.destroy();
 	};
 
 	createjs.HTMLAudioPlugin = createjs.promote(HTMLAudioPlugin, "AbstractPlugin");
