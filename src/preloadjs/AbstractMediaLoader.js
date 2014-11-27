@@ -52,9 +52,7 @@ this.createjs = this.createjs || {};
 		 * @type {string}
 		 * @private
 		 */
-		this._tagType = "";	// needs to be defined in classes that extend this
-
-		this._loadedHandler = createjs.proxy(this._handleTagComplete, this);
+		this._tagType = type;
 
 		this.resultFormatter = this._formatResult;
 	};
@@ -65,35 +63,25 @@ this.createjs = this.createjs || {};
 	// public methods
 
 	// protected methods
-	p._loadTag = function() {
-		if(!this._tag) {
+	p.load = function () {
+		// TagRequest will handle most of this, but Sound / Video need a few custom properties, so just handle them here.
+		if (!this._tag) {
 			this._tag = this._createTag(this._item.src);
 		}
-		this._tag.onstalled = createjs.proxy(this._handleStalled, this);
-		// This will tell us when audio is buffered enough to play through, but not when its loaded.
-		// The tag doesn't keep loading in Chrome once enough has buffered, and we have decided that behaviour is sufficient.
-		this._tag.addEventListener && this._tag.addEventListener("canplaythrough", this._loadedHandler, false); // canplaythrough callback doesn't work in Chrome, so we use an event.
-
-		this.AbstractLoader__loadTag();
 
 		this._tag.preload = "auto";
 		this._tag.load();
-	}
+
+		this.AbstractLoader_load();
+	};
 
 	/**
-	 * Create an HTML audio tag.
-	 * @method _createTag
-	 * @param {String} src The source file to set for the audio tag.
-	 * @return {HTMLElement} Returns an HTML audio tag.
-	 * @protected
+	 * Abstract, create a new tag if none exist.
+	 *
+	 * @private
 	 */
-	p._createTag = function (src) {
-		var tag = document.createElement(this._tagType);
-		tag.autoplay = false;
-		tag.preload = "none";
-		//LM: Firefox fails when this the preload="none" for other tags, but it needs to be "none" to ensure PreloadJS works.
-		tag.src = src;
-		return tag;
+	p._createTag = function () {
+
 	};
 
 	p._formatResult = function (loader) {
@@ -103,16 +91,6 @@ this.createjs = this.createjs || {};
 			loader.getTag().src = loader.getResult(true);
 		}
 		return loader.getTag();
-	};
-
-	/**
-	 * Handle a stalled audio event. The main place we seem to get these is with HTMLAudio in Chrome when we try and
-	 * playback audio that is already in a load, but not complete.
-	 * @method _handleStalled
-	 * @private
-	 */
-	p._handleStalled = function () {
-		//Ignore, let the timeout take care of it. Sometimes its not really stopped.
 	};
 
 	createjs.AbstractMediaLoader = createjs.promote(AbstractMediaLoader, "AbstractLoader");

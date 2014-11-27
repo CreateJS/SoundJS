@@ -17,6 +17,9 @@
 		"../src/preloadjs/utils/RequestUtils.js",
 		"../src/preloadjs/AbstractLoader.js",
 		"../src/preloadjs/AbstractMediaLoader.js",
+		"../src/preloadjs/AbstractRequest.js",
+		"../src/preloadjs/TagRequest.js",
+		"../src/preloadjs/MediaTagRequest.js",
 		"../src/preloadjs/XHRRequest.js",
 		"../src/preloadjs/SoundLoader.js",
 

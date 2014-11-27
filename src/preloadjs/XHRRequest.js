@@ -53,7 +53,7 @@ this.createjs = this.createjs || {};
 	 * @extends AbstractLoader
 	 */
 	function XHRRequest(item, crossOrigin) {
-		this.AbstractLoader_constructor();
+		this.AbstractRequest_constructor(item, crossOrigin);
 
 		// protected properties
 		/**
@@ -109,7 +109,6 @@ this.createjs = this.createjs || {};
 		 * @defaultValue ""
 		 * @private
 		 */
-		this._crossOrigin = crossOrigin;
 
 		this._canceled = false;
 
@@ -122,7 +121,6 @@ this.createjs = this.createjs || {};
 		this._handleLoadProxy = createjs.proxy(this._handleLoad, this);
 		this._handleReadyStateChangeProxy = createjs.proxy(this._handleReadyStateChange, this);
 
-		this._item = item;
 		if (!this._createXHR(item)) {
 			//TODO: Throw error?
 		}
@@ -530,6 +528,6 @@ this.createjs = this.createjs || {};
 		return "[PreloadJS XHRRequest]";
 	};
 
-	createjs.XHRRequest = createjs.promote(XHRRequest, "AbstractLoader");
+	createjs.XHRRequest = createjs.promote(XHRRequest, "AbstractRequest");
 
 }());

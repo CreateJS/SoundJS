@@ -58,6 +58,31 @@ this.createjs = this.createjs || {};
 		return item.type == createjs.DataTypes.SOUND;
 	};
 
+	p._createRequest = function() {
+		if (!this._useXHR) {
+			this._request = new createjs.MediaTagRequest(this._item, false, this._tag || this._createTag(), this._tagSrcAttribute);
+		} else {
+			this._request = new createjs.XHRRequest(this._item, false);
+		}
+	};
+
+	/**
+	 * Create an HTML audio tag.
+	 * @method _createTag
+	 * @param {String} src The source file to set for the audio tag.
+	 * @return {HTMLElement} Returns an HTML audio tag.
+	 * @protected
+	 */
+	p._createTag = function (src) {
+		var tag = document.createElement(this._tagType);
+		tag.autoplay = false;
+		tag.preload = "none";
+
+		//LM: Firefox fails when this the preload="none" for other tags, but it needs to be "none" to ensure PreloadJS works.
+		tag.src = src;
+		return tag;
+	};
+
 	createjs.SoundLoader = createjs.promote(SoundLoader, "AbstractMediaLoader");
 
 }());

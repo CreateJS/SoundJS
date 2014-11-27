@@ -109,7 +109,6 @@ this.createjs = this.createjs || {};
 		this._useXHR = useXHR;
 
 		this._rawResult = null;
-
 	};
 
 	var p = createjs.extend(AbstractLoader, createjs.EventDispatcher);
@@ -231,10 +230,27 @@ this.createjs = this.createjs || {};
 	 * @method load
 	 */
 	p.load = function () {
+		this._createRequest();
+
+		this._request.on("complete", this, this);
+		this._request.on("progress", this, this);
+		this._request.on("loadStart", this, this);
+		this._request.on("abort", this, this);
+		this._request.on("timeout", this, this);
+		this._request.on("error", this, this);
+
+		var evt = new createjs.Event("initialize");
+		evt.loader = this._request;
+		this.dispatchEvent(evt);
+
+		this._request.load();
+	};
+
+	p._createRequest = function() {
 		if (!this._useXHR) {
-			this._loadTag()
+			this._request = new createjs.TagRequest(this._item, false, this._tag || this._createTag(), this._tagSrcAttribute);
 		} else {
-			this._loadWithXHR();
+			this._request = new createjs.XHRRequest(this._item, false);
 		}
 	};
 
@@ -246,6 +262,7 @@ this.createjs = this.createjs || {};
 	 * @method close
 	 */
 	p.close = function () {
+
 	};
 
 	/**
@@ -253,34 +270,30 @@ this.createjs = this.createjs || {};
 	 */
 	p.cancel = function () {
 		this.canceled = true;
-
-		if (this._xhr != null) {
-			this._xhr.off("complete", this, this);
-			this._xhr.off("progress", this, this);
-		}
+		this.destroy();
 	};
 
+	/**
+	 * Remove all references to this loader.
+	 *
+	 */
 	p.destroy = function() {
-	  this.cancel();
-	  if(this._tag) {
-	   this._tag.onload = null;
-	   this._tag.onreadystatechange = null;
-	   this._tag = null;
-	  }
-	  if(this._xhr) {
-	   this._xhr.off("complete", this, this);
-	   this._xhr.off("progress", this, this);
-	   this._xhr.off("loadStart", this, this);
-	   this._xhr.off("abort", this, this);
-	   this._xhr.off("timeout", this, this);
-	   this._xhr.off("error", this, this);
-	   this._xhr = null;
-	  }
-	  this._item = null;
-	  this._rawResult = null;
-	  this._result = null;
-	  this.removeAllEventListeners();
-	 };
+		this._request.off("complete", this, this);
+		this._request.off("progress", this, this);
+		this._request.off("loadStart", this, this);
+		this._request.off("abort", this, this);
+		this._request.off("timeout", this, this);
+		this._request.off("error", this, this);
+		this._request.destroy();
+
+		this._request = null;
+
+		this._item = null;
+		this._rawResult = null;
+		this._result = null;
+
+		this.removeAllEventListeners();
+	};
 
 // Callback proxies
 	/**
@@ -321,7 +334,6 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Dispatch a complete event. Please see the {{#crossLink "AbstractLoader/complete:event"}}{{/crossLink}} event
-	 * for details on the event payload.
 	 * @method _sendComplete
 	 * @protected
 	 */
@@ -367,22 +379,6 @@ this.createjs = this.createjs || {};
 		return false;
 	};
 
-	p._loadWithXHR = function () {
-		this._xhr = new createjs.XHRRequest(this._item, false);
-		this._xhr.on("complete", this, this);
-		this._xhr.on("progress", this, this);
-		this._xhr.on("loadStart", this, this);
-		this._xhr.on("abort", this, this);
-		this._xhr.on("timeout", this, this);
-		this._xhr.on("error", this, this);
-
-		var evt = new createjs.Event("initialize");
-		evt.loader = this._xhr;
-		this.dispatchEvent(evt);
-
-		this._xhr.load();
-	};
-
 	/**
 	 * Optional; Called just before a request dispatches its complete event.
 	 * Allows plugins to set a custom result value.
@@ -417,44 +413,6 @@ this.createjs = this.createjs || {};
 				}
 				break;
 		}
-	};
-
-	p._loadTag = function () {
-		window.document.body.appendChild(this._tag);
-
-		this._tag.onload = createjs.proxy(this._handleTagComplete, this);
-		this._tag.onreadystatechange = createjs.proxy(this._handleReadyStateChange, this);
-
-		var evt = new createjs.Event("initialize");
-		evt.loader = this._tag;
-		this.dispatchEvent(evt);
-
-		this._tag[this._tagSrcAttribute] = this._item.src;
-	};
-
-	/**
-	 * Handle the readyStateChange event from a tag. We sometimes need this in place of the onload event (mainly SCRIPT
-	 * and LINK tags), but other cases may exist.
-	 * @method _handleReadyStateChange
-	 * @private
-	 */
-	p._handleReadyStateChange = function () {
-		clearTimeout(this._loadTimeout);
-		// This is strictly for tags in browsers that do not support onload.
-		var tag = this._tag;
-
-		// Complete is for old IE support.
-		if (tag.readyState == "loaded" || tag.readyState == "complete") {
-			this._handleTagComplete();
-		}
-	};
-
-	p._handleTagComplete = function () {
-		this._tag.onload = null;
-		this._tag.onreadystatechange = null;
-		this._rawResult = this._tag;
-		this._result = this.resultFormatter && this.resultFormatter(this) || this._rawResult;
-		this._sendComplete();
 	};
 
 	/**
