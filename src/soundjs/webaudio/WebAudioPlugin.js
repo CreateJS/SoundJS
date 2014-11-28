@@ -149,6 +149,10 @@ this.createjs = this.createjs || {};
 	/**
 	 * The web audio context, which WebAudio uses to play audio. All nodes that interact with the WebAudioPlugin
 	 * need to be created within this context.
+	 *
+	 * Advanced users can set this to an existing context, but <b>must</b> do so before they call
+	 * {{#crossLink "Sound/registerPlugins"}}{{/crossLink}} or {{#crossLink "Sound/initializeDefaultPlugins"}}{{/crossLink}}.
+	 *
 	 * @property context
 	 * @type {AudioContext}
 	 * @static
@@ -156,7 +160,7 @@ this.createjs = this.createjs || {};
 	s.context = null;
 
 
-// Static Methods
+// Static Public Methods
 	/**
 	 * Determine if the plugin can be used in the current browser/OS.
 	 * @method isSupported
@@ -173,6 +177,30 @@ this.createjs = this.createjs || {};
 		return true;
 	};
 
+	/**
+	 * Plays an empty sound in the web audio context.  This is used to enable web audio on iOS devices, as they
+	 * require the first sound to be played inside of a user initiated event (touch/click).  This is called when
+	 * {{#crossLink "WebAudioPlugin"}}{{/crossLink}} is initialized (by Sound {{#crossLink "Sound/initializeDefaultPlugins"}}{{/crossLink}}
+	 * for example).
+	 *
+	 * <h4>Example</h4>
+	 *     function handleTouch(event) {
+	 *         createjs.WebAudioPlugin.playEmptySound();
+	 *     }
+	 *
+	 * @method playEmptySound
+	 * @static
+	 * @since 0.4.1
+	 */
+	s.playEmptySound = function() {
+		var source = s.context.createBufferSource();
+		source.buffer = s.context.createBuffer(1, 1, 22050);
+		source.connect(s.context.destination);
+		source.start(0, 0, 0);
+	};
+
+
+// Static Private Methods
 	/**
 	 * Determine if XHR is supported, which is necessary for web audio.
 	 * @method _isFileXHRSupported
@@ -219,12 +247,14 @@ this.createjs = this.createjs || {};
 		var t = document.createElement("audio");
 		if (t.canPlayType == null) {return null;}
 
-		if (window.AudioContext) {
-			s.context = new AudioContext();
-		} else if (window.webkitAudioContext) {
-			s.context = new webkitAudioContext();
-		} else {
-			return null;
+		if (s.context == null) {
+			if (window.AudioContext) {
+				s.context = new AudioContext();
+			} else if (window.webkitAudioContext) {
+				s.context = new webkitAudioContext();
+			} else {
+				return null;
+			}
 		}
 
 		s._compatibilitySetUp();
@@ -280,28 +310,6 @@ this.createjs = this.createjs || {};
 
 		// panningModel
 		s._panningModel = 0;
-	};
-
-	/**
-	 * Plays an empty sound in the web audio context.  This is used to enable web audio on iOS devices, as they
-	 * require the first sound to be played inside of a user initiated event (touch/click).  This is called when
-	 * {{#crossLink "WebAudioPlugin"}}{{/crossLink}} is initialized (by Sound {{#crossLink "Sound/initializeDefaultPlugins"}}{{/crossLink}}
-	 * for example).
-	 *
-	 * <h4>Example</h4>
-	 *     function handleTouch(event) {
-	 *         createjs.WebAudioPlugin.playEmptySound();
-	 *     }
-	 *
-	 * @method playEmptySound
-	 * @static
-	 * @since 0.4.1
-	 */
-	s.playEmptySound = function() {
-		var source = s.context.createBufferSource();
-		source.buffer = s.context.createBuffer(1, 1, 22050);
-		source.connect(s.context.destination);
-		source.start(0, 0, 0);
 	};
 
 
