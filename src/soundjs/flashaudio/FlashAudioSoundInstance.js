@@ -37,20 +37,37 @@ this.createjs = this.createjs || {};
 (function () {
 	"use strict";
 
-	// NOTE audio control is shuttled to a flash player instance via the flash reference.
-	function SoundInstance(src, startTime, duration, playbackResource) {
+	/**
+	 * FlashAudioSoundInstance extends the base api of {{#crossLink "AbstractSoundInstance"}}{{/crossLink}}.
+	 * NOTE audio control is shuttled to a flash player instance via the flash reference.
+	 *
+	 * @param {String} src The path to and file name of the sound.
+	 * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
+	 * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
+	 * @param {Object} playbackResource Any resource needed by plugin to support audio playback.
+	 * @class FlashAudioSoundInstance
+	 * @extends AbstractSoundInstance
+	 * @constructor
+	 */
+	function FlashAudioSoundInstance(src, startTime, duration, playbackResource) {
 		this.AbstractSoundInstance_constructor(src, startTime, duration, playbackResource);
 
 
 // Public Properties
+		/**
+		 * ID used to facilitate communication with flash.
+		 * Not doc'd because this should not be altered externally
+		 * #property flashId
+		 * @type {String}
+		 */
 		this.flashId = null; // To communicate with Flash
 
 		if(s._flash == null) { s._instances.push(this); }
 	};
-	var p = createjs.extend(SoundInstance, createjs.AbstractSoundInstance);
+	var p = createjs.extend(FlashAudioSoundInstance, createjs.AbstractSoundInstance);
 
 // Static Propeties
-	var s = SoundInstance;
+	var s = FlashAudioSoundInstance;
 	/**
 	 * A reference to the Flash instance that gets created.
 	 * #property flash
@@ -88,7 +105,7 @@ this.createjs = this.createjs || {};
 
 
 // Private Methods
-	// TODO change flash.setLoop to mimic remove and add
+	// TODO change flash.setLoop to mimic remove and add??
 	p._removeLooping = function () {
 		if (this.flashId == null) { return; }
 		s._flash.setLoop(this.flashId, this._loop);
@@ -201,5 +218,5 @@ this.createjs = this.createjs || {};
 		this._sendEvent("loop");
 	};
 
-	createjs.FlashAudioSoundInstance = createjs.promote(SoundInstance, "AbstractSoundInstance");
+	createjs.FlashAudioSoundInstance = createjs.promote(FlashAudioSoundInstance, "AbstractSoundInstance");
 }());

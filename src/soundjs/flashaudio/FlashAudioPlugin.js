@@ -384,9 +384,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/*
-	 * Used to couple a Flash sound instance with a {{#crossLink "SoundInstance"}}{{/crossLink}}.
+	 * Used to couple a Flash sound instance with a {{#crossLink "FlashAudioSoundInstance"}}{{/crossLink}}.
 	 * @method registerSoundInstance
-	 * @param {String} flashId Used to identify the SoundInstance.
+	 * @param {String} flashId Used to identify the FlashAudioSoundInstance.
 	 * @param {Loader} instance The actual instance.
 	 */
 	p.registerSoundInstance = function (event) {
@@ -394,10 +394,10 @@ this.createjs = this.createjs || {};
 	};
 
 	/*
-	 * Used to decouple a {{#crossLink "SoundInstance"}}{{/crossLink}} from Flash.
+	 * Used to decouple a {{#crossLink "FlashAudioSoundInstance"}}{{/crossLink}} from Flash.
 	 * instance.
 	 * @method unregisterSoundInstance
-	 * @param {String} flashId Used to identify the SoundInstance.
+	 * @param {String} flashId Used to identify the FlashAudioSoundInstance.
 	 * @param {Loader} instance The actual instance.
 	 */
 	p.unregisterSoundInstance = function (event) {
@@ -419,10 +419,10 @@ this.createjs = this.createjs || {};
 	};
 
 	/*
-	 * Handles events from Flash, and routes communication to a {{#crossLink "SoundInstance"}}{{/crossLink}} via
+	 * Handles events from Flash, and routes communication to a {{#crossLink "FlashAudioSoundInstance"}}{{/crossLink}} via
 	 * the Flash ID. The method and arguments from Flash are run directly on the loader or sound instance.
 	 * @method handleSoundEvent
-	 * @param {String} flashId Used to identify the SoundInstance.
+	 * @param {String} flashId Used to identify the FlashAudioSoundInstance.
 	 * @param {String} method Indicates the method to run.
 	 */
 	p.handleSoundEvent = function (flashId, method) {

@@ -68,7 +68,7 @@ this.createjs = this.createjs || {};
 
 // Private Properties
 		/**
-		 * Value to set panning model to equal power for SoundInstance.  Can be "equalpower" or 0 depending on browser implementation.
+		 * Value to set panning model to equal power for WebAudioSoundInstance.  Can be "equalpower" or 0 depending on browser implementation.
 		 * @property _panningModel
 		 * @type {Number / String}
 		 * @protected
@@ -138,7 +138,7 @@ this.createjs = this.createjs || {};
 	s._capabilities = null;
 
 	/**
-	 * Value to set panning model to equal power for SoundInstance.  Can be "equalpower" or 0 depending on browser implementation.
+	 * Value to set panning model to equal power for WebAudioSoundInstance.  Can be "equalpower" or 0 depending on browser implementation.
 	 * @property _panningModel
 	 * @type {Number / String}
 	 * @protected

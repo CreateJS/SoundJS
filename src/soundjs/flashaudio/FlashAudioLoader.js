@@ -56,6 +56,7 @@ this.createjs = this.createjs || {};
 // Public properties
 		/**
 		 * ID used to facilitate communication with flash.
+		 * Not doc'd because this should not be altered externally
 		 * #property flashId
 		 * @type {String}
 		 */

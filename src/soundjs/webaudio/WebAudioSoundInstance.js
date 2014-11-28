@@ -35,21 +35,27 @@
 this.createjs = this.createjs || {};
 
 /**
-  * @class WebAudioSoundInstance
-  * @extends AbstractSoundInstance
-  * @constructor
-  */
+ * WebAudioSoundInstance extends the base api of {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} and exposes audioNodes for advanced users.
+ *
+ * @param {String} src The path to and file name of the sound.
+ * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
+ * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
+ * @param {Object} playbackResource Any resource needed by plugin to support audio playback.
+ * @class WebAudioSoundInstance
+ * @extends AbstractSoundInstance
+ * @constructor
+ */
 (function () {
 	"use strict";
 
-	function SoundInstance(src, startTime, duration, playbackResource) {
+	function WebAudioSoundInstance(src, startTime, duration, playbackResource) {
 		this.AbstractSoundInstance_constructor(src, startTime, duration, playbackResource);
 
 
 // public properties
 		/**
 		 * NOTE this is only intended for use by advanced users.
-		 * <br />GainNode for controlling <code>SoundInstance</code> volume. Connected to the {{#crossLink "WebAudioSoundInstance/destinationNode:property"}}{{/crossLink}}.
+		 * <br />GainNode for controlling <code>WebAudioSoundInstance</code> volume. Connected to the {{#crossLink "WebAudioSoundInstance/destinationNode:property"}}{{/crossLink}}.
 		 * @property gainNode
 		 * @type {AudioGainNode}
 		 * @since 0.4.0
@@ -59,7 +65,7 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * NOTE this is only intended for use by advanced users.
-		 * <br />A panNode allowing left and right audio channel panning only. Connected to SoundInstance {{#crossLink "SoundInstance/gainNode:property"}}{{/crossLink}}.
+		 * <br />A panNode allowing left and right audio channel panning only. Connected to WebAudioSoundInstance {{#crossLink "WebAudioSoundInstance/gainNode:property"}}{{/crossLink}}.
 		 * @property panNode
 		 * @type {AudioPannerNode}
 		 * @since 0.4.0
@@ -70,7 +76,7 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * NOTE this is only intended for use by advanced users.
-		 * <br />sourceNode is the audio source. Connected to SoundInstance {{#crossLink "SoundInstance/panNode:property"}}{{/crossLink}}.
+		 * <br />sourceNode is the audio source. Connected to WebAudioSoundInstance {{#crossLink "WebAudioSoundInstance/panNode:property"}}{{/crossLink}}.
 		 * @property sourceNode
 		 * @type {AudioNode}
 		 * @since 0.4.0
@@ -92,9 +98,9 @@ this.createjs = this.createjs || {};
 		this._soundCompleteTimeout = null;
 
 		/**
-		 * NOTE this is only intended for use by advanced users.
+		 * NOTE this is only intended for use by very advanced users.
 		 * _sourceNodeNext is the audio source for the next loop, inserted in a look ahead approach to allow for smooth
-		 * looping. Connected to {{#crossLink "SoundInstance/gainNode:property"}}{{/crossLink}}.
+		 * looping. Connected to {{#crossLink "WebAudioSoundInstance/gainNode:property"}}{{/crossLink}}.
 		 * @property _sourceNodeNext
 		 * @type {AudioNode}
 		 * @default null
@@ -117,8 +123,8 @@ this.createjs = this.createjs || {};
 		// Proxies, make removing listeners easier.
 		this._endedHandler = createjs.proxy(this._handleSoundComplete, this);
 	};
-	var p = createjs.extend(SoundInstance, createjs.AbstractSoundInstance);
-	var s = SoundInstance;
+	var p = createjs.extend(WebAudioSoundInstance, createjs.AbstractSoundInstance);
+	var s = WebAudioSoundInstance;
 
 	/**
 	 * Note this is only intended for use by advanced users.
@@ -131,7 +137,7 @@ this.createjs = this.createjs || {};
 	s.context = null;
 
 	/**
-	 * Note this is only inteded for use by advanced users.
+	 * Note this is only intended for use by advanced users.
 	 * <br /> Audio node from WebAudioPlugin that sequences to <code>context.destination</code>
 	 * @property destinationNode
 	 * @type {AudioNode}
@@ -141,11 +147,12 @@ this.createjs = this.createjs || {};
 	s.destinationNode = null;
 
 	/**
-	 * Value to set panning model to equal power for SoundInstance.  Can be "equalpower" or 0 depending on browser implementation.
+	 * Value to set panning model to equal power for WebAudioSoundInstance.  Can be "equalpower" or 0 depending on browser implementation.
 	 * @property _panningModel
 	 * @type {Number / String}
 	 * @protected
 	 * @static
+	 * @since 0.5.3
 	 */
 	s._panningModel = "equalpower";
 
@@ -304,5 +311,5 @@ this.createjs = this.createjs || {};
 		this._resume();
 	};
 
-	createjs.WebAudioSoundInstance = createjs.promote(SoundInstance, "AbstractSoundInstance");
+	createjs.WebAudioSoundInstance = createjs.promote(WebAudioSoundInstance, "AbstractSoundInstance");
 }());

@@ -37,7 +37,18 @@ this.createjs = this.createjs || {};
 (function () {
 	"use strict";
 
-	function SoundInstance(src, startTime, duration, playbackResource) {
+	/**
+	 * HTMLAudioSoundInstance extends the base api of {{#crossLink "AbstractSoundInstance"}}{{/crossLink}}.
+	 *
+	 * @param {String} src The path to and file name of the sound.
+	 * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
+	 * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
+	 * @param {Object} playbackResource Any resource needed by plugin to support audio playback.
+	 * @class HTMLAudioSoundInstance
+	 * @extends AbstractSoundInstance
+	 * @constructor
+	 */
+	function HTMLAudioSoundInstance(src, startTime, duration, playbackResource) {
 		this.AbstractSoundInstance_constructor(src, startTime, duration, playbackResource);
 
 
@@ -58,14 +69,26 @@ this.createjs = this.createjs || {};
 			this._duration = createjs.HTMLAudioTagPool.getDuration(this.src);
 		}
 	}
-	var p = createjs.extend(SoundInstance, createjs.AbstractSoundInstance);
+	var p = createjs.extend(HTMLAudioSoundInstance, createjs.AbstractSoundInstance);
 
 
 // Public Methods
+	/**
+	 * Called by {{#crossLink "Sound"}}{{/crossLink}} when plugin does not handle master volume.
+	 * undoc'd because it is not meant to be used outside of Sound
+	 * #method setMasterVolume
+	 * @param value
+	 */
 	p.setMasterVolume = function (value) {
 		this._updateVolume();
 	};
 
+	/**
+	 * Called by {{#crossLink "Sound"}}{{/crossLink}} when plugin does not handle master mute.
+	 * undoc'd because it is not meant to be used outside of Sound
+	 * #method setMasterMute
+	 * @param value
+	 */
 	p.setMasterMute = function (isMuted) {
 		this._updateVolume();
 	};
@@ -137,6 +160,12 @@ this.createjs = this.createjs || {};
 		this._playbackResource.play();
 	};
 
+	/**
+	 * Used to handle when a tag is not ready for immediate playback when it is returned from the HTMLAudioTagPool.
+	 * @method _handleTagReady
+	 * @param event
+	 * @protected
+	 */
 	p._handleTagReady = function (event) {
 		this._playbackResource.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_READY, this._readyHandler, false);
 		this._playbackResource.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_STALLED, this._stalledHandler, false);
@@ -173,14 +202,27 @@ this.createjs = this.createjs || {};
 		}
 	};
 
+	/**
+	 * Used to enable setting position, as we need to wait for that seek to be done before we add back our loop handling seek listener
+	 * @method _handleSetPositionSeek
+	 * @param event
+	 * @protected
+	 */
 	p._handleSetPositionSeek = function(event) {
 		if (this._playbackResource == null) { return; }
 		this._playbackResource.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this._handleSetPositionSeek, false);
 		this._playbackResource.addEventListener(createjs.HTMLAudioPlugin._AUDIO_SEEKED, this._loopHandler, false);
 	};
 
-	// NOTE because of the inaccuracies in the timeupdate event (15 - 250ms) and in setting the tag to the desired timed
-	// (up to 300ms), it is strongly recommended not to loop audio sprites with HTML Audio if smooth looping is desired
+	/**
+	 * Timer used to loop audio sprites.
+	 * NOTE because of the inaccuracies in the timeupdate event (15 - 250ms) and in setting the tag to the desired timed
+	 * (up to 300ms), it is strongly recommended not to loop audio sprites with HTML Audio if smooth looping is desired
+	 *
+	 * @method _handleAudioSpriteLoop
+	 * @param event
+	 * @private
+	 */
 	p._handleAudioSpriteLoop = function (event) {
 		if(this._playbackResource.currentTime <= this._audioSpriteStopTime) {return;}
 		this._playbackResource.pause();
@@ -204,11 +246,20 @@ this.createjs = this.createjs || {};
 		}
 	};
 
-	/*TODO
-	 p._updateDuration
-	 p._setDurationFromSource
+	p._updateDuration = function () {
+		this._audioSpriteStopTime = (startTime + duration) * 0.001;
 
-	 */
+		if(this.playState == createjs.Sound.PLAY_SUCCEEDED) {
+			this._playbackResource.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_ENDED, this._endedHandler, false);
+			this._playbackResource.addEventListener(createjs.HTMLAudioPlugin._TIME_UPDATE, this._audioSpriteEndHandler, false);
+		}
+	};
 
-	createjs.HTMLAudioSoundInstance = createjs.promote(SoundInstance, "AbstractSoundInstance");
+	/*	This should never change
+	p._setDurationFromSource = function () {
+		this._duration = createjs.HTMLAudioTagPool.getDuration(this.src);
+	};
+	*/
+
+	createjs.HTMLAudioSoundInstance = createjs.promote(HTMLAudioSoundInstance, "AbstractSoundInstance");
 }());

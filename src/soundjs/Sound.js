@@ -27,7 +27,6 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
 // namespace:
 this.createjs = this.createjs || {};
 
@@ -44,7 +43,7 @@ this.createjs = this.createjs || {};
  * </ul>
  *
  * <b>Controlling Sounds</b><br />
- * Playing sounds creates {{#crossLink "SoundInstance"}}{{/crossLink}} instances, which can be controlled individually.
+ * Playing sounds creates {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} instances, which can be controlled individually.
  * <ul><li>Pause, resume, seek, and stop sounds</li>
  *      <li>Control a sound's volume, mute, and pan</li>
  *      <li>Listen for events on sound instances to get notified when they finish, loop, or fail</li>
@@ -87,8 +86,8 @@ this.createjs = this.createjs || {};
 	 *
 	 * <b>Playback</b><br />
 	 * To play a sound once it's been registered and preloaded, use the {{#crossLink "Sound/play"}}{{/crossLink}} method.
-	 * This method returns a {{#crossLink "SoundInstance"}}{{/crossLink}} which can be paused, resumed, muted, etc.
-	 * Please see the {{#crossLink "SoundInstance"}}{{/crossLink}} documentation for more on the instance control APIs.
+	 * This method returns a {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} which can be paused, resumed, muted, etc.
+	 * Please see the {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} documentation for more on the instance control APIs.
 	 *
 	 * <b>Plugins</b><br />
 	 * By default, the {{#crossLink "WebAudioPlugin"}}{{/crossLink}} or the {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}
@@ -164,7 +163,7 @@ this.createjs = this.createjs || {};
 	 *		// after load is complete
 	 *		createjs.Sound.play("sound2");
 	 *
-	 * You can also create audio sprites on the fly by setting the startTime and duration when creating an new SoundInstance.
+	 * You can also create audio sprites on the fly by setting the startTime and duration when creating an new AbstractSoundInstance.
 	 *
 	 * 		createjs.Sound.play("MyAudioSprite", {startTime: 1000, duration: 400});
 	 *
@@ -418,7 +417,7 @@ this.createjs = this.createjs || {};
 	s._pluginsRegistered = false;
 
 	/**
-	 * Used internally to assign unique IDs to each SoundInstance.
+	 * Used internally to assign unique IDs to each AbstractSoundInstance.
 	 * @property _lastID
 	 * @type {Number}
 	 * @static
@@ -1055,18 +1054,18 @@ this.createjs = this.createjs || {};
 	 Static API.
 	 --------------- */
 	/**
-	 * Play a sound and get a {{#crossLink "SoundInstance"}}{{/crossLink}} to control. If the sound fails to play, a
-	 * SoundInstance will still be returned, and have a playState of {{#crossLink "Sound/PLAY_FAILED:property"}}{{/crossLink}}.
-	 * Note that even on sounds with failed playback, you may still be able to call SoundInstance {{#crossLink "SoundInstance/play"}}{{/crossLink}},
+	 * Play a sound and get a {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} to control. If the sound fails to play, a
+	 * AbstractSoundInstance will still be returned, and have a playState of {{#crossLink "Sound/PLAY_FAILED:property"}}{{/crossLink}}.
+	 * Note that even on sounds with failed playback, you may still be able to call AbstractSoundInstance {{#crossLink "AbstractSoundInstance/play"}}{{/crossLink}},
 	 * since the failure could be due to lack of available channels. If the src does not have a supported extension or
-	 * if there is no available plugin, a default SoundInstance will be returned which will not play any audio, but will not generate errors.
+	 * if there is no available plugin, a default AbstractSoundInstance will be returned which will not play any audio, but will not generate errors.
 	 *
 	 * <h4>Example</h4>
 	 *      createjs.Sound.addEventListener("fileload", handleLoad);
 	 *      createjs.Sound.registerSound("myAudioPath/mySound.mp3", "myID", 3);
 	 *      function handleLoad(event) {
 	 *      	createjs.Sound.play("myID");
-	 *      	// we can pass in options we want to set inside of an object, and store off SoundInstance for controlling
+	 *      	// we can pass in options we want to set inside of an object, and store off AbstractSoundInstance for controlling
 	 *      	var myInstance = createjs.Sound.play("myID", {interrupt: createjs.Sound.INTERRUPT_ANY, loop:-1});
 	 *      	// alternately, we can pass full source path and specify each argument individually
 	 *      	var myInstance = createjs.Sound.play("myAudioPath/mySound.mp3", createjs.Sound.INTERRUPT_ANY, 0, 0, -1, 1, 0);
@@ -1092,7 +1091,7 @@ this.createjs = this.createjs || {};
 	 * @param {Number} [pan=0] The left-right pan of the sound (if supported), between -1 (left) and 1 (right).
 	 * @param {Number} [startTime=null] To create an audio sprite (with duration), the initial offset to start playback and loop from, in milliseconds.
 	 * @param {Number} [duration=null] To create an audio sprite (with startTime), the amount of time to play the clip for, in milliseconds.
-	 * @return {SoundInstance} A {{#crossLink "SoundInstance"}}{{/crossLink}} that can be controlled after it is created.
+	 * @return {AbstractSoundInstance} A {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} that can be controlled after it is created.
 	 * @static
 	 */
 	s.play = function (src, interrupt, delay, offset, loop, volume, pan, startTime, duration) {
@@ -1114,8 +1113,8 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Creates a {{#crossLink "SoundInstance"}}{{/crossLink}} using the passed in src. If the src does not have a
-	 * supported extension or if there is no available plugin, a default SoundInstance will be returned that can be
+	 * Creates a {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} using the passed in src. If the src does not have a
+	 * supported extension or if there is no available plugin, a default AbstractSoundInstance will be returned that can be
 	 * called safely but does nothing.
 	 *
 	 * <h4>Example</h4>
@@ -1135,8 +1134,8 @@ this.createjs = this.createjs || {};
 	 * @param {String} src The src or ID of the audio.
 	 * @param {Number} [startTime=null] To create an audio sprite (with duration), the initial offset to start playback and loop from, in milliseconds.
 	 * @param {Number} [duration=null] To create an audio sprite (with startTime), the amount of time to play the clip for, in milliseconds.
-	 * @return {SoundInstance} A {{#crossLink "SoundInstance"}}{{/crossLink}} that can be controlled after it is created.
-	 * Unsupported extensions will return the default SoundInstance.
+	 * @return {AbstractSoundInstance} A {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} that can be controlled after it is created.
+	 * Unsupported extensions will return the default AbstractSoundInstance.
 	 * @since 0.4.0
 	 */
 	s.createInstance = function (src, startTime, duration) {
@@ -1163,7 +1162,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Set the master volume of Sound. The master volume is multiplied against each sound's individual volume.  For
 	 * example, if master volume is 0.5 and a sound's volume is 0.5, the resulting volume is 0.25. To set individual
-	 * sound volume, use SoundInstance {{#crossLink "SoundInstance/setVolume"}}{{/crossLink}} instead.
+	 * sound volume, use AbstractSoundInstance {{#crossLink "AbstractSoundInstance/setVolume"}}{{/crossLink}} instead.
 	 *
 	 * <h4>Example</h4>
 	 *     createjs.Sound.setVolume(0.5);
@@ -1186,7 +1185,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Get the master volume of Sound. The master volume is multiplied against each sound's individual volume.
-	 * To get individual sound volume, use SoundInstance {{#crossLink "SoundInstance/volume:property"}}{{/crossLink}} instead.
+	 * To get individual sound volume, use AbstractSoundInstance {{#crossLink "AbstractSoundInstance/volume:property"}}{{/crossLink}} instead.
 	 *
 	 * <h4>Example</h4>
 	 *     var masterVolume = createjs.Sound.getVolume();
@@ -1202,7 +1201,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Mute/Unmute all audio. Note that muted audio still plays at 0 volume. This global mute value is maintained
 	 * separately and when set will override, but not change the mute property of individual instances. To mute an individual
-	 * instance, use SoundInstance {{#crossLink "SoundInstance/setMute"}}{{/crossLink}} instead.
+	 * instance, use AbstractSoundInstance {{#crossLink "AbstractSoundInstance/setMute"}}{{/crossLink}} instead.
 	 *
 	 * <h4>Example</h4>
 	 *     createjs.Sound.setMute(true);
@@ -1227,8 +1226,8 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Returns the global mute value. To get the mute value of an individual instance, use SoundInstance
-	 * {{#crossLink "SoundInstance/getMute"}}{{/crossLink}} instead.
+	 * Returns the global mute value. To get the mute value of an individual instance, use AbstractSoundInstance
+	 * {{#crossLink "AbstractSoundInstance/getMute"}}{{/crossLink}} instead.
 	 *
 	 * <h4>Example</h4>
 	 *     var muted = createjs.Sound.getMute();
@@ -1244,7 +1243,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Stop all audio (global stop). Stopped audio is reset, and not paused. To play audio that has been stopped,
-	 * call SoundInstance {{#crossLink "SoundInstance/play"}}{{/crossLink}}.
+	 * call AbstractSoundInstance {{#crossLink "AbstractSoundInstance/play"}}{{/crossLink}}.
 	 *
 	 * <h4>Example</h4>
 	 *     createjs.Sound.stop();
@@ -1267,7 +1266,7 @@ this.createjs = this.createjs || {};
 	 * Play an instance. This is called by the static API, as well as from plugins. This allows the core class to
 	 * control delays.
 	 * @method _playInstance
-	 * @param {SoundInstance} instance The {{#crossLink "SoundInstance"}}{{/crossLink}} to start playing.
+	 * @param {AbstractSoundInstance} instance The {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} to start playing.
 	 * @param {String | Object} [interrupt="none"|options] How to interrupt any currently playing instances of audio with the same source,
 	 * if the maximum number of instances of the sound are already playing. Values are defined as <code>INTERRUPT_TYPE</code>
 	 * constants on the Sound class, with the default defined by {{#crossLink "Sound/defaultInterruptBehavior"}}{{/crossLink}}.
@@ -1322,7 +1321,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Begin playback. This is called immediately or after delay by {{#crossLink "Sound/playInstance"}}{{/crossLink}}.
 	 * @method _beginPlaying
-	 * @param {SoundInstance} instance A {{#crossLink "SoundInstance"}}{{/crossLink}} to begin playback.
+	 * @param {AbstractSoundInstance} instance A {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} to begin playback.
 	 * @param {String} [interrupt=none] How this sound interrupts other instances with the same source. Defaults to
 	 * {{#crossLink "Sound/INTERRUPT_NONE:property"}}{{/crossLink}}. Interrupts are defined as <code>INTERRUPT_TYPE</code>
 	 * constants on Sound.
@@ -1367,7 +1366,7 @@ this.createjs = this.createjs || {};
 	 * Sound management. It will be added again, if the sound re-plays. Note that this method is called from the
 	 * instances themselves.
 	 * @method _playFinished
-	 * @param {SoundInstance} instance The instance that finished playback.
+	 * @param {AbstractSoundInstance} instance The instance that finished playback.
 	 * @protected
 	 * @static
 	 */
@@ -1380,7 +1379,7 @@ this.createjs = this.createjs || {};
 	createjs.Sound = Sound;
 
 	/**
-	 * An internal class that manages the number of active {{#crossLink "SoundInstance"}}{{/crossLink}} instances for
+	 * An internal class that manages the number of active {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} instances for
 	 * each sound type. This method is only used internally by the {{#crossLink "Sound"}}{{/crossLink}} class.
 	 *
 	 * The number of sounds is artificially limited by Sound in order to prevent over-saturation of a
@@ -1454,7 +1453,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Add an instance to a sound channel.
 	 * #method add
-	 * @param {SoundInstance} instance The instance to add to the channel
+	 * @param {AbstractSoundInstance} instance The instance to add to the channel
 	 * @param {String} interrupt The interrupt value to use. Please see the {{#crossLink "Sound/play"}}{{/crossLink}}
 	 * for details on interrupt modes.
 	 * @return {Boolean} The success of the method call. If the channel is full, it will return false.
@@ -1468,7 +1467,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Remove an instance from the channel.
 	 * #method remove
-	 * @param {SoundInstance} instance The instance to remove from the channel
+	 * @param {AbstractSoundInstance} instance The instance to remove from the channel
 	 * @return The success of the method call. If there is no channel, it will return false.
 	 * @static
 	 */
@@ -1547,7 +1546,7 @@ this.createjs = this.createjs || {};
 	 * Get an instance by index.
 	 * #method get
 	 * @param {Number} index The index to return.
-	 * @return {SoundInstance} The SoundInstance at a specific instance.
+	 * @return {AbstractSoundInstance} The AbstractSoundInstance at a specific instance.
 	 */
 	p._get = function (index) {
 		return this._instances[index];
@@ -1556,7 +1555,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Add a new instance to the channel.
 	 * #method add
-	 * @param {SoundInstance} instance The instance to add.
+	 * @param {AbstractSoundInstance} instance The instance to add.
 	 * @return {Boolean} The success of the method call. If the channel is full, it will return false.
 	 */
 	p._add = function (instance, interrupt) {
@@ -1569,7 +1568,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Remove an instance from the channel, either when it has finished playing, or it has been interrupted.
 	 * #method remove
-	 * @param {SoundInstance} instance The instance to remove
+	 * @param {AbstractSoundInstance} instance The instance to remove
 	 * @return {Boolean} The success of the remove call. If the instance is not found in this channel, it will
 	 * return false.
 	 */
@@ -1596,9 +1595,9 @@ this.createjs = this.createjs || {};
 	 * Get an available slot depending on interrupt value and if slots are available.
 	 * #method getSlot
 	 * @param {String} interrupt The interrupt value to use.
-	 * @param {SoundInstance} instance The sound instance that will go in the channel if successful.
+	 * @param {AbstractSoundInstance} instance The sound instance that will go in the channel if successful.
 	 * @return {Boolean} Determines if there is an available slot. Depending on the interrupt mode, if there are no slots,
-	 * an existing SoundInstance may be interrupted. If there are no slots, this method returns false.
+	 * an existing AbstractSoundInstance may be interrupted. If there are no slots, this method returns false.
 	 */
 	p._getSlot = function (interrupt, instance) {
 		var target, replacement;

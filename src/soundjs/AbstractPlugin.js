@@ -88,7 +88,7 @@ this.createjs = this.createjs || {};
 		this._loaderClass;
 
 		/**
-		 * A reference to a SoundInstance class used by a plugin that must be set.
+		 * A reference to an AbstractSoundInstance class used by a plugin that must be set.
 		 * @type {Object}
 		 * @protected;
 		 */
@@ -207,7 +207,7 @@ this.createjs = this.createjs || {};
 	 * @param {String} src The sound source to use.
 	 * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.
 	 * @param {Number} duration Audio sprite property used to set the time the clip plays for, in milliseconds.
-	 * @return {SoundInstance} A sound instance for playback and control.
+	 * @return {AbstractSoundInstance} A sound instance for playback and control.
 	 */
 	p.create = function (src, startTime, duration) {
 		if (!this.isPreloadStarted(src)) {
