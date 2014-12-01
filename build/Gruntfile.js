@@ -133,7 +133,7 @@ module.exports = function (grunt) {
 						version: '<%= version %>'
 					},
 					flashaudioplugin: {
-						file: '../src/soundjs/version_flashaudioplugin.js',
+						file: '../src/soundjs/version_flashplugin.js',
 						version: '<%= version %>'
 					}
 				},
@@ -143,7 +143,7 @@ module.exports = function (grunt) {
 						file: '../src/soundjs/version.js'
 					},
 					flashaudioplugin: {
-						file: '../src/soundjs/version_flashaudioplugin.js'
+						file: '../src/soundjs/version_flashplugin.js'
 					}
 				},
 
