@@ -211,7 +211,7 @@ this.createjs = this.createjs || {};
 	 */
 	p.create = function (src, startTime, duration) {
 		if (!this.isPreloadStarted(src)) {
-			this.preload(this.register(src).tag);
+			this.preload(this.register(src));
 		}
 		var si = new this._soundInstanceClass(src, startTime, duration, this._audioSources[src]);
 		this._soundInstances[src].push(si);
