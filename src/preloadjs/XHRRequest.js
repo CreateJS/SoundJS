@@ -204,9 +204,9 @@ this.createjs = this.createjs || {};
 
 		// Sometimes we get back 404s immediately, particularly when there is a cross origin request.  // note this does not catch in Chrome
 		try {
-			if (!this._item.values || this._item.method == createjs.RequestMethods.GET) {
+			if (!this._item.values || this._item.method == createjs.AbstractLoader.GET) {
 				this._request.send();
-			} else if (this._item.method == createjs.RequestMethods.POST) {
+			} else if (this._item.method == createjs.AbstractLoader.POST) {
 				this._request.send(createjs.RequestUtils.formatQueryString(this._item.values));
 			}
 		} catch (error) {
@@ -466,21 +466,21 @@ this.createjs = this.createjs || {};
 		this._xhrLevel = (typeof req.responseType === "string") ? 2 : 1;
 
 		var src = null;
-		if (item.method == createjs.RequestMethods.GET) {
+		if (item.method == createjs.AbstractLoader.GET) {
 			src = createjs.RequestUtils.buildPath(item.src, item.values);
 		} else {
 			src = item.src;
 		}
 
 		// Open the request.  Set cross-domain flags if it is supported (XHR level 1 only)
-		req.open(item.method || createjs.RequestMethods.GET, src, true);
+		req.open(item.method || createjs.AbstractLoader.GET, src, true);
 
 		if (crossdomain && req instanceof XMLHttpRequest && this._xhrLevel == 1) {
 			headers["Origin"] = location.origin;
 		}
 
 		// To send data we need to set the Content-type header)
-		if (item.values && item.method == createjs.RequestMethods.POST) {
+		if (item.values && item.method == createjs.AbstractLoader.POST) {
 			headers["Content-Type"] = "application/x-www-form-urlencoded";
 		}
 

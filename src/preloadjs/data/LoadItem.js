@@ -60,7 +60,7 @@ this.createjs = this.createjs || {};
 		 *
 		 * @type {String|HTMLMediaElement|HTMLImageElement|HTMLLinkElement}
 		 */
-		this.type = createjs.DataTypes.TEXT;
+		this.type = createjs.AbstractLoader.TEXT;
 
 		/**
 		 * A string identifier which can be used to reference the loaded object.

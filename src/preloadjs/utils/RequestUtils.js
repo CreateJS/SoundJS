@@ -172,8 +172,8 @@
 	 */
 	s.isBinary = function (type) {
 		switch (type) {
-			case createjs.DataTypes.IMAGE:
-			case createjs.DataTypes.BINARY:
+			case createjs.AbstractLoader.IMAGE:
+			case createjs.AbstractLoader.BINARY:
 				return true;
 			default:
 				return false;
@@ -189,14 +189,14 @@
 	 */
 	s.isText = function (type) {
 		switch (type) {
-			case createjs.DataTypes.TEXT:
-			case createjs.DataTypes.JSON:
-			case createjs.DataTypes.MANIFEST:
-			case createjs.DataTypes.XML:
-			case createjs.DataTypes.HTML:
-			case createjs.DataTypes.CSS:
-			case createjs.DataTypes.SVG:
-			case createjs.DataTypes.JAVASCRIPT:
+			case createjs.AbstractLoader.TEXT:
+			case createjs.AbstractLoader.JSON:
+			case createjs.AbstractLoader.MANIFEST:
+			case createjs.AbstractLoader.XML:
+			case createjs.AbstractLoader.HTML:
+			case createjs.AbstractLoader.CSS:
+			case createjs.AbstractLoader.SVG:
+			case createjs.AbstractLoader.JAVASCRIPT:
 				return true;
 			default:
 				return false;
@@ -207,13 +207,13 @@
 	 * Determine the type of the object using common extensions. Note that the type can be passed in with the load item
 	 * if it is an unusual extension.
 	 * @param {String} extension The file extension to use to determine the load type.
-	 * @return {String} The determined load type (for example, <code>DataTypes.IMAGE</code> or null if it can not be
+	 * @return {String} The determined load type (for example, <code>AbstractLoader.IMAGE</code> or null if it can not be
 	 * determined by the extension.
 	 * @private
 	 */
 	s.getTypeByExtension = function (extension) {
 		if (extension == null) {
-			return createjs.DataTypes.TEXT;
+			return createjs.AbstractLoader.TEXT;
 		}
 		switch (extension.toLowerCase()) {
 			case "jpeg":
@@ -222,27 +222,27 @@
 			case "png":
 			case "webp":
 			case "bmp":
-				return createjs.DataTypes.IMAGE;
+				return createjs.AbstractLoader.IMAGE;
 			case "ogg":
 			case "mp3":
 			case "webm":
-				return createjs.DataTypes.SOUND;
+				return createjs.AbstractLoader.SOUND;
 			case "mp4":
 			case "webm":
 			case "ts":
-				return createjs.DataTypes.VIDEO;
+				return createjs.AbstractLoader.VIDEO;
 			case "json":
-				return createjs.DataTypes.JSON;
+				return createjs.AbstractLoader.JSON;
 			case "xml":
-				return createjs.DataTypes.XML;
+				return createjs.AbstractLoader.XML;
 			case "css":
-				return createjs.DataTypes.CSS;
+				return createjs.AbstractLoader.CSS;
 			case "js":
-				return createjs.DataTypes.JAVASCRIPT;
+				return createjs.AbstractLoader.JAVASCRIPT;
 			case 'svg':
-				return createjs.DataTypes.SVG;
+				return createjs.AbstractLoader.SVG;
 			default:
-				return createjs.DataTypes.TEXT;
+				return createjs.AbstractLoader.TEXT;
 		}
 	};
 
