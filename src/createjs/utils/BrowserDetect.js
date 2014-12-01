@@ -40,10 +40,14 @@ this.createjs = this.createjs||{};
 	"use strict";
 
 	/**
-	 * An additional module to determine the current browser, version, operating system, and other environment
+	 * An object that determines the current browser, version, operating system, and other environment
 	 * variables via user agent string.
 	 *
 	 * Used for audio because feature detection is unable to detect the many limitations of mobile devices.
+	 *
+	 * <h4>Example</h4>
+  	 *
+ 	 *      if (createjs.BrowserDetect.isIOS) { // do stuff }
 	 *
 	 * @property BrowserDetect
 	 * @type {Object}
