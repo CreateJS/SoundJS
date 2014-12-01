@@ -38,7 +38,9 @@ this.createjs = this.createjs || {};
 	"use strict";
 
 	/**
-	 * FlashAudioSoundInstance extends the base api of {{#crossLink "AbstractSoundInstance"}}{{/crossLink}}.
+	 * FlashAudioSoundInstance extends the base api of {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} and is used by
+	 * {{#crossLink "FlashAudioPlugin"}}{{/crossLink}}.
+	 *
 	 * NOTE audio control is shuttled to a flash player instance via the flash reference.
 	 *
 	 * @param {String} src The path to and file name of the sound.

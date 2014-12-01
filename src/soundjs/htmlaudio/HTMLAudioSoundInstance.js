@@ -38,7 +38,8 @@ this.createjs = this.createjs || {};
 	"use strict";
 
 	/**
-	 * HTMLAudioSoundInstance extends the base api of {{#crossLink "AbstractSoundInstance"}}{{/crossLink}}.
+	 * HTMLAudioSoundInstance extends the base api of {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} and is used by
+	 * {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}.
 	 *
 	 * @param {String} src The path to and file name of the sound.
 	 * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.

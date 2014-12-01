@@ -35,7 +35,10 @@
 this.createjs = this.createjs || {};
 
 /**
- * WebAudioSoundInstance extends the base api of {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} and exposes audioNodes for advanced users.
+ * WebAudioSoundInstance extends the base api of {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} and is used by
+ * {{#crossLink "WebAudioPlugin"}}{{/crossLink}}.
+ *
+ * WebAudioSoundInstance exposes audioNodes for advanced users.
  *
  * @param {String} src The path to and file name of the sound.
  * @param {Number} startTime Audio sprite property used to apply an offset, in milliseconds.

@@ -251,7 +251,7 @@ this.createjs = this.createjs || {};
 		 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower, Opera versions 11.50 or lower,
 		 * and Internet Explorer 8 or lower.  Instead use {{#crossLink "AbstractSoundInstance/setMute"}}{{/crossLink}} and {{#crossLink "AbstractSoundInstance/getMute"}}{{/crossLink}}.
 		 *
-		 * @property mute
+		 * @property muted
 		 * @type {Boolean}
 		 * @default false
 		 * @since 0.5.3
@@ -271,7 +271,7 @@ this.createjs = this.createjs || {};
 		 * and Internet Explorer 8 or lower.
 		 * Use {{#crossLink "AbstractSoundInstance/pause:method"}}{{/crossLink}} and {{#crossLink "AbstractSoundInstance/resume:method"}}{{/crossLink}} to set.
 		 *
-		 * @property pause
+		 * @property paused
 		 * @type {Boolean}
 		 */
 		this._paused = false;
