@@ -33,19 +33,25 @@
 // namespace:
 this.createjs = this.createjs||{};
 
+/**
+ * @class Utility Methods
+ */
 (function() {
 	"use strict";
 
 	/**
 	 * An additional module to determine the current browser, version, operating system, and other environment
-	 * variables. It is not publically documented.
+	 * variables via user agent string.
+	 *
 	 * Used for audio because feature detection is unable to detect the many limitations of mobile devices.
-	 * #class BrowserDetect
+	 *
+	 * @property BrowserDetect
+	 * @type {Object}
 	 * @param {Boolean} isFirefox True if our browser is Firefox.
 	 * @param {Boolean} isOpera True if our browser is opera.
 	 * @param {Boolean} isChrome True if our browser is Chrome.  Note that Chrome for Android returns true, but is a
 	 * completely different browser with different abilities.
-	 * @param {Boolean} isIOS True if our browser is safari for iOS devices (iPad, iPhone, and iPad).
+	 * @param {Boolean} isIOS True if our browser is safari for iOS devices (iPad, iPhone, and iPod).
 	 * @param {Boolean} isAndroid True if our browser is Android.
 	 * @param {Boolean} isBlackberry True if our browser is Blackberry.
 	 * @constructor
