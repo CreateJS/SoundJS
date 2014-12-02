@@ -3,7 +3,8 @@
 <head>
 <title>SoundJS: Web Audio Music Visualizer</title>
 
-	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css" />
+    <link href="../_assets/css/shared.css" rel="stylesheet" type="text/css"/>
+   	<link href="../_assets/css/examples.css" rel="stylesheet" type="text/css"/>
 </head>
 
 <body onload="init()">
@@ -26,7 +27,7 @@
         <canvas id="testCanvas" width="960" height="400"></canvas>
     </div>
 
-    <script type="text/javascript" src="assets/easeljs-NEXT.min.js"></script>
+    <script type="text/javascript" src="../_assets/libs/easeljs-NEXT.min.js"></script>
     <script type="text/javascript" src="../lib/soundjs-NEXT.combined.js"></script>
     <!-- We also provide hosted minified versions of all CreateJS libraries.
         http://code.createjs.com -->
@@ -49,7 +50,7 @@
         var h, w;               // variables to store the width and height of the canvas
         var centerX, centerY;   // variables to hold the center point, so that tick is quicker
         var messageField;       // Message display field
-        var assetsPath = "assets/"; // Create a single item to load.
+        var assetsPath = "../_assets/audio/";   // Create a single item to load.
         var src = assetsPath + "05-Binrpilot-Underground.mp3";  // set up our source
         var soundInstance;      // the sound instance we create
         var analyserNode;       // the analyser node that allows us to visualize the audio

@@ -4,7 +4,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title>SoundJS: Test Suite</title>
 
-	<link type="text/css" href="assets/css/jquery-ui-1.8.18.custom.css" rel="stylesheet" />  <!-- update to http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css? -->
+	<link type="text/css" href="../_assets/css/jquery-ui-1.8.18.custom.css" rel="stylesheet" />  <!-- update to http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css? -->
 	<style type="text/css">
 	    /* define a width for the sliders by styling the wrapping div */
 	    .panSlider,
@@ -18,7 +18,8 @@
 	    .loopSlider { width:200px; }
 	</style>
 
-	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css"/>
+    <link href="../_assets/css/shared.css" rel="stylesheet" type="text/css"/>
+   	<link href="../_assets/css/examples.css" rel="stylesheet" type="text/css"/>
 	<style>
 	    FORM {
 	        text-align:left;
@@ -394,7 +395,7 @@
         enableSet("sound", false);
         enableSet("instance", false);
 
-        var assetsPath = "./assets/";
+        var assetsPath = "../_assets/audio/";
         var sounds = [
             {id:"Music", src:"M-GameBG.ogg", data:2},
             {id:"Humm (mp3)", src:"Humm.mp3"},

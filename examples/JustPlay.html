@@ -3,7 +3,8 @@
 <head>
 <title>SoundJS: Just Play</title>
 
-	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css" />
+    <link href="../_assets/css/shared.css" rel="stylesheet" type="text/css"/>
+   	<link href="../_assets/css/examples.css" rel="stylesheet" type="text/css"/>
 </head>
 
 <body onload="init()">
@@ -63,7 +64,7 @@
             displayStatus = document.getElementById("status");
 
             // Create a single item to load.
-            var assetsPath = "assets/";
+            var assetsPath = "../_assets/audio/";
             src = assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg";
 
 			createjs.Sound.alternateExtensions = ["mp3"];	// add other extensions to try loading if the src file extension is not supported

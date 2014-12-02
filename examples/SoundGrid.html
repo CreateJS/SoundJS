@@ -3,7 +3,8 @@
 <head>
 <title>SoundJS: Sound Grid</title>
 
-	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css"/>
+    <link href="../_assets/css/shared.css" rel="stylesheet" type="text/css"/>
+   	<link href="../_assets/css/examples.css" rel="stylesheet" type="text/css"/>
 	<style>
 	   body {
 	       font-family: sans-serif;
@@ -88,7 +89,7 @@
             }
 
             document.getElementById("loader").className = "loader";
-            var assetsPath = "assets/";
+            var assetsPath = "../_assets/audio/";
             var sounds = [
                 {src:"Game-Break.ogg", id:1},
                 {src:"Game-Spawn.ogg", id:2},
@@ -115,7 +116,7 @@
         function soundLoaded(event) {
             document.getElementById("loader").className = "";
             var div = document.getElementById(event.id);
-            div.style.backgroundImage = "url('assets/audioButtonSheet.png')";
+            div.style.backgroundImage = "url('../_assets/art/audioButtonSheet.png')";
         }
 
         function stop() {

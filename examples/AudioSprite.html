@@ -3,7 +3,8 @@
 <head>
 	<title>SoundJS: Audio Sprite</title>
 
-	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css" />
+    <link href="../_assets/css/shared.css" rel="stylesheet" type="text/css"/>
+   	<link href="../_assets/css/examples.css" rel="stylesheet" type="text/css"/>
 </head>
 
 <body onload="init()">
@@ -95,7 +96,7 @@
 					}
 
 					this.sprite = ["pew", "hit", "explode"];	// this code is not needed for sprites, it is used for the looping effect
-					var assetsPath = "./assets/";
+					var assetsPath = "../_assets/audio/";
 					var sounds = [
 						// This is an audio sprite.  The sprite property tells SoundJS what ids to use for playback, with time to start playback and length of playback
 						// we are setting data to 1 to show how sprites function with only a single instance

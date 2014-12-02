@@ -3,7 +3,8 @@
 <head>
 <title>SoundJS: Sound Tween</title>
 
-	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css" />
+    <link href="../_assets/css/shared.css" rel="stylesheet" type="text/css"/>
+   	<link href="../_assets/css/examples.css" rel="stylesheet" type="text/css"/>
 </head>
 
 <body onload="init()">
@@ -42,8 +43,8 @@
             with the OS and browser if you see this on a device that is not mobile.  Thank you.</p>
     </div>
 
-	<script type="text/javascript" src="./assets/easeljs-NEXT.min.js"></script> <!-- note tweenjs needs easeljs ticker -->
-	<script type="text/javascript" src="./assets/tweenjs-NEXT.min.js"></script>
+	<script type="text/javascript" src="../_assets/libs/easeljs-NEXT.min.js"></script> <!-- note tweenjs needs easeljs ticker -->
+	<script type="text/javascript" src="../_assets/libs/tweenjs-NEXT.min.js"></script>
     <script type="text/javascript" src="../lib/soundjs-NEXT.combined.js"></script>
 	<!-- Note: FlashAudioPlugin is only needed to support older browsers -->
     <script type="text/javascript" src="../lib/FlashAudioPlugin-NEXT.combined.js"></script>
@@ -99,7 +100,7 @@
             displayStatus = document.getElementById("status");
 
             // Create a single item to load.
-            var assetsPath = "assets/";
+            var assetsPath = "../_assets/audio/";
             src = assetsPath+"M-GameBG.ogg";
 
 			createjs.Sound.alternateExtensions = ["mp3"];	// add other extensions to try loading if the src file extension is not supported

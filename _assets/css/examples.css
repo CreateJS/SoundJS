@@ -1,0 +1,53 @@
+body {
+	width: 960px;
+}
+
+h1 {
+	font-weight: 200;
+	margin-bottom: 1rem;
+}
+
+h1:before {
+	content:"EASELJS ";
+	font-weight: bold;
+}
+
+header p {
+	margin: 0;
+	padding: 1em;
+	background: rgba(250, 252, 255, 0.7);
+}
+
+canvas {
+	margin-top: 1rem;
+	background: white;
+}
+
+#loader {
+	display: none;
+}
+
+#error {
+	display:none;
+	width: 960px;
+	text-align: left;
+	padding: 10px;
+}
+
+#mobile {
+    display:none;
+    width: 960px;
+    text-align: left;
+    padding: 10px;
+}
+
+.loader {
+	width: 100%;
+	height: 50px;
+	position: absolute;
+	text-align:center;
+	margin-top: 250px;
+	background: url('loader.gif') no-repeat;
+	background-position: 50% 50%;
+	display: block !important;
+}

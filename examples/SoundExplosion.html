@@ -3,7 +3,8 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>EaselJS Example: Using Stage.autoClear</title>
-	<link href="assets/demoStyles.css" rel="stylesheet" type="text/css" />
+    <link href="../_assets/css/shared.css" rel="stylesheet" type="text/css"/>
+   	<link href="../_assets/css/examples.css" rel="stylesheet" type="text/css"/>
 </head>
 
 <body onload="init();">
@@ -26,8 +27,8 @@
 		<canvas id="testCanvas" width="960" height="400"></canvas>
 	</div>
 
-    <script type="text/javascript" src="assets/easeljs-NEXT.min.js"></script>
-    <script type="text/javascript" src="assets/preloadjs-NEXT.min.js"></script>
+    <script type="text/javascript" src="../_assets/libs/easeljs-NEXT.min.js"></script>
+    <script type="text/javascript" src="../_assets/libs//preloadjs-NEXT.min.js"></script>
     <script type="text/javascript" src="../lib/soundjs-NEXT.combined.js"></script>
     <!-- We also provide hosted minified versions of all CreateJS libraries.
         http://code.createjs.com -->
@@ -85,7 +86,7 @@
             }
 
             // set up our manifest of assets to load
-            var assetsPath = "assets/";
+            var assetsPath = "../_assets/audio/";
             var manifest = [
                 {src:"Game-Break.ogg", id:"0"},
                 {src:"Game-Spawn.ogg", id:"1"},

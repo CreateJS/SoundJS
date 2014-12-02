@@ -3,7 +3,8 @@
 <head>
 	<title>SoundJS: Mobile Safe</title>
 
-	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css" />
+    <link href="../_assets/css/shared.css" rel="stylesheet" type="text/css"/>
+   	<link href="../_assets/css/examples.css" rel="stylesheet" type="text/css"/>
 </head>
 
 <body onload="init()">
@@ -86,7 +87,7 @@
 					}
 
 					// Create a single item to load.
-					var assetsPath = "assets/";
+                    var assetsPath = "../_assets/audio/";
 					this.src = assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg";
 
 					this.displayStatus.innerHTML = "Waiting for load to complete.";  // let the user know what's happening

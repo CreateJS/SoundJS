@@ -4,7 +4,8 @@
 <title>SoundJS: Preload & Sound APIs</title>
 
 
-	<link rel="stylesheet" type="text/css" href="assets/demoStyles.css" />
+    <link href="../_assets/css/shared.css" rel="stylesheet" type="text/css"/>
+   	<link href="../_assets/css/examples.css" rel="stylesheet" type="text/css"/>
     <style>
         .plugin {
             font-size: 16px;
@@ -46,7 +47,7 @@
             with the OS and browser if you see this on a device that is not mobile.  Thank you.</p>
     </div>
 
-    <script type="text/javascript" src="./assets/preloadjs-NEXT.min.js"></script>
+    <script type="text/javascript" src="../_assets/libs/preloadjs-NEXT.min.js"></script>
     <script type="text/javascript" src="../lib/soundjs-NEXT.combined.js"></script>
 	<!-- Note: FlashAudioPlugin is only needed to support older browsers -->
     <script type="text/javascript" src="../lib/FlashAudioPlugin-NEXT.combined.js"></script>
@@ -98,7 +99,7 @@
             displayStatus = document.getElementById("status");
 
             // Create a single item to load.
-            var assetsPath = "assets/";
+            var assetsPath = "../_assets/audio/";
             //var item = {src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg", id:"music"};
             var manifest = [
                 {id:"music", src:assetsPath+"18-machinae_supremacy-lord_krutors_dominion.ogg"}

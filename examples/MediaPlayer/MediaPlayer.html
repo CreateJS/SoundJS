@@ -3,12 +3,13 @@
 <head>
 	<title>SoundJS: Media Player Example</title>
 
-	<link rel="stylesheet" href="assets/demoStyles.css"/>
+    <link href="../../_assets/css/shared.css" rel="stylesheet" type="text/css"/>
+   	<link href="../../_assets/css/examples.css" rel="stylesheet" type="text/css"/>
 	<style type="text/css">
 		#player {
 			width: 451px;
 			height: 101px;
-			background-image: url('assets/mediaplayer/player.png');
+			background-image: url('./art/player.png');
 
 			user-select: none;
 			-moz-user-select: none;
@@ -33,25 +34,25 @@
 			left: 324px;
 		}
 		.playBtn {
-			background-image: url('assets/mediaplayer/buttonPlay.png');
+			background-image: url('./art/buttonPlay.png');
 		}
 		.playBtn:hover {
-			background-image: url('assets/mediaplayer/buttonPlayHover.png');
+			background-image: url('./art/buttonPlayHover.png');
 		}
 		.pauseBtn {
-			background-image: url('assets/mediaplayer/buttonPause.png');
+			background-image: url('./art/buttonPause.png');
 		}
 		.pauseBtn:hover {
-			background-image: url('assets/mediaplayer/buttonPauseHover.png');
+			background-image: url('./art/buttonPauseHover.png');
 		}
 		#stopBtn {
 			left: 387px;
 		}
 		.stopBtn {
-			background-image: url('assets/mediaplayer/buttonStop.png');
+			background-image: url('./art/buttonStop.png');
 		}
 		.stopBtn:hover {
-			background-image: url('assets/mediaplayer/buttonStopHover.png');
+			background-image: url('./art/buttonStopHover.png');
 		}
 
 		#labels {
@@ -74,12 +75,12 @@
 			height: 5px;
 			top: 78px;
 			left: 40px;
-			background-image: url("assets/mediaplayer/scubberBar.png");
+			background-image: url("./art/scubberBar.png");
 		}
 
 		#thumb {
 			cursor: pointer;
-			background-image: url("assets/mediaplayer/scrubberPlayhead.png");
+			background-image: url("./art/scrubberPlayhead.png");
 			width: 16px;
 			height: 16px;
 			top: -5px;
@@ -121,7 +122,7 @@
             with the device and browser you are using.  Thank you.</p>
     </div>
 
-    <script type="text/javascript" src="../lib/soundjs-NEXT.combined.js"></script>
+    <script type="text/javascript" src="../../lib/soundjs-NEXT.combined.js"></script>
     <!-- We also provide hosted minified versions of all CreateJS libraries.
         http://code.createjs.com -->
 
@@ -147,8 +148,8 @@
             $("#track").css("display", "none");
 
             document.getElementById("loader").className = "loader";
-            var assetPath = "assets/";
-            var src = assetPath+"M-GameBG.ogg";
+            var assetsPath = "../../_assets/audio/";
+            var src = assetsPath+"M-GameBG.ogg";
 
 			createjs.Sound.alternateExtensions = ["mp3"];	// add other extensions to try loading if the src file extension is not supported
 			createjs.Sound.addEventListener("fileload", createjs.proxy(handleLoadComplete,this)); // add an event listener for when load is completed
