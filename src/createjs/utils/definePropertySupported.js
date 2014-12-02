@@ -43,8 +43,8 @@ this.createjs = this.createjs||{};
 	 * Boolean value indicating if Object.defineProperty is supported.
 	 *
 	 * <h4>Example</h4>
-  	 *
- 	 *      if (createjs.definePropertySupported) { // add getter / setter}
+	 *
+	 *      if (createjs.definePropertySupported) { // add getter / setter}
 	 *
 	 * @property definePropertySupported
 	 * @type {Boolean}
@@ -56,16 +56,16 @@ this.createjs = this.createjs||{};
 	var foo = {};
 	try {
 		Object.defineProperty(foo, "bar", {
-			get: function() {
+			get: function () {
 				return this._bar;
 			},
-			set: function(value) {
+			set: function (value) {
 				this._bar = value;
 			}
 		});
 	} catch (e) {
 		t = false;
-	};
+	}
 
 	createjs.definePropertySupported = t;
 }());
