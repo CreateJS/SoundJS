@@ -2,6 +2,11 @@ body {
 	width: 960px;
 }
 
+header {
+	margin-bottom: 1rem;
+	width: 960px;
+}
+
 h1 {
 	font-weight: 200;
 	margin-bottom: 1rem;
@@ -18,36 +23,39 @@ header p {
 	background: rgba(250, 252, 255, 0.7);
 }
 
-canvas {
-	margin-top: 1rem;
+.content, canvas {
 	background: white;
 }
 
-#loader {
+.content {
+	height: auto;
+	overflow: hidden;
+	padding: 1em;
+}
+
+.loading {
+	position: relative;
+}
+
+.loading:after {
+	content: url("../art/loading.gif");
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin: -13px 0 0 -51px;
+	opacity: 0.8;
+}
+
+#error, #mobile {
+	display:none;
+	text-align: left;
+	padding: 1em;
+}
+
+body.embedded header {
 	display: none;
 }
 
-#error {
-	display:none;
-	width: 960px;
-	text-align: left;
-	padding: 10px;
-}
-
-#mobile {
-    display:none;
-    width: 960px;
-    text-align: left;
-    padding: 10px;
-}
-
-.loader {
-	width: 100%;
-	height: 50px;
-	position: absolute;
-	text-align:center;
-	margin-top: 250px;
-	background: url('loader.gif') no-repeat;
-	background-position: 50% 50%;
-	display: block !important;
+body.embedded {
+	margin: 0;
 }
