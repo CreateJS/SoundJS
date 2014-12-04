@@ -41,7 +41,7 @@ this.createjs = this.createjs || {};
 	 * Loader provides a mechanism to preload Web Audio content via PreloadJS or internally. Instances are returned to
 	 * the preloader, and the load method is called when the asset needs to be requested.
 	 *
-	 * @class Loader
+	 * @class WebAudioLoader
 	 * @param {String} src The path to the sound
 	 * @param {Object} flash The flash instance that will do the preloading.
 	 * @extends XHRRequest
@@ -55,7 +55,12 @@ this.createjs = this.createjs || {};
 	};
 	var p = createjs.extend(Loader, createjs.XHRRequest);
 
-	// web audio context required for decoding audio
+	/**
+	 * web audio context required for decoding audio
+	 * @property context
+	 * @type {AudioContext}
+	 * @static
+	 */
 	Loader.context = null;
 
 
@@ -76,7 +81,8 @@ this.createjs = this.createjs || {};
 
 	/**
 	* The audio has been decoded.
-	* #method handleAudioDecoded
+	* @method handleAudioDecoded
+	 * @param decoded
 	* @protected
 	*/
 	p._handleAudioDecoded = function (decodedAudio) {

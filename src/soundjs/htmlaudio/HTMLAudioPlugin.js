@@ -87,6 +87,7 @@ this.createjs = this.createjs || {};
 	 * See {{#crossLink "Sound"}}{{/crossLink}} for general notes on known issues.
 	 *
 	 * @class HTMLAudioPlugin
+	 * @extends AbstractPlugin
 	 * @constructor
 	 */
 	function HTMLAudioPlugin() {

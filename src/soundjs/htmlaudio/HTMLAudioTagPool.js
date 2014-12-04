@@ -34,8 +34,8 @@
 // namespace:
 this.createjs = this.createjs || {};
 
-//TODO verify that tags no longer need to be precreated
-//TODO modify this now that tags do not need to be precreated (for Chrome?)
+//TODO verify that tags no longer need to be precreated (mac and pc)
+//TODO modify this now that tags do not need to be precreated
 (function () {
 	"use strict";
 
@@ -43,7 +43,7 @@ this.createjs = this.createjs || {};
 	 * The TagPool is an object pool for HTMLAudio tag instances. In Chrome, we have to pre-create the number of HTML
 	 * audio tag instances that we are going to play before we load the data, otherwise the audio stalls.
 	 * (Note: This seems to be a bug in Chrome)
-	 * #class TagPool
+	 * @class HTMLAudioTagPool
 	 * @param {String} src The source of the channel.
 	 * @protected
 	 */

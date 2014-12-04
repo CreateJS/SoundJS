@@ -41,7 +41,7 @@ this.createjs = this.createjs || {};
 	 * Loader provides a mechanism to preload Flash content via PreloadJS or internally. Instances are returned to
 	 * the preloader, and the load method is called when the asset needs to be requested.
 	 *
-	 * @class Loader
+	 * @class FlashAudioLoader
 	 * @param {String} src The path to the sound
 	 * @param {Object} flash The flash instance that will do the preloading.
 	 * @extends AbstractLoader
@@ -55,7 +55,7 @@ this.createjs = this.createjs || {};
 		/**
 		 * ID used to facilitate communication with flash.
 		 * Not doc'd because this should not be altered externally
-		 * #property flashId
+		 * @property flashId
 		 * @type {String}
 		 */
 		this.flashId = null;
@@ -69,23 +69,24 @@ this.createjs = this.createjs || {};
 	var s = Loader;
 	/**
 	 * A reference to the Flash instance that gets created.
-	 * #property flash
+	 * @property flash
 	 * @type {Object | Embed}
+	 * @protected
 	 */
 	s._flash = null;
 
 	/**
 	 * A list of loader instances that tried to load before _flash was set
-	 * #property _preloadInstances
+	 * @property _preloadInstances
 	 * @type {Array}
-	 * @private
+	 * @protected
 	 */
 	s._preloadInstances = [];
 
 	/**
 	 * Set the Flash instance on the class, and start loading on any instances that had load called
 	 * before flash was ready
-	 * #method setFlash
+	 * @method setFlash
 	 * @param flash Flash instance that handles loading and playback
 	 */
 	s.setFlash = function(flash) {
@@ -110,13 +111,21 @@ this.createjs = this.createjs || {};
 		this.dispatchEvent(e);
 	};
 
+	/**
+	 * called from flash when loading has progress
+	 * @method handleProgress
+	 * @param loaded
+	 * @param total
+	 * @protected
+	 */
 	p.handleProgress = function (loaded, total) {
 		this._sendProgress(loaded/total);
 	};
 
 	/**
 	 * Called from Flash when sound is loaded.  Set our ready state and fire callbacks / events
-	 * #method handleComplete
+	 * @method handleComplete
+	 * @protected
 	 */
 	p.handleComplete = function () {
 		this._result = this._item.src;
@@ -125,7 +134,9 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Receive error event from flash and pass it to callback.
+	 * @method handleError
 	 * @param {Event} error
+	 * @protected
 	 */
 	p.handleError = function (error) {
 		this._handleError(error);
