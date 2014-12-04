@@ -38,8 +38,8 @@ this.createjs = this.createjs || {};
 	 * The AbstractMediaLoader class description goes here.
 	 *
 	 */
-	function AbstractMediaLoader(loadItem, useXHR, type) {
-		this.AbstractLoader_constructor(loadItem, useXHR, type);
+	function AbstractMediaLoader(loadItem, preferXHR, type) {
+		this.AbstractLoader_constructor(loadItem, preferXHR, type);
 
 		// public properties
 
@@ -87,7 +87,7 @@ this.createjs = this.createjs || {};
 	p._formatResult = function (loader) {
 		this._tag.removeEventListener && this._tag.removeEventListener("canplaythrough", this._loadedHandler);
 		this._tag.onstalled = null;
-		if (this._useXHR) {
+		if (this._preferXHR) {
 			loader.getTag().src = loader.getResult(true);
 		}
 		return loader.getTag();

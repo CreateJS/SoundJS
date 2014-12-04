@@ -38,8 +38,8 @@ this.createjs = this.createjs || {};
 	 * The TagRequest class description goes here.
 	 *
 	 */
-	function MediaTagRequest(loadItem, useXHR, tag, srcAttribute) {
-		this.AbstractRequest_constructor(loadItem, useXHR);
+	function MediaTagRequest(loadItem, preferXHR, tag, srcAttribute) {
+		this.AbstractRequest_constructor(loadItem, preferXHR);
 
 		// public properties
 
@@ -55,6 +55,7 @@ this.createjs = this.createjs || {};
 
 	p.load = function () {
 		this._tag.onstalled = createjs.proxy(this._handleStalled, this);
+		this._tag.onprogress = createjs.proxy(this._handleProgress, this);
 
 		// This will tell us when audio is buffered enough to play through, but not when its loaded.
 		// The tag doesn't keep loading in Chrome once enough has buffered, and we have decided that behaviour is sufficient.
@@ -66,6 +67,7 @@ this.createjs = this.createjs || {};
 	p.destroy = function() {
 		this._tag.addEventListener && this._tag.removeEventListener("canplaythrough", this._loadedHandler);
 		this._tag.onstalled = null;
+		this._tag.onprogress = null;
 
 		this.TagRequest_destory();
 	};
@@ -96,6 +98,22 @@ this.createjs = this.createjs || {};
 	p._handleStalled = function () {
 		//Ignore, let the timeout take care of it. Sometimes its not really stopped.
 	};
+
+	/**
+	 * The XHR request has reported progress.
+	 * @method _handleProgress
+	 * @param {Object} event The XHR progress event.
+	 * @private
+	 */
+	p._handleProgress = function (event) {
+		if (!event || event.loaded > 0 && event.total == 0) {
+			return; // Sometimes we get no "total", so just ignore the progress event.
+		}
+
+		var newEvent = new createjs.ProgressEvent(event.loaded, event.total);
+		this.dispatchEvent(newEvent);
+	};
+
 
 	createjs.MediaTagRequest = createjs.promote(MediaTagRequest, "TagRequest");
 

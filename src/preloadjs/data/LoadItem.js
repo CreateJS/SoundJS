@@ -132,6 +132,15 @@ this.createjs = this.createjs || {};
 		this.mimeType = null;
 
 		/**
+		 * Sets the crossorigin attribute on images.
+		 *
+		 * @default Anonymous
+		 *
+		 * @type {boolean}
+		 */
+		this.crossOrigin = "Anonymous";
+
+		/**
 		 * how long before we stop a request.  Only applies to Tag loading and XHR level one loading.
 		 *
 		 * @type {number}
@@ -154,6 +163,22 @@ this.createjs = this.createjs || {};
 		} else {
 			throw new Error("Type not recognized.");
 		}
+	};
+
+	/**
+	 * Provides a chainable shortcut method for setting a number of properties on the instance.
+	 *
+	 * <h4>Example</h4>
+	 *
+	 *      var loadItem = new createjs.LoadItem().set({src:"image.png", maintainOrder:true});
+	 *
+	 * @method set
+	 * @param {Object} props A generic object containing properties to copy to the LoadItem instance.
+	 * @return {LoadItem} Returns the instance the method is called on (useful for chaining calls.)
+	*/
+	p.set = function(props) {
+		for (var n in props) { this[n] = props[n]; }
+		return this;
 	};
 
 	createjs.LoadItem = s;

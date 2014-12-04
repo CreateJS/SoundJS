@@ -41,16 +41,14 @@ this.createjs = this.createjs || {};
 	 * Loader provides a mechanism to preload Flash content via PreloadJS or internally. Instances are returned to
 	 * the preloader, and the load method is called when the asset needs to be requested.
 	 *
-	 * Loader has the same APIs as an &lt;audio&gt; tag. The instance calls the <code>onload</code>, <code>onprogress</code>,
-	 * and <code>onerror</code> callbacks when necessary.
-	 *
-	 * #class Loader
+	 * @class Loader
 	 * @param {String} src The path to the sound
 	 * @param {Object} flash The flash instance that will do the preloading.
+	 * @extends AbstractLoader
 	 * @protected
 	 */
 	function Loader(src) {
-		this.AbstractLoader_constructor(src, false, createjs.DataTypes.SOUND);
+		this.AbstractLoader_constructor(src, false, createjs.AbstractLoader.SOUND);
 
 
 // Public properties

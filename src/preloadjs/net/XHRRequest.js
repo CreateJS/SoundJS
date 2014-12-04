@@ -48,12 +48,10 @@ this.createjs = this.createjs || {};
 	 * @constructor
 	 * @param {Object} item The object that defines the file to load. Please see the {{#crossLink "LoadQueue/loadFile"}}{{/crossLink}}
 	 * for an overview of supported file properties.
-	 * @param {String} [crossOrigin] An optional flag to support images loaded from a CORS-enabled server. Please see
-	 * {{#crossLink "LoadQueue/_crossOrigin:property"}}{{/crossLink}} for more info.
 	 * @extends AbstractLoader
 	 */
-	function XHRRequest(item, crossOrigin) {
-		this.AbstractRequest_constructor(item, crossOrigin);
+	function XHRRequest(item) {
+		this.AbstractRequest_constructor(item);
 
 		// protected properties
 		/**
@@ -101,14 +99,6 @@ this.createjs = this.createjs || {};
 		 * @private
 		 */
 		this._rawResponse = null;
-
-		/**
-		 * See {{#crossLink "LoadQueue/_crossOrigin:property"}}{{/crossLink}}
-		 * @property _crossOrigin
-		 * @type {String}
-		 * @defaultValue ""
-		 * @private
-		 */
 
 		this._canceled = false;
 
@@ -269,10 +259,8 @@ this.createjs = this.createjs || {};
 			return; // Sometimes we get no "total", so just ignore the progress event.
 		}
 
-		var newEvent = new createjs.Event("progress");
-		newEvent.loaded = event.loaded;
-		newEvent.total = event.total;
-		this._sendProgress(newEvent);
+		var newEvent = new createjs.ProgressEvent(event.loaded, event.total);
+		this.dispatchEvent(newEvent);
 	};
 
 	/**

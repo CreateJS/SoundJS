@@ -44,7 +44,7 @@ this.createjs = this.createjs || {};
 	 * @class AbstractLoader
 	 * @extends EventDispatcher
 	 */
-	function AbstractLoader(loadItem, useXHR, type) {
+	function AbstractLoader(loadItem, preferXHR, type) {
 		this.EventDispatcher_constructor();
 
 		// public properties
@@ -95,7 +95,7 @@ this.createjs = this.createjs || {};
 		// protected properties
 		/**
 		 * The item this loader represents. Note that this is null in a {{#crossLink "LoadQueue"}}{{/crossLink}}, but will
-		 * be available on loaders such as {{#crossLink "XHRLoader"}}{{/crossLink}} and {{#crossLink "TagLoader"}}{{/crossLink}}.
+		 * be available on loaders such as {{#crossLink "XMLLoader"}}{{/crossLink}} and {{#crossLink "ImageLoader"}}{{/crossLink}}.
 		 * @property _item
 		 * @type {Object}
 		 * @private
@@ -106,9 +106,19 @@ this.createjs = this.createjs || {};
 			this._item = null;
 		}
 
-		this._useXHR = useXHR;
+		this._preferXHR = preferXHR;
 
 		this._rawResult = null;
+
+		/**
+		 * A list of items that loaders load behind the scenes. This does not include the main item the loader is
+		 * responsible for loading. Examples of loaders that have subitems include the {{#crossLink "SpriteSheetLoader"}}{{/crossLink}} and
+		 * {{#crossLink "ManifestLoader"}}{{/crossLink}}.
+		 * @property _loadItems
+		 * @type {null}
+		 * @protected
+		 */
+		this._loadedItems = null;
 	};
 
 	var p = createjs.extend(AbstractLoader, createjs.EventDispatcher);
@@ -173,7 +183,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * The preload type for json files, usually with the "json" file extension. JSON data is loaded and parsed into a
 	 * JavaScript object. Note that if a `callback` is present on the load item, the file will be loaded with JSONP,
-	 * no matter what the {{#crossLink "LoadQueue/useXHR:property"}}{{/crossLink}} property is set to, and the JSON
+	 * no matter what the {{#crossLink "LoadQueue/preferXHR:property"}}{{/crossLink}} property is set to, and the JSON
 	 * must contain a matching wrapper function.
 	 * @property JSON
 	 * @type {String}
@@ -185,7 +195,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * The preload type for jsonp files, usually with the "json" file extension. JSON data is loaded and parsed into a
 	 * JavaScript object. You are required to pass a callback parameter that matches the function wrapper in the JSON.
-	 * Note that JSONP will always be used if there is a callback present, no matter what the {{#crossLink "LoadQueue/useXHR:property"}}{{/crossLink}}
+	 * Note that JSONP will always be used if there is a callback present, no matter what the {{#crossLink "LoadQueue/preferXHR:property"}}{{/crossLink}}
 	 * property is set to.
 	 * @property JSONP
 	 * @type {String}
@@ -199,7 +209,7 @@ this.createjs = this.createjs || {};
 	 * and parsed into a JavaScript object. PreloadJS will then look for a "manifest" property in the JSON, which is an
 	 * Array of files to load, following the same format as the {{#crossLink "LoadQueue/loadManifest"}}{{/crossLink}}
 	 * method. If a "callback" is specified on the manifest object, then it will be loaded using JSONP instead,
-	 * regardless of what the {{#crossLink "LoadQueue/useXHR:property"}}{{/crossLink}} property is set to.
+	 * regardless of what the {{#crossLink "LoadQueue/preferXHR:property"}}{{/crossLink}} property is set to.
 	 * @property MANIFEST
 	 * @type {String}
 	 * @default manifest
@@ -390,7 +400,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p._createRequest = function() {
-		if (!this._useXHR) {
+		if (!this._preferXHR) {
 			this._request = new createjs.TagRequest(this._item, false, this._tag || this._createTag(), this._tagSrcAttribute);
 		} else {
 			this._request = new createjs.XHRRequest(this._item, false);
@@ -421,13 +431,10 @@ this.createjs = this.createjs || {};
 	 *
 	 */
 	p.destroy = function() {
-		this._request.off("complete", this, this);
-		this._request.off("progress", this, this);
-		this._request.off("loadStart", this, this);
-		this._request.off("abort", this, this);
-		this._request.off("timeout", this, this);
-		this._request.off("error", this, this);
-		this._request.destroy();
+		if (this._request) {
+			this._request.removeAllEventListeners();
+			this._request.destroy();
+		}
 
 		this._request = null;
 
@@ -436,6 +443,15 @@ this.createjs = this.createjs || {};
 		this._result = null;
 
 		this.removeAllEventListeners();
+	};
+
+	/**
+	 * Get any items loaded internally by the loader.
+	 * @method getLoadedItems
+	 * @returns {Array} A list of the items loaded by the loader.
+	 */
+	p.getLoadedItems = function () {
+		return this._loadedItems;
 	};
 
 // Callback proxies
@@ -463,7 +479,7 @@ this.createjs = this.createjs || {};
 		var event = null;
 		if (typeof(value) == "number") {
 			this.progress = value;
-			event = new createjs.Event("progress");
+			event = new createjs.ProgressEvent();
 			event.loaded = this.progress;
 			event.total = 1;
 		} else {

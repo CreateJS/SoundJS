@@ -4,9 +4,8 @@ this.createjs = this.createjs || {};
 (function () {
 	"use strict";
 
-	var AbstractRequest = function (item, crossOrigin) {
+	var AbstractRequest = function (item) {
 		this._item = item;
-		this._crossOrigin = crossOrigin;
 	};
 
 	var p = createjs.extend(AbstractRequest, createjs.EventDispatcher);

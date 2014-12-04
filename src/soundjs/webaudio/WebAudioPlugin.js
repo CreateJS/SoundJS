@@ -59,6 +59,7 @@ this.createjs = this.createjs || {};
 	 * 	by ensuring the audio and video audio share the same sampleRate.</li>
 	 * </ul>
 	 * @class WebAudioPlugin
+	 * @extends AbstractPlugin
 	 * @constructor
 	 * @since 0.4.0
 	 */

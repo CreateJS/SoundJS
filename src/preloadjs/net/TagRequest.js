@@ -38,8 +38,8 @@ this.createjs = this.createjs || {};
 	 * The TagRequest class description goes here.
 	 *
 	 */
-	function TagRequest(loadItem, useXHR, tag, srcAttribute) {
-		this.AbstractRequest_constructor(loadItem, useXHR);
+	function TagRequest(loadItem, preferXHR, tag, srcAttribute) {
+		this.AbstractRequest_constructor(loadItem, preferXHR);
 
 		// public properties
 

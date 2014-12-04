@@ -68,6 +68,7 @@ this.createjs = this.createjs || {};
 	 * Unfortunely this is an issue with the flash player and the browser and therefore cannot be addressed by SoundJS.</li></ul>
 	 *
 	 * @class FlashAudioPlugin
+	 * @extends AbstractPlugin
 	 * @constructor
 	 */
 	function FlashAudioPlugin() {

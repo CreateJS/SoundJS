@@ -86,7 +86,7 @@ module.exports = function (grunt) {
 						url: '<%= pkg.url %>',
 						logo: '<%= pkg.logo %>',
 						options: {
-							paths: ['./'],
+							paths: ['./createjs', './soundjs'],
 							outdir: '<%= docsFolder %>',
 							linkNatives: true,
 							attributesEmit: true,
