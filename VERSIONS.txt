@@ -49,7 +49,7 @@ CRITICAL (may break existing content):
 - Updated documentation to include abstract classes and all plugin classes.
 - Added support for setting WebAudioPlugin.context.  Note that it needs to be set before plugins are instantiated.
 - Added fileerror event, dispatched when internal loading fails.
-- registerSounds now handles a path property in the passed in manifest of sounds.
+- registerSounds & removeSounds now handles a path property in the passed in manifest of sounds.
 
 Version 0.5.2 [December 12, 2013]
 ************************************************************************************************************************

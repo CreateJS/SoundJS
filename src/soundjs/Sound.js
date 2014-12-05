@@ -891,7 +891,13 @@ this.createjs = this.createjs || {};
 	 */
 	s.registerSounds = function (sounds, basePath) {
 		var returnValues = [];
-		if (!basePath) {basePath = sounds.path;}
+		if (sounds.path) {
+			if (!basePath) {
+				basePath = sounds.path;
+			} else {
+				basePath = basePath + sounds.path;
+			}
+		}
 		for (var i = 0, l = sounds.length; i < l; i++) {
 			returnValues[i] = createjs.Sound.registerSound(sounds[i].src, sounds[i].id, sounds[i].data, basePath);
 		}
@@ -982,7 +988,8 @@ this.createjs = this.createjs || {};
 	 *
 	 * @method removeSounds
 	 * @param {Array} sounds An array of objects to remove. Objects are expected to be in the format needed for
-	 * {{#crossLink "Sound/removeSound"}}{{/crossLink}}: <code>{srcOrID:srcURIorID}</code>
+	 * {{#crossLink "Sound/removeSound"}}{{/crossLink}}: <code>{srcOrID:srcURIorID}</code>.
+	 * You can also set an optional path property that will be prepended to the src of each object.
 	 * @param {string} basePath Set a path that will be prepended to each src when removing.
 	 * @return {Object} An array of Boolean values representing if the sounds with the same array index were
 	 * successfully removed.
@@ -991,7 +998,13 @@ this.createjs = this.createjs || {};
 	 */
 	s.removeSounds = function (sounds, basePath) {
 		var returnValues = [];
-		if (!basePath) {basePath = sounds.path;}
+		if (sounds.path) {
+			if (!basePath) {
+				basePath = sounds.path;
+			} else {
+				basePath = basePath + sounds.path;
+			}
+		}
 		for (var i = 0, l = sounds.length; i < l; i++) {
 			returnValues[i] = createjs.Sound.removeSound(sounds[i].src, basePath);
 		}
