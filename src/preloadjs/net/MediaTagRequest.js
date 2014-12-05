@@ -114,6 +114,13 @@ this.createjs = this.createjs || {};
 		this.dispatchEvent(newEvent);
 	};
 
+	p._handleTagComplete = function () {
+		this._tag.removeEventListener && this._tag.removeEventListener("canplaythrough", this._loadedHandler);
+		this._tag.onstalled = null;
+		this._tag.onprogress = null;
+		this.TagRequest__handleTagComplete();
+	};
+
 
 	createjs.MediaTagRequest = createjs.promote(MediaTagRequest, "TagRequest");
 

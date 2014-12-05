@@ -94,6 +94,8 @@ this.createjs = this.createjs || {};
 	};
 
 	p._handleTagComplete = function () {
+		this._tag.onload = null;
+		this._tag.onreadystatechange = null;
 		this._rawResult = this._tag;
 		this._result = this.resultFormatter && this.resultFormatter(this) || this._rawResult;
 
