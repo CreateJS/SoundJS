@@ -880,7 +880,7 @@ this.createjs = this.createjs || {};
 	 * @method registerSounds
 	 * @param {Array} sounds An array of objects to load. Objects are expected to be in the format needed for
 	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}}: <code>{src:srcURI, id:ID, data:Data}</code>
-	 * with "id" and "data" being optional.
+	 * with "id" and "data" being optional.  You can also set an optional path property that will be prepended to the src of each object.
 	 * @param {string} basePath Set a path that will be prepended to each src when loading.  When creating, playing, or removing
 	 * audio that was loaded with a basePath by src, the basePath must be included.
 	 * @return {Object} An array of objects with the modified values that were passed in, which defines each sound.
@@ -891,6 +891,7 @@ this.createjs = this.createjs || {};
 	 */
 	s.registerSounds = function (sounds, basePath) {
 		var returnValues = [];
+		if (!basePath) {basePath = sounds.path;}
 		for (var i = 0, l = sounds.length; i < l; i++) {
 			returnValues[i] = createjs.Sound.registerSound(sounds[i].src, sounds[i].id, sounds[i].data, basePath);
 		}
@@ -990,6 +991,7 @@ this.createjs = this.createjs || {};
 	 */
 	s.removeSounds = function (sounds, basePath) {
 		var returnValues = [];
+		if (!basePath) {basePath = sounds.path;}
 		for (var i = 0, l = sounds.length; i < l; i++) {
 			returnValues[i] = createjs.Sound.removeSound(sounds[i].src, basePath);
 		}
