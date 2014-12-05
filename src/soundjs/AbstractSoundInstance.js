@@ -178,7 +178,7 @@ this.createjs = this.createjs || {};
 		 * @property duration
 		 * @type {Number}
 		 * @default 0
-		 * @since 0.5.3
+		 * @since 0.6.0
 		 */
 		this._duration = Math.max(0, duration || 0);
 		if (createjs.definePropertySupported) {
@@ -215,7 +215,7 @@ this.createjs = this.createjs || {};
 		 * @property position
 		 * @type {Number}
 		 * @default 0
-		 * @since 0.5.3
+		 * @since 0.6.0
 		 */
 		this._position = 0;
 		if (createjs.definePropertySupported) {
@@ -235,7 +235,7 @@ this.createjs = this.createjs || {};
 		 * @type {Number}
 		 * @default 0
 		 * @public
-		 * @since 0.5.3
+		 * @since 0.6.0
 		 */
 		this._loop = 0;
 		if (createjs.definePropertySupported) {
@@ -254,7 +254,7 @@ this.createjs = this.createjs || {};
 		 * @property muted
 		 * @type {Boolean}
 		 * @default false
-		 * @since 0.5.3
+		 * @since 0.6.0
 		 */
 		this._muted = false;
 		if (createjs.definePropertySupported) {
@@ -428,7 +428,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Remove all external references and resources from AbstractSoundInstance.  Note this is irreversible and AbstractSoundInstance will no longer work
 	 * @method destroy
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p.destroy = function() {
 		this._cleanUp();
@@ -452,7 +452,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * @method getPaused
 	 * @returns {boolean} If the instance is currently paused
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p.getPaused = function() {
 		return this._paused;
@@ -465,7 +465,7 @@ this.createjs = this.createjs || {};
 	 * Pause or resume the instance.  Note you can also resume playback with {{#crossLink "AbstractSoundInstance/play"}}{{/crossLink}}.
 	 *
 	 * @param {boolean} value
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 * @return {AbstractSoundInstance} A reference to itself, intended for chaining calls.
 	 */
 	p.setPaused = function (value) {
@@ -556,7 +556,7 @@ this.createjs = this.createjs || {};
 	 * @method setMute
 	 * @param {Boolean} value If the sound should be muted.
 	 * @return {AbstractSoundInstance} A reference to itself, intended for chaining calls.
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p.setMuted = function (value) {
 		if (value !== true && value !== false) {return;}
@@ -576,7 +576,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * @method getMute
 	 * @return {Boolean} If the sound is muted.
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p.getMuted = function () {
 		return this._muted;
@@ -690,7 +690,7 @@ this.createjs = this.createjs || {};
 	 * @method setDuration
 	 * @param {number} value The new duration time in milli seconds.
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p.setDuration = function (value) {
 		if (value == this._duration) { return this; }
@@ -709,7 +709,7 @@ this.createjs = this.createjs || {};
 	 * @method setPlayback
 	 * @param {Object} value The new playback resource.
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 **/
 	p.setPlaybackResource = function (value) {
 		this._playbackResource = value;
@@ -726,7 +726,7 @@ this.createjs = this.createjs || {};
 	 * @method setPlayback
 	 * @param {Object} value The new playback resource.
 	 * @return {Object} playback resource used for playing audio
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 **/
 	p.getPlaybackResource = function () {
 		return this._playbackResource;
@@ -740,7 +740,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * @method getLoop
 	 * @return {number}
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 **/
 	p.getLoop = function () {
 		return this._loop;
@@ -754,7 +754,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * @method setLoop
 	 * @param {number} value The number of times to loop after play.
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p.setLoop = function (value) {
 		// remove looping
@@ -891,7 +891,7 @@ this.createjs = this.createjs || {};
 	 * Internal function used to update the pan
 	 * @method _updatePan
 	 * @protected
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p._updatePan = function () {
 		// plugin specific code
@@ -901,7 +901,7 @@ this.createjs = this.createjs || {};
 	 * Internal function used to update the duration of the audio.
 	 * @method _updateDuration
 	 * @protected
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p._updateDuration = function () {
 		// plugin specific code
@@ -911,7 +911,7 @@ this.createjs = this.createjs || {};
 	 * Internal function used to get the duration of the audio from the source we'll be playing.
 	 * @method _updateDuration
 	 * @protected
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p._setDurationFromSource = function () {
 		// plugin specific code
@@ -921,7 +921,7 @@ this.createjs = this.createjs || {};
 	 * Internal function that calculates the current position of the playhead and sets it on this._position
 	 * @method _updatePosition
 	 * @protected
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p._calculateCurrentPosition = function () {
 		// plugin specific code that sets this.position
@@ -931,7 +931,7 @@ this.createjs = this.createjs || {};
 	 * Internal function used to update the position of the playhead.
 	 * @method _updatePosition
 	 * @protected
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p._updatePosition = function () {
 		// plugin specific code
@@ -941,7 +941,7 @@ this.createjs = this.createjs || {};
 	 * Internal function called when looping is removed during playback.
 	 * @method _removeLooping
 	 * @protected
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p._removeLooping = function () {
 		// plugin specific code
@@ -951,7 +951,7 @@ this.createjs = this.createjs || {};
 	 * Internal function called when looping is added during playback.
 	 * @method _addLooping
 	 * @protected
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p._addLooping = function () {
 		// plugin specific code
@@ -961,7 +961,7 @@ this.createjs = this.createjs || {};
 	 * Internal function called when pausing playback
 	 * @method _pause
 	 * @protected
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p._pause = function () {
 		// plugin specific code
@@ -971,7 +971,7 @@ this.createjs = this.createjs || {};
 	 * Internal function called when resuming playback
 	 * @method _resume
 	 * @protected
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p._resume = function () {
 		// plugin specific code
@@ -981,7 +981,7 @@ this.createjs = this.createjs || {};
 	 * Internal function called when stopping playback
 	 * @method _handleStop
 	 * @protected
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p._handleStop = function() {
 		// plugin specific code
@@ -991,7 +991,7 @@ this.createjs = this.createjs || {};
 	 * Internal function called when AbstractSoundInstance is being cleaned up
 	 * @method _handleCleanUp
 	 * @protected
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p._handleCleanUp = function() {
 		// plugin specific code
@@ -1001,7 +1001,7 @@ this.createjs = this.createjs || {};
 	 * Internal function called when AbstractSoundInstance has played to end and is looping
 	 * @method _handleCleanUp
 	 * @protected
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p._handleLoop = function () {
 		// plugin specific code

@@ -326,7 +326,7 @@ this.createjs = this.createjs || {};
 	 * @method _addPropsToClasses
 	 * @static
 	 * @protected
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	p._addPropsToClasses = function() {
 		var c = this._soundInstanceClass;

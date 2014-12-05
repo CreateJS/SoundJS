@@ -48,6 +48,7 @@ CRITICAL (may break existing content):
 - moved BrowserDetect into a util and changed namespace to createjs.BrowserDetect
 - Updated documentation to include abstract classes and all plugin classes.
 - Added support for setting WebAudioPlugin.context.  Note that it needs to be set before plugins are instantiated.
+- Added fileerror event, dispatched when internal loading fails
 
 Version 0.5.2 [December 12, 2013]
 ************************************************************************************************************************

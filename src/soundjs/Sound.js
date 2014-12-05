@@ -125,7 +125,7 @@ this.createjs = this.createjs || {};
 	 *		queue.installPlugin(createjs.Sound);
 	 *
 	 * <b>Audio Sprites</b><br />
-	 * SoundJS has added support for Audio Sprites, available as of version 0.5.3.
+	 * SoundJS has added support for Audio Sprites, available as of version 0.6.0.
 	 * For those unfamiliar with audio sprites, they are much like CSS sprites or sprite sheets: multiple audio assets
 	 * grouped into a single file.
 	 *
@@ -506,6 +506,18 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 
+	/**
+	 * This event is fired when a file fails loading internally. This event is fired for each loaded sound,
+	 * so any handler methods should look up the <code>event.src</code> to handle a particular sound.
+	 * @event fileerror
+	 * @param {Object} target The object that dispatched the event.
+	 * @param {String} type The event type.
+	 * @param {String} src The source of the sound that was loaded.
+	 * @param {String} [id] The id passed in when the sound was registered. If one was not provided, it will be null.
+	 * @param {Number|Object} [data] Any additional data associated with the item. If not provided, it will be undefined.
+	 * @since 0.6.0
+	 */
+
 
 // Class Public Methods
 	/**
@@ -531,14 +543,15 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Used by external plugins to dispatch file load events.
-	 * @method _sendFileLoadEvent
-	 * @param {String} src A sound file has completed loading, and should be dispatched.
+	 * Used to dispatch fileload events from internal loading.
+	 * @method _handleLoadComplete
+	 * @param event A loader event.
 	 * @protected
 	 * @static
-	 * @since 0.4.1
+	 * @since 0.6.0
 	 */
-	s._sendFileLoadEvent = function (src) {
+	s._handleLoadComplete = function(event) {
+		var src = event.target.getItem().src;
 		if (!s._preloadHash[src]) {return;}
 
 		for (var i = 0, l = s._preloadHash[src].length; i < l; i++) {
@@ -548,6 +561,32 @@ this.createjs = this.createjs || {};
 			if (!s.hasEventListener("fileload")) { continue; }
 
 			var event = new createjs.Event("fileload");
+			event.src = item.src;
+			event.id = item.id;
+			event.data = item.data;
+			event.sprite = item.sprite;
+
+			s.dispatchEvent(event);
+		}
+	};
+
+	/**
+	 * Used to dispatch error events from internal preloading.
+	 * @param event
+	 * @protected
+	 * @since 0.6.0
+	 */
+	s._handleLoadError = function(event) {
+		var src = event.target.getItem().src;
+		if (!s._preloadHash[src]) {return;}
+
+		for (var i = 0, l = s._preloadHash[src].length; i < l; i++) {
+			var item = s._preloadHash[src][i];
+			s._preloadHash[src][i] = false;
+
+			if (!s.hasEventListener("fileerror")) { continue; }
+
+			var event = new createjs.Event("fileerror");
 			event.src = item.src;
 			event.id = item.id;
 			event.data = item.data;
@@ -720,7 +759,7 @@ this.createjs = this.createjs || {};
 	 * Returns true if the source is already loaded.
 	 * @static
 	 * @private
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 
 	s._registerSound = function (src, id, data) {
@@ -812,6 +851,9 @@ this.createjs = this.createjs || {};
 		s._preloadHash[details.src].push({src:src, id:id, data:details.data});
 		if (s._preloadHash[details.src].length == 1) {
 			// OJR note this will disallow reloading a sound if loading fails or the source changes
+			var loader = details.loader;
+			loader.on("complete", createjs.proxy(this._handleLoadComplete, this));
+			loader.on("error", createjs.proxy(this._handleLoadError, this));
 			s.activePlugin.preload(details.loader);
 		} else {
 			if (s._preloadHash[details.src][0] == true) {return true;}
@@ -845,7 +887,7 @@ this.createjs = this.createjs || {};
 	 * Like registerSound, it will return false for any values when the source cannot be parsed or if no plugins can be initialized.
 	 * Also, it will return true for any values when the source is already loaded.
 	 * @static
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	s.registerSounds = function (sounds, basePath) {
 		var returnValues = [];

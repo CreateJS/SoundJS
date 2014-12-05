@@ -39,7 +39,7 @@ this.createjs = this.createjs || {};
 	 * A default plugin class used as a base for all other plugins.
 	 * @class AbstractPlugin
 	 * @constructor
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 
 	var AbstractPlugin = function () {
@@ -150,6 +150,7 @@ this.createjs = this.createjs || {};
 	 * @param {Loader} loader The sound URI to load.
 	 */
 	p.preload = function (loader) {
+		loader.on("error", createjs.proxy(this._handlePreloadError, this));
 		loader.load();
 	};
 
@@ -270,12 +271,21 @@ this.createjs = this.createjs || {};
 	p._handlePreloadComplete = function (event) {
 		var src = event.target.getItem().src;
 		this._audioSources[src] = event.target.getResult(false);
-		createjs.Sound._sendFileLoadEvent(src);	// OJR is this worth changing to events?
 		for (var i = 0, l = this._soundInstances[src].length; i < l; i++) {
 			var item = this._soundInstances[src][i];
 			item.setPlaybackResource(this._audioSources[src]);
 			// ToDo consider adding play call here if playstate == playfailed
 		}
+	};
+
+	/**
+	 * Handles internal preload erros
+	 * @method _handlePreloadError
+	 * @param event
+	 * @protected
+	 */
+	p._handlePreloadError = function(event) {
+		//delete(this._audioSources[src]);
 	};
 
 	/**

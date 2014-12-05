@@ -135,7 +135,7 @@ this.createjs = this.createjs || {};
   	 * @property context
 	 * @type {AudioContext}
 	 * @static
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	s.context = null;
 
@@ -145,7 +145,7 @@ this.createjs = this.createjs || {};
 	 * @property destinationNode
 	 * @type {AudioNode}
 	 * @static
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	s.destinationNode = null;
 
@@ -155,7 +155,7 @@ this.createjs = this.createjs || {};
 	 * @type {Number / String}
 	 * @protected
 	 * @static
-	 * @since 0.5.3
+	 * @since 0.6.0
 	 */
 	s._panningModel = "equalpower";
 
