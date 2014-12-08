@@ -239,6 +239,15 @@ this.createjs = this.createjs || {};
 	s.VIDEO = "video";
 
 	/**
+	 * The preload type for SpriteSheet files.
+	 * @property SPRITESHEET
+	 * @type {String}
+	 * @default spritesheet
+	 * @static
+	 */
+	s.SPRITESHEET = "spritesheet";
+
+	/**
 	 * The preload type for SVG files.
 	 * @property SVG
 	 * @type {String}
@@ -428,10 +437,10 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Remove all references to this loader.
-	 *
+	 * @method destroy
 	 */
 	p.destroy = function() {
-		if (this._request) {
+		if (this._request && this._request.removeAllEventListeners) {
 			this._request.removeAllEventListeners();
 			this._request.destroy();
 		}
@@ -441,6 +450,8 @@ this.createjs = this.createjs || {};
 		this._item = null;
 		this._rawResult = null;
 		this._result = null;
+
+		this._loadItems = null;
 
 		this.removeAllEventListeners();
 	};
@@ -479,15 +490,13 @@ this.createjs = this.createjs || {};
 		var event = null;
 		if (typeof(value) == "number") {
 			this.progress = value;
-			event = new createjs.ProgressEvent();
-			event.loaded = this.progress;
-			event.total = 1;
+			event = new createjs.ProgressEvent(this.progress);
 		} else {
 			event = value;
 			this.progress = value.loaded / value.total;
+			event.progress = this.progress;
 			if (isNaN(this.progress) || this.progress == Infinity) { this.progress = 0; }
 		}
-		event.progress = this.progress;
 		this.hasEventListener("progress") && this.dispatchEvent(event);
 	};
 
@@ -498,6 +507,8 @@ this.createjs = this.createjs || {};
 	 */
 	p._sendComplete = function () {
 		if (this._isCanceled()) { return; }
+
+		this.loaded = true;
 
 		var event = new createjs.Event("complete");
 		event.rawResult = this._rawResult;
@@ -519,7 +530,7 @@ this.createjs = this.createjs || {};
 	p._sendError = function (event) {
 		if (this._isCanceled() || !this.hasEventListener("error")) { return; }
 		if (event == null) {
-			event = new createjs.Event("error");
+			event = new createjs.ErrorEvent(); // TODO: Populate error
 		}
 		this.dispatchEvent(event);
 	};

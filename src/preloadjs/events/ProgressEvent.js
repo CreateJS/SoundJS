@@ -65,7 +65,7 @@ this.createjs = this.createjs || {};
 		 * @type {Number}
 		 * @default 0
 		 */
-		this.progress = (total == 0) ? 0 : loaded / total;
+		this.progress = (total == 0) ? 0 : this.loaded / this.total;
 	};
 
 	var p = createjs.extend(ProgressEvent, createjs.Event);

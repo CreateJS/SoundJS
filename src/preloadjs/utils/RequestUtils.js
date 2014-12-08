@@ -181,6 +181,44 @@
 	};
 
 	/**
+	 * Utility function to check if item is a valid HTMLImageElement
+	 *
+	 * @param item {object}
+	 * @returns {boolean}
+	 */
+	s.isImageTag = function(item) {
+		return item instanceof HTMLImageElement;
+	};
+
+	/**
+	 * Utility function to check if item is a valid HTMLAudioElement
+	 *
+	 * @param item
+	 * @returns {boolean}
+	 */
+	s.isAudioTag = function(item) {
+		if (window.HTMLAudioElement) {
+			return item instanceof HTMLAudioElement;
+		} else {
+			return false;
+		}
+	};
+
+	/**
+	 * Utility function to check if item is a valid HTMLVideoElement
+	 *
+	 * @param item
+	 * @returns {boolean}
+	 */
+	s.isVideoTag = function(item) {
+		if (window.HTMLVideoElement) {
+			return item instanceof HTMLVideoElement;
+		} else {
+			false;
+		}
+	};
+
+	/**
 	 * Determine if a specific type is a text based asset, and should be loaded as UTF-8.
 	 * @method isText
 	 * @param {String} type The item type.
@@ -215,6 +253,7 @@
 		if (extension == null) {
 			return createjs.AbstractLoader.TEXT;
 		}
+
 		switch (extension.toLowerCase()) {
 			case "jpeg":
 			case "jpg":

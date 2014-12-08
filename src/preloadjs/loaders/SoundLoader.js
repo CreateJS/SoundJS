@@ -42,6 +42,11 @@ this.createjs = this.createjs || {};
 		this.AbstractMediaLoader_constructor(loadItem, preferXHR, createjs.AbstractLoader.SOUND);
 
 		this._tagType = "audio";
+
+		if (createjs.RequestUtils.isAudioTag(loadItem) || createjs.RequestUtils.isAudioTag(loadItem.src)) {
+			this._preferXHR = false;
+			this._tag =createjs.RequestUtils.isAudioTag(loadItem)?loadItem:loadItem.src;
+		}
 	};
 
 	var p = createjs.extend(SoundLoader, createjs.AbstractMediaLoader);

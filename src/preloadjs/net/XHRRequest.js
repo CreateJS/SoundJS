@@ -162,7 +162,7 @@ this.createjs = this.createjs || {};
 		return this._response;
 	};
 
-	// Overrides abstract method in AbstractLoader
+	// Overrides abstract method in AbstractRequest
 	p.cancel = function () {
 		this.canceled = true;
 		this._clean();
@@ -200,8 +200,8 @@ this.createjs = this.createjs || {};
 				this._request.send(createjs.RequestUtils.formatQueryString(this._item.values));
 			}
 		} catch (error) {
-			var event = new createjs.Event("error");
-			event.error = error;
+			var event = new createjs.ErrorEvent("XHR_SEND");
+			//event.error = error; // TODO: Populate error
 			this._sendError(event);
 		}
 	};

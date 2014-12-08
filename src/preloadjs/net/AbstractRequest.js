@@ -23,6 +23,10 @@ this.createjs = this.createjs || {};
 
 	};
 
+	p.cancel = function() {
+
+	};
+
 	createjs.AbstractRequest = createjs.promote(AbstractRequest, "EventDispatcher");
 
 }());
