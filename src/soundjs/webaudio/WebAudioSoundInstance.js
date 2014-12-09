@@ -186,6 +186,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p._addLooping = function() {
+		if (this.playState != createjs.Sound.PLAY_SUCCEEDED) { return; }
 		this._sourceNodeNext = this._createAndPlayAudioNode(this._playbackStartTime, 0);
 	};
 

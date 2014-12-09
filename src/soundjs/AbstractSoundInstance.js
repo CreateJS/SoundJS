@@ -757,13 +757,15 @@ this.createjs = this.createjs || {};
 	 * @since 0.6.0
 	 */
 	p.setLoop = function (value) {
-		// remove looping
-		if (this._loop != 0 && value == 0) {
-			this._removeLooping(value);
-		}
-		// add looping
-		if (this._loop == 0 && value != 0) {
-			this._addLooping(value);
+		if(this._playbackResource != null) {
+			// remove looping
+			if (this._loop != 0 && value == 0) {
+				this._removeLooping(value);
+			}
+			// add looping
+			if (this._loop == 0 && value != 0) {
+				this._addLooping(value);
+			}
 		}
 		this._loop = value;
 	};

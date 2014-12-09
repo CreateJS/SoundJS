@@ -1,5 +1,7 @@
 Version NEXT [Not Released]
 ************************************************************************************************************************
+**   Please note PreloadJS 0.6.0 is only compatible with SoundJS 0.6.0 and later. Earlier versions are incompatible. ***
+************************************************************************************************************************
 CRITICAL (may break existing content):
 - removed preload property from Sound.registerSound and Sound.registerManifest, as it is only used by PreloadJS
 - changed WebAudioPlugin dynamicsCompressorNode and gainNode to be instance level rather than static class level
