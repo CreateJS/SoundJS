@@ -126,17 +126,19 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Defines a POST request, use for a method value when loading data.
-	 *
+	 * @property POST
 	 * @type {string}
+	 * @defaultValue post
 	 */
-	s.POST = 'POST';
+	s.POST = "POST";
 
 	/**
 	 * Defines a GET request, use for a method value when loading data.
-	 *
+	 * @property GET
 	 * @type {string}
+	 * @defaultValue get
 	 */
-	s.GET = 'GET';
+	s.GET = "GET";
 
 	/**
 	 * The preload type for generic binary types. Note that images are loaded as binary files when using XHR.
@@ -144,6 +146,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default binary
 	 * @static
+	 * @since 0.6.0
 	 */
 	s.BINARY = "binary";
 
@@ -154,6 +157,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default css
 	 * @static
+	 * @since 0.6.0
 	 */
 	s.CSS = "css";
 
@@ -163,6 +167,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default image
 	 * @static
+	 * @since 0.6.0
 	 */
 	s.IMAGE = "image";
 
@@ -177,6 +182,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default javascript
 	 * @static
+	 * @since 0.6.0
 	 */
 	s.JAVASCRIPT = "javascript";
 
@@ -189,6 +195,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default json
 	 * @static
+	 * @since 0.6.0
 	 */
 	s.JSON = "json";
 
@@ -201,6 +208,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default jsonp
 	 * @static
+	 * @since 0.6.0
 	 */
 	s.JSONP = "jsonp";
 
@@ -214,7 +222,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default manifest
 	 * @static
-	 * @since 0.4.1
+	 * @since 0.6.0
 	 */
 	s.MANIFEST = "manifest";
 
@@ -225,6 +233,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default sound
 	 * @static
+	 * @since 0.6.0
 	 */
 	s.SOUND = "sound";
 
@@ -235,15 +244,17 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default video
 	 * @static
+	 * @since 0.6.0
 	 */
 	s.VIDEO = "video";
 
 	/**
-	 * The preload type for SpriteSheet files.
+	 * The preload type for SpriteSheet files. SpriteSheet files are JSON files that contain string image paths.
 	 * @property SPRITESHEET
 	 * @type {String}
 	 * @default spritesheet
 	 * @static
+	 * @since 0.6.0
 	 */
 	s.SPRITESHEET = "spritesheet";
 
@@ -253,6 +264,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default svg
 	 * @static
+	 * @since 0.6.0
 	 */
 	s.SVG = "svg";
 
@@ -263,6 +275,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default text
 	 * @static
+	 * @since 0.6.0
 	 */
 	s.TEXT = "text";
 
@@ -272,6 +285,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default xml
 	 * @static
+	 * @since 0.6.0
 	 */
 	s.XML = "xml";
 
@@ -440,7 +454,7 @@ this.createjs = this.createjs || {};
 	 * @method destroy
 	 */
 	p.destroy = function() {
-		if (this._request && this._request.removeAllEventListeners) {
+		if (this._request) {
 			this._request.removeAllEventListeners();
 			this._request.destroy();
 		}

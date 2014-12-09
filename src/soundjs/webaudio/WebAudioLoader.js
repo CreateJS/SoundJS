@@ -48,12 +48,10 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	function Loader(src) {
-		var loaditem = createjs.LoadItem.create(src);
-		this.XHRRequest_constructor(loaditem, true, createjs.AbstractLoader.SOUND);
+		this.AbstractLoader_constructor(src, true, createjs.AbstractLoader.SOUND);
 
-		this._request.responseType = "arraybuffer";
 	};
-	var p = createjs.extend(Loader, createjs.XHRRequest);
+	var p = createjs.extend(Loader, createjs.AbstractLoader);
 
 	/**
 	 * web audio context required for decoding audio
@@ -71,9 +69,14 @@ this.createjs = this.createjs || {};
 
 
 // private methods
-	p._handleLoad = function (event) {
+	p._createRequest = function() {
+		this._request = new createjs.XHRRequest(this._item, false);
+		this._request.setResponseType("arraybuffer");
+	};
+
+	p._sendComplete = function (event) {
 		// OJR we leave this wrapped in Loader because we need to reference src and the handler only receives a single argument, the decodedAudio
-		Loader.context.decodeAudioData(this._request.response,
+		Loader.context.decodeAudioData(this._rawResult,
 	         createjs.proxy(this._handleAudioDecoded, this),
 	         createjs.proxy(this._handleError, this));
 	};
@@ -86,9 +89,9 @@ this.createjs = this.createjs || {};
 	* @protected
 	*/
 	p._handleAudioDecoded = function (decodedAudio) {
-		this._response = decodedAudio;
-		this.XHRRequest__handleLoad();
+		this._result = decodedAudio;
+		this.AbstractLoader__sendComplete();
 	};
 
-	createjs.WebAudioLoader = createjs.promote(Loader, "XHRRequest");
+	createjs.WebAudioLoader = createjs.promote(Loader, "AbstractLoader");
 }());

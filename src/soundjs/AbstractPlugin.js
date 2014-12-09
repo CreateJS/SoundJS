@@ -270,7 +270,7 @@ this.createjs = this.createjs || {};
 	 */
 	p._handlePreloadComplete = function (event) {
 		var src = event.target.getItem().src;
-		this._audioSources[src] = event.target.getResult(false);
+		this._audioSources[src] = event.result;
 		for (var i = 0, l = this._soundInstances[src].length; i < l; i++) {
 			var item = this._soundInstances[src][i];
 			item.setPlaybackResource(this._audioSources[src]);

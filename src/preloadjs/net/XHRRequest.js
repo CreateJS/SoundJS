@@ -116,7 +116,7 @@ this.createjs = this.createjs || {};
 		}
 	};
 
-	var p = createjs.extend(XHRRequest, createjs.AbstractLoader);
+	var p = createjs.extend(XHRRequest, createjs.AbstractRequest);
 
 // static properties
 	/**
@@ -200,9 +200,7 @@ this.createjs = this.createjs || {};
 				this._request.send(createjs.RequestUtils.formatQueryString(this._item.values));
 			}
 		} catch (error) {
-			var event = new createjs.ErrorEvent("XHR_SEND");
-			//event.error = error; // TODO: Populate error
-			this._sendError(event);
+			this.dispatchEvent(new createjs.ErrorEvent("XHR_SEND", null, error));
 		}
 	};
 
@@ -271,7 +269,7 @@ this.createjs = this.createjs || {};
 	 */
 	p._handleLoadStart = function (event) {
 		clearTimeout(this._loadTimeout);
-		this._sendLoadStart();
+		this.dispatchEvent("loadstart");
 	};
 
 	/**
@@ -282,9 +280,7 @@ this.createjs = this.createjs || {};
 	 */
 	p._handleAbort = function (event) {
 		this._clean();
-		var newEvent = new createjs.Event("error");
-		newEvent.text = "XHR_ABORTED";
-		this._sendError(newEvent);
+		this.dispatchEvent(new createjs.ErrorEvent("XHR_ABORTED", null, event));
 	};
 
 	/**
@@ -295,10 +291,9 @@ this.createjs = this.createjs || {};
 	 */
 	p._handleError = function (event) {
 		this._clean();
-		var newEvent = new createjs.Event("error");
-		newEvent.error = event;
 
-		this._sendError(newEvent);
+
+		this.dispatchEvent(new createjs.ErrorEvent(null, null, event));
 	};
 
 	/**
@@ -327,15 +322,16 @@ this.createjs = this.createjs || {};
 		}
 		this.loaded = true;
 
-		if (!this._checkError()) {
-			this._handleError();
+		var error = this._checkError();
+		if (error) {
+			this._handleError(error);
 			return;
 		}
 
 		this._response = this._getResponse();
 		this._clean();
 
-		this._sendComplete();
+		this.dispatchEvent(new createjs.Event("complete"));
 	};
 
 	/**
@@ -347,11 +343,8 @@ this.createjs = this.createjs || {};
 	 */
 	p._handleTimeout = function (event) {
 		this._clean();
-		var newEvent = new createjs.Event("error");
-		newEvent.text = "PRELOAD_TIMEOUT";
-		newEvent.error = event;
 
-		this._sendError(event);
+		this.dispatchEvent(new createjs.ErrorEvent("PRELOAD_TIMEOUT", null, event));
 	};
 
 // Protected
@@ -359,7 +352,7 @@ this.createjs = this.createjs || {};
 	 * Determine if there is an error in the current load. This checks the status of the request for problem codes. Note
 	 * that this does not check for an actual response. Currently, it only checks for 404 or 0 error code.
 	 * @method _checkError
-	 * @return {Boolean} If the request status returns an error code.
+	 * @return {int} If the request status returns an error code.
 	 * @private
 	 */
 	p._checkError = function () {
@@ -369,9 +362,9 @@ this.createjs = this.createjs || {};
 		switch (status) {
 			case 404:   // Not Found
 			case 0:     // Not Loaded
-				return false;
+				return new Error(status);
 		}
-		return true;
+		return null;
 	};
 
 	/**
