@@ -11,6 +11,7 @@
 		"../src/createjs/events/EventDispatcher.js",
 		"../src/createjs/events/Event.js",
 
+		"../src/createjs/events/ErrorEvent.js",
 		"../src/preloadjs/events/ProgressEvent.js",
 		"../src/preloadjs/data/LoadItem.js",
 		"../src/preloadjs/utils/RequestUtils.js",
