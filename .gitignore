@@ -15,3 +15,4 @@ docs/**/
 # (for cross OS compatibility)
 #-----------------------------
 *[\<\>\:\"\/\\\|\?\*]*
+**/.sass-cache/
