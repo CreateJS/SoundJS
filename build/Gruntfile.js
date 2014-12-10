@@ -171,7 +171,7 @@ module.exports = function (grunt) {
 							sourcemap:"none"
 						},
 						files: {
-							'createjsTheme/assets/css/main.css': 'createjsTheme/assets/css/scss/main.scss'
+							'createjsTheme/assets/css/main.css': 'createjsTheme/assets/scss/main.scss'
 						}
 					}
 				}
