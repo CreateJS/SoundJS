@@ -127,19 +127,19 @@ this.createjs = this.createjs || {};
 	 * Note all plugins provide a <code>Loader</code> instance, which <a href="http://preloadjs.com" target="_blank">PreloadJS</a>
 	 * can use to assist with preloading.
 	 * @method register
-	 * @param {String} src The source of the audio
+	 * @param {String} loadItem An Object containing the source of the audio
 	 * @param {Number} instances The number of concurrently playing instances to allow for the channel at any time.
 	 * Note that not every plugin will manage this value.
 	 * @return {Object} A result object, containing a "tag" for preloading purposes.
 	 */
-	p.register = function (src, instances) {
-		this._audioSources[src] = true;
-		this._soundInstances[src] = [];
-		if(this._loaders[src]) {return this._loaders[src];}	// already loading/loaded this, so don't load twice
+	p.register = function (loadItem, instances) {
+		this._audioSources[loadItem.src] = true;
+		this._soundInstances[loadItem.src] = [];
+		if(this._loaders[loadItem.src]) {return this._loaders[loadItem.src];}	// already loading/loaded this, so don't load twice
 		// OJR potential issue that we won't be firing loaded event, might need to trigger if this is already loaded?
-		var loader = new this._loaderClass(src);
+		var loader = new this._loaderClass(loadItem);
 		loader.on("complete", createjs.proxy(this._handlePreloadComplete, this));
-		this._loaders[src] = loader;
+		this._loaders[loadItem.src] = loader;
 		return loader;
 	};
 

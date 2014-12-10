@@ -73,14 +73,24 @@ this.createjs = this.createjs || {};
 		 * @private
 		 */
 		this._loadedHandler = createjs.proxy(this._handleTagComplete, this);
+
+		/**
+		 * Determines if the element was added to the DOM automatically by PreloadJS, so it can be cleaned up after.
+		 * @property _addedToDOM
+		 * @type {Boolean}
+		 * @private
+		 */
+		this._addedToDOM = false;
 	};
 
 	var p = createjs.extend(TagRequest, createjs.AbstractRequest);
-	var s = TagRequest;
 
 	// public methods
 	p.load = function () {
-		window.document.body.appendChild(this._tag);
+		if (this._tag.parentNode == null) {
+			window.document.body.appendChild(this._tag);
+			this._addedToDOM = true;
+		}
 
 		this._tag.onload = createjs.proxy(this._handleTagComplete, this);
 		this._tag.onreadystatechange = createjs.proxy(this._handleReadyStateChange, this);
@@ -97,7 +107,7 @@ this.createjs = this.createjs || {};
 		this._clean();
 		this._tag = null;
 
-		this.AbstractRequest_destory();
+		this.AbstractRequest_destroy();
 	};
 
 	// private methods
@@ -140,6 +150,9 @@ this.createjs = this.createjs || {};
 	p._clean = function() {
 		this._tag.onload = null;
 		this._tag.onreadystatechange = null;
+		if (this._addedToDOM && this._tag.parentNode != null) {
+			this._tag.parentNode.removeChild(this._tag);
+		}
 	};
 
 	/**

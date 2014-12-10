@@ -724,36 +724,20 @@ this.createjs = this.createjs || {};
 	 * Process manifest items from <a href="http://preloadjs.com" target="_blank">PreloadJS</a>. This method is intended
 	 * for usage by a plugin, and not for direct interaction.
 	 * @method initLoad
-	 * @param {String | Object} src The src or object to load. This is usually a string path, but can also be an
-	 * HTMLAudioElement or similar audio playback object.
-	 * @param {String} [type] The type of object. Will likely be "sound" or null.
-	 * @param {String} [id] An optional user-specified id that is used to play sounds.
-	 * @param {Number|String|Boolean|Object} [data] Data associated with the item. Sound uses the data parameter as the
-	 * number of channels for an audio instance, however a "channels" property can be appended to the data object if
-	 * this property is used for other information. The audio channels will set a default based on plugin if no value is found.
-	 * @return {Boolean|Object} An object with the modified values of those that were passed in, or false if the active
-	 * plugin can not play the audio type.
+	 * @param {Object} src The object to load.
+	 * @return {Object|AbstractLoader} An instance of AbstractLoader.
 	 * @protected
 	 * @static
 	 */
-	s.initLoad = function (src, type, id, data) {
-		return s._registerSound(src, id, data);
+	s.initLoad = function (loadItem) {
+		return s._registerSound(loadItem);
 	};
 
 	/**
 	 * Internal method for loading sounds.  This should not be called directly.
 	 *
 	 * @method _registerSound
-	 * @param {String | Object} src The source to load.
-	 * @param {String} [id] An id specified by the user to play the sound later.
-	 * @param {Number | Object} [data] Data associated with the item. Sound uses the data parameter as the number of
-	 * channels for an audio instance, however a "channels" property can be appended to the data object if it is used
-	 * for other information. The audio channels will set a default based on plugin if no value is found.
-	 * Sound also uses the data property to hold an audioSprite array of objects in the following format {id, startTime, duration}.<br/>
-	 *   id used to play the sound later, in the same manner as a sound src with an id.<br/>
-	 *   startTime is the initial offset to start playback and loop from, in milliseconds.<br/>
-	 *   duration is the amount of time to play the clip for, in milliseconds.<br/>
-	 * This allows Sound to support audio sprites that are played back by id.
+	 * @param {Object} src The object to load, containing src property and optionally containing id and data.
 	 * @return {Object} An object with the modified values that were passed in, which defines the sound.
 	 * Returns false if the source cannot be parsed or no plugins can be initialized.
 	 * Returns true if the source is already loaded.
@@ -762,15 +746,15 @@ this.createjs = this.createjs || {};
 	 * @since 0.6.0
 	 */
 
-	s._registerSound = function (src, id, data) {
+	s._registerSound = function (loadItem) {
 		if (!s.initializeDefaultPlugins()) {return false;}
 
-		var details = s._parsePath(src);
+		var details = s._parsePath(loadItem.src);
 		if (details == null) {return false;}
-		details.type = "sound";
-		details.id = id;
-		details.data = data;
+		loadItem.src = details.src;
+		loadItem.type = "sound";
 
+		var data = loadItem.data;
 		var numChannels = s.activePlugin.defaultNumChannels || null;
 		if (data != null) {
 			if (!isNaN(data.channels)) {
@@ -783,27 +767,26 @@ this.createjs = this.createjs || {};
 				var sp;
 				for(var i = data.audioSprite.length; i--; ) {
 					sp = data.audioSprite[i];
-					s._idHash[sp.id] = {src: details.src, startTime: parseInt(sp.startTime), duration: parseInt(sp.duration)};
+					s._idHash[sp.id] = {src: loadItem.src, startTime: parseInt(sp.startTime), duration: parseInt(sp.duration)};
 				}
 			}
 		}
-		if (id != null) {s._idHash[id] = {src: details.src}};
-		var loader = s.activePlugin.register(details.src, numChannels);  // Note only HTML audio uses numChannels
+		if (loadItem.id != null) {s._idHash[loadItem.id] = {src: loadItem.src}};
+		var loader = s.activePlugin.register(loadItem, numChannels);  // Note only HTML audio uses numChannels
 
-		SoundChannel.create(details.src, numChannels);
+		SoundChannel.create(loadItem.src, numChannels);
 
 		// return the number of instances to the user.  This will also be returned in the load event.
 		if (data == null || !isNaN(data)) {
-			details.data = numChannels || SoundChannel.maxPerChannel();
+			loadItem.data = numChannels || SoundChannel.maxPerChannel();
 		} else {
-			details.data.channels = numChannels || SoundChannel.maxPerChannel();
+			loadItem.data.channels = numChannels || SoundChannel.maxPerChannel();
 		}
 
-		details.loader = loader;
-		if (loader.onload) {details.completeHandler = loader.onload;}	// used by preloadJS
-		if (loader.type) {details.type = loader.type;}
+		//if (loader.onload) {details.completeHandler = loader.onload;}	// used by preloadJS
+		if (loader.type) {loadItem.type = loader.type;}
 
-		return details;
+		return loader;
 	};
 
 	/**
@@ -835,31 +818,30 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.0
 	 */
 	s.registerSound = function (src, id, data, basePath) {
+		var loadItem = {src: src, id: id, data:data};
 		if (src instanceof Object) {
 			basePath = id;
-			id = src.id;
-			data = src.data;
-			src = src.src;
+			loadItem = src;
 		}
+		loadItem = createjs.LoadItem.create(loadItem);
 
-		if (basePath != null) {src = basePath + src;}
+		if (basePath != null) {loadItem.src = basePath + src;}
 
-		var details = s._registerSound(src, id, data);
-		if(!details) {return false;}
+		var loader = s._registerSound(loadItem);
+		if(!loader) {return false;}
 
-		if (!s._preloadHash[details.src]) {	s._preloadHash[details.src] = [];}
-		s._preloadHash[details.src].push({src:src, id:id, data:details.data});
-		if (s._preloadHash[details.src].length == 1) {
+		if (!s._preloadHash[loadItem.src]) { s._preloadHash[loadItem.src] = [];}
+		s._preloadHash[loadItem.src].push(loadItem);
+		if (s._preloadHash[loadItem.src].length == 1) {
 			// OJR note this will disallow reloading a sound if loading fails or the source changes
-			var loader = details.loader;
 			loader.on("complete", createjs.proxy(this._handleLoadComplete, this));
 			loader.on("error", createjs.proxy(this._handleLoadError, this));
-			s.activePlugin.preload(details.loader);
+			s.activePlugin.preload(loader);
 		} else {
-			if (s._preloadHash[details.src][0] == true) {return true;}
+			if (s._preloadHash[loadItem.src][0] == true) {return true;}
 		}
 
-		return details;
+		return loadItem;
 	};
 
 	/**

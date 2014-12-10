@@ -42,13 +42,13 @@ this.createjs = this.createjs || {};
 	 * the preloader, and the load method is called when the asset needs to be requested.
 	 *
 	 * @class WebAudioLoader
-	 * @param {String} src The path to the sound
+	 * @param {String} loadItem The item to be loaded
 	 * @param {Object} flash The flash instance that will do the preloading.
 	 * @extends XHRRequest
 	 * @protected
 	 */
-	function Loader(src) {
-		this.AbstractLoader_constructor(src, true, createjs.AbstractLoader.SOUND);
+	function Loader(loadItem) {
+		this.AbstractLoader_constructor(loadItem, true, createjs.AbstractLoader.SOUND);
 
 	};
 	var p = createjs.extend(Loader, createjs.AbstractLoader);

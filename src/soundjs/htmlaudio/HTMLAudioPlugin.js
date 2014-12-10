@@ -251,15 +251,15 @@ this.createjs = this.createjs || {};
 
 
 // public methods
-	p.register = function (src, instances) {
-		var channel = createjs.HTMLAudioTagPool.get(src);
+	p.register = function (loadItem, instances) {
+		var channel = createjs.HTMLAudioTagPool.get(loadItem.src);
 		var tag = null;
 		for (var i = 0; i < instances; i++) {
-			tag = this._createTag(src);
+			tag = this._createTag(loadItem.src);
 			channel.add(tag);
 		}
 
-		var loader = this.AbstractPlugin_register(src, instances);
+		var loader = this.AbstractPlugin_register(loadItem, instances);
 		loader.setTag(tag);
 
 		return loader;

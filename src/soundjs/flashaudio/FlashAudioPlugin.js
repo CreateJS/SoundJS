@@ -150,7 +150,7 @@ this.createjs = this.createjs || {};
 		 * @protected
 		 */
 		this._flashPreloadInstances = {};
-		//TODO consider combining _flashInstances and _flashPreloadInstances into a single has
+		//TODO consider combining _flashInstances and _flashPreloadInstances into a single hash
 
 		// TODO remove _queuedInstances
 		/**
