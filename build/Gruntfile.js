@@ -109,6 +109,12 @@ module.exports = function (grunt) {
 					}
 				},
 
+				clean: {
+				  docs: {
+				    src: ["<%= docsFolder %>/assets/scss"]
+				  }
+				},
+
 				copy: {
 					docsZip: {
 						files: [
@@ -154,6 +160,18 @@ module.exports = function (grunt) {
 					sound: {
 						files: {
 							'../src/soundjs/flashaudio/FlashAudioPlugin.swf': ['../dev/com/createjs/soundjs/FlashAudioPlugin.as']
+						}
+					}
+				},
+
+				sass: {
+					docs: {
+						options: {
+							style: 'compressed',
+							sourcemap:"none"
+						},
+						files: {
+							'createjsTheme/assets/css/main.css': 'createjsTheme/assets/css/scss/main.scss'
 						}
 					}
 				}
@@ -232,6 +250,8 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-compress');
 	grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.loadNpmTasks('grunt-mxmlc');
+	grunt.loadNpmTasks('grunt-contrib-sass');
+	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadTasks('tasks/');
 
 	grunt.registerTask('exportScriptTags', function() {
@@ -262,7 +282,7 @@ module.exports = function (grunt) {
 	 * Build the docs using YUIdocs.
 	 */
 	grunt.registerTask('docs', [
-		"setDocsBase", "yuidoc", "resetBase", "compress", "copy:docsZip"
+		"sass", "setDocsBase", "yuidoc", "resetBase", "clean:docs", "compress", "copy:docsZip"
 	]);
 
 	/**

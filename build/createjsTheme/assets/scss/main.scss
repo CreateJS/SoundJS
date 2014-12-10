@@ -17,18 +17,18 @@
 //
 //*******************************************
 // UTILITIES
-@import "utilities/breakpoint.scss";
-@import "utilities/clearfix.scss";
+@import "utilities/breakpoint";
+@import "utilities/clearfix";
 
 // SETTINGS
-@import "settings/breakpoint.scss";
-@import "settings/color.scss";
-@import "settings/fonts.scss";
-@import "settings/layout.scss";
-@import "settings/path.scss";
+@import "settings/breakpoint";
+@import "settings/color";
+@import "settings/fonts";
+@import "settings/layout";
+@import "settings/path";
 
 // ELEMENTS
-@import "elements/tags.scss";
+@import "elements/tags";
 
 
 
@@ -67,7 +67,7 @@ body {
   margin: 0;
   padding: 0;
 }
- 
+
 
 /* -- Links ----------------------------------------------------------------- */
 h1 a {
@@ -312,7 +312,7 @@ th {
 }
 .header {
   padding: 1em 0 0 0 !important;
-  background-color: $color_gray-dark; 
+  background-color: $color_gray-dark;
   a:hover {
     background: transparent;
   }
@@ -880,7 +880,7 @@ ol.linenums {
   .file-line {
     position: relative;
     z-index: 2;
-    color:$color_gray-darkest; 
+    color:$color_gray-darkest;
   }
 }
 
