@@ -27,6 +27,10 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @module PreloadJS
+ */
+
 // namespace:
 this.createjs = this.createjs || {};
 
@@ -35,24 +39,27 @@ this.createjs = this.createjs || {};
 
 	// constructor
 	/**
-	 * The TagRequest class description goes here.
-	 *
+	 * An {{#crossLink "TagRequest"}}{{/crossLink}} that loads HTML tags for video and audio.
+	 * @class MediaTagRequest
+	 * @param {LoadItem} loadItem
+	 * @param {Boolean} preferXHR
+	 * @param {HTMLAudioElement|HTMLVideoElement} tag
+	 * @param {String} srcAttribute The tag attribute that specifies the source, such as "src", "href", etc.
+	 * @constructor
 	 */
 	function MediaTagRequest(loadItem, preferXHR, tag, srcAttribute) {
 		this.AbstractRequest_constructor(loadItem, preferXHR);
 
-		// public properties
-
 		// protected properties
 		this._tag = tag;
 		this._tagSrcAttribute = srcAttribute;
-
 		this._loadedHandler = createjs.proxy(this._handleTagComplete, this);
 	};
 
 	var p = createjs.extend(MediaTagRequest, createjs.TagRequest);
 	var s = MediaTagRequest;
 
+	// public methods
 	p.load = function () {
 		this._tag.onstalled = createjs.proxy(this._handleStalled, this);
 		this._tag.onprogress = createjs.proxy(this._handleProgress, this);
@@ -64,12 +71,7 @@ this.createjs = this.createjs || {};
 		this.TagRequest_load();
 	};
 
-	/**
-	 * Handle the readyStateChange event from a tag. We sometimes need this in place of the onload event (mainly SCRIPT
-	 * and LINK tags), but other cases may exist.
-	 * @method _handleReadyStateChange
-	 * @private
-	 */
+	// private methods
 	p._handleReadyStateChange = function () {
 		clearTimeout(this._loadTimeout);
 		// This is strictly for tags in browsers that do not support onload.
@@ -81,18 +83,12 @@ this.createjs = this.createjs || {};
 		}
 	};
 
-	/**
-	 * Handle a stalled audio event. The main place we seem to get these is with HTMLAudio in Chrome when we try and
-	 * playback audio that is already in a load, but not complete.
-	 * @method _handleStalled
-	 * @private
-	 */
 	p._handleStalled = function () {
 		//Ignore, let the timeout take care of it. Sometimes its not really stopped.
 	};
 
 	/**
-	 * The XHR request has reported progress.
+	 * An XHR request has reported progress.
 	 * @method _handleProgress
 	 * @param {Object} event The XHR progress event.
 	 * @private
@@ -106,10 +102,7 @@ this.createjs = this.createjs || {};
 		this.dispatchEvent(newEvent);
 	};
 
-	/**
-	 *
-	 * @private
-	 */
+	// protected methods
 	p._clean = function () {
 		this._tag.removeEventListener && this._tag.removeEventListener("canplaythrough", this._loadedHandler);
 		this._tag.onstalled = null;

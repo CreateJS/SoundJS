@@ -31,7 +31,6 @@
  * @module PreloadJS
  */
 
-
 // namespace:
 this.createjs = this.createjs || {};
 
@@ -39,111 +38,130 @@ this.createjs = this.createjs || {};
 	"use strict";
 
 	/**
+	 * All loaders accept an item containing the properties defined in this class. If a raw object is passed instead,
+	 * it will not be affected, but it must contain at least a {{#crossLink "src:property"}}{{/crossLink}} property. A
+	 * string path or HTML tag is also acceptable, but it will be automatically converted to a LoadItem using the
+	 * {{#crossLink "create"}}{{/crossLink}} method by {{#crossLink "AbstractLoader"}}{{/crossLink}}
 	 * @class LoadItem
-	 *
 	 * @constructor
+	 * @since 0.6.0
 	 */
 	function LoadItem() {
 		/**
-		 * The source of the file that is being loaded. This property is <b>required</b>. The source can
-		 * either be a string (recommended), or an HTML tag.</li>
-		 *
-		 * @type {null}
+		 * The source of the file that is being loaded. This property is <b>required</b>. The source can either be a
+		 * string (recommended), or an HTML tag.</li>
+		 * @property src
+		 * @type {String}
+		 * @default null
 		 */
 		this.src = null;
 
 		/**
-		 * The source of the file that is being loaded. This property is <b>required</b>. The source can
-		 * either be a string (recommended), or an HTML tag.
-		 *
-		 * Check {{#crossLink "DataTypes"}}DataTypes{{/crossLink}} for the full list of supported types.
-		 *
-		 * @type {String|HTMLMediaElement|HTMLImageElement|HTMLLinkElement}
+		 * The source of the file that is being loaded. This property is <strong>required</strong>. The source can
+		 * either be a string (recommended), or an HTML tag. See the {{#crossLink "AbstractLoader"}}{{/crossLink}}
+		 * class for the full list of supported types.
+		 * @property type
+		 * @type {String}
+		 * @default null
 		 */
-		this.type = createjs.AbstractLoader.TEXT;
+		this.type = null;
 
 		/**
-		 * A string identifier which can be used to reference the loaded object.
-		 *
-		 * @type {String|Number}
+		 * A string identifier which can be used to reference the loaded object. If none is provided, this will be
+		 * automatically set to the {{#crossLink "src:property"}}{{/crossLink}}.
+		 * @property id
+		 * @type {String}
+		 * @default null
 		 */
 		this.id = null;
 
 		/**
-		 * Set to `true` to ensure this asset loads in the order defined in the manifest. This
-		 * will happen when the max connections has been set above 1 (using {{#crossLink "LoadQueue/setMaxConnections"}}{{/crossLink}}),
-		 * and will only affect other assets also defined as `maintainOrder`. Everything else will finish as it is
-		 * loaded. Ordered items are combined with script tags loading in order when {{#crossLink "LoadQueue/maintainScriptOrder:property"}}{{/crossLink}}
-		 * is set to `true`.
-		 *
-		 * @type {boolean}
+		 * Determines if a manifest will maintain the order of this item, in relation to other items in the manifest
+		 * that have also set the `maintainOrder` property to `true`. This only applies when the max connections has
+		 * been set above 1 (using {{#crossLink "LoadQueue/setMaxConnections"}}{{/crossLink}}). Everything with this
+		 * property set to `false` will finish as it is loaded. Ordered items are combined with script tags loading in
+		 * order when {{#crossLink "LoadQueue/maintainScriptOrder:property"}}{{/crossLink}} is set to `true`.
+		 * @property maintainOrder
+		 * @type {Boolean}
+		 * @default false
 		 */
 		this.maintainOrder = false;
 
 		/**
-		 * Optional, used for JSONP requests, to define what method to call when the JSONP is loaded.
-		 *
+		 * A callback used by JSONP requests that defines what global method to call when the JSONP content is loaded.
+		 * @property callback
 		 * @type {String}
+		 * @default null
 		 */
 		this.callback = null;
 
 		/**
-		 * An arbitrary data object, which is included with the loaded object
-		 *
+		 * An arbitrary data object, which is included with the loaded object.
+		 * @property data
 		 * @type {Object}
+		 * @default null
 		 */
 		this.data = null;
 
 		/**
-		 * uUsed to define if this request uses GET or POST when sending data to the server. The default value is "GET"
-		 *
+		 * The request method used for HTTP calls. Both {{#crossLink "AbstractLoader/GET:property"}}{{/crossLink}} or
+		 * {{#crossLink "AbstractLoader/POST:property"}}{{/crossLink}} request types are supported, and are defined as
+		 * constants on {{#crossLink "AbstractLoader"}}{{/crossLink}}.
+		 * @property method
 		 * @type {String}
+		 * @default get
 		 */
 		this.method = createjs.LoadItem.GET;
 
 		/**
-		 * Optional object of name/value pairs to send to the server.
-		 *
+		 * An object hash of name/value pairs to send to the server.
+		 * @property values
 		 * @type {Object}
+		 * @default null
 		 */
 		this.values = null;
 
 		/**
-		 * Optional object hash of headers to attach to an XHR request. PreloadJS will automatically
-		 * attach some default headers when required, including Origin, Content-Type, and X-Requested-With. You may
-		 * override the default headers if needed.
-		 *
+		 * An object hash of headers to attach to an XHR request. PreloadJS will automatically attach some default
+		 * headers when required, including "Origin", "Content-Type", and "X-Requested-With". You may override the
+		 * default headers by including them in your headers object.
+		 * @property headers
 		 * @type {Object}
+		 * @default null
 		 */
 		this.headers = null;
 
 		/**
-		 * Default false; Set to true if you need to enable credentials for XHR requests.
-		 *
-		 * @type {boolean}
+		 * Enable credentials for XHR requests.
+		 * @property withCredentials
+		 * @type {Boolean}
+		 * @default false
 		 */
 		this.withCredentials = false;
 
 		/**
-		 * String, Default for text bases files (json, xml, text, css, js) "text/plain; charset=utf-8"; Sets the mime type of XHR.
-		 *
+		 * Set the mime type of XHR-based requests. This is automatically set to "text/plain; charset=utf-8" for text
+		 * based files (json, xml, text, css, js).
+		 * @property mimeType
 		 * @type {String}
+		 * @default null
 		 */
 		this.mimeType = null;
 
 		/**
-		 * Sets the crossorigin attribute on images.
-		 *
-		 * @default Anonymous
-		 *
+		 * Sets the crossOrigin attribute for CORS-enabled images loading cross-domain.
+		 * @property crossOrigin
 		 * @type {boolean}
+		 * @default Anonymous
 		 */
 		this.crossOrigin = "Anonymous";
 
 		/**
-		 * how long before we stop a request.  Only applies to Tag loading and XHR level one loading.
-		 *
-		 * @type {number}
+		 * The duration in milliseconds to wait before a request times out. This only applies to tag-based and and XHR
+		 * (level one) loading, as XHR (level 2) provides its own timeout event.
+		 * @property loadTimeout
+		 * @type {Number}
+		 * @default 8000 (8 seconds)
 		 */
 		this.loadTimeout = 8000;
 	};
@@ -151,6 +169,18 @@ this.createjs = this.createjs || {};
 	var p = LoadItem.prototype = {};
 	var s = LoadItem;
 
+	/**
+	 * Create/validate a LoadItem.
+	 * <ul>
+	 *     <li>String-based items are converted to a LoadItem with a populated {{#crossLink "src:property"}}{{/crossLink}}.</li>
+	 *     <li>LoadItem instances are returned as-is</li>
+	 *     <li>Objectss are returned as-is</li>
+	 * </ul>
+	 * @method create
+	 * @param {LoadItem|String|Object} value The load item value
+	 * @returns {Object|LoadItem}
+	 * @static
+	 */
 	s.create = function (value) {
 		if (typeof value == "string") {
 			var item = new LoadItem();
@@ -159,6 +189,7 @@ this.createjs = this.createjs || {};
 		} else if (value instanceof s) {
 			return value;
 		} else if (value instanceof Object) { // Don't modify object, allows users to attach random data to the item.
+			// TODO: Disallow objects with no src?
 			return value;
 		} else {
 			throw new Error("Type not recognized.");

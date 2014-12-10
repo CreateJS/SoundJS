@@ -37,7 +37,7 @@ this.createjs = this.createjs||{};
 	"use strict";
 
 	/**
-	 * A general error event, which describes an error that occurred, as well as any details.
+	 * A general error {{#crossLink "Event"}}{{/crossLink}}, that describes an error that occurred, as well as any details.
 	 * @class ErrorEvent
 	 * @param {String} [title] The error title
 	 * @param {String} [message] The error description

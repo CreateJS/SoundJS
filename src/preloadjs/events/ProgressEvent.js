@@ -1,5 +1,5 @@
 /*
- * ManifestLoader
+ * ProgressEvent
  * Visit http://createjs.com/ for documentation, updates and examples.
  *
  *
@@ -27,18 +27,24 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @module PreloadJS
+ */
+
 // namespace:
 this.createjs = this.createjs || {};
 
 (function (scope) {
 	"use strict";
 
+	// constructor
 	/**
-	 * A createjs Event that is dispatched when progress changes.
+	 * A createjs {{#crossLink "Event"}}{{/crossLink}} that is dispatched when progress changes.
 	 * @class ProgressEvent
 	 * @param {Number} loaded The amount that has been loaded. This can be any number relative to the total.
 	 * @param {Number} [total] The total amount that will load. This will default to 0, so does not need to be passed in,
 	 * as long as the loaded value is a progress value (between 0 and 1).
+	 * @todo Consider having this event be a "fileprogress" event as well
 	 * @constructor
 	 */
 	function ProgressEvent(loaded, total) {

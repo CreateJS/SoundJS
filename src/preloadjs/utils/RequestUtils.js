@@ -1,22 +1,57 @@
+/*
+ * RequestUtils
+ * Visit http://createjs.com/ for documentation, updates and examples.
+ *
+ *
+ * Copyright (c) 2012 gskinner.com, inc.
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+/**
+ * @module PreloadJS
+ */
+
 (function () {
 
+	/**
+	 * Utilities that assist with parsing load items, and determining file types, etc.
+	 * @class RequestUtils
+	 */
 	var s = {};
 
 	/**
 	 * The Regular Expression used to test file URLS for an absolute path.
 	 * @property ABSOLUTE_PATH
-	 * @static
 	 * @type {RegExp}
-	 * @since 0.4.2
+	 * @static
 	 */
 	s.ABSOLUTE_PATT = /^(?:\w+:)?\/{2}/i;
 
 	/**
 	 * The Regular Expression used to test file URLS for an absolute path.
 	 * @property RELATIVE_PATH
-	 * @static
 	 * @type {RegExp}
-	 * @since 0.4.2
+	 * @static
 	 */
 	s.RELATIVE_PATT = (/^[./]*?\//i);
 
@@ -24,14 +59,12 @@
 	 * The Regular Expression used to test file URLS for an extension. Note that URIs must already have the query string
 	 * removed.
 	 * @property EXTENSION_PATT
-	 * @static
 	 * @type {RegExp}
-	 * @since 0.4.2
+	 * @static
 	 */
 	s.EXTENSION_PATT = /\/?[^/]+\.(\w{1,5})$/i;
 
 	/**
-	 * @method _parseURI
 	 * Parse a file path to determine the information we need to work with it. Currently, PreloadJS needs to know:
 	 * <ul>
 	 *     <li>If the path is absolute. Absolute paths start with a protocol (such as `http://`, `file://`, or
@@ -40,14 +73,11 @@
 	 *     <li>The file extension. This is determined by the filename with an extension. Query strings are dropped, and
 	 *     the file path is expected to follow the format `name.ext`.</li>
 	 * </ul>
-	 *
-	 * <strong>Note:</strong> This has changed from earlier versions, which used a single, complicated Regular Expression, which
-	 * was difficult to maintain, and over-aggressive in determining all file properties. It has been simplified to
-	 * only pull out what it needs.
-	 * @param path
-	 * @returns {Object} An Object with an `absolute` and `relative` Boolean, as well as an optional 'extension` String
+	 * @method parseURI
+	 * @param {String} path
+	 * @returns {Object} An Object with an `absolute` and `relative` Boolean values, as well as an optional 'extension`
 	 * property, which is the lowercase extension.
-	 * @private
+	 * @static
 	 */
 	s.parseURI = function (path) {
 		var info = {absolute: false, relative: false};
@@ -78,10 +108,10 @@
 
 	/**
 	 * Formats an object into a query string for either a POST or GET request.
-	 * @method _formatQueryString
+	 * @method formatQueryString
 	 * @param {Object} data The data to convert to a query string.
 	 * @param {Array} [query] Existing name/value pairs to append on to this query.
-	 * @private
+	 * @static
 	 */
 	s.formatQueryString = function (data, query) {
 		if (data == null) {
@@ -98,14 +128,13 @@
 	};
 
 	/**
-	 * A utility method that builds a file path using a source and a data object, and formats it into a new path. All
-	 * of the loaders in PreloadJS use this method to compile paths when loading.
+	 * A utility method that builds a file path using a source and a data object, and formats it into a new path.
 	 * @method buildPath
 	 * @param {String} src The source path to add values to.
 	 * @param {Object} [data] Object used to append values to this request as a query string. Existing parameters on the
 	 * path will be preserved.
 	 * @returns {string} A formatted string that contains the path and the supplied parameters.
-	 * @since 0.3.1
+	 * @static
 	 */
 	s.buildPath = function (src, data) {
 		if (data == null) {
@@ -128,10 +157,10 @@
 	};
 
 	/**
-	 * @method _isCrossDomain
-	 * @param {Object} item A load item with a `src` property
+	 * @method isCrossDomain
+	 * @param {LoadItem|Object} item A load item with a `src` property.
 	 * @return {Boolean} If the load item is loading from a different domain than the current location.
-	 * @private
+	 * @static
 	 */
 	s.isCrossDomain = function (item) {
 		var target = document.createElement("a");
@@ -148,11 +177,11 @@
 	};
 
 	/**
-	 * @method _isLocal
-	 * @param {Object} item A load item with a `src` property
+	 * @method isLocal
+	 * @param {LoadItem|Object} item A load item with a `src` property
 	 * @return {Boolean} If the load item is loading from the "file:" protocol. Assume that the host must be local as
 	 * well.
-	 * @private
+	 * @static
 	 */
 	s.isLocal = function (item) {
 		var target = document.createElement("a");
@@ -164,11 +193,12 @@
 	 * Determine if a specific type should be loaded as a binary file. Currently, only images and items marked
 	 * specifically as "binary" are loaded as binary. Note that audio is <b>not</b> a binary type, as we can not play
 	 * back using an audio tag if it is loaded as binary. Plugins can change the item type to binary to ensure they get
-	 * a binary result to work with. Binary files are loaded using XHR2.
+	 * a binary result to work with. Binary files are loaded using XHR2. Types are defined as static constants on
+	 * {{#crossLink "AbstractLoader"}}{{/crossLink}}.
 	 * @method isBinary
 	 * @param {String} type The item type.
 	 * @return {Boolean} If the specified type is binary.
-	 * @private
+	 * @static
 	 */
 	s.isBinary = function (type) {
 		switch (type) {
@@ -181,20 +211,22 @@
 	};
 
 	/**
-	 * Utility function to check if item is a valid HTMLImageElement
-	 *
-	 * @param item {object}
-	 * @returns {boolean}
+	 * Check if item is a valid HTMLImageElement
+	 * @method isImageTag
+	 * @param {Object} item
+	 * @returns {Boolean}
+	 * @static
 	 */
 	s.isImageTag = function(item) {
 		return item instanceof HTMLImageElement;
 	};
 
 	/**
-	 * Utility function to check if item is a valid HTMLAudioElement
-	 *
-	 * @param item
-	 * @returns {boolean}
+	 * Check if item is a valid HTMLAudioElement
+	 * @method isAudioTag
+	 * @param {Object} item
+	 * @returns {Boolean}
+	 * @static
 	 */
 	s.isAudioTag = function(item) {
 		if (window.HTMLAudioElement) {
@@ -205,10 +237,11 @@
 	};
 
 	/**
-	 * Utility function to check if item is a valid HTMLVideoElement
-	 *
-	 * @param item
-	 * @returns {boolean}
+	 * Check if item is a valid HTMLVideoElement
+	 * @method isVideoTag
+	 * @param {Objectitem
+	 * @returns {Boolean}
+	 * @static
 	 */
 	s.isVideoTag = function(item) {
 		if (window.HTMLVideoElement) {
@@ -219,11 +252,11 @@
 	};
 
 	/**
-	 * Determine if a specific type is a text based asset, and should be loaded as UTF-8.
+	 * Determine if a specific type is a text-based asset, and should be loaded as UTF-8.
 	 * @method isText
 	 * @param {String} type The item type.
 	 * @return {Boolean} If the specified type is text.
-	 * @private
+	 * @static
 	 */
 	s.isText = function (type) {
 		switch (type) {
@@ -231,7 +264,6 @@
 			case createjs.AbstractLoader.JSON:
 			case createjs.AbstractLoader.MANIFEST:
 			case createjs.AbstractLoader.XML:
-			case createjs.AbstractLoader.HTML:
 			case createjs.AbstractLoader.CSS:
 			case createjs.AbstractLoader.SVG:
 			case createjs.AbstractLoader.JAVASCRIPT:
@@ -244,10 +276,11 @@
 	/**
 	 * Determine the type of the object using common extensions. Note that the type can be passed in with the load item
 	 * if it is an unusual extension.
+	 * @method getTypeByExtension
 	 * @param {String} extension The file extension to use to determine the load type.
-	 * @return {String} The determined load type (for example, <code>AbstractLoader.IMAGE</code> or null if it can not be
-	 * determined by the extension.
-	 * @private
+	 * @return {String} The determined load type (for example, <code>AbstractLoader.IMAGE</code>). Will return `null` if
+	 * the type can not be determined by the extension.
+	 * @static
 	 */
 	s.getTypeByExtension = function (extension) {
 		if (extension == null) {

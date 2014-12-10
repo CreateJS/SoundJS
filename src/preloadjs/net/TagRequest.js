@@ -27,6 +27,10 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @module PreloadJS
+ */
+
 // namespace:
 this.createjs = this.createjs || {};
 
@@ -35,24 +39,46 @@ this.createjs = this.createjs || {};
 
 	// constructor
 	/**
-	 * The TagRequest class description goes here.
-	 *
+	 * An {{#crossLink "AbstractRequest"}}{{/crossLink}} that loads HTML tags, such as images and scripts.
+	 * @class TagRequest
+	 * @param {LoadItem} loadItem
+	 * @param {Boolean} preferXHR
+	 * @param {HTMLElement} tag
+	 * @param {String} srcAttribute The tag attribute that specifies the source, such as "src", "href", etc.
 	 */
 	function TagRequest(loadItem, preferXHR, tag, srcAttribute) {
 		this.AbstractRequest_constructor(loadItem, preferXHR);
 
-		// public properties
-
 		// protected properties
+		/**
+		 * The HTML tag instance that is used to load.
+		 * @property _tag
+		 * @type {HTMLElement}
+		 * @protected
+		 */
 		this._tag = tag;
+
+		/**
+		 * The tag attribute that specifies the source, such as "src", "href", etc.
+		 * @property _tagSrcAttribute
+		 * @type {String}
+		 * @protected
+		 */
 		this._tagSrcAttribute = srcAttribute;
 
+		/**
+		 * A method closure used for handling the tag load event.
+		 * @property _loadedHandler
+		 * @type {Function}
+		 * @private
+		 */
 		this._loadedHandler = createjs.proxy(this._handleTagComplete, this);
 	};
 
 	var p = createjs.extend(TagRequest, createjs.AbstractRequest);
 	var s = TagRequest;
 
+	// public methods
 	p.load = function () {
 		window.document.body.appendChild(this._tag);
 
@@ -74,8 +100,9 @@ this.createjs = this.createjs || {};
 		this.AbstractRequest_destory();
 	};
 
+	// private methods
 	/**
-	 * Handle the readyStateChange event from a tag. We sometimes need this in place of the onload event (mainly SCRIPT
+	 * Handle the readyStateChange event from a tag. We need this in place of the `onload` callback (mainly SCRIPT
 	 * and LINK tags), but other cases may exist.
 	 * @method _handleReadyStateChange
 	 * @private
@@ -91,6 +118,11 @@ this.createjs = this.createjs || {};
 		}
 	};
 
+	/**
+	 * Handle the tag's onload callback.
+	 * @method _handleTagComplete
+	 * @private
+	 */
 	p._handleTagComplete = function () {
 		this._rawResult = this._tag;
 		this._result = this.resultFormatter && this.resultFormatter(this) || this._rawResult;
@@ -101,8 +133,8 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Remove event listeners, but don't destory the request object
-	 *
+	 * Remove event listeners, but don't destroy the request object
+	 * @method _clean
 	 * @private
 	 */
 	p._clean = function() {
@@ -111,8 +143,8 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Handle a stalled audio event. The main place we seem to get these is with HTMLAudio in Chrome when we try and
-	 * playback audio that is already in a load, but not complete.
+	 * Handle a stalled audio event. The main place this happens is with HTMLAudio in Chrome when playing back audio
+	 * that is already in a load, but not complete.
 	 * @method _handleStalled
 	 * @private
 	 */

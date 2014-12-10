@@ -27,6 +27,10 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @module PreloadJS
+ */
+
 // namespace:
 this.createjs = this.createjs || {};
 
@@ -35,34 +39,43 @@ this.createjs = this.createjs || {};
 
 	// constructor
 	/**
-	 * The SoundLoader class description goes here.
-	 *
+	 * A loader for HTML audio files. PreloadJS can not load WebAudio files, as a WebAudio context is required, which
+	 * should be created by either a library playing the sound (such as <a href="http://soundjs.com">SoundJS</a>, or an
+	 * external framework that handles audio playback. To load content that can be played by WebAudio, use the
+	 * {{#crossLink "BinaryLoader"}}{{/crossLink}}, and handle the audio context decoding manually.
+	 * @class SoundLoader
+	 * @param {LoadItem|Object}
+	 * @constructor
 	 */
 	function SoundLoader(loadItem, preferXHR) {
 		this.AbstractMediaLoader_constructor(loadItem, preferXHR, createjs.AbstractLoader.SOUND);
 
+		// protected properties
 		this._tagType = "audio";
 
 		if (createjs.RequestUtils.isAudioTag(loadItem) || createjs.RequestUtils.isAudioTag(loadItem.src)) {
 			this._preferXHR = false;
-			this._tag =createjs.RequestUtils.isAudioTag(loadItem)?loadItem:loadItem.src;
+			this._tag = createjs.RequestUtils.isAudioTag(loadItem) ? loadItem : loadItem.src;
 		}
 	};
 
 	var p = createjs.extend(SoundLoader, createjs.AbstractMediaLoader);
 	var s = SoundLoader;
+
+	// static methods
 	/**
-	 * LoadQueue calls this when it creates loaders.
-	 * Each loader has the option to say either yes (true) or no (false).
-	 *
-	 * @private
-	 * @param item The LoadItem LoadQueue is trying to load.
-	 * @returns {boolean}
+	 * Determines if the loader can load a specific item. This loader can only load items that are of type
+	 * {{#crossLink "AbstractLoader/SOUND:property"}}{{/crossLink}}.
+	 * @method canLoadItem
+	 * @param {LoadItem|Object} item The LoadItem that a LoadQueue is trying to load.
+	 * @returns {Boolean} Whether the loader can load the item.
+	 * @static
 	 */
 	s.canLoadItem = function (item) {
 		return item.type == createjs.AbstractLoader.SOUND;
 	};
 
+	// protected methods
 	p._createRequest = function() {
 		if (!this._preferXHR) {
 			this._request = new createjs.MediaTagRequest(this._item, false, this._tag || this._createTag(), this._tagSrcAttribute);
@@ -71,13 +84,6 @@ this.createjs = this.createjs || {};
 		}
 	};
 
-	/**
-	 * Create an HTML audio tag.
-	 * @method _createTag
-	 * @param {String} src The source file to set for the audio tag.
-	 * @return {HTMLElement} Returns an HTML audio tag.
-	 * @protected
-	 */
 	p._createTag = function (src) {
 		var tag = document.createElement(this._tagType);
 		tag.autoplay = false;

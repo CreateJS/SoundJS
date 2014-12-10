@@ -56,7 +56,7 @@ this.createjs = this.createjs || {};
 		// public properties
 		/**
 		 * If the loader has completed loading. This provides a quick check, but also ensures that the different approaches
-		 * used for loading do not pile up resulting in more than one <code>complete</code> event.
+		 * used for loading do not pile up resulting in more than one `complete` {{#crossLink "Event"}}{{/crossLink}}.
 		 * @property loaded
 		 * @type {Boolean}
 		 * @default false
@@ -64,9 +64,9 @@ this.createjs = this.createjs || {};
 		this.loaded = false;
 
 		/**
-		 * Determine if the loader was canceled. Canceled loads will not fire complete events. Note that
-		 * {{#crossLink "LoadQueue"}}{{/crossLink}} queues should be closed using {{#crossLink "AbstractLoader/close"}}{{/crossLink}}
-		 * instead of setting this property.
+		 * Determine if the loader was canceled. Canceled loads will not fire complete events. Note that this property
+		 * is readonly, so {{#crossLink "LoadQueue"}}{{/crossLink}} queues should be closed using {{#crossLink "LoadQueue/close"}}{{/crossLink}}
+		 * instead.
 		 * @property canceled
 		 * @type {Boolean}
 		 * @default false
@@ -91,19 +91,32 @@ this.createjs = this.createjs || {};
 		this.progress = 0;
 
 		/**
-		 * The type of this item.
-		 * See {{#crossLink}}DataTypes{{/crossLink}} for a full list of supported types.
-		 *
-		 * @type {null}
+		 * The type of item this loader will load. See {{#crossLink "AbstractLoader"}}{{/crossLink}} for a full list of
+		 * supported types.
+		 * @property type
+		 * @type {String}
 		 */
 		this.type = type;
 
+		/**
+		 * A formatter function that converts the loaded raw result into the final result. For example, the JSONLoader
+		 * converts a string of text into a JavaScript object. Not all loaders have a resultFormatter, and this property
+		 * can be overridden to provide custom formatting.
+		 *
+		 * Optionally, a resultFormatter can return a callback function in cases where the formatting needs to be
+		 * asynchronous, such as creating a new image.
+		 * @property resultFormatter
+		 * @type {Function}
+		 * @default null
+		 */
+		this.resultFormatter = null;
+
 		// protected properties
 		/**
-		 * The item this loader represents. Note that this is null in a {{#crossLink "LoadQueue"}}{{/crossLink}}, but will
-		 * be available on loaders such as {{#crossLink "XMLLoader"}}{{/crossLink}} and {{#crossLink "ImageLoader"}}{{/crossLink}}.
+		 * The {{#crossLink "LoadItem"}}{{/crossLink}} this loader represents. Note that this is null in a {{#crossLink "LoadQueue"}}{{/crossLink}},
+		 * but will be available on loaders such as {{#crossLink "XMLLoader"}}{{/crossLink}} and {{#crossLink "ImageLoader"}}{{/crossLink}}.
 		 * @property _item
-		 * @type {Object}
+		 * @type {LoadItem|Object}
 		 * @private
 		 */
 		if (loadItem) {
@@ -112,19 +125,58 @@ this.createjs = this.createjs || {};
 			this._item = null;
 		}
 
+		/**
+		 * Whether the loader will try and load content using XHR (true) or HTML tags (false).
+		 * @property _preferXHR
+		 * @type {Boolean}
+		 * @private
+		 */
 		this._preferXHR = preferXHR;
 
+		/**
+		 * The loaded result after it is formatted by an optional {{#crossLink "resultFormatter"}}{{/crossLink}}. For
+		 * items that are not formatted, this will be the same as the {{#crossLink "_rawResult:property"}}{{/crossLink}}.
+		 * The result is accessed using the {{#crossLink "getResult"}}{{/crossLink}} method.
+		 * @property _result
+		 * @type {Object|String}
+		 * @private
+		 */
+		this._result = null;
+
+		/**
+		 * The loaded result before it is formatted. The rawResult is accessed using the {{#crossLink "getResult"}}{{/crossLink}}
+		 * method, and passing `true`.
+		 * @property _rawResult
+		 * @type {Object|String}
+		 * @private
+		 */
 		this._rawResult = null;
 
 		/**
 		 * A list of items that loaders load behind the scenes. This does not include the main item the loader is
-		 * responsible for loading. Examples of loaders that have subitems include the {{#crossLink "SpriteSheetLoader"}}{{/crossLink}} and
+		 * responsible for loading. Examples of loaders that have sub-items include the {{#crossLink "SpriteSheetLoader"}}{{/crossLink}} and
 		 * {{#crossLink "ManifestLoader"}}{{/crossLink}}.
 		 * @property _loadItems
 		 * @type {null}
 		 * @protected
 		 */
 		this._loadedItems = null;
+
+		/**
+		 * The attribute the items loaded using tags use for the source.
+		 * @type {string}
+		 * @default null
+		 * @private
+		 */
+		this._tagSrcAttribute = null;
+
+		/**
+		 * An HTML tag (or similar) that a loader may use to load HTML content, such as images, scripts, etc.
+		 * @property _tag
+		 * @type {Object}
+		 * @private
+		 */
+		this._tag = null;
 	};
 
 	var p = createjs.extend(AbstractLoader, createjs.EventDispatcher);
@@ -489,7 +541,7 @@ this.createjs = this.createjs || {};
 	 * Other loaders may override this to use different request types, such as {{#crossLink "ManifestLoader"}}{{/crossLink}},
 	 * which uses {{#crossLink "JSONLoader"}}{{/crossLink}} or {{#crossLink "JSONPLoader"}}{{/crossLink}} under the hood.
 	 * @method _createRequest
-	 * @private
+	 * @protected
 	 */
 	p._createRequest = function() {
 		if (!this._preferXHR) {
@@ -498,6 +550,16 @@ this.createjs = this.createjs || {};
 			this._request = new createjs.XHRRequest(this._item, false);
 		}
 	};
+
+	/**
+	 * Create the HTML tag used for loading. This method does nothing by default, and needs to be implemented
+	 * by loaders that require tag loading.
+	 * @method _createTag
+	 * @param {String} src The tag source
+	 * @return {HTMLElement} The tag that was created
+	 * @protected
+	 */
+	p._createTag = function(src) { return null; };
 
 	/**
 	 * Dispatch a loadstart {{#crossLink "Event"}}{{/crossLink}}. Please see the {{#crossLink "AbstractLoader/loadstart:event"}}{{/crossLink}}
@@ -597,7 +659,7 @@ this.createjs = this.createjs || {};
 	 * this method can be overridden for custom behaviours.
 	 * @method handleEvent
 	 * @param {Event} The event that the internal request dispatches.
-	 * @private
+	 * @protected
 	 * @since 0.6.0
 	 */
 	p.handleEvent = function (event) {
@@ -636,6 +698,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * @method buildPath
+	 * @protected
 	 * @deprecated Use the {{#crossLink "RequestUtils"}}{{/crossLink}} method {{#crossLink "RequestUtils/buildPath"}}{{/crossLink}}
 	 * instead.
 	 */

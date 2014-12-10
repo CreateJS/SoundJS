@@ -27,6 +27,10 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/**
+ * @module PreloadJS
+ */
+
 // namespace:
 this.createjs = this.createjs || {};
 
@@ -35,34 +39,36 @@ this.createjs = this.createjs || {};
 
 	// constructor
 	/**
-	 * The AbstractMediaLoader class description goes here.
-	 *
+	 * The AbstractMediaLoader is a base class that handles some of the shared methods and properties of loaders that
+	 * handle HTML media elements, such as Video and Audio.
+	 * @class AbstractMediaLoader
+	 * @param {LoadItem|Object} loadItem
+	 * @param {Boolean} preferXHR
+	 * @param {String} type The type of media to load. Usually "video" or "audio".
+	 * @constructor
 	 */
 	function AbstractMediaLoader(loadItem, preferXHR, type) {
 		this.AbstractLoader_constructor(loadItem, preferXHR, type);
 
 		// public properties
+		this.resultFormatter = this._formatResult;
 
 		// protected properties
 		this._tagSrcAttribute = "src";
 
 		/**
-		 * Used to determine what type of tag to create, for example "audio"
+		 * The type of tag to create, for example "audio".
 		 * @property _tagType
 		 * @type {string}
 		 * @private
 		 */
 		this._tagType = type;
-
-		this.resultFormatter = this._formatResult;
 	};
 
 	var p = createjs.extend(AbstractMediaLoader, createjs.AbstractLoader);
+
 	// static properties
-
 	// public methods
-
-	// protected methods
 	p.load = function () {
 		// TagRequest will handle most of this, but Sound / Video need a few custom properties, so just handle them here.
 		if (!this._tag) {
@@ -75,15 +81,20 @@ this.createjs = this.createjs || {};
 		this.AbstractLoader_load();
 	};
 
+	// protected methods
 	/**
-	 * Abstract, create a new tag if none exist.
-	 *
+	 * Creates a new tag for loading if it doesn't exist yet.
+	 * @method _createTag
 	 * @private
 	 */
-	p._createTag = function () {
+	p._createTag = function () {};
 
-	};
-
+	/**
+	 * The result formatter for media files.
+	 * @param {AbstractLoader} loader
+	 * @returns {HTMLVideoElement|HTMLAudioElement}
+	 * @private
+	 */
 	p._formatResult = function (loader) {
 		this._tag.removeEventListener && this._tag.removeEventListener("canplaythrough", this._loadedHandler);
 		this._tag.onstalled = null;
