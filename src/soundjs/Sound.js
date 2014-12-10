@@ -97,6 +97,7 @@ this.createjs = this.createjs || {};
 	 * {{#crossLink "Sound/installPlugins"}}{{/crossLink}}.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashAudioPlugin]);
 	 *      createjs.Sound.alternateExtensions = ["mp3"];
 	 *      createjs.Sound.addEventListener("fileload", createjs.proxy(this.loadHandler, (this));
@@ -146,6 +147,7 @@ this.createjs = this.createjs || {};
 	 * concurrently playing instances, that means you can only play 2 of the sounds at the same time.</li></ul>
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *      createjs.Sound.initializeDefaultPlugins();
 	 *		var assetsPath = "./assets/";
 	 *		var sounds = [{
@@ -175,6 +177,7 @@ this.createjs = this.createjs || {};
 	 * application.  See the MobileSafe demo for a working example.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *     document.getElementById("status").addEventListener("click", handleTouch, false);    // works on Android and iPad
 	 *     function handleTouch(event) {
 	 *       document.getElementById("status").removeEventListener("click", handleTouch, false);    // remove the listener
@@ -376,7 +379,9 @@ this.createjs = this.createjs || {};
 	 *
 	 * Note that regardless of which file is loaded, you can call {{#crossLink "Sound/createInstance"}}{{/crossLink}}
 	 * and {{#crossLink "Sound/play"}}{{/crossLink}} using the same id or full source path passed for loading.
+	 *
 	 * <h4>Example</h4>
+	 *
 	 *	var sounds = [
 	 *		{src:"myPath/mySound.ogg", id:"example"},
 	 *	];
@@ -618,6 +623,7 @@ this.createjs = this.createjs || {};
 	 * Register a list of Sound plugins, in order of precedence. To register a single plugin, pass a single element in the array.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *      createjs.FlashAudioPlugin.swfPath = "../src/soundjs/flashaudio/";
 	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.HTMLAudioPlugin, createjs.FlashAudioPlugin]);
 	 *
@@ -642,6 +648,7 @@ this.createjs = this.createjs || {};
 	 * default plugins are {{#crossLink "WebAudioPlugin"}}{{/crossLink}} followed by {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 * 	if (!createjs.initializeDefaultPlugins()) { return; }
 	 *
 	 * @method initializeDefaultPlugins
@@ -707,6 +714,7 @@ this.createjs = this.createjs || {};
 	 * full list of capabilities.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *      var maxAudioInstances = createjs.Sound.getCapability("tracks");
 	 *
 	 * @method getCapability
@@ -795,6 +803,7 @@ this.createjs = this.createjs || {};
 	 * need to be played back in order to properly prepare and preload them. Sound does internal preloading when required.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *      createjs.Sound.alternateExtensions = ["mp3"];
 	 *      createjs.Sound.addEventListener("fileload", handleLoad); // add an event listener for when load is completed
 	 *      createjs.Sound.registerSound("myAudioPath/mySound.ogg", "myID", 3);
@@ -850,6 +859,7 @@ this.createjs = this.createjs || {};
 	 * when required.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *      var sounds = [
 	 *          {src:"asset0.ogg", id:"example"},
 	 *          {src:"asset1.ogg", id:"1", data:6},
@@ -917,6 +927,7 @@ this.createjs = this.createjs || {};
 	 * <br />Note if you passed in a basePath, you need to pass it or prepend it to the src here.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *      createjs.Sound.removeSound("myAudioBasePath/mySound.ogg");
 	 *      createjs.Sound.removeSound("myID");
 	 *
@@ -961,6 +972,7 @@ this.createjs = this.createjs || {};
 	 * <br />Note if you passed in a basePath, you need to pass it or prepend it to the src here.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *      var sounds = [
 	 *          {src:"asset0.ogg", id:"example"},
 	 *          {src:"asset1.ogg", id:"1", data:6},
@@ -1021,6 +1033,7 @@ this.createjs = this.createjs || {};
 	 * <br />Note this will stop playback on all active sound instances before deleting them.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *     createjs.Sound.removeAllSounds();
 	 *
 	 * @method removeAllSounds
@@ -1039,6 +1052,7 @@ this.createjs = this.createjs || {};
 	 * not completed preloading will not kick off a new internal preload if they are played.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *     var mySound = "assetPath/asset0.ogg";
 	 *     if(createjs.Sound.loadComplete(mySound) {
 	 *         createjs.Sound.play(mySound);
@@ -1100,6 +1114,7 @@ this.createjs = this.createjs || {};
 	 * if there is no available plugin, a default AbstractSoundInstance will be returned which will not play any audio, but will not generate errors.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *      createjs.Sound.addEventListener("fileload", handleLoad);
 	 *      createjs.Sound.registerSound("myAudioPath/mySound.mp3", "myID", 3);
 	 *      function handleLoad(event) {
@@ -1157,6 +1172,7 @@ this.createjs = this.createjs || {};
 	 * called safely but does nothing.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *      var myInstance = null;
 	 *      createjs.Sound.addEventListener("fileload", handleLoad);
 	 *      createjs.Sound.registerSound("myAudioPath/mySound.mp3", "myID", 3);
@@ -1204,6 +1220,7 @@ this.createjs = this.createjs || {};
 	 * sound volume, use AbstractSoundInstance {{#crossLink "AbstractSoundInstance/setVolume"}}{{/crossLink}} instead.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *     createjs.Sound.setVolume(0.5);
 	 *
 	 * @method setVolume
@@ -1227,6 +1244,7 @@ this.createjs = this.createjs || {};
 	 * To get individual sound volume, use AbstractSoundInstance {{#crossLink "AbstractSoundInstance/volume:property"}}{{/crossLink}} instead.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *     var masterVolume = createjs.Sound.getVolume();
 	 *
 	 * @method getVolume
@@ -1243,6 +1261,7 @@ this.createjs = this.createjs || {};
 	 * instance, use AbstractSoundInstance {{#crossLink "AbstractSoundInstance/setMute"}}{{/crossLink}} instead.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *     createjs.Sound.setMute(true);
 	 *
 	 * @method setMute
@@ -1269,6 +1288,7 @@ this.createjs = this.createjs || {};
 	 * {{#crossLink "AbstractSoundInstance/getMute"}}{{/crossLink}} instead.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *     var muted = createjs.Sound.getMute();
 	 *
 	 * @method getMute
@@ -1285,6 +1305,7 @@ this.createjs = this.createjs || {};
 	 * call AbstractSoundInstance {{#crossLink "AbstractSoundInstance/play"}}{{/crossLink}}.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *     createjs.Sound.stop();
 	 *
 	 * @method stop

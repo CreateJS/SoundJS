@@ -36,6 +36,7 @@ this.createjs = this.createjs || {};
  * for control by the user.
  *
  * <h4>Example</h4>
+ *
  *      var myInstance = createjs.Sound.play("myAssetPath/mySrcFile.mp3");
  *
  * A number of additional parameters provide a quick way to determine how a sound is played. Please see the Sound
@@ -338,6 +339,7 @@ this.createjs = this.createjs || {};
 	 * with the Sound API {{#crossLink "Sound/createInstance"}}{{/crossLink}} or {{#crossLink "Sound/play"}}{{/crossLink}}).
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *      var myInstance = createjs.Sound.createInstance(mySrc);
 	 *      myInstance.play({offset:1, loop:2, pan:0.5});	// options as object properties
 	 *      myInstance.play(createjs.Sound.INTERRUPT_ANY);	// options as parameters
@@ -488,6 +490,7 @@ this.createjs = this.createjs || {};
 	 * Set the volume of the instance.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *      myInstance.setVolume(0.5);
 	 *
 	 * Note that the master volume set using the Sound API method {{#crossLink "Sound/setVolume"}}{{/crossLink}}
@@ -551,6 +554,7 @@ this.createjs = this.createjs || {};
 	 * silent depending on {{#crossLink "Sound"}}{{/crossLink}} volume, instance volume, and Sound muted.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *     myInstance.setMuted(true);
 	 *
 	 * @method setMute
@@ -572,6 +576,7 @@ this.createjs = this.createjs || {};
 	 * Get the mute value of the instance.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *      var isMuted = myInstance.getMuted();
 	 *
 	 * @method getMute
@@ -630,6 +635,7 @@ this.createjs = this.createjs || {};
 	 * Get the position of the playhead of the instance in milliseconds.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *     var currentOffset = myInstance.getPosition();
 	 *
 	 * @method getPosition
@@ -650,6 +656,7 @@ this.createjs = this.createjs || {};
 	 * stopped.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *      myInstance.setPosition(myInstance.getDuration()/2); // set audio to its halfway point.
 	 *
 	 * @method setPosition
@@ -672,6 +679,7 @@ this.createjs = this.createjs || {};
 	 * Note a sound needs to be loaded before it will have duration, unless it was set manually to create an audio sprite.
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *     var soundDur = myInstance.getDuration();
 	 *
 	 * @method getDuration

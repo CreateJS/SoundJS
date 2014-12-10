@@ -185,6 +185,7 @@ this.createjs = this.createjs || {};
 	 * for example).
 	 *
 	 * <h4>Example</h4>
+	 *
 	 *     function handleTouch(event) {
 	 *         createjs.WebAudioPlugin.playEmptySound();
 	 *     }
