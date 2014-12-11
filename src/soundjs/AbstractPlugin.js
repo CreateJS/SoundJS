@@ -181,13 +181,14 @@ this.createjs = this.createjs || {};
 	 * @param {String} src The sound URI to unload.
 	 */
 	p.removeSound = function (src) {
+		if (this._soundInstances[src]) { return; }
 		for (var i = this._soundInstances[src].length; i--; ) {
 			var item = this._soundInstances[src][i];
 			item.destroy();
 		}
 		delete(this._soundInstances[src]);
 		delete(this._audioSources[src]);
-		this._loaders[src].destroy();
+		if(this._loaders[src]) { this._loaders[src].destroy(); }
 		delete(this._loaders[src]);
 	};
 
