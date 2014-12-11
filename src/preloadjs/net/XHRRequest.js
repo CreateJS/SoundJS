@@ -177,15 +177,15 @@ this.createjs = this.createjs || {};
 		}
 
 		//Events
-		this._request.addEventListener("loadstart", this._handleLoadStartProxy);
-		this._request.addEventListener("progress", this._handleProgressProxy);
-		this._request.addEventListener("abort", this._handleAbortProxy);
-		this._request.addEventListener("error",this._handleErrorProxy);
-		this._request.addEventListener("timeout", this._handleTimeoutProxy);
+		this._request.addEventListener("loadstart", this._handleLoadStartProxy, false);
+		this._request.addEventListener("progress", this._handleProgressProxy, false);
+		this._request.addEventListener("abort", this._handleAbortProxy, false);
+		this._request.addEventListener("error",this._handleErrorProxy, false);
+		this._request.addEventListener("timeout", this._handleTimeoutProxy, false);
 
 		// Note: We don't get onload in all browsers (earlier FF and IE). onReadyStateChange handles these.
-		this._request.addEventListener("load", this._handleLoadProxy);
-		this._request.addEventListener("readystatechange", this._handleReadyStateChangeProxy);
+		this._request.addEventListener("load", this._handleLoadProxy, false);
+		this._request.addEventListener("readystatechange", this._handleReadyStateChangeProxy, false);
 
 		// Set up a timeout if we don't have XHR2
 		if (this._xhrLevel == 1) {

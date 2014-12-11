@@ -50,13 +50,14 @@ this.createjs = this.createjs || {};
  * </ul>
  *
  * <h4>Feature Set Example</h4>
+ *
  *      createjs.Sound.alternateExtensions = ["mp3"];
- *      createjs.Sound.addEventListener("fileload", createjs.proxy(this.loadHandler, this));
+ *      createjs.Sound.on("fileload", this.loadHandler, this);
  *      createjs.Sound.registerSound("path/to/mySound.ogg", "sound");
  *      function loadHandler(event) {
  *          // This is fired for each sound that is registered.
  *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use full sourcepath or event.src.
- *          instance.addEventListener("complete", createjs.proxy(this.handleComplete, this));
+ *          instance.on("complete", this.handleComplete, this);
  *          instance.volume = 0.5;
  *      }
  *
@@ -100,12 +101,12 @@ this.createjs = this.createjs || {};
 	 *
 	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashAudioPlugin]);
 	 *      createjs.Sound.alternateExtensions = ["mp3"];
-	 *      createjs.Sound.addEventListener("fileload", createjs.proxy(this.loadHandler, (this));
+	 *      createjs.Sound.on("fileload", createjs.proxy(this.loadHandler, (this));
 	 *      createjs.Sound.registerSound("path/to/mySound.ogg", "sound");
 	 *      function loadHandler(event) {
      *          // This is fired for each sound that is registered.
      *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use full source path or event.src.
-     *          instance.addEventListener("complete", createjs.proxy(this.handleComplete, this));
+     *          instance.on("complete", createjs.proxy(this.handleComplete, this));
      *          instance.volume = 0.5;
 	 *      }
 	 *
@@ -160,7 +161,7 @@ this.createjs = this.createjs || {};
  *				}
 	 *		];
 	 *		createjs.Sound.alternateExtensions = ["mp3"];
-	 *		createjs.Sound.addEventListener("fileload", loadSound);
+	 *		createjs.Sound.on("fileload", loadSound);
 	 *		createjs.Sound.registerSounds(sounds, assetsPath);
 	 *		// after load is complete
 	 *		createjs.Sound.play("sound2");
@@ -180,8 +181,8 @@ this.createjs = this.createjs || {};
 	 *
 	 *     document.getElementById("status").addEventListener("click", handleTouch, false);    // works on Android and iPad
 	 *     function handleTouch(event) {
-	 *       document.getElementById("status").removeEventListener("click", handleTouch, false);    // remove the listener
-	 *       var thisApp = new myNameSpace.MyApp();    // launch the app
+	 *         document.getElementById("status").removeEventListener("click", handleTouch, false);    // remove the listener
+	 *         var thisApp = new myNameSpace.MyApp();    // launch the app
 	 *     }
 	 *
 	 * <h4>Known Browser and OS issues</h4>
@@ -386,7 +387,7 @@ this.createjs = this.createjs || {};
 	 *		{src:"myPath/mySound.ogg", id:"example"},
 	 *	];
 	 *	createjs.Sound.alternateExtensions = ["mp3"]; // now if ogg is not supported, SoundJS will try asset0.mp3
-	 *	createjs.Sound.addEventListener("fileload", handleLoad); // call handleLoad when each sound loads
+	 *	createjs.Sound.on("fileload", handleLoad); // call handleLoad when each sound loads
 	 *	createjs.Sound.registerSounds(sounds, assetPath);
 	 *	// ...
 	 *	createjs.Sound.play("myPath/mySound.ogg"); // works regardless of what extension is supported.  Note calling with ID is a better approach
@@ -805,7 +806,7 @@ this.createjs = this.createjs || {};
 	 * <h4>Example</h4>
 	 *
 	 *      createjs.Sound.alternateExtensions = ["mp3"];
-	 *      createjs.Sound.addEventListener("fileload", handleLoad); // add an event listener for when load is completed
+	 *      createjs.Sound.on("fileload", handleLoad); // add an event listener for when load is completed
 	 *      createjs.Sound.registerSound("myAudioPath/mySound.ogg", "myID", 3);
 	 *
 	 * @method registerSound
@@ -866,7 +867,7 @@ this.createjs = this.createjs || {};
 	 *          {src:"asset2.mp3", id:"works"}
 	 *      ];
 	 *      createjs.Sound.alternateExtensions = ["mp3"];	// if the passed extension is not supported, try this extension
-	 *      createjs.Sound.addEventListener("fileload", handleLoad); // call handleLoad when each sound loads
+	 *      createjs.Sound.on("fileload", handleLoad); // call handleLoad when each sound loads
 	 *      createjs.Sound.registerSounds(sounds, assetPath);
 	 *
 	 * @method registerSounds
@@ -1115,7 +1116,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * <h4>Example</h4>
 	 *
-	 *      createjs.Sound.addEventListener("fileload", handleLoad);
+	 *      createjs.Sound.on("fileload", handleLoad);
 	 *      createjs.Sound.registerSound("myAudioPath/mySound.mp3", "myID", 3);
 	 *      function handleLoad(event) {
 	 *      	createjs.Sound.play("myID");
@@ -1174,7 +1175,7 @@ this.createjs = this.createjs || {};
 	 * <h4>Example</h4>
 	 *
 	 *      var myInstance = null;
-	 *      createjs.Sound.addEventListener("fileload", handleLoad);
+	 *      createjs.Sound.on("fileload", handleLoad);
 	 *      createjs.Sound.registerSound("myAudioPath/mySound.mp3", "myID", 3);
 	 *      function handleLoad(event) {
 	 *      	myInstance = createjs.Sound.createInstance("myID");

@@ -468,7 +468,7 @@ this.createjs = this.createjs || {};
 	 * <h4>Example</h4>
 	 *
 	 *      var queue = new createjs.LoadQueue();
-	 *      queue.addEventListener("complete", handleComplete);
+	 *      queue.on("complete", handleComplete);
 	 *      queue.loadManifest(fileArray, false); // Note the 2nd argument that tells the queue not to start loading yet
 	 *      queue.load();
 	 *

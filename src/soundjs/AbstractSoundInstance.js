@@ -49,7 +49,7 @@ this.createjs = this.createjs || {};
  * will rebuild the references the Sound class need to control it.
  *
  *      var myInstance = createjs.Sound.play("myAssetPath/mySrcFile.mp3", {loop:2});
- *      myInstance.addEventListener("loop", handleLoop);
+ *      myInstance.on("loop", handleLoop);
  *      function handleLoop(event) {
  *          myInstance.volume = myInstance.volume * 0.5;
  *      }
@@ -57,9 +57,9 @@ this.createjs = this.createjs || {};
  * Events are dispatched from the instance to notify when the sound has completed, looped, or when playback fails
  *
  *      var myInstance = createjs.Sound.play("myAssetPath/mySrcFile.mp3");
- *      myInstance.addEventListener("complete", handleComplete);
- *      myInstance.addEventListener("loop", handleLoop);
- *      myInstance.addEventListener("failed", handleFailed);
+ *      myInstance.on("complete", handleComplete);
+ *      myInstance.on("loop", handleLoop);
+ *      myInstance.on("failed", handleFailed);
  *
  *
  * @class AbstractSoundInstance

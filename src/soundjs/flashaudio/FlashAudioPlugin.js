@@ -310,8 +310,8 @@ this.createjs = this.createjs || {};
 
 	p.create = function (src, startTime, duration) {
 		var si = this.AbstractPlugin_create(src, startTime, duration);
-		si.addEventListener(s._REG_FLASHID, createjs.proxy(this.registerSoundInstance, this));
-		si.addEventListener(s._UNREG_FLASHID, createjs.proxy(this.unregisterSoundInstance, this));
+		si.on(s._REG_FLASHID, this.registerSoundInstance, this);
+		si.on(s._UNREG_FLASHID, this.unregisterSoundInstance, this);
 		return si;
 	};
 
