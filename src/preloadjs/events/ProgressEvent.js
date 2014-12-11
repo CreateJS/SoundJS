@@ -59,7 +59,7 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * The total "size" of the load.
-		 * @oroperty size
+		 * @property total
 		 * @type {Number}
 		 * @default 1
 		 */

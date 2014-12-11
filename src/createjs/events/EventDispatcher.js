@@ -375,6 +375,7 @@ this.createjs = this.createjs||{};
 			try { eventObj.currentTarget = this; } catch (e) {}
 			try { eventObj.eventPhase = eventPhase; } catch (e) {}
 			eventObj.removed = false;
+			
 			arr = arr.slice(); // to avoid issues with items being removed or added during the dispatch
 			for (var i=0; i<l && !eventObj.immediatePropagationStopped; i++) {
 				var o = arr[i];
