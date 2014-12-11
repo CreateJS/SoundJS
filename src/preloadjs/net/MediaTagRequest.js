@@ -42,13 +42,12 @@ this.createjs = this.createjs || {};
 	 * An {{#crossLink "TagRequest"}}{{/crossLink}} that loads HTML tags for video and audio.
 	 * @class MediaTagRequest
 	 * @param {LoadItem} loadItem
-	 * @param {Boolean} preferXHR
 	 * @param {HTMLAudioElement|HTMLVideoElement} tag
 	 * @param {String} srcAttribute The tag attribute that specifies the source, such as "src", "href", etc.
 	 * @constructor
 	 */
-	function MediaTagRequest(loadItem, preferXHR, tag, srcAttribute) {
-		this.AbstractRequest_constructor(loadItem, preferXHR);
+	function MediaTagRequest(loadItem, tag, srcAttribute) {
+		this.AbstractRequest_constructor(loadItem);
 
 		// protected properties
 		this._tag = tag;

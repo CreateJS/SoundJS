@@ -42,12 +42,11 @@ this.createjs = this.createjs || {};
 	 * An {{#crossLink "AbstractRequest"}}{{/crossLink}} that loads HTML tags, such as images and scripts.
 	 * @class TagRequest
 	 * @param {LoadItem} loadItem
-	 * @param {Boolean} preferXHR
 	 * @param {HTMLElement} tag
 	 * @param {String} srcAttribute The tag attribute that specifies the source, such as "src", "href", etc.
 	 */
-	function TagRequest(loadItem, preferXHR, tag, srcAttribute) {
-		this.AbstractRequest_constructor(loadItem, preferXHR);
+	function TagRequest(loadItem, tag, srcAttribute) {
+		this.AbstractRequest_constructor(loadItem);
 
 		// protected properties
 		/**
@@ -81,6 +80,14 @@ this.createjs = this.createjs || {};
 		 * @private
 		 */
 		this._addedToDOM = false;
+
+		/**
+		 * Determines what the tags initial style.visibility was, so we can set it correctly after a load.
+		 *
+		 * @type {null}
+		 * @private
+		 */
+		this._startTagVisibility = null;
 	};
 
 	var p = createjs.extend(TagRequest, createjs.AbstractRequest);
@@ -99,6 +106,8 @@ this.createjs = this.createjs || {};
 		evt.loader = this._tag;
 
 		this.dispatchEvent(evt);
+
+		this._hideTag();
 
 		this._tag[this._tagSrcAttribute] = this._item.src;
 	};
@@ -138,6 +147,7 @@ this.createjs = this.createjs || {};
 		this._result = this.resultFormatter && this.resultFormatter(this) || this._rawResult;
 
 		this._clean();
+		this._showTag();
 
 		this.dispatchEvent("complete");
 	};
@@ -153,6 +163,15 @@ this.createjs = this.createjs || {};
 		if (this._addedToDOM && this._tag.parentNode != null) {
 			this._tag.parentNode.removeChild(this._tag);
 		}
+	};
+
+	p._hideTag = function() {
+		this._startTagVisibility = this._tag.style.visibility;
+		this._tag.style.visibility = "hidden";
+	};
+
+	p._showTag = function() {
+		this._tag.style.visibility = this._startTagVisibility;
 	};
 
 	/**

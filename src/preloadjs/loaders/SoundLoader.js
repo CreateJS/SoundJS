@@ -44,18 +44,24 @@ this.createjs = this.createjs || {};
 	 * external framework that handles audio playback. To load content that can be played by WebAudio, use the
 	 * {{#crossLink "BinaryLoader"}}{{/crossLink}}, and handle the audio context decoding manually.
 	 * @class SoundLoader
-	 * @param {LoadItem|Object}
+	 * @param {LoadItem|Object} loadItem
+	 * @param {Boolean} preferXHR
 	 * @constructor
 	 */
 	function SoundLoader(loadItem, preferXHR) {
 		this.AbstractMediaLoader_constructor(loadItem, preferXHR, createjs.AbstractLoader.SOUND);
 
 		// protected properties
-		this._tagType = "audio";
-
-		if (createjs.RequestUtils.isAudioTag(loadItem) || createjs.RequestUtils.isAudioTag(loadItem.src)) {
-			this._preferXHR = false;
+		if (createjs.RequestUtils.isAudioTag(loadItem)) {
+			this._tag = loadItem;
+		} else if (createjs.RequestUtils.isAudioTag(loadItem.src)) {
+			this._tag = loadItem;
+		} else if (createjs.RequestUtils.isAudioTag(loadItem.tag)) {
 			this._tag = createjs.RequestUtils.isAudioTag(loadItem) ? loadItem : loadItem.src;
+		}
+
+		if (this._tag != null) {
+			this._preferXHR = false;
 		}
 	};
 
@@ -76,16 +82,8 @@ this.createjs = this.createjs || {};
 	};
 
 	// protected methods
-	p._createRequest = function() {
-		if (!this._preferXHR) {
-			this._request = new createjs.MediaTagRequest(this._item, false, this._tag || this._createTag(), this._tagSrcAttribute);
-		} else {
-			this._request = new createjs.XHRRequest(this._item, false);
-		}
-	};
-
 	p._createTag = function (src) {
-		var tag = document.createElement(this._tagType);
+		var tag = document.createElement("audio");
 		tag.autoplay = false;
 		tag.preload = "none";
 

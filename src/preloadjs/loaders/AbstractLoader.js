@@ -545,9 +545,9 @@ this.createjs = this.createjs || {};
 	 */
 	p._createRequest = function() {
 		if (!this._preferXHR) {
-			this._request = new createjs.TagRequest(this._item, false, this._tag || this._createTag(), this._tagSrcAttribute);
+			this._request = new createjs.TagRequest(this._item, this._tag || this._createTag(), this._tagSrcAttribute);
 		} else {
-			this._request = new createjs.XHRRequest(this._item, false);
+			this._request = new createjs.XHRRequest(this._item);
 		}
 	};
 

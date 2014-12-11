@@ -55,14 +55,6 @@ this.createjs = this.createjs || {};
 
 		// protected properties
 		this._tagSrcAttribute = "src";
-
-		/**
-		 * The type of tag to create, for example "audio".
-		 * @property _tagType
-		 * @type {string}
-		 * @private
-		 */
-		this._tagType = type;
 	};
 
 	var p = createjs.extend(AbstractMediaLoader, createjs.AbstractLoader);
@@ -89,8 +81,18 @@ this.createjs = this.createjs || {};
 	 */
 	p._createTag = function () {};
 
+
+	p._createRequest = function() {
+		if (!this._preferXHR) {
+			this._request = new createjs.MediaTagRequest(this._item, this._tag || this._createTag(), this._tagSrcAttribute);
+		} else {
+			this._request = new createjs.XHRRequest(this._item);
+		}
+	};
+
 	/**
 	 * The result formatter for media files.
+	 * @method _formatResult
 	 * @param {AbstractLoader} loader
 	 * @returns {HTMLVideoElement|HTMLAudioElement}
 	 * @private
