@@ -7,12 +7,17 @@ CRITICAL (may break existing content):
 - changed WebAudioPlugin dynamicsCompressorNode and gainNode to be instance level rather than static class level
   this is now accessed via createjs.Sound.activePlugin.dynamicsCompressorNode rather than
   createjs.WebAudioPlugin.dynamicsCompressorNode
-- removed deprecated code and cleaned up supporting code for deprecated "|" loading approach
 - removed iOS disabling by default on HTMLAudioPlugin
-- SoundInstance stop, setVolume, setPan, setPosition
-- SoundInstance deprecated pause / resume, please use SoundInstance.paused property instead.
-- renamed FlashPlugin to FlashAudioPlugin, deprecated FlashPlugin for next release.
-  Note this means FlashPlugin-NEXT has also changed to FlashAudioPlugin-NEXT.
+- SoundInstance stop, setVolume, setPan, setPosition now return a reference to the instance, instead of a Boolean,
+	which is useful for chaining calls.
+- deprecated SoundInstance pause/resume methods, please use SoundInstance.paused property instead.
+- renamed FlashPlugin to FlashAudioPlugin, deprecated FlashPlugin for next release, including the VERSION file.
+- removed deprecated code and cleaned up supporting code for deprecated "|" loading approach
+- re-architected the class and inheritance model
+	- initialize methods removed, use MySuperClass_constructor instead
+	- helper methods: extend & promote (see the "Utility Methods" docs)
+	- property definitions are now instance level, and in the constructor (performance gains)
+	- the .constructor is now set correctly on all classes (thanks kaesve)
 
 *****
 - Added constructors to all non-static classes (Thanks kaesve)
@@ -52,6 +57,7 @@ CRITICAL (may break existing content):
 - Added support for setting WebAudioPlugin.context.  Note that it needs to be set before plugins are instantiated.
 - Added fileerror event, dispatched when internal loading fails.
 - registerSounds & removeSounds now handles a path property in the passed in manifest of sounds.
+
 
 Version 0.5.2 [December 12, 2013]
 ************************************************************************************************************************
