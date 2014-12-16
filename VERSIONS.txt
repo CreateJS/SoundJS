@@ -1,6 +1,11 @@
-Version 0.6.0
+Version NEXT [not yet released]
+****************************************************************************************************
+
+
+
+Version 0.6.0 [December 12, 2014]
 ************************************************************************************************************************
-**   Please note PreloadJS 0.6.0 is only compatible with SoundJS 0.6.0 and later. Earlier versions are incompatible. ***
+**   Please note SoundJS 0.6.0 is only compatible with PreloadJS 0.6.0 and later. Earlier versions are incompatible. ***
 ************************************************************************************************************************
 CRITICAL (may break existing content):
 - removed preload property from Sound.registerSound and Sound.registerManifest, as it is only used by PreloadJS
