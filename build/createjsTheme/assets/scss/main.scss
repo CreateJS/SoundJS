@@ -38,17 +38,17 @@
 //
 //*******************************************
 .header {
-  @extend %color_easeljs-gradient;
+  @extend %color_soundjs-gradient;
 }
 .yui3-skin-sam .yui3-tab-selected .yui3-tab-label,
 .yui3-skin-sam .yui3-tab-selected .yui3-tab-label:focus,
 .yui3-skin-sam .yui3-tab-selected .yui3-tab-label:hover {
   background: none !important;
   border: none !important;
-  background-color: $color_easeljs-default !important;
+  background-color: $color_soundjs-default !important;
 }
 .yui3-skin-sam .yui3-tabview-list {
-  border-bottom: 5px solid $color_easeljs-default !important;
+  border-bottom: 5px solid $color_soundjs-default !important;
 }
 
 
