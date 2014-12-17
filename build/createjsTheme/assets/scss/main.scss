@@ -1,7 +1,7 @@
 //*******************************************
 //
-//  SOUNDJS DOCS
-//  - 2.0 Reskin
+//  EASELJS DOCS
+//  - 2.0 skin
 //
 //  1) IMPORTS
 //  2) LIBRARY SPECIFIC COLORS
@@ -17,18 +17,18 @@
 //
 //*******************************************
 // UTILITIES
-@import "utilities/breakpoint";
-@import "utilities/clearfix";
+@import "utilities/breakpoint.scss";
+@import "utilities/clearfix.scss";
 
 // SETTINGS
-@import "settings/breakpoint";
-@import "settings/color";
-@import "settings/fonts";
-@import "settings/layout";
-@import "settings/path";
+@import "settings/breakpoint.scss";
+@import "settings/color.scss";
+@import "settings/fonts.scss";
+@import "settings/layout.scss";
+@import "settings/path.scss";
 
 // ELEMENTS
-@import "elements/tags";
+@import "elements/tags.scss";
 
 
 
@@ -38,17 +38,17 @@
 //
 //*******************************************
 .header {
-  @extend %color_soundjs-gradient;
+  @extend %color_easeljs-gradient;
 }
 .yui3-skin-sam .yui3-tab-selected .yui3-tab-label,
 .yui3-skin-sam .yui3-tab-selected .yui3-tab-label:focus,
 .yui3-skin-sam .yui3-tab-selected .yui3-tab-label:hover {
   background: none !important;
   border: none !important;
-  background-color: $color_soundjs-default !important;
+  background-color: $color_easeljs-default !important;
 }
 .yui3-skin-sam .yui3-tabview-list {
-  border-bottom: 5px solid $color_soundjs-default !important;
+  border-bottom: 5px solid $color_easeljs-default !important;
 }
 
 
@@ -67,7 +67,7 @@ body {
   margin: 0;
   padding: 0;
 }
-
+ 
 
 /* -- Links ----------------------------------------------------------------- */
 h1 a {
@@ -108,7 +108,7 @@ kbd,
 pre,
 samp {
   font-family: $fontFamily-monospace;
-  font-size: $fontSize-smaller;
+  font-size: $fontSize-smallest;
   line-height: $gridUnit-default;
 }
 p code,
@@ -312,7 +312,7 @@ th {
 }
 .header {
   padding: 1em 0 0 0 !important;
-  background-color: $color_gray-dark;
+  background-color: $color_gray-dark; 
   a:hover {
     background: transparent;
   }
@@ -523,6 +523,7 @@ specific tabview, see the other sections below.
 /* Comma-separated list. */
 .apidocs ul.commas li:after {
   content: ',';
+  font-size: $fontSize-smaller;
 }
 .apidocs ul.commas li:last-child:after {
   content: '';
@@ -631,6 +632,9 @@ kbd .cmd {
 .apidocs .item pre.code {
   margin: 1em 0 0;
 }
+.apidocs .item .description {
+  font-size: $fontSize-smaller;
+}
 .apidocs .item .meta {
   background: none;
   border: none;
@@ -665,6 +669,12 @@ kbd .cmd {
 .apidocs .param {
   margin-bottom: 1em;
 }
+.apidocs .param-description {
+  font-size: $fontSize-smaller;
+  code {
+    font-size: $fontSize-smallest
+  }
+}
 .apidocs .param .type,
 .apidocs .param .type a {
   color: $color_gray-default;
@@ -684,7 +694,7 @@ kbd .cmd {
 /* -- Item "Returns" block -------------------------------------------------- */
 .apidocs .item .returns .type,
 .apidocs .item .returns .type a {
-  font-size: 100%;
+  font-size: 11px;
   margin: 0;
 }
 /* -- Class Constructor block ----------------------------------------------- */
@@ -880,7 +890,7 @@ ol.linenums {
   .file-line {
     position: relative;
     z-index: 2;
-    color:$color_gray-darkest;
+    color:$color_gray-darkest; 
   }
 }
 
