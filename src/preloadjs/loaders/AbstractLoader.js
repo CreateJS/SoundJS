@@ -182,6 +182,10 @@ this.createjs = this.createjs || {};
 	var p = createjs.extend(AbstractLoader, createjs.EventDispatcher);
 	var s = AbstractLoader;
 
+	// TODO: deprecated
+	// p.initialize = function() {}; // searchable for devs wondering where it is. REMOVED. See docs for details.
+
+
 	/**
 	 * Defines a POST request, use for a method value when loading data.
 	 * @property POST

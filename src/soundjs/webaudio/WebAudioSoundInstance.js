@@ -129,6 +129,10 @@ this.createjs = this.createjs || {};
 	var p = createjs.extend(WebAudioSoundInstance, createjs.AbstractSoundInstance);
 	var s = WebAudioSoundInstance;
 
+	// TODO: deprecated
+	// p.initialize = function() {}; // searchable for devs wondering where it is. REMOVED. See docs for details.
+
+
 	/**
 	 * Note this is only intended for use by advanced users.
 	 * <br />Audio context used to create nodes.  This is and needs to be the same context used by {{#crossLink "WebAudioPlugin"}}{{/crossLink}}.

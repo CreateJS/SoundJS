@@ -53,6 +53,10 @@ this.createjs = this.createjs || {};
 	};
 	var p = createjs.extend(Loader, createjs.AbstractLoader);
 
+	// TODO: deprecated
+	// p.initialize = function() {}; // searchable for devs wondering where it is. REMOVED. See docs for details.
+
+
 	/**
 	 * web audio context required for decoding audio
 	 * @property context
