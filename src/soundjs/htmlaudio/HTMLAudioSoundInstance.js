@@ -60,7 +60,7 @@ this.createjs = this.createjs || {};
 		// Proxies, make removing listeners easier.
 		this._endedHandler = createjs.proxy(this._handleSoundComplete, this);
 		this._readyHandler = createjs.proxy(this._handleTagReady, this);
-		this._stalledHandler = createjs.proxy(this.playFailed, this);
+		this._stalledHandler = createjs.proxy(this._playFailed, this);
 		this._audioSpriteEndHandler = createjs.proxy(this._handleAudioSpriteLoop, this);
 		this._loopHandler = createjs.proxy(this._handleSoundComplete, this);
 

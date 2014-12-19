@@ -1,6 +1,6 @@
 Version NEXT [not yet released]
 ****************************************************************************************************
-
+- fixed typo in HTMLAudioSoundInstance for this._stalledHandler from this.playFailed to this._playFailed
 
 
 Version 0.6.0 [December 12, 2014]
