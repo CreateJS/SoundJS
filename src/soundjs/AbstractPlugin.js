@@ -252,7 +252,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Get the master volume of the plugin, which affects all SoundInstances.
 	 * @method getVolume
-	 * @return The volume level, between 0 and 1.
+	 * @return {Number} The volume level, between 0 and 1.
 	 */
 	p.getVolume = function () {
 		return this._volume;
