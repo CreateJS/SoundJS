@@ -469,6 +469,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * Pause or resume the instance.  Note you can also resume playback with {{#crossLink "AbstractSoundInstance/play"}}{{/crossLink}}.
 	 *
+	 * @method setPaused
 	 * @param {boolean} value
 	 * @since 0.6.0
 	 * @return {AbstractSoundInstance} A reference to itself, intended for chaining calls.
@@ -500,7 +501,7 @@ this.createjs = this.createjs || {};
 	 * will be applied to the instance volume.
 	 *
 	 * @method setVolume
-	 * @param value The volume to set, between 0 and 1.
+	 * @param {Number} value The volume to set, between 0 and 1.
 	 * @return {AbstractSoundInstance} A reference to itself, intended for chaining calls.
 	 */
 	p.setVolume = function (value) {
@@ -520,7 +521,7 @@ this.createjs = this.createjs || {};
 	 * <code>myInstance.getVolume() * createjs.Sound.getVolume();</code>
 	 *
 	 * @method getVolume
-	 * @return The current volume of the sound instance.
+	 * @return {Number} The current volume of the sound instance.
 	 */
 	p.getVolume = function () {
 		return this._volume;
