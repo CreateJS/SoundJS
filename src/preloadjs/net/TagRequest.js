@@ -101,6 +101,7 @@ this.createjs = this.createjs || {};
 
 		this._tag.onload = createjs.proxy(this._handleTagComplete, this);
 		this._tag.onreadystatechange = createjs.proxy(this._handleReadyStateChange, this);
+		this._tag.onerror = createjs.proxy(this._handleError, this);
 
 		var evt = new createjs.Event("initialize");
 		evt.loader = this._tag;
@@ -138,6 +139,16 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
+	 * Handle any error events from the tag.
+	 * @method _handleError
+	 * @protected
+	 */
+	p._handleError = function() {
+		this._clean();
+		this.dispatchEvent("error");
+	};
+
+	/**
 	 * Handle the tag's onload callback.
 	 * @method _handleTagComplete
 	 * @private
@@ -160,6 +171,7 @@ this.createjs = this.createjs || {};
 	p._clean = function() {
 		this._tag.onload = null;
 		this._tag.onreadystatechange = null;
+		this._tag.onerror = null;
 		if (this._addedToDOM && this._tag.parentNode != null) {
 			this._tag.parentNode.removeChild(this._tag);
 		}
