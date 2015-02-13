@@ -3,6 +3,7 @@ Version NEXT [not yet released]
 - fixed typo in HTMLAudioSoundInstance for this._stalledHandler from this.playFailed to this._playFailed
 - fixed a reference in WebAudioLoader from this._handleError to this._sendError
 - updated HTMLAudio loading to properly dispatch error events
+- fixed issue with reloading canceled audio when used with PreloadJS (github issue 143)
 
 
 Version 0.6.0 [December 12, 2014]

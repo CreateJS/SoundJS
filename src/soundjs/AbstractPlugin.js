@@ -148,9 +148,10 @@ this.createjs = this.createjs || {};
 	p.register = function (loadItem, instances) {
 		this._audioSources[loadItem.src] = true;
 		this._soundInstances[loadItem.src] = [];
-		if(this._loaders[loadItem.src]) {return this._loaders[loadItem.src];}	// already loading/loaded this, so don't load twice
+		var loader = this._loaders[loadItem.src];
+		if(loader && !loader.canceled) {return this._loaders[loadItem.src];}	// already loading/loaded this, so don't load twice
 		// OJR potential issue that we won't be firing loaded event, might need to trigger if this is already loaded?
-		var loader = new this._loaderClass(loadItem);
+		loader = new this._loaderClass(loadItem);
 		loader.on("complete", createjs.proxy(this._handlePreloadComplete, this));
 		this._loaders[loadItem.src] = loader;
 		return loader;
