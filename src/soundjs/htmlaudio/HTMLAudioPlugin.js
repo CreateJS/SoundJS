@@ -65,12 +65,11 @@ this.createjs = this.createjs || {};
 	 * <ul><li>Safari requires Quicktime to be installed for audio playback.</li></ul>
 	 *
 	 * <b>iOS 6 limitations</b><br />
-	 * <ul><li>Note it is recommended to use {{#crossLink "WebAudioPlugin"}}{{/crossLink}} for iOS (6+)</li>
-	 * 		<li>HTML Audio is disabled by default because</li>
-	 * 		<li>can only have one &lt;audio&gt; tag</li>
+	 * <ul><li>can only have one &lt;audio&gt; tag</li>
 	 * 		<li>can not preload or autoplay the audio</li>
 	 * 		<li>can not cache the audio</li>
 	 * 		<li>can not play the audio except inside a user initiated event.</li>
+	 *		<li>Note it is recommended to use {{#crossLink "WebAudioPlugin"}}{{/crossLink}} for iOS (6+)</li>
 	 * 		<li>audio sprites can be used to mitigate some of these issues and are strongly recommended on iOS</li>
 	 * </ul>
 	 *

@@ -208,8 +208,6 @@ this.createjs = this.createjs || {};
 	 * <ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event
 	 * (touch/click).</li>
 	 * <li>A bug exists that will distort un-cached web audio when a video element is present in the DOM that has audio at a different sampleRate.</li>
-	 * <li>Note HTMLAudioPlugin is not supported on iOS by default.  See {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}
-	 * for more details.</li>
 	 * </ul>
 	 *
 	 * <b>Android HTML Audio limitations</b><br />
