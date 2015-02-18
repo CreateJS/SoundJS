@@ -9,8 +9,8 @@
  *
  * Audio sprites are much like CSS sprites or image sprite sheets: multiple audio assets grouped into a single file.
  * Audio sprites work around limitations in certain browsers, where only a single sound can be loaded and played at a
- * time, and are played exclusively with an HTML Audio tag. We recommend at least 300ms of silence between audio clips
- * to deal with HTML audio tag inaccuracy, and to prevent accidentally playing bits of the neighbouring clips.
+ * time. We recommend at least 300ms of silence between audio clips to deal with HTML audio tag inaccuracy, and to prevent
+ * accidentally playing bits of the neighbouring clips.
  *
  * <strong>Benefits of Audio Sprites:</strong>
  * <ul>
@@ -36,7 +36,7 @@
  *
  * <h4>Example</h4>
  *
- *      createjs.Sound.initializeDefaultPlugins();
+ *		createjs.Sound.initializeDefaultPlugins();
  *		var assetsPath = "./assets/";
  *		var sounds = [{
  *			src:"MyAudioSprite.ogg", data: {
