@@ -127,29 +127,12 @@ this.createjs = this.createjs || {};
 	 *		queue.installPlugin(createjs.Sound);
 	 *
 	 * <b>Audio Sprites</b><br />
-	 * SoundJS has added support for Audio Sprites, available as of version 0.6.0.
+	 * SoundJS has added support for {{#crossLink "AudioSprites"}}{{/crossLink}}, available as of version 0.6.0.
 	 * For those unfamiliar with audio sprites, they are much like CSS sprites or sprite sheets: multiple audio assets
 	 * grouped into a single file.
 	 *
-	 * Benefits of Audio Sprites
-	 * <ul><li>More robust support for older browsers and devices that only allow a single audio instance, such as iOS 5.</li>
-	 * <li>They provide a work around for the Internet Explorer 9 audio tag limit, which until now restricted how many
-	 * different sounds we could load at once.</li>
-	 * <li>Faster loading by only requiring a single network request for several sounds, especially on mobile devices
-	 * where the network round trip for each file can add significant latency.</li></ul>
-	 *
-	 * Drawbacks of Audio Sprites
-	 * <ul><li>No guarantee of smooth looping when using HTML or Flash audio.  If you have a track that needs to loop
-	 * smoothly and you are supporting non-web audio browsers, do not use audio sprites for that sound if you can avoid it.</li>
-	 * <li>No guarantee that HTML audio will play back immediately, especially the first time. In some browsers (Chrome!),
-	 * HTML audio will only load enough to play through – so we rely on the “canplaythrough” event to determine if the audio is loaded.
-	 * Since audio sprites must jump ahead to play specific sounds, the audio may not yet have downloaded.</li>
-	 * <li>Audio sprites share the same core source, so if you have a sprite with 5 sounds and are limited to 2
-	 * concurrently playing instances, that means you can only play 2 of the sounds at the same time.</li></ul>
-	 *
 	 * <h4>Example</h4>
 	 *
-	 *      createjs.Sound.initializeDefaultPlugins();
 	 *		var assetsPath = "./assets/";
 	 *		var sounds = [{
 	 *			src:"MyAudioSprite.ogg", data: {
@@ -158,17 +141,13 @@ this.createjs = this.createjs || {};
 	 *					{id:"sound2", startTime:1000, duration:400},
 	 *					{id:"sound3", startTime:1700, duration: 1000}
 	 *				]}
- *				}
+ 	 *			}
 	 *		];
 	 *		createjs.Sound.alternateExtensions = ["mp3"];
 	 *		createjs.Sound.on("fileload", loadSound);
 	 *		createjs.Sound.registerSounds(sounds, assetsPath);
 	 *		// after load is complete
 	 *		createjs.Sound.play("sound2");
-	 *
-	 * You can also create audio sprites on the fly by setting the startTime and duration when creating an new AbstractSoundInstance.
-	 *
-	 * 		createjs.Sound.play("MyAudioSprite", {startTime: 1000, duration: 400});
 	 *
 	 * <b>Mobile Safe Approach</b><br />
 	 * Mobile devices require sounds to be played inside of a user initiated event (touch/click) in varying degrees.
@@ -215,6 +194,9 @@ this.createjs = this.createjs || {};
 	 * <li>We can only play audio inside a user event (touch/click).  This currently means you cannot loop sound or use
 	 * a delay.</li></ul>
 	 *
+	 * <b>Web Audio and PreloadJS</b><br />
+	 * <ul><li>Web Audio must be loaded through XHR, therefore when used with PreloadJS tag loading is not possible.  This means that tag loading cannot
+	 * be used to avoid cross domain issues if WebAudioPlugin is used<li><ul>
 	 *
 	 * @class Sound
 	 * @static
