@@ -9,7 +9,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * The version string for this release.
-	 * @for FlashPlugin
+	 * @for FlashAudioPlugin
 	 * @property version
 	 * @type String
 	 * @static
@@ -18,7 +18,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * The build date for this release in UTC format.
-	 * @for FlashPlugin
+	 * @for FlashAudioPlugin
 	 * @property buildDate
 	 * @type String
 	 * @static

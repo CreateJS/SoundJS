@@ -397,7 +397,7 @@
 			if (instance == null) {
 				return;
 			}
-			instance.paused ? instance.resume() : instance.pause();
+			instance.paused ? instance.paused = false : instance.paused = true;
 			$("#pauseBtn").attr("value", instance.paused ? "Resume" : "Pause");
 		});
 		$("#muteBtn").click(function (event) {

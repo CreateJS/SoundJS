@@ -39,12 +39,6 @@ this.createjs = this.createjs || {};
 	"use strict";
 
 	/**
-	 * FlashPlugin has been renamed to {{#crossLink "FlashAudioPlugin"}}{{/crossLink}}.
-	 * @class FlashPlugin
-	 * @deprecated
-	 */
-
-	/**
 	 * Play sounds using a Flash instance. This plugin is not used by default, and must be registered manually in
 	 * {{#crossLink "Sound"}}{{/crossLink}} using the {{#crossLink "Sound/registerPlugins"}}{{/crossLink}} method. This
 	 * plugin is recommended to be included if sound support is required in older browsers such as IE8.
@@ -496,5 +490,4 @@ this.createjs = this.createjs || {};
 	};
 
 	createjs.FlashAudioPlugin = createjs.promote(FlashAudioPlugin, "AbstractPlugin");
-	createjs.FlashPlugin = createjs.FlashAudioPlugin;		// TODO remove deprecated
 }());

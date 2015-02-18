@@ -385,32 +385,6 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Deprecated, please use {{#crossLink "AbstractSoundInstance/paused:property"}}{{/crossLink}} instead.
-	 *
-	 * @method pause
-	 * @return {Boolean} If the pause call succeeds. This will return false if the sound isn't currently playing.
-	 * @deprecated
-	 */
-	p.pause = function () {
-		if (this._paused || this.playState != createjs.Sound.PLAY_SUCCEEDED) {return false;}
-		this.setPaused(true);
-		return true;
-	};
-
-	/**
-	 * Deprecated, please use {{#crossLink "AbstractSoundInstance/paused:property"}}{{/crossLink}} instead.
-	 *
-	 * @method resume
-	 * @return {Boolean} If the resume call succeeds. This will return false if called on a sound that is not paused.
-	 * @deprecated
-	 */
-	p.resume = function () {
-		if (!this._paused) {return false;}
-		this.setPaused(false);
-		return true;
-	};
-
-	/**
 	 * Stop playback of the instance. Stopped sounds will reset their position to 0, and calls to {{#crossLink "AbstractSoundInstance/resume"}}{{/crossLink}}
 	 * will fail.  To start playback again, call {{#crossLink "AbstractSoundInstance/play"}}{{/crossLink}}.
 	 *
@@ -525,29 +499,6 @@ this.createjs = this.createjs || {};
 	 */
 	p.getVolume = function () {
 		return this._volume;
-	};
-
-	/**
-	 * Deprecated, please use {{#crossLink "AbstractSoundInstance/muted:property"}}{{/crossLink}} instead.
-	 *
-	 * @method setMute
-	 * @param {Boolean} value If the sound should be muted.
-	 * @return {Boolean} If the mute call succeeds.
-	 * @deprecated
-	 */
-	p.setMute = function (value) {
-		this.setMuted(value);
-	};
-
-	/**
-	 * Deprecated, please use {{#crossLink "AbstractSoundInstance/muted:property"}}{{/crossLink}} instead.
-	 *
-	 * @method getMute
-	 * @return {Boolean} If the sound is muted.
-	 * @deprecated
-	 */
-	p.getMute = function () {
-		return this._muted;
 	};
 
 	/**

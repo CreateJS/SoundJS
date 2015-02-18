@@ -884,31 +884,6 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Deprecated.  Please use {{#crossLink "Sound/registerSounds"}}{{/crossLink} instead.
-	 *
-	 * @method registerManifest
-	 * @param {Array} sounds An array of objects to load. Objects are expected to be in the format needed for
-	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}}: <code>{src:srcURI, id:ID, data:Data}</code>
-	 * with "id" and "data" being optional.
-	 * @param {string} basePath Set a path that will be prepended to each src when loading.  When creating, playing, or removing
-	 * audio that was loaded with a basePath by src, the basePath must be included.
-	 * @return {Object} An array of objects with the modified values that were passed in, which defines each sound.
-	 * Like registerSound, it will return false for any values when the source cannot be parsed or if no plugins can be initialized.
-	 * Also, it will return true for any values when the source is already loaded.
-	 * @since 0.4.0
-	 * @depreacted
-	 * @static
- 	 */
-	s.registerManifest = function(manifest, basePath) {
-		try {
-			console.log("createjs.Sound.registerManifest is deprecated, please use createjs.Sound.registerSounds.")
-		} catch (error) {
-
-		};
-		return this.registerSounds(manifest, basePath);
-	};
-
-	/**
 	 * Remove a sound that has been registered with {{#crossLink "Sound/registerSound"}}{{/crossLink}} or
 	 * {{#crossLink "Sound/registerSounds"}}{{/crossLink}}.
 	 * <br />Note this will stop playback on active instances playing this sound before deleting them.
@@ -991,28 +966,6 @@ this.createjs = this.createjs || {};
 			returnValues[i] = createjs.Sound.removeSound(sounds[i].src, basePath);
 		}
 		return returnValues;
-	};
-
-	/**
-	 * Deprecated.  Please use {{#crossLink "Sound/removeSounds"}}{{/crossLink}} instead.
-	 *
-	 * @method removeManifest
-	 * @param {Array} manifest An array of objects to remove. Objects are expected to be in the format needed for
-	 * {{#crossLink "Sound/removeSound"}}{{/crossLink}}: <code>{srcOrID:srcURIorID}</code>
-	 * @param {string} basePath Set a path that will be prepended to each src when removing.
-	 * @return {Object} An array of Boolean values representing if the sounds with the same array index in manifest was
-	 * successfully removed.
-	 * @static
-	 * @since 0.4.1
-	 * @deprecated
-	 */
-	s.removeManifest = function (manifest, basePath) {
-		try {
-			console.log("createjs.Sound.removeManifest is deprecated, please use createjs.Sound.removeSounds.");
-		} catch (error) {
-
-		};
-		return s.removeSounds(manifest, basePath);
 	};
 
 	/**

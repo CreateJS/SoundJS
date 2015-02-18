@@ -194,20 +194,6 @@ this.createjs = this.createjs || {};
 	 */
 	s._capabilities = null;
 
-	/**
-	 * Deprecated now that we have audio sprite support.  Audio sprites are strongly recommend on iOS for the following reasons:
-	 * <li>it can only have one &lt;audio&gt; tag</li>
-	 * <li>can not preload or autoplay the audio</li>
-	 * <li>can not cache the audio</li>
-	 * <li>can not play the audio except inside a user initiated event</li>
-	 *
-	 * @property enableIOS
-	 * @type {Boolean}
-	 * @default false
-	 * @deprecated
-	 */
-	s.enableIOS = false;
-
 
 // Static Methods
 	/**

@@ -197,7 +197,7 @@
 				trackTime();
 				return;
 			} else {
-				instance.paused ? instance.resume() : instance.pause();
+				instance.paused ? instance.paused = false : instance.paused = true;
 			}
 
 			if (instance.paused) {
