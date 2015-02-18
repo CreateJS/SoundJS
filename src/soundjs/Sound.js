@@ -127,7 +127,7 @@ this.createjs = this.createjs || {};
 	 *		queue.installPlugin(createjs.Sound);
 	 *
 	 * <b>Audio Sprites</b><br />
-	 * SoundJS has added support for {{#crossLink "AudioSprites"}}{{/crossLink}}, available as of version 0.6.0.
+	 * SoundJS has added support for {{#crossLink "AudioSprite"}}{{/crossLink}}, available as of version 0.6.0.
 	 * For those unfamiliar with audio sprites, they are much like CSS sprites or sprite sheets: multiple audio assets
 	 * grouped into a single file.
 	 *
@@ -196,7 +196,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * <b>Web Audio and PreloadJS</b><br />
 	 * <ul><li>Web Audio must be loaded through XHR, therefore when used with PreloadJS tag loading is not possible.  This means that tag loading cannot
-	 * be used to avoid cross domain issues if WebAudioPlugin is used<li><ul>
+	 * be used to avoid cross domain issues if WebAudioPlugin is used</li><ul>
 	 *
 	 * @class Sound
 	 * @static
@@ -801,7 +801,7 @@ this.createjs = this.createjs || {};
 	 * @param {Number | Object} [data] Data associated with the item. Sound uses the data parameter as the number of
 	 * channels for an audio instance, however a "channels" property can be appended to the data object if it is used
 	 * for other information. The audio channels will set a default based on plugin if no value is found.
-	 * Sound also uses the data property to hold an audioSprite array of objects in the following format {id, startTime, duration}.<br/>
+	 * Sound also uses the data property to hold an {{#crossLink "AudioSprite"}}{{/crossLink}} array of objects in the following format {id, startTime, duration}.<br/>
 	 *   id used to play the sound later, in the same manner as a sound src with an id.<br/>
 	 *   startTime is the initial offset to start playback and loop from, in milliseconds.<br/>
 	 *   duration is the amount of time to play the clip for, in milliseconds.<br/>
