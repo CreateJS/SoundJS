@@ -133,8 +133,6 @@ this.createjs = this.createjs || {};
 		// OJR TODO find original reason that we didn't use defined functions.  I think it was performance related
 		/**
 		 * The volume of the sound, between 0 and 1.
-		 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower and Opera versions 11.50 or lower,
-		 * and Internet Explorer 8 or lower.  Instead use {{#crossLink "AbstractSoundInstance/setVolume"}}{{/crossLink}} and {{#crossLink "AbstractSoundInstance/getVolume"}}{{/crossLink}}.
 		 *
 		 * The actual output volume of a sound can be calculated using:
 		 * <code>myInstance.volume * createjs.Sound.getVolume();</code>
@@ -152,8 +150,6 @@ this.createjs = this.createjs || {};
 		/**
 		 * The pan of the sound, between -1 (left) and 1 (right). Note that pan is not supported by HTML Audio.
 		 *
-		 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower, Opera versions 11.50 or lower,
-		 * and Internet Explorer 8 or lower.  Instead use {{#crossLink "AbstractSoundInstance/setPan"}}{{/crossLink}} and {{#crossLink "AbstractSoundInstance/getPan"}}{{/crossLink}}.
 		 * <br />Note in WebAudioPlugin this only gives us the "x" value of what is actually 3D audio.
 		 *
 		 * @property pan
@@ -168,9 +164,6 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * The length of the audio clip, in milliseconds.
-		 *
-		 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower, Opera versions 11.50 or lower,
-		 * and Internet Explorer 8 or lower.  Instead use {{#crossLink "AbstractSoundInstance/setDuration"}}{{/crossLink}} and {{#crossLink "AbstractSoundInstance/getDuration"}}{{/crossLink}}.
 		 *
 		 * @property duration
 		 * @type {Number}
@@ -202,9 +195,6 @@ this.createjs = this.createjs || {};
 		/**
 		 * The position of the playhead in milliseconds. This can be set while a sound is playing, paused, or stopped.
 		 *
-		 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower, Opera versions 11.50 or lower,
-		 * and Internet Explorer 8 or lower.  Instead use {{#crossLink "AbstractSoundInstance/setPosition"}}{{/crossLink}} and {{#crossLink "AbstractSoundInstance/getPosition"}}{{/crossLink}}.
-		 *
 		 * @property position
 		 * @type {Number}
 		 * @default 0
@@ -218,9 +208,6 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * The number of play loops remaining. Negative values will loop infinitely.
-		 *
-  		 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower, Opera versions 11.50 or lower,
-		 * and Internet Explorer 8 or lower.  Instead use {{#crossLink "AbstractSoundInstance/setLoop"}}{{/crossLink}} and {{#crossLink "AbstractSoundInstance/getLoop"}}{{/crossLink}}.
 		 *
 		 * @property loop
 		 * @type {Number}
@@ -237,9 +224,6 @@ this.createjs = this.createjs || {};
 		/**
 		 * Determines if the audio is currently muted.
 		 *
-		 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower, Opera versions 11.50 or lower,
-		 * and Internet Explorer 8 or lower.  Instead use {{#crossLink "AbstractSoundInstance/setMute"}}{{/crossLink}} and {{#crossLink "AbstractSoundInstance/getMute"}}{{/crossLink}}.
-		 *
 		 * @property muted
 		 * @type {Boolean}
 		 * @default false
@@ -253,10 +237,6 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * Tells you if the audio is currently paused.
-		 *
-		 * <br />Note this uses a getter setter, which is not supported by Firefox versions 3.6 or lower, Opera versions 11.50 or lower,
-		 * and Internet Explorer 8 or lower.
-		 * Use {{#crossLink "AbstractSoundInstance/pause:method"}}{{/crossLink}} and {{#crossLink "AbstractSoundInstance/resume:method"}}{{/crossLink}} to set.
 		 *
 		 * @property paused
 		 * @type {Boolean}

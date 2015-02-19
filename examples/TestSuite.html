@@ -327,13 +327,13 @@
 		});
 		$("#muteAllSoundsBtn").click(function (event) {
 			var muted = !createjs.Sound.getMute();
-			createjs.Sound.setMute(muted);
+			createjs.Sound.muted = muted;
 			$("#muteAllSoundsBtn").attr("value", muted ? "Unmute All Sounds" : "Mute All Sounds");
 		});
 
 		$(".masterVolumeSlider").on('slidestop', function (event) {
 			var value = $(this).slider("option", "value");
-			createjs.Sound.setVolume(value / 100);
+			createjs.Sound.volume = value / 100;
 		});
 
 		// instance controls
@@ -641,7 +641,7 @@
 			enableSet("instance", true);
 			var instance = getInstance();
 
-			var value = instance.getVolume() * 100 | 0;
+			var value = instance.volume * 100 | 0;
 			$(".volumeSlider").slider("value", value);
 			$("#volumeValue").text(value);
 
@@ -649,7 +649,7 @@
 			$(".instanceLoopSlider").slider("value", value);
 			$("#instaceLoopValue").text(value);
 
-			value = instance.getPan() | 0;
+			value = instance.pan | 0;
 			$(".panSlider").slider("value", value);
 			$("#panValue").text(value);
 
@@ -665,9 +665,9 @@
 
 	function setPosSlider() {
 		var instance = getInstance();
-		value = instance.getPosition() / instance.getDuration() * 100 | 0;
+		var value = instance.position / instance.duration * 100 | 0;
 		$(".posSlider").slider("value", value);
-		$("#posValue").text(instance.getPosition() / instance.getDuration() * 100 | 0);
+		$("#posValue").text(instance.position / instance.duration * 100 | 0);
 	}
 
 	// Toggle the enabled property of a named set of components in a specific form

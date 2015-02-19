@@ -391,6 +391,69 @@ this.createjs = this.createjs || {};
 	 */
     s.activePlugin = null;
 
+	/**
+	 * Set the master volume of Sound. The master volume is multiplied against each sound's individual volume.  For
+	 * example, if master volume is 0.5 and a sound's volume is 0.5, the resulting volume is 0.25. To set individual
+	 * sound volume, use AbstractSoundInstance {{#crossLink "AbstractSoundInstance/volume:property"}}{{/crossLink}} instead.
+	 *
+	 * <h4>Example</h4>
+	 *
+	 *     createjs.Sound.volume = 0.5;
+	 *
+	 *
+	 * @property volume
+	 * @type {Number}
+	 * @default 1
+	 */
+	s._masterVolume = 1;
+	Object.defineProperty(s, "volume", {
+		get: function () {return this._masterVolume;},
+		set: function (value) {
+				if (Number(value) == null) {return false;}
+				value = Math.max(0, Math.min(1, value));
+				s._masterVolume = value;
+				if (!this.activePlugin || !this.activePlugin.setVolume || !this.activePlugin.setVolume(value)) {
+					var instances = this._instances;
+					for (var i = 0, l = instances.length; i < l; i++) {
+						instances[i].setMasterVolume(value);
+					}
+				}
+			}
+	});
+
+	/**
+	 * Mute/Unmute all audio. Note that muted audio still plays at 0 volume. This global mute value is maintained
+	 * separately and when set will override, but not change the mute property of individual instances. To mute an individual
+	 * instance, use AbstractSoundInstance {{#crossLink "AbstractSoundInstance/muted:property"}}{{/crossLink}} instead.
+	 *
+	 * <h4>Example</h4>
+	 *
+	 *     createjs.Sound.muted = true;
+	 *
+	 *
+	 * @property muted
+	 * @type {Boolean}
+	 * @default false
+	 * @since 0.6.0
+	 */
+	s._masterMute = false;
+	// OJR references to the methods were not working, so the code had to be duplicated here
+	Object.defineProperty(s, "muted", {
+		get: function () {return this._masterMute;},
+		set: function (value) {
+				if (value == null) {return false;}
+
+				this._masterMute = value;
+				if (!this.activePlugin || !this.activePlugin.setMute || !this.activePlugin.setMute(value)) {
+					var instances = this._instances;
+					for (var i = 0, l = instances.length; i < l; i++) {
+						instances[i].setMasterMute(value);
+					}
+				}
+				return true;
+			}
+	});
+
 
 // Class Private properties
 	/**
@@ -413,30 +476,6 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	s._lastID = 0;
-
-	/**
-	 * The master volume value, which affects all sounds. Use {{#crossLink "Sound/getVolume"}}{{/crossLink}} and
-	 * {{#crossLink "Sound/setVolume"}}{{/crossLink}} to modify the volume of all audio.
-	 * @property _masterVolume
-	 * @type {Number}
-	 * @default 1
-	 * @protected
-	 * @since 0.4.0
-	 * @static
-	 */
-	s._masterVolume = 1;
-
-	/**
-	 * The master mute value, which affects all sounds.  This is applies to all sound instances.  This value can be set
-	 * through {{#crossLink "Sound/setMute"}}{{/crossLink}} and accessed via {{#crossLink "Sound/getMute"}}{{/crossLink}}.
-	 * @property _masterMute
-	 * @type {Boolean}
-	 * @default false
-	 * @protected
-	 * @static
-	 * @since 0.4.0
-	 */
-	s._masterMute = false;
 
 	/**
 	 * An array containing all currently playing instances. This allows Sound to control the volume, mute, and playback of
@@ -1159,17 +1198,12 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Set the master volume of Sound. The master volume is multiplied against each sound's individual volume.  For
-	 * example, if master volume is 0.5 and a sound's volume is 0.5, the resulting volume is 0.25. To set individual
-	 * sound volume, use AbstractSoundInstance {{#crossLink "AbstractSoundInstance/setVolume"}}{{/crossLink}} instead.
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *     createjs.Sound.setVolume(0.5);
+	 * Deprecated, please use {{#crossLink "Sound/volume:property"}}{{/crossLink}} instead.
 	 *
 	 * @method setVolume
 	 * @param {Number} value The master volume value. The acceptable range is 0-1.
 	 * @static
+	 * @deprecated
 	 */
 	s.setVolume = function (value) {
 		if (Number(value) == null) {return false;}
@@ -1184,35 +1218,26 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Get the master volume of Sound. The master volume is multiplied against each sound's individual volume.
-	 * To get individual sound volume, use AbstractSoundInstance {{#crossLink "AbstractSoundInstance/volume:property"}}{{/crossLink}} instead.
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *     var masterVolume = createjs.Sound.getVolume();
+	 * Deprecated, please use {{#crossLink "Sound/volume:property"}}{{/crossLink}} instead.
 	 *
 	 * @method getVolume
 	 * @return {Number} The master volume, in a range of 0-1.
 	 * @static
+	 * @deprecated
 	 */
 	s.getVolume = function () {
-		return s._masterVolume;
+		return this._masterVolume;
 	};
 
 	/**
-	 * Mute/Unmute all audio. Note that muted audio still plays at 0 volume. This global mute value is maintained
-	 * separately and when set will override, but not change the mute property of individual instances. To mute an individual
-	 * instance, use AbstractSoundInstance {{#crossLink "AbstractSoundInstance/setMute"}}{{/crossLink}} instead.
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *     createjs.Sound.setMute(true);
+	 * Deprecated, please use {{#crossLink "Sound/muted:property"}}{{/crossLink}} instead.
 	 *
 	 * @method setMute
 	 * @param {Boolean} value Whether the audio should be muted or not.
 	 * @return {Boolean} If the mute was set.
 	 * @static
 	 * @since 0.4.0
+	 * @deprecated
 	 */
 	s.setMute = function (value) {
 		if (value == null) {return false;}
@@ -1228,17 +1253,13 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Returns the global mute value. To get the mute value of an individual instance, use AbstractSoundInstance
-	 * {{#crossLink "AbstractSoundInstance/getMute"}}{{/crossLink}} instead.
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *     var muted = createjs.Sound.getMute();
+	 * Deprecated, please use {{#crossLink "Sound/muted:property"}}{{/crossLink}} instead.
 	 *
 	 * @method getMute
 	 * @return {Boolean} The mute value of Sound.
 	 * @static
 	 * @since 0.4.0
+	 * @deprecated
 	 */
 	s.getMute = function () {
 		return this._masterMute;
