@@ -405,9 +405,8 @@
 			if (instance == null) {
 				return;
 			}
-			var muted = !instance.getMute();
-			instance.setMute(muted);
-			$("#muteBtn").attr("value", muted ? "Unmute" : "Mute");
+			instance.muted = !instance.muted;
+			$("#muteBtn").attr("value", instance.muted ? "Unmute" : "Mute");
 		});
 		$("#clearBtn").click(function (event) {
 			var instance = getInstance();
@@ -429,7 +428,7 @@
 				return;
 			}
 			var value = $(this).slider("option", "value");
-			instance.setVolume(value / 100);
+			instance.volume = value / 100;
 		});
 
 		$(".instanceLoopSlider").on('slidestop', function (event) {
@@ -444,13 +443,13 @@
 		$(".panSlider").on('slidestop', function (event) {
 			var instance = getInstance();
 			var value = $(this).slider("option", "value");
-			instance.setPan(value);
+			instance.pan = value;
 		});
 
 		$(".posSlider").on('slidestop', function (event) {
 			var instance = getInstance();
 			var value = $(this).slider("option", "value");
-			instance.setPosition(value / 100 * instance.getDuration());
+			instance.position = (value / 100 * instance.duration);
 			audioInterval = setInterval(setPosSlider, intervalTime);
 		});
 		$(".posSlider").on('slidestart', function (event) {
@@ -658,7 +657,7 @@
 			audioInterval = setInterval(setPosSlider, intervalTime);
 
 			$("#pauseBtn").attr("value", instance.paused ? "Resume" : "Pause");
-			$("#muteBtn").attr("value", instance.getMute() ? "Unmute" : "Mute");
+			$("#muteBtn").attr("value", instance.muted ? "Unmute" : "Mute");
 		} else {
 			enableSet("instance", false);
 		}

@@ -144,12 +144,10 @@ this.createjs = this.createjs || {};
 		 * @default 1
 		 */
 		this._volume =  1;
-		if (createjs.definePropertySupported) {
-			Object.defineProperty(this, "volume", {
+		Object.defineProperty(this, "volume", {
 			get: this.getVolume,
 			set: this.setVolume
-			});
-		}
+		});
 
 		/**
 		 * The pan of the sound, between -1 (left) and 1 (right). Note that pan is not supported by HTML Audio.
@@ -163,12 +161,10 @@ this.createjs = this.createjs || {};
 		 * @default 0
 		 */
 		this._pan =  0;
-		if (createjs.definePropertySupported) {
-			Object.defineProperty(this, "pan", {
-				get: this.getPan,
-				set: this.setPan
-			});
-		}
+		Object.defineProperty(this, "pan", {
+			get: this.getPan,
+			set: this.setPan
+		});
 
 		/**
 		 * The length of the audio clip, in milliseconds.
@@ -182,12 +178,10 @@ this.createjs = this.createjs || {};
 		 * @since 0.6.0
 		 */
 		this._duration = Math.max(0, duration || 0);
-		if (createjs.definePropertySupported) {
-			Object.defineProperty(this, "duration", {
-				get: this.getDuration,
-				set: this.setDuration
-			});
-		}
+		Object.defineProperty(this, "duration", {
+			get: this.getDuration,
+			set: this.setDuration
+		});
 
 		/**
 		 * Object that holds plugin specific resource need for audio playback.
@@ -199,12 +193,10 @@ this.createjs = this.createjs || {};
 		 * @default null
 		 */
 		this._playbackResource = null;
-		if (createjs.definePropertySupported) {
-			Object.defineProperty(this, "playbackResource", {
-				get: this.getPlaybackResource,
-				set: this.setPlaybackResource
-			});
-		}
+		Object.defineProperty(this, "playbackResource", {
+			get: this.getPlaybackResource,
+			set: this.setPlaybackResource
+		});
 		if(playbackResource !== false && playbackResource !== true) { this.setPlaybackResource(playbackResource); }
 
 		/**
@@ -219,12 +211,10 @@ this.createjs = this.createjs || {};
 		 * @since 0.6.0
 		 */
 		this._position = 0;
-		if (createjs.definePropertySupported) {
-			Object.defineProperty(this, "position", {
-				get: this.getPosition,
-				set: this.setPosition
-			});
-		}
+		Object.defineProperty(this, "position", {
+			get: this.getPosition,
+			set: this.setPosition
+		});
 
 		/**
 		 * The number of play loops remaining. Negative values will loop infinitely.
@@ -239,12 +229,10 @@ this.createjs = this.createjs || {};
 		 * @since 0.6.0
 		 */
 		this._loop = 0;
-		if (createjs.definePropertySupported) {
-			Object.defineProperty(this, "loop", {
-				get: this.getLoop,
-				set: this.setLoop
-			});
-		}
+		Object.defineProperty(this, "loop", {
+			get: this.getLoop,
+			set: this.setLoop
+		});
 
 		/**
 		 * Determines if the audio is currently muted.
@@ -258,12 +246,10 @@ this.createjs = this.createjs || {};
 		 * @since 0.6.0
 		 */
 		this._muted = false;
-		if (createjs.definePropertySupported) {
-			Object.defineProperty(this, "muted", {
-				get: this.getMuted,
-				set: this.setMuted
-			});
-		}
+		Object.defineProperty(this, "muted", {
+			get: this.getMuted,
+			set: this.setMuted
+		});
 
 		/**
 		 * Tells you if the audio is currently paused.
@@ -276,12 +262,10 @@ this.createjs = this.createjs || {};
 		 * @type {Boolean}
 		 */
 		this._paused = false;
-		if (createjs.definePropertySupported) {
-			Object.defineProperty(this, "paused", {
-				get: this.getPaused,
-				set: this.setPaused
-			});
-		}
+		Object.defineProperty(this, "paused", {
+			get: this.getPaused,
+			set: this.setPaused
+		});
 
 
 	// Events
@@ -424,11 +408,9 @@ this.createjs = this.createjs || {};
 
 // get/set methods that allow support for IE8
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/paused:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * and getPaused remains to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/paused:property"}}{{/crossLink}} directly as a property,
 	 *
-	 * Returns true if the instance is currently paused.
-	 *
+	 * @deprecated
 	 * @method getPaused
 	 * @returns {boolean} If the instance is currently paused
 	 * @since 0.6.0
@@ -438,11 +420,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/paused:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * setPaused remains to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/paused:property"}}{{/crossLink}} directly as a property
 	 *
-	 * Pause or resume the instance.  Note you can also resume playback with {{#crossLink "AbstractSoundInstance/play"}}{{/crossLink}}.
-	 *
+	 * @deprecated
 	 * @method setPaused
 	 * @param {boolean} value
 	 * @since 0.6.0
@@ -462,18 +442,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/volume:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * setVolume remains to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/volume:property"}}{{/crossLink}} directly as a property
 	 *
-	 * Set the volume of the instance.
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *      myInstance.setVolume(0.5);
-	 *
-	 * Note that the master volume set using the Sound API method {{#crossLink "Sound/setVolume"}}{{/crossLink}}
-	 * will be applied to the instance volume.
-	 *
+	 * @deprecated
 	 * @method setVolume
 	 * @param {Number} value The volume to set, between 0 and 1.
 	 * @return {AbstractSoundInstance} A reference to itself, intended for chaining calls.
@@ -488,12 +459,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/volume:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getVolume remains to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/volume:property"}}{{/crossLink}} directly as a property
 	 *
-	 * Get the volume of the instance. The actual output volume of a sound can be calculated using:
-	 * <code>myInstance.getVolume() * createjs.Sound.getVolume();</code>
-	 *
+	 * @deprecated
 	 * @method getVolume
 	 * @return {Number} The current volume of the sound instance.
 	 */
@@ -502,16 +470,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/muted:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * setMuted exists to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/muted:property"}}{{/crossLink}} directly as a property
 	 *
-	 * Mute and unmute the sound. Muted sounds will still play at 0 volume. Note that an unmuted sound may still be
-	 * silent depending on {{#crossLink "Sound"}}{{/crossLink}} volume, instance volume, and Sound muted.
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *     myInstance.setMuted(true);
-	 *
+	 * @deprecated
 	 * @method setMute
 	 * @param {Boolean} value If the sound should be muted.
 	 * @return {AbstractSoundInstance} A reference to itself, intended for chaining calls.
@@ -525,15 +486,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/muted:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getMuted remains to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/muted:property"}}{{/crossLink}} directly as a property
 	 *
-	 * Get the mute value of the instance.
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *      var isMuted = myInstance.getMuted();
-	 *
+	 * @deprecated
 	 * @method getMute
 	 * @return {Boolean} If the sound is muted.
 	 * @since 0.6.0
@@ -543,17 +498,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/pan:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getPan remains to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/pan:property"}}{{/crossLink}} directly as a property
 	 *
-	 * Set the left(-1)/right(+1) pan of the instance. Note that {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}} does not
-	 * support panning, and only simple left/right panning has been implemented for {{#crossLink "WebAudioPlugin"}}{{/crossLink}}.
-	 * The default pan value is 0 (center).
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *     myInstance.setPan(-1);  // to the left!
-	 *
+	 * @deprecated
 	 * @method setPan
 	 * @param {Number} value The pan value, between -1 (left) and 1 (right).
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
@@ -566,16 +513,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/pan:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getPan remains to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/pan:property"}}{{/crossLink}} directly as a property
 	 *
-	 * Get the left/right pan of the instance. Note in WebAudioPlugin this only gives us the "x" value of what is
-	 * actually 3D audio.
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *     var myPan = myInstance.getPan();
-	 *
+	 * @deprecated
 	 * @method getPan
 	 * @return {Number} The value of the pan, between -1 (left) and 1 (right).
 	 */
@@ -584,15 +524,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/position:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getPosition remains to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/position:property"}}{{/crossLink}} directly as a property
 	 *
-	 * Get the position of the playhead of the instance in milliseconds.
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *     var currentOffset = myInstance.getPosition();
-	 *
+	 * @deprecated
 	 * @method getPosition
 	 * @return {Number} The position of the playhead in the sound, in milliseconds.
 	 */
@@ -604,16 +538,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/position:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * setPosition remains to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/position:property"}}{{/crossLink}} directly as a property
 	 *
-	 * Set the position of the playhead in the instance. This can be set while a sound is playing, paused, or
-	 * stopped.
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *      myInstance.setPosition(myInstance.getDuration()/2); // set audio to its halfway point.
-	 *
+	 * @deprecated
 	 * @method setPosition
 	 * @param {Number} value The position to place the playhead, in milliseconds.
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
@@ -627,16 +554,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/duration:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getDuration exists to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/duration:property"}}{{/crossLink}} directly as a property
 	 *
-	 * Get the duration of the instance, in milliseconds.
-	 * Note a sound needs to be loaded before it will have duration, unless it was set manually to create an audio sprite.
-	 *
-	 * <h4>Example</h4>
-	 *
-	 *     var soundDur = myInstance.getDuration();
-	 *
+	 * @deprecated
 	 * @method getDuration
 	 * @return {Number} The duration of the sound instance in milliseconds.
 	 */
@@ -645,11 +565,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/duration:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * setDuration exists to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/duration:property"}}{{/crossLink}} directly as a property
 	 *
-	 * Set the duration of the audio.  Generally this is not called, but it can be used to create an audio sprite out of an existing AbstractSoundInstance.
-	 *
+	 * @deprecated
 	 * @method setDuration
 	 * @param {number} value The new duration time in milli seconds.
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
@@ -663,12 +581,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/playbackResource:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * setPlaybackResource exists to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/playbackResource:property"}}{{/crossLink}} directly as a property
 	 *
-	 * An object containing any resources needed for audio playback, set by the plugin.
-	 * Only meant for use by advanced users.
-	 *
+	 * @deprecated
 	 * @method setPlayback
 	 * @param {Object} value The new playback resource.
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
@@ -681,11 +596,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/playbackResource:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getPlaybackResource exists to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/playbackResource:property"}}{{/crossLink}} directly as a property
 	 *
-	 * An object containing any resources needed for audio playback, usually set by the plugin.
-	 *
+	 * @deprecated
 	 * @method setPlayback
 	 * @param {Object} value The new playback resource.
 	 * @return {Object} playback resource used for playing audio
@@ -696,11 +609,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/loop:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * getLoop exists to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/loop:property"}}{{/crossLink}} directly as a property
 	 *
-	 * The number of play loops remaining. Negative values will loop infinitely.
-	 *
+	 * @deprecated
 	 * @method getLoop
 	 * @return {number}
 	 * @since 0.6.0
@@ -710,11 +621,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * NOTE {{#crossLink "AbstractSoundInstance/loop:property"}}{{/crossLink}} can be accessed directly as a property,
-	 * setLoop exists to allow support for IE8 with FlashAudioPlugin.
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/loop:property"}}{{/crossLink}} directly as a property,
 	 *
-	 * Set the number of play loops remaining.
-	 *
+	 * @deprecated
 	 * @method setLoop
 	 * @param {number} value The number of times to loop after play.
 	 * @since 0.6.0

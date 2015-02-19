@@ -234,7 +234,7 @@
 			s = new createjs.Bitmap(sparkleShape.cacheCanvas);
 			// add a bounce sound, which never changes after it's added
 			s.bounceSound = createjs.Sound.createInstance("bounce");  // create it by id
-			s.bounceSound.setVolume(Math.random() * 0.01 + 0.01);  // because there will be a lot
+			s.bounceSound.volume = (Math.random() * 0.01 + 0.01);  // because there will be a lot
 		}
 		return s;
 	}

@@ -237,7 +237,7 @@
 				seeking = false;
 				$(this).unbind("mouseup mousemove");
 				var pos = $("#thumb").position().left / $("#track").width();
-				instance.setPosition(pos * instance.getDuration());
+				instance.position = (pos * instance.duration);
 				$("#blocker").remove();
 			});
 		});
