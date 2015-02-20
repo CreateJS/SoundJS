@@ -1,13 +1,17 @@
 Version NEXT [not yet released]
 ****************************************************************************************************
+CRITICAL (may break existing content):
+- removed support for ie8 and deprecated related get/set methods
+
+*****
 - fixed typo in HTMLAudioSoundInstance for this._stalledHandler from this.playFailed to this._playFailed
 - fixed a reference in WebAudioLoader from this._handleError to this._sendError
 - updated HTMLAudio loading to properly dispatch error events
 - fixed issue with reloading canceled audio when used with PreloadJS (github issue 143)
 - fixed issue that would break loaded audio if you registered it a 2nd time (github issue 148)
 - added AudioSprite class to document audiosprite more clearly
-- removed support for ie8 and deprecated related get/set methods
-- add muted and volume properties to Sound, deprecate get/setMute and get/setVolume
+- added muted and volume properties to Sound, and deprecated get/setMute and get/setVolume
+- added capabilities property to Sound, and deprecated getCapabilities and getCapability
 
 
 Version 0.6.0 [December 12, 2014]
