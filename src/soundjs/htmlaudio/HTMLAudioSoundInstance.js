@@ -129,13 +129,13 @@ this.createjs = this.createjs || {};
 				tag.currentTime = this._startTime;
 			} catch (e) {
 			} // Reset Position
-			createjs.HTMLAudioTagPool.setInstance(this.src, tag);
+			createjs.HTMLAudioTagPool.set(this.src, tag);
 			this._playbackResource = null;
 		}
 	};
 
 	p._beginPlaying = function (offset, loop, volume, pan) {
-		this._playbackResource = createjs.HTMLAudioTagPool.getInstance(this.src);
+		this._playbackResource = createjs.HTMLAudioTagPool.get(this.src);
 		return this.AbstractSoundInstance__beginPlaying(offset, loop, volume, pan);
 	};
 

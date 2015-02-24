@@ -12,7 +12,7 @@ CRITICAL (may break existing content):
 - added AudioSprite class to document audiosprite more clearly
 - added muted and volume properties to Sound, and deprecated get/setMute and get/setVolume
 - added capabilities property to Sound, and deprecated getCapabilities and getCapability
-
+- refactor HTMLAudioTagPool as Chrome no longer requires tags be pre-created
 
 Version 0.6.0 [December 12, 2014]
 ************************************************************************************************************************

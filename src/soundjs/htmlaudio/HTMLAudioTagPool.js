@@ -34,195 +34,158 @@
 // namespace:
 this.createjs = this.createjs || {};
 
-//TODO verify that tags no longer need to be precreated (mac and pc)
-//TODO modify this now that tags do not need to be precreated
 (function () {
 	"use strict";
 
 	/**
-	 * The TagPool is an object pool for HTMLAudio tag instances. In Chrome, we have to pre-create the number of HTML
-	 * audio tag instances that we are going to play before we load the data, otherwise the audio stalls.
-	 * (Note: This seems to be a bug in Chrome)
+	 * HTMLAudioTagPool is an object pool for HTMLAudio tag instances.
 	 * @class HTMLAudioTagPool
+	 * @param {String} src The source of the channel.
+	 * @protected
+	 */
+	function HTMLAudioTagPool() {
+			throw "HTMLAudioTagPool cannot be instantiated";
+	}
+
+	var s = HTMLAudioTagPool;
+
+// Static Properties
+	/**
+	 * A hash lookup of each base audio tag, indexed by the audio source.
+	 * @property _tags
+	 * @type {{}}
+	 * @static
+	 * @protected
+	 */
+	s._tags = {};
+
+	/**
+	 * An object pool for html audio tags
+	 * @property _tagPool
+	 * @type {TagPool}
+	 * @static
+	 * @protected
+	 */
+	s._tagPool = new TagPool();
+
+	/**
+	 * A hash lookup of if a base audio tag is available, indexed by the audio source
+	 * @property _tagsUsed
+	 * @type {{}}
+	 * @protected
+	 * @static
+	 */
+	s._tagUsed = {};
+
+// Static Methods
+	/**
+	  * Get an audio tag with the given source.
+	  * @method get
+	  * @param {String} src The source file used by the audio tag.
+	  * @static
+	  */
+	 s.get = function (src) {
+		var t = s._tags[src];
+		if (t == null) {
+			// create new base tag
+			t = s._tags[src] = s._tagPool.get();
+			t.src = src;
+		} else {
+			// get base or pool
+			if (s._tagUsed[src]) {
+				t = s._tagPool.get();
+				t.src = src;
+			} else {
+				s._tagUsed[src] = true;
+			}
+		}
+		return t;
+	 };
+
+	 /**
+	  * Return an audio tag to the pool.
+	  * @method set
+	  * @param {String} src The source file used by the audio tag.
+	  * @param {HTMLElement} tag Audio tag to set.
+	  * @static
+	  */
+	 s.set = function (src, tag) {
+		 // check if this is base, if yes set boolean if not return to pool
+		 if(tag == s._tags[src]) {
+			 s._tagUsed[src] = false;
+		 } else {
+			 s._tagPool.set(tag);
+		 }
+	 };
+
+	/**
+	 * Delete stored tag reference and return them to pool. Note that if the tag reference does not exist, this will fail.
+	 * @method remove
+	 * @param {String} src The source for the tag
+	 * @return {Boolean} If the TagPool was deleted.
+	 * @static
+	 */
+	s.remove = function (src) {
+		var tag = s._tags[src];
+		if (tag == null) {return false;}
+		s._tagPool.set(tag);
+		delete(s._tags[src]);
+		delete(s._tagUsed[src]);
+		return true;
+	};
+
+	/**
+	 * Gets the duration of the src audio in milliseconds
+	 * @method getDuration
+	 * @param {String} src The source file used by the audio tag.
+	 * @return {Number} Duration of src in milliseconds
+	 * @static
+	 */
+	s.getDuration= function (src) {
+		var t = s._tags[src];
+		if (t == null) {return 0;}
+		return t.duration * 1000;
+	};
+
+	createjs.HTMLAudioTagPool = HTMLAudioTagPool;
+
+
+// ************************************************************************************************************
+	/**
+	 * The TagPool is an object pool for HTMLAudio tag instances.
+	 * #class TagPool
 	 * @param {String} src The source of the channel.
 	 * @protected
 	 */
 	function TagPool(src) {
 
-
-//Public Properties
-		/**
-		 * The source of the tag pool.
-		 * #property src
-		 * @type {String}
-		 * @protected
-		 */
-		this.src = src;
-
-		/**
-		 * The total number of HTMLAudio tags in this pool. This is the maximum number of instance of a certain sound
-		 * that can play at one time.
-		 * #property length
-		 * @type {Number}
-		 * @default 0
-		 * @protected
-		 */
-		this.length = 0;
-
-		/**
-		 * The number of unused HTMLAudio tags.
-		 * #property available
-		 * @type {Number}
-		 * @default 0
-		 * @protected
-		 */
-		this.available = 0;
-
+// Public Properties
 		/**
 		 * A list of all available tags in the pool.
 		 * #property tags
 		 * @type {Array}
 		 * @protected
 		 */
-		this.tags = [];
-
-		/**
-		 * The duration property of all audio tags, converted to milliseconds, which originally is only available on the
-		 * last tag in the tags array because that is the one that is loaded.
-		 * #property
-		 * @type {Number}
-		 * @protected
-		 */
-		this.duration = 0;
+		this._tags = [];
 	};
 
 	var p = TagPool.prototype;
 	p.constructor = TagPool;
-	var s = TagPool;
-
-	// TODO: deprecated
-	// p.initialize = function() {}; // searchable for devs wondering where it is. REMOVED. See docs for details.
-
-
-// Static Properties
-	/**
-	 * A hash lookup of each sound channel, indexed by the audio source.
-	 * #property tags
-	 * @static
-	 * @protected
-	 */
-	s.tags = {};
-
-
-// Static Methods
-	/**
-	 * Get a tag pool. If the pool doesn't exist, create it.
-	 * #method get
-	 * @param {String} src The source file used by the audio tag.
-	 * @static
-	 * @protected
-	 */
-	s.get = function (src) {
-		var channel = s.tags[src];
-		if (channel == null) {
-			channel = s.tags[src] = new TagPool(src);
-		}
-		return channel;
-	};
-
-	/**
-	 * Delete a TagPool and all related tags. Note that if the TagPool does not exist, this will fail.
-	 * #method remove
-	 * @param {String} src The source for the tag
-	 * @return {Boolean} If the TagPool was deleted.
-	 * @static
-	 */
-	s.remove = function (src) {
-		var channel = s.tags[src];
-		if (channel == null) {return false;}
-		channel.removeAll();
-		delete(s.tags[src]);
-		return true;
-	};
-
-	/**
-	 * Get a tag instance. This is a shortcut method.
-	 * #method getInstance
-	 * @param {String} src The source file used by the audio tag.
-	 * @static
-	 * @protected
-	 */
-	s.getInstance = function (src) {
-		var channel = s.tags[src];
-		if (channel == null) {return null;}
-		return channel.get();
-	};
-
-	/**
-	 * Return a tag instance. This is a shortcut method.
-	 * #method setInstance
-	 * @param {String} src The source file used by the audio tag.
-	 * @param {HTMLElement} tag Audio tag to set.
-	 * @static
-	 * @protected
-	 */
-	s.setInstance = function (src, tag) {
-		var channel = s.tags[src];
-		if (channel == null) {return null;}
-		return channel.set(tag);
-	};
-
-	/**
-	 * Gets the duration of the src audio in milliseconds
-	 * #method getDuration
-	 * @param {String} src The source file used by the audio tag.
-	 * @return {Number} Duration of src in milliseconds
-	 */
-	s.getDuration= function (src) {
-		var channel = s.tags[src];
-		if (channel == null) {return 0;}
-		return channel.getDuration();
-	};
 
 
 // Public Methods
-	/**
-	 * Add an HTMLAudio tag into the pool.
-	 * #method add
-	 * @param {HTMLAudioElement} tag A tag to be used for playback.
-	 */
-	p.add = function (tag) {
-		this.tags.push(tag);
-		this.length++;
-		this.available++;
-	};
-
-	/**
-	 * Remove all tags from the channel.  Usually in response to a delete call.
-	 * #method removeAll
-	 */
-	p.removeAll = function () {
-		var tag;
-		while(this.length--) {
-			tag = this.tags[this.length];
-			if(tag.parentNode) {
-				tag.parentNode.removeChild(tag);
-			}
-			delete(this.tags[this.length]);	// NOTE that the audio playback is already stopped by this point
-		}
-		this.src = null;
-		this.tags.length = 0;
-	};
-
 	/**
 	 * Get an HTMLAudioElement for immediate playback. This takes it out of the pool.
 	 * #method get
 	 * @return {HTMLAudioElement} An HTML audio tag.
 	 */
 	p.get = function () {
-		if (this.tags.length == 0) {return null;}
-		this.available = this.tags.length;
-		var tag = this.tags.pop();
+		var tag;
+		if (this._tags.length == 0) {
+			tag = this._createTag();
+		} else {
+			tag = this._tags.pop();
+		}
 		if (tag.parentNode == null) {document.body.appendChild(tag);}
 		return tag;
 	};
@@ -233,25 +196,33 @@ this.createjs = this.createjs || {};
 	 * @param {HTMLAudioElement} tag HTML audio tag
 	 */
 	p.set = function (tag) {
-		var index = createjs.indexOf(this.tags, tag);
-		if (index == -1) {this.tags.push(tag);}
-		this.available = this.tags.length;
-	};
-
-	/**
-	 * Gets the duration for the src audio and on first call stores it to this.duration
-	 * #method getDuration
-	 * @return {Number} Duration of the src in milliseconds
-	 */
-	p.getDuration = function () {
-		// this will work because this will be only be run the first time a sound instance is created and before any tags are taken from the pool
-		if (!this.duration) {this.duration = this.tags[this.tags.length - 1].duration * 1000;}
-		return this.duration;
+		// OJR this first step seems unnecessary
+		var index = createjs.indexOf(this._tags, tag);
+		if (index == -1) {
+			this._tags.src = null;
+			this._tags.push(tag);
+		}
 	};
 
 	p.toString = function () {
-		return "[HTMLAudioTagPool]";
+		return "[TagPool]";
 	};
 
-	createjs.HTMLAudioTagPool = TagPool;
+
+// Private Methods
+	/**
+	 * Create an HTML audio tag.
+	 * #method _createTag
+	 * @param {String} src The source file to set for the audio tag.
+	 * @return {HTMLElement} Returns an HTML audio tag.
+	 * @protected
+	 */
+	p._createTag = function () {
+		var tag = document.createElement("audio");
+		tag.autoplay = false;
+		tag.preload = "none";
+		//LM: Firefox fails when this the preload="none" for other tags, but it needs to be "none" to ensure PreloadJS works.
+		return tag;
+	};
+
 }());
