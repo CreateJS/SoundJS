@@ -14,6 +14,7 @@ CRITICAL (may break existing content):
 - added capabilities property to Sound, and deprecated getCapabilities and getCapability
 - refactor HTMLAudioTagPool as Chrome no longer requires tags be pre-created
 - deprecate HTMLAudioPlugin defaultNumChannels and cleaned up associated code
+- fixed issue 154, FlashAudioPlugin not properly setting volume and pan on play calls
 
 Version 0.6.0 [December 12, 2014]
 ************************************************************************************************************************

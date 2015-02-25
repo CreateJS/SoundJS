@@ -493,6 +493,9 @@ class SoundWrapper extends EventDispatcher {
 	public function play(offset:Number, loop:int, volume:Number, pan:Number) {
 		this.offset = offset;
 		this.loop = loop;
+		this._volume = volume;
+		this._pan = pan;
+		this.updateVolume();
 		sound.load(new URLRequest(src));
 	}
 
