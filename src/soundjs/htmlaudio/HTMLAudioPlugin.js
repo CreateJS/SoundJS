@@ -46,9 +46,8 @@ this.createjs = this.createjs || {};
 	 * <h4>Known Browser and OS issues for HTML Audio</h4>
 	 * <b>All browsers</b><br />
 	 * Testing has shown in all browsers there is a limit to how many audio tag instances you are allowed.  If you exceed
-	 * this limit, you can expect to see unpredictable results.  This will be seen as soon as you register sounds, as
-	 * tags are precreated to allow Chrome to load them.  Please use {{#crossLink "Sound.MAX_INSTANCES"}}{{/crossLink}} as
-	 * a guide to how many total audio tags you can safely use in all browsers.
+	 * this limit, you can expect to see unpredictable results. Please use {{#crossLink "Sound.MAX_INSTANCES"}}{{/crossLink}} as
+	 * a guide to how many total audio tags you can safely use in all browsers.  This issue is primarily limited to IE9.
 	 *
      * <b>IE html limitations</b><br />
      * <ul><li>There is a delay in applying volume changes to tags that occurs once playback is started. So if you have
@@ -57,7 +56,7 @@ this.createjs = this.createjs || {};
      * <li>MP3 encoding will not always work for audio tags if it's not default.  We've found default encoding with
      * 64kbps works.</li>
 	 * <li>Occasionally very short samples will get cut off.</li>
-	 * <li>There is a limit to how many audio tags you can load and play at once, which appears to be determined by
+	 * <li>There is a limit to how many audio tags you can load or play at once, which appears to be determined by
 	 * hardware and browser settings.  See {{#crossLink "HTMLAudioPlugin.MAX_INSTANCES"}}{{/crossLink}} for a safe estimate.
 	 * Note that audio sprites can be used as a solution to this issue.</li></ul>
 	 *
@@ -95,15 +94,14 @@ this.createjs = this.createjs || {};
 
 	// Public Properties
 		/**
-		 * The default number of instances to allow.  Used by {{#crossLink "Sound"}}{{/crossLink}} when a source
-		 * is registered using the {{#crossLink "Sound/register"}}{{/crossLink}} method.  This is only used if
-		 * a value is not provided.
+		 * This is no longer needed as we are now using object pooling for tags.
 		 *
 		 * <b>NOTE this property only exists as a limitation of HTML audio.</b>
 		 * @property defaultNumChannels
 		 * @type {Number}
 		 * @default 2
 		 * @since 0.4.0
+		 * @deprecated
 		 */
 		this.defaultNumChannels = 2;
 
@@ -122,7 +120,7 @@ this.createjs = this.createjs || {};
 
 // Static Properties
 	/**
-	 * The maximum number of instances that can be loaded and played. This is a browser limitation, primarily limited to IE9.
+	 * The maximum number of instances that can be loaded or played. This is a browser limitation, primarily limited to IE9.
 	 * The actual number varies from browser to browser (and is largely hardware dependant), but this is a safe estimate.
 	 * Audio sprites work around this limitation.
 	 * @property MAX_INSTANCES
@@ -239,9 +237,9 @@ this.createjs = this.createjs || {};
 
 
 // public methods
-	p.register = function (loadItem, instances) {
+	p.register = function (loadItem) {
 		var tag = createjs.HTMLAudioTagPool.get(loadItem.src);
-		var loader = this.AbstractPlugin_register(loadItem, instances);
+		var loader = this.AbstractPlugin_register(loadItem);
 		loader.setTag(tag);
 
 		return loader;

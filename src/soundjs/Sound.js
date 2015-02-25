@@ -813,7 +813,7 @@ this.createjs = this.createjs || {};
 		loadItem.type = "sound";
 
 		var data = loadItem.data;
-		var numChannels = s.activePlugin.defaultNumChannels || null;
+		var numChannels = null;
 		if (data != null) {
 			if (!isNaN(data.channels)) {
 				numChannels = parseInt(data.channels);
@@ -830,7 +830,7 @@ this.createjs = this.createjs || {};
 			}
 		}
 		if (loadItem.id != null) {s._idHash[loadItem.id] = {src: loadItem.src}};
-		var loader = s.activePlugin.register(loadItem, numChannels);  // Note only HTML audio uses numChannels
+		var loader = s.activePlugin.register(loadItem);
 
 		SoundChannel.create(loadItem.src, numChannels);
 
