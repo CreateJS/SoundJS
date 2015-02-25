@@ -264,23 +264,5 @@ this.createjs = this.createjs || {};
 	p.setVolume = p.getVolume = p.setMute = null;
 
 
-// private methods
-	/**
-	 * Create an HTML audio tag.
-	 * @method _createTag
-	 * @param {String} src The source file to set for the audio tag.
-	 * @return {HTMLElement} Returns an HTML audio tag.
-	 * @protected
-	 */
-	// TODO move this to tagpool when it changes to be a standard object pool
-	p._createTag = function (src) {
-		var tag = document.createElement("audio");
-		tag.autoplay = false;
-		tag.preload = "none";
-		//LM: Firefox fails when this the preload="none" for other tags, but it needs to be "none" to ensure PreloadJS works.
-		tag.src = src;
-		return tag;
-	};
-
 	createjs.HTMLAudioPlugin = createjs.promote(HTMLAudioPlugin, "AbstractPlugin");
 }());

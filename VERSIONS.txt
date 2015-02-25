@@ -15,6 +15,7 @@ CRITICAL (may break existing content):
 - refactor HTMLAudioTagPool as Chrome no longer requires tags be pre-created
 - deprecate HTMLAudioPlugin defaultNumChannels and cleaned up associated code
 - fixed issue 154, FlashAudioPlugin not properly setting volume and pan on play calls
+- fixed FlashAudioSoundInstance bug that did not change loop value properly on playing instances
 
 Version 0.6.0 [December 12, 2014]
 ************************************************************************************************************************

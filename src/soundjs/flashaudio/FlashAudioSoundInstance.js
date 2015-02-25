@@ -105,23 +105,20 @@ this.createjs = this.createjs || {};
 
 
 // Public Methods
+	// TODO change flash.setLoop to mimic remove and add??
+	p.setLoop = function (value) {
+		if(this.flashId!= null) {
+			s._flash.setLoop(this.flashId, value);
+		}
+		this._loop = value;
+	};
+
 	p.toString = function () {
 		return "[FlashAudioSoundInstance]"
 	};
 
 
 // Private Methods
-	// TODO change flash.setLoop to mimic remove and add??
-	p._removeLooping = function () {
-		if (this.flashId == null) { return; }
-		s._flash.setLoop(this.flashId, this._loop);
-	};
-
-	p._addLooping = function () {
-		if (this.flashId == null) { return; }
-		s._flash.setLoop(this.flashId, this._loop);
-	};
-
 	p._updateVolume = function() {
 		if (this.flashId == null) { return; }
 		s._flash.setVolume(this.flashId, this._volume)

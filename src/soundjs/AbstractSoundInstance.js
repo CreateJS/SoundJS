@@ -615,7 +615,7 @@ this.createjs = this.createjs || {};
 				this._removeLooping(value);
 			}
 			// add looping
-			if (this._loop == 0 && value != 0) {
+			else if (this._loop == 0 && value != 0) {
 				this._addLooping(value);
 			}
 		}
@@ -794,20 +794,22 @@ this.createjs = this.createjs || {};
 	/**
 	 * Internal function called when looping is removed during playback.
 	 * @method _removeLooping
+	 * @param {number} value The number of times to loop after play.
 	 * @protected
 	 * @since 0.6.0
 	 */
-	p._removeLooping = function () {
+	p._removeLooping = function (value) {
 		// plugin specific code
 	};
 
 	/**
 	 * Internal function called when looping is added during playback.
 	 * @method _addLooping
+	 * @param {number} value The number of times to loop after play.
 	 * @protected
 	 * @since 0.6.0
 	 */
-	p._addLooping = function () {
+	p._addLooping = function (value) {
 		// plugin specific code
 	};
 

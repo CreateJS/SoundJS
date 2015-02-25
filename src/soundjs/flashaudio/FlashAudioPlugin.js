@@ -147,17 +147,6 @@ this.createjs = this.createjs || {};
 		this._flashPreloadInstances = {};
 		//TODO consider combining _flashInstances and _flashPreloadInstances into a single hash
 
-		// TODO remove _queuedInstances
-		/**
-		 * An array of Sound Preload instances that are waiting to preload. Once Flash is initialized, the queued
-		 * instances are preloaded.
-		 * @property _queuedInstances
-		 * @type {Object}
-		 * @protected
-		 */
-		this._queuedInstances = [];
-
-
 		this._capabilities = s._capabilities;
 
 		this._loaderClass = createjs.FlashAudioLoader;
@@ -279,25 +268,13 @@ this.createjs = this.createjs || {};
 
 //public methods
 	p.register = function (src, instances) {
-		if (!this.flashReady) {
-			this._queuedInstances.push(src);
-		}
 		var loader = this.AbstractPlugin_register(src, instances);
 		loader.addEventListener(s._REG_FLASHID, createjs.proxy(this.registerPreloadInstance, this));
 		loader.addEventListener(s._UNREG_FLASHID, createjs.proxy(this.unregisterPreloadInstance, this));
 		return loader;
 	};
 
-	p.removeSound = function (src) {
-		var i = createjs.indexOf(this._queuedInstances, src);
-		if(i != -1) {this._queuedInstances.splice(i,1);}
-		// NOTE sound cannot be removed from a swf
-
-		this.AbstractPlugin_removeSound(src);
-	};
-
 	p.removeAllSounds = function () {
-		this._queuedInstances.length = 0;
 		this._flashInstances = {};
 		this._flashPreloadInstances = {};
 		// NOTE sound cannot be removed from a swf
@@ -339,13 +316,6 @@ this.createjs = this.createjs || {};
 
 		this._loaderClass.setFlash(this._flash);
 		this._soundInstanceClass.setFlash(this._flash);
-
-		// Anything that needed to be preloaded, can now do so.
-		for (var i = 0, l = this._queuedInstances.length; i < l; i++) {
-			this._flash.register(this._queuedInstances[i]);  // NOTE this flash function currently does nothing
-		}
-		this._queuedInstances.length = 0;
-
 	};
 
 	/**
