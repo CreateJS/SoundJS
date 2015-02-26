@@ -164,6 +164,22 @@ this.createjs = this.createjs || {};
 	 *         var thisApp = new myNameSpace.MyApp();    // launch the app
 	 *     }
 	 *
+	 * <b>Loading Alternate Paths and Extensionless Files</b><br />
+	 * SoundJS supports loading alternate paths and extensionless files by handling src objects with extension labeled properties.
+	 * Note these require an id for playback.  Priority is determined by the property order (first property is tried first).
+	 * Note this feature is not yet supported by PreloadJS.
+	 *
+	 * <h4>Example</h4>
+	 *
+	 *		var sounds = {path:"./audioPath/",
+	 * 				manifest: [
+	 *				{id: "cool", src: {mp3:"mp3/awesome.mp3", ogg:"noExtensionOggFile"}}
+	 *		]};
+	 *
+	 *		createjs.Sound.alternateExtensions = ["mp3"];
+	 *		createjs.Sound.addEventListener("fileload", handleLoad);
+	 *		createjs.Sound.registerSounds(sounds);
+	 *
 	 * <h4>Known Browser and OS issues</h4>
 	 * <b>IE 9 HTML Audio limitations</b><br />
 	 * <ul><li>There is a delay in applying volume changes to tags that occurs once playback is started. So if you have
@@ -807,7 +823,13 @@ this.createjs = this.createjs || {};
 	s._registerSound = function (loadItem) {
 		if (!s.initializeDefaultPlugins()) {return false;}
 
-		var details = s._parsePath(loadItem.src);
+		var details;
+		if (loadItem.src instanceof Object) {
+			details = s._parseSrc(loadItem.src);
+			details.src = loadItem.path + details.src;
+		} else {
+			details = s._parsePath(loadItem.src);
+		}
 		if (details == null) {return false;}
 		loadItem.src = details.src;
 		loadItem.type = "sound";
@@ -841,7 +863,6 @@ this.createjs = this.createjs || {};
 			loadItem.data.channels = numChannels || SoundChannel.maxPerChannel();
 		}
 
-		//if (loader.onload) {details.completeHandler = loader.onload;}	// used by preloadJS
 		if (loader.type) {loadItem.type = loader.type;}
 
 		return loader;
@@ -857,10 +878,12 @@ this.createjs = this.createjs || {};
 	 *      createjs.Sound.alternateExtensions = ["mp3"];
 	 *      createjs.Sound.on("fileload", handleLoad); // add an event listener for when load is completed
 	 *      createjs.Sound.registerSound("myAudioPath/mySound.ogg", "myID", 3);
+	 *      createjs.Sound.registerSound({ogg:"path1/mySound.ogg", mp3:"path2/mySoundNoExtension"}, "myID", 3);
+	 *
 	 *
 	 * @method registerSound
-	 * @param {String | Object} src The source or an Object with a "src" property
-	 * @param {String} [id] An id specified by the user to play the sound later.
+	 * @param {String | Object} src The source or an Object with a "src" property or an Object with multiple extension labeled src properties.
+	 * @param {String} [id] An id specified by the user to play the sound later.  Note id is required for when src is multiple extension labeled src properties.
 	 * @param {Number | Object} [data] Data associated with the item. Sound uses the data parameter as the number of
 	 * channels for an audio instance, however a "channels" property can be appended to the data object if it is used
 	 * for other information. The audio channels will set a default based on plugin if no value is found.
@@ -878,13 +901,14 @@ this.createjs = this.createjs || {};
 	 */
 	s.registerSound = function (src, id, data, basePath) {
 		var loadItem = {src: src, id: id, data:data};
-		if (src instanceof Object) {
+		if (src instanceof Object && src.src) {
 			basePath = id;
 			loadItem = src;
 		}
 		loadItem = createjs.LoadItem.create(loadItem);
+		loadItem.path = basePath;
 
-		if (basePath != null) {loadItem.src = basePath + src;}
+		if (basePath != null && !(loadItem.src instanceof Object)) {loadItem.src = basePath + src;}
 
 		var loader = s._registerSound(loadItem);
 		if(!loader) {return false;}
@@ -910,10 +934,12 @@ this.createjs = this.createjs || {};
 	 *
 	 * <h4>Example</h4>
 	 *
+	 * 		var assetPath = "./myAudioPath/";
 	 *      var sounds = [
 	 *          {src:"asset0.ogg", id:"example"},
 	 *          {src:"asset1.ogg", id:"1", data:6},
 	 *          {src:"asset2.mp3", id:"works"}
+	 *          {src:{mp3:"path1/asset3.mp3", ogg:"path2/asset3NoExtension}, id:"better"}
 	 *      ];
 	 *      createjs.Sound.alternateExtensions = ["mp3"];	// if the passed extension is not supported, try this extension
 	 *      createjs.Sound.on("fileload", handleLoad); // call handleLoad when each sound loads
@@ -922,7 +948,9 @@ this.createjs = this.createjs || {};
 	 * @method registerSounds
 	 * @param {Array} sounds An array of objects to load. Objects are expected to be in the format needed for
 	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}}: <code>{src:srcURI, id:ID, data:Data}</code>
-	 * with "id" and "data" being optional.  You can also set an optional path property that will be prepended to the src of each object.
+	 * with "id" and "data" being optional.
+	 * You can also pass an object with path and manifest properties, where path is a basePath and manifest is an array of objects to load.
+	 * Note id is required if src is an object with extension labeled src properties.
 	 * @param {string} basePath Set a path that will be prepended to each src when loading.  When creating, playing, or removing
 	 * audio that was loaded with a basePath by src, the basePath must be included.
 	 * @return {Object} An array of objects with the modified values that were passed in, which defines each sound.
@@ -939,6 +967,8 @@ this.createjs = this.createjs || {};
 			} else {
 				basePath = basePath + sounds.path;
 			}
+			sounds = sounds.manifest;
+			// TODO document this feature
 		}
 		for (var i = 0, l = sounds.length; i < l; i++) {
 			returnValues[i] = createjs.Sound.registerSound(sounds[i].src, sounds[i].id, sounds[i].data, basePath);
@@ -954,11 +984,13 @@ this.createjs = this.createjs || {};
 	 *
 	 * <h4>Example</h4>
 	 *
-	 *      createjs.Sound.removeSound("myAudioBasePath/mySound.ogg");
 	 *      createjs.Sound.removeSound("myID");
+	 *      createjs.Sound.removeSound("myAudioBasePath/mySound.ogg");
+	 *      createjs.Sound.removeSound("myPath/myOtherSound.mp3", "myBasePath/");
+	 *      createjs.Sound.removeSound({mp3:"musicNoExtension", ogg:"music.ogg"}, "myBasePath/");
 	 *
 	 * @method removeSound
-	 * @param {String | Object} src The src or ID of the audio, or an Object with a "src" property
+	 * @param {String | Object} src The src or ID of the audio, or an Object with a "src" property, or an Object with multiple extension labeled src properties.
 	 * @param {string} basePath Set a path that will be prepended to each src when removing.
 	 * @return {Boolean} True if sound is successfully removed.
 	 * @static
@@ -967,13 +999,18 @@ this.createjs = this.createjs || {};
 	s.removeSound = function(src, basePath) {
 		if (s.activePlugin == null) {return false;}
 
-		if (src instanceof Object) {src = src.src;}
-		src = s._getSrcById(src).src;
-		if (basePath != null) {src = basePath + src;}
+		if (src instanceof Object && src.src) {src = src.src;}
 
-		var details = s._parsePath(src);
+		var details;
+		if (src instanceof Object) {
+			details = s._parseSrc(src);
+		} else {
+			src = s._getSrcById(src).src;
+			details = s._parsePath(src);
+		}
 		if (details == null) {return false;}
 		src = details.src;
+		if (basePath != null) {src = basePath + src;}
 
 		for(var prop in s._idHash){
 			if(s._idHash[prop].src == src) {
@@ -999,6 +1036,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * <h4>Example</h4>
 	 *
+	 * 		assetPath = "./myPath/";
 	 *      var sounds = [
 	 *          {src:"asset0.ogg", id:"example"},
 	 *          {src:"asset1.ogg", id:"1", data:6},
@@ -1009,7 +1047,7 @@ this.createjs = this.createjs || {};
 	 * @method removeSounds
 	 * @param {Array} sounds An array of objects to remove. Objects are expected to be in the format needed for
 	 * {{#crossLink "Sound/removeSound"}}{{/crossLink}}: <code>{srcOrID:srcURIorID}</code>.
-	 * You can also set an optional path property that will be prepended to the src of each object.
+	 * You can also pass an object with path and manifest properties, where path is a basePath and manifest is an array of objects to remove.
 	 * @param {string} basePath Set a path that will be prepended to each src when removing.
 	 * @return {Object} An array of Boolean values representing if the sounds with the same array index were
 	 * successfully removed.
@@ -1024,6 +1062,7 @@ this.createjs = this.createjs || {};
 			} else {
 				basePath = basePath + sounds.path;
 			}
+			sounds = sounds.manifest;
 		}
 		for (var i = 0, l = sounds.length; i < l; i++) {
 			returnValues[i] = createjs.Sound.removeSound(sounds[i].src, basePath);
@@ -1080,7 +1119,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Parse the path of a sound. alternate extensions will be attempted in order if the
+	 * Parse the path of a sound. Alternate extensions will be attempted in order if the
 	 * current extension is not supported
 	 * @method _parsePath
 	 * @param {String} value The path to an audio source.
@@ -1106,6 +1145,39 @@ this.createjs = this.createjs || {};
 		value = value.replace("."+match[5], "."+ext);
 
 		var ret = {name:name, src:value, extension:ext};
+		return ret;
+	};
+
+	/**
+	 * Parse the path of a sound based on properties of src matching with supported extensions.
+	 * Returns false if none of the properties are supported
+	 * @method _parseSrc
+	 * @param {Object} value The paths to an audio source, indexed by extension type.
+	 * @return {Object} A formatted object that can be registered with the {{#crossLink "Sound/activePlugin:property"}}{{/crossLink}}
+	 * and returned to a preloader like <a href="http://preloadjs.com" target="_blank">PreloadJS</a>.
+	 * @protected
+	 * @static
+	 */
+	s._parseSrc = function (value) {
+		var ret = {name:undefined, src:undefined, extension:undefined};
+		var c = s.capabilities;
+
+		for (var prop in value) {
+		  if(value.hasOwnProperty(prop) && c[prop]) {
+				ret.src = value[prop];
+				ret.extension = prop;
+				break;
+		  }
+		}
+		if (!ret.src) {return false;}	// no matches
+
+		var i = ret.src.lastIndexOf("/");
+		if (i != -1) {
+			ret.name = ret.src.slice(i+1);
+		} else {
+			ret.name = ret.src;
+		}
+
 		return ret;
 	};
 
@@ -1213,7 +1285,7 @@ this.createjs = this.createjs || {};
 			if (startTime == null) {startTime = src.startTime;}
 			instance = s.activePlugin.create(details.src, startTime, duration || src.duration);
 		} else {
-			instance = new createjs.DefaultSoundInstance(src, startTime, duration);;
+			instance = new createjs.DefaultSoundInstance(src, startTime, duration);
 		}
 
 		instance.uniqueId = s._lastID++;

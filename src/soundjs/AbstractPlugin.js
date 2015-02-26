@@ -113,8 +113,7 @@ this.createjs = this.createjs || {};
 // Static Properties:
 // NOTE THESE PROPERTIES NEED TO BE ADDED TO EACH PLUGIN
 	/**
-	 * The capabilities of the plugin. This is generated via the {{#crossLink "WebAudioPlugin/_generateCapabilities:method"}}{{/crossLink}}
-	 * method and is used internally.
+	 * The capabilities of the plugin. This is generated via the _generateCapabilities method and is used internally.
 	 * @property _capabilities
 	 * @type {Object}
 	 * @default null
