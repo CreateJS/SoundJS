@@ -119,16 +119,6 @@ this.createjs = this.createjs || {};
 
 
 	// private properties
-		/**
-		 * Audio sprite property used to determine the starting offset.
-		 * @type {Number}
-		 * @default null
-		 * @protected
-		 */
-		this._startTime = Math.max(0, startTime || 0);
-		//TODO add a getter / setter for startTime?
-
-
 	// Getter / Setter Properties
 		// OJR TODO find original reason that we didn't use defined functions.  I think it was performance related
 		/**
@@ -160,6 +150,19 @@ this.createjs = this.createjs || {};
 		Object.defineProperty(this, "pan", {
 			get: this.getPan,
 			set: this.setPan
+		});
+
+		/**
+		 * Audio sprite property used to determine the starting offset.
+		 * @property startTime
+		 * @type {Number}
+		 * @default 0
+		 * @since 0.6.1
+		 */
+		this._startTime = Math.max(0, startTime || 0);
+		Object.defineProperty(this, "startTime", {
+			get: this.getStartTime,
+			set: this.setStartTime
 		});
 
 		/**
@@ -534,6 +537,32 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/startTime:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method getStartTime
+	 * @return {Number} The startTime of the sound instance in milliseconds.
+	 */
+	p.getStartTime = function () {
+		return this._startTime;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/startTime:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method setStartTime
+	 * @param {number} value The new startTime time in milli seconds.
+	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
+	 */
+	p.setStartTime = function (value) {
+		if (value == this._startTime) { return this; }
+		this._startTime = Math.max(0, value || 0);
+		this._updateStartTime();
+		return this;
+	};
+
+	/**
 	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/duration:property"}}{{/crossLink}} directly as a property
 	 *
 	 * @deprecated
@@ -748,6 +777,16 @@ this.createjs = this.createjs || {};
 	 * @since 0.6.0
 	 */
 	p._updatePan = function () {
+		// plugin specific code
+	};
+
+	/**
+	 * Internal function used to update the startTime of the audio.
+	 * @method _updateStartTime
+	 * @protected
+	 * @since 0.6.1
+	 */
+	p._updateStartTime = function () {
 		// plugin specific code
 	};
 

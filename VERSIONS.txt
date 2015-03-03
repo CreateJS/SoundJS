@@ -22,6 +22,7 @@ CRITICAL (may break existing content):
   example: {id:"music", src:{mp3:"myMP3Path/music.mp3", ogg:"myOggPath/musicWithoutExtension"}}
 - fixed setting duration on an existing SoundInstance in HTMLAudioSoundInstance
 - fixed setting duration on an existing SoundInstance in WebAudioPlugin
+- added SoundInstance.startTime support
 
 Version 0.6.0 [December 12, 2014]
 ************************************************************************************************************************

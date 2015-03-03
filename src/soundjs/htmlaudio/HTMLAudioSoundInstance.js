@@ -250,6 +250,15 @@ this.createjs = this.createjs || {};
 		}
 	};
 
+	p.updateStartTime = function () {
+		this._audioSpriteStopTime = (this._startTime + this._duration) * 0.001;
+
+		if(this.playState == createjs.Sound.PLAY_SUCCEEDED) {
+			this._playbackResource.removeEventListener(createjs.HTMLAudioPlugin._AUDIO_ENDED, this._endedHandler, false);
+			this._playbackResource.addEventListener(createjs.HTMLAudioPlugin._TIME_UPDATE, this._audioSpriteEndHandler, false);
+		}
+	};
+
 	p._updateDuration = function () {
 		this._audioSpriteStopTime = (this._startTime + this._duration) * 0.001;
 

@@ -17,7 +17,11 @@
 		.startTimeSlider,
 		.durationSlider,
 		.masterVolumeSlider,
-		.loopSlider {
+		.loopSlider,
+		.instanceLoopSlider,
+		.instanceStartTimeSlider,
+		.instanceDurationSlider
+		{
 			width: 200px;
 		}
 	</style>
@@ -215,6 +219,25 @@
 				<td><label for="pos" id="posValue">0</label></td>
 			</tr>
 		</table>
+		<table border="0" width="400" cellpadding="5" cellspacing="5">
+			<label>Instance Audio Sprite Properties</label>
+			<tr>
+				<td><label for="instanceStartTime">Instance StartTime</label></td>
+				<td>
+					<div class="instanceStartTimeSlider" id="instanceStartTime"></div>
+				</td>
+				<td><label for="instanceStartTime" id="instanceStartTimeValue">0 seconds</label>
+				</td>
+			</tr>
+			<tr>
+				<td><label for="instanceDuration">Instance Duration</label></td>
+				<td>
+					<div class="instanceDurationSlider" id="instanceDuration"></div>
+				</td>
+				<td><label for="instanceDuration" id="instanceDurationValue">0 seconds</label>
+				</td>
+			</tr>
+		</table>
 	</form>
 
 </div>
@@ -366,6 +389,22 @@
 								   change: handleSliderChange
 							   });
 
+		$(".instanceStartTimeSlider").slider({value: 0,
+										 min: 0,
+										 max: 10,
+										 disabled: true,
+										 change: handleSliderChange
+									 });
+		$(".instanceStartTimeSlider").data("units", "second");
+
+		$(".instanceDurationSlider").slider({value: 0,
+										min: 0,
+										max: 10,
+										disabled: true,
+										change: handleSliderChange
+									});
+		$(".instanceDurationSlider").data("units", "second");
+
 		$("#nowPlaying").change(selectInstance);
 		$("#playBtn").click(function (event) {
 			var instance = getInstance();
@@ -454,6 +493,20 @@
 		});
 		$(".posSlider").on('slidestart', function (event) {
 			clearInterval(audioInterval);
+		});
+
+		$(".instanceStartTimeSlider").on('slidestop', function (event) {
+			var instance = getInstance();
+			if (instance == null) {return;}
+			var value = $(this).slider("option", "value");
+			instance.startTime = value * 1000;
+		});
+
+		$(".instanceDurationSlider").on('slidestop', function (event) {
+			var instance = getInstance();
+			if (instance == null) {return;}
+			var value = $(this).slider("option", "value");
+			instance.duration = value * 1000;
 		});
 
 		enableSet("sound", false);
@@ -656,6 +709,14 @@
 			setPosSlider();
 			audioInterval = setInterval(setPosSlider, intervalTime);
 
+			value = instance.startTime / 1000 | 0;
+			$(".instanceStartTimeSlider").slider("value", value);
+			$("#instaceStartTimeValue").text(value);
+
+			value = instance.duration / 1000 | 0;
+			$(".instanceDurationSlider").slider("value", value);
+			$("#instaceDurationpValue").text(value);
+
 			$("#pauseBtn").attr("value", instance.paused ? "Resume" : "Pause");
 			$("#muteBtn").attr("value", instance.muted ? "Unmute" : "Mute");
 		} else {
@@ -677,7 +738,7 @@
 				enableItems("playControls", enabled, ["playSoundBtn", "interrupt", "loop", "delay", "offset", "startTime", "duration"]);
 				break;
 			case "instance":
-				enableItems("instanceControls", enabled, ["play", "pause", "stop", "clear", "volume", "instanceLoop", "pan", "pos", "mute"]);
+				enableItems("instanceControls", enabled, ["play", "pause", "stop", "clear", "volume", "instanceLoop", "pan", "pos", "mute", "instanceStartTime", "instanceDuration"]);
 				break;
 		}
 	}
