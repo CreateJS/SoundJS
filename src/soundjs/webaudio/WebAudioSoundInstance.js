@@ -234,6 +234,7 @@ this.createjs = this.createjs || {};
 
 		var dur = this._duration * 0.001;
 		var pos = this._position * 0.001;
+		if (pos > dur) {pos = dur;}
 		this.sourceNode = this._createAndPlayAudioNode((s.context.currentTime - dur), pos);
 		this._playbackStartTime = this.sourceNode.startTime - pos;
 
@@ -315,8 +316,10 @@ this.createjs = this.createjs || {};
 	};
 
 	p._updateDuration = function () {
-		this._pause();
-		this._resume();
+		if(this.playState == createjs.Sound.PLAY_SUCCEEDED) {
+			this._pause();
+			this._resume();
+		}
 	};
 
 	createjs.WebAudioSoundInstance = createjs.promote(WebAudioSoundInstance, "AbstractSoundInstance");

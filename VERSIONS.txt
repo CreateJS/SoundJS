@@ -20,7 +20,8 @@ CRITICAL (may break existing content):
 - added support for alternate loading paths and for loading files without extensions
   via loading objects where src is an object that contains extension properties along with paths
   example: {id:"music", src:{mp3:"myMP3Path/music.mp3", ogg:"myOggPath/musicWithoutExtension"}}
-- fixed setting duration on an existing instance in HTMLAudioSoundInstance
+- fixed setting duration on an existing SoundInstance in HTMLAudioSoundInstance
+- fixed setting duration on an existing SoundInstance in WebAudioPlugin
 
 Version 0.6.0 [December 12, 2014]
 ************************************************************************************************************************
