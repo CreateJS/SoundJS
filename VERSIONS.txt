@@ -23,6 +23,8 @@ CRITICAL (may break existing content):
 - fixed setting duration on an existing SoundInstance in HTMLAudioSoundInstance
 - fixed setting duration on an existing SoundInstance in WebAudioPlugin
 - added SoundInstance.startTime support
+- added PlayPropsConfig class which is now used in all play calls.  Deprecated passing individual properties
+- added startTime and duration handling to SoundInstance.play when passed in an Object or PlayPropsConfig
 
 Version 0.6.0 [December 12, 2014]
 ************************************************************************************************************************

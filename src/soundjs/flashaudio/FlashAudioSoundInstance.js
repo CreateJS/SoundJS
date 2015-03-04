@@ -146,13 +146,17 @@ this.createjs = this.createjs || {};
 		this.flashId = null;
 	};
 
-	p._beginPlaying = function (offset, loop, volume, pan) {
+	p._beginPlaying = function (playProps) {
 		if (s._flash == null) { return false; }
 
-		this.setPosition(offset);
-		this.setLoop(loop);
-		this.setVolume(volume);
-		this.setPan(pan);
+		this.setPosition(playProps.offset);
+		this.setLoop(playProps.loop);
+		this.setVolume(playProps.volume);
+		this.setPan(playProps.pan);
+		if (playProps.startTime != null) {
+			this.setStartTime(playProps.startTime);
+			this.setDuration(playProps.duration);
+		}
 		this._paused = false;
 
 		this.flashId = s._flash.playSound(this.src, this._position, this._loop, this._volume, this._pan, this._startTime, this._duration);

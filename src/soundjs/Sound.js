@@ -1200,49 +1200,46 @@ this.createjs = this.createjs || {};
 	 *      createjs.Sound.registerSound("myAudioPath/mySound.mp3", "myID", 3);
 	 *      function handleLoad(event) {
 	 *      	createjs.Sound.play("myID");
-	 *      	// we can pass in options we want to set inside of an object, and store off AbstractSoundInstance for controlling
+	 *      	// store off AbstractSoundInstance for controlling
 	 *      	var myInstance = createjs.Sound.play("myID", {interrupt: createjs.Sound.INTERRUPT_ANY, loop:-1});
-	 *      	// alternately, we can pass full source path and specify each argument individually
-	 *      	var myInstance = createjs.Sound.play("myAudioPath/mySound.mp3", createjs.Sound.INTERRUPT_ANY, 0, 0, -1, 1, 0);
 	 *      }
 	 *
 	 * NOTE to create an audio sprite that has not already been registered, both startTime and duration need to be set.
 	 * This is only when creating a new audio sprite, not when playing using the id of an already registered audio sprite.
 	 *
+	 * <b>Parameters Deprecated</b><br />
+	 * The parameters for this method are deprecated in favor of a single parameter that is an Object or {{#crossLink "PlayPropsConfig"}}{{/crossLink}}.
+	 *
 	 * @method play
 	 * @param {String} src The src or ID of the audio.
-	 * @param {String | Object} [interrupt="none"|options] How to interrupt any currently playing instances of audio with the same source,
+	 * @param {String | Object} [interrupt="none"|options] <b>This parameter will be renamed playProps in the next release.</b><br />
+	 * This parameter can be an instance of {{#crossLink "PlayPropsConfig"}}{{/crossLink}} or an Object that contains any or all optional properties by name,
+	 * including: interrupt, delay, offset, loop, volume, pan, startTime, and duration (see the above code sample).
+	 * <br /><strong>OR</strong><br />
+	 * <b>Deprecated</b> How to interrupt any currently playing instances of audio with the same source,
 	 * if the maximum number of instances of the sound are already playing. Values are defined as <code>INTERRUPT_TYPE</code>
 	 * constants on the Sound class, with the default defined by {{#crossLink "Sound/defaultInterruptBehavior:property"}}{{/crossLink}}.
-	 * <br /><strong>OR</strong><br />
-	 * This parameter can be an object that contains any or all optional properties by name, including: interrupt,
-	 * delay, offset, loop, volume, pan, startTime, and duration (see the above code sample).
-	 * @param {Number} [delay=0] The amount of time to delay the start of audio playback, in milliseconds.
-	 * @param {Number} [offset=0] The offset from the start of the audio to begin playback, in milliseconds.
-	 * @param {Number} [loop=0] How many times the audio loops when it reaches the end of playback. The default is 0 (no
+	 * @param {Number} [delay=0] <b>Deprecated</b> The amount of time to delay the start of audio playback, in milliseconds.
+	 * @param {Number} [offset=0] <b>Deprecated</b> The offset from the start of the audio to begin playback, in milliseconds.
+	 * @param {Number} [loop=0] <b>Deprecated</b> How many times the audio loops when it reaches the end of playback. The default is 0 (no
 	 * loops), and -1 can be used for infinite playback.
-	 * @param {Number} [volume=1] The volume of the sound, between 0 and 1. Note that the master volume is applied
+	 * @param {Number} [volume=1] <b>Deprecated</b> The volume of the sound, between 0 and 1. Note that the master volume is applied
 	 * against the individual volume.
-	 * @param {Number} [pan=0] The left-right pan of the sound (if supported), between -1 (left) and 1 (right).
-	 * @param {Number} [startTime=null] To create an audio sprite (with duration), the initial offset to start playback and loop from, in milliseconds.
-	 * @param {Number} [duration=null] To create an audio sprite (with startTime), the amount of time to play the clip for, in milliseconds.
+	 * @param {Number} [pan=0] <b>Deprecated</b> The left-right pan of the sound (if supported), between -1 (left) and 1 (right).
+	 * @param {Number} [startTime=null] <b>Deprecated</b> To create an audio sprite (with duration), the initial offset to start playback and loop from, in milliseconds.
+	 * @param {Number} [duration=null] <b>Deprecated</b> To create an audio sprite (with startTime), the amount of time to play the clip for, in milliseconds.
 	 * @return {AbstractSoundInstance} A {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} that can be controlled after it is created.
 	 * @static
 	 */
 	s.play = function (src, interrupt, delay, offset, loop, volume, pan, startTime, duration) {
-		if (interrupt instanceof Object) {
-			delay = interrupt.delay;
-			offset = interrupt.offset;
-			loop = interrupt.loop;
-			volume = interrupt.volume;
-			pan = interrupt.pan;
-			startTime = interrupt.startTime;
-			duration = interrupt.duration;
-			interrupt = interrupt.interrupt;
-
+		var playProps;
+		if (interrupt instanceof Object || interrupt instanceof createjs.PlayPropsConfig) {
+			playProps = createjs.PlayPropsConfig.create(interrupt);
+		} else {
+			playProps = createjs.PlayPropsConfig.create({interrupt:interrupt, delay:delay, offset:offset, loop:loop, volume:volume, pan:pan, startTime:startTime, duration:duration});
 		}
-		var instance = s.createInstance(src, startTime, duration);
-		var ok = s._playInstance(instance, interrupt, delay, offset, loop, volume, pan);
+		var instance = s.createInstance(src, playProps.startTime, playProps.duration);
+		var ok = s._playInstance(instance, playProps);
 		if (!ok) {instance._playFailed();}
 		return instance;
 	};
@@ -1391,49 +1388,29 @@ this.createjs = this.createjs || {};
 	 * control delays.
 	 * @method _playInstance
 	 * @param {AbstractSoundInstance} instance The {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} to start playing.
-	 * @param {String | Object} [interrupt="none"|options] How to interrupt any currently playing instances of audio with the same source,
-	 * if the maximum number of instances of the sound are already playing. Values are defined as <code>INTERRUPT_TYPE</code>
-	 * constants on the Sound class, with the default defined by {{#crossLink "Sound/defaultInterruptBehavior"}}{{/crossLink}}.
-	 * <br /><strong>OR</strong><br />
-	 * This parameter can be an object that contains any or all optional properties by name, including: interrupt,
-	 * delay, offset, loop, volume, and pan (see the above code sample).
-	 * @param {Number} [delay=0] Time in milliseconds before playback begins.
-	 * @param {Number} [offset=instance.offset] Time into the sound to begin playback in milliseconds.  Defaults to the
-	 * current value on the instance.
-	 * @param {Number} [loop=0] The number of times to loop the audio. Use 0 for no loops, and -1 for an infinite loop.
-	 * @param {Number} [volume] The volume of the sound between 0 and 1. Defaults to current instance value.
-	 * @param {Number} [pan] The pan of the sound between -1 and 1. Defaults to current instance value.
+	 * @param {PlayPropsConfig} playProps A PlayPropsConfig object.
 	 * @return {Boolean} If the sound can start playing. Sounds that fail immediately will return false. Sounds that
 	 * have a delay will return true, but may still fail to play.
 	 * @protected
 	 * @static
 	 */
-	s._playInstance = function (instance, interrupt, delay, offset, loop, volume, pan) {
-		if (interrupt instanceof Object) {
-			delay = interrupt.delay;
-			offset = interrupt.offset;
-			loop = interrupt.loop;
-			volume = interrupt.volume;
-			pan = interrupt.pan;
-			interrupt = interrupt.interrupt;
-		}
+	s._playInstance = function (instance, playProps) {
+		if (playProps.interrupt == null) {playProps.interrupt = s.defaultInterruptBehavior};
+		if (playProps.delay == null) {playProps.delay = 0;}
+		if (playProps.offset == null) {playProps.offset = instance.getPosition();}
+		if (playProps.loop == null) {playProps.loop = instance.loop;}
+		if (playProps.volume == null) {playProps.volume = instance.volume;}
+		if (playProps.pan == null) {playProps.pan = instance.pan;}
 
-		interrupt = interrupt || s.defaultInterruptBehavior;
-		if (delay == null) {delay = 0;}
-		if (offset == null) {offset = instance.getPosition();}
-		if (loop == null) {loop = instance.loop;}
-		if (volume == null) {volume = instance.volume;}
-		if (pan == null) {pan = instance.pan;}
-
-		if (delay == 0) {
-			var ok = s._beginPlaying(instance, interrupt, offset, loop, volume, pan);
+		if (playProps.delay == 0) {
+			var ok = s._beginPlaying(instance, playProps);
 			if (!ok) {return false;}
 		} else {
 			//Note that we can't pass arguments to proxy OR setTimeout (IE only), so just wrap the function call.
 			// OJR WebAudio may want to handle this differently, so it might make sense to move this functionality into the plugins in the future
 			var delayTimeoutId = setTimeout(function () {
-				s._beginPlaying(instance, interrupt, offset, loop, volume, pan);
-			}, delay);
+				s._beginPlaying(instance, playProps);
+			}, playProps.delay);
 			instance.delayTimeoutId = delayTimeoutId;
 		}
 
@@ -1446,24 +1423,17 @@ this.createjs = this.createjs || {};
 	 * Begin playback. This is called immediately or after delay by {{#crossLink "Sound/playInstance"}}{{/crossLink}}.
 	 * @method _beginPlaying
 	 * @param {AbstractSoundInstance} instance A {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} to begin playback.
-	 * @param {String} [interrupt=none] How this sound interrupts other instances with the same source. Defaults to
-	 * {{#crossLink "Sound/INTERRUPT_NONE:property"}}{{/crossLink}}. Interrupts are defined as <code>INTERRUPT_TYPE</code>
-	 * constants on Sound.
-	 * @param {Number} [offset] Time in milliseconds into the sound to begin playback.  Defaults to the current value on
-	 * the instance.
-	 * @param {Number} [loop=0] The number of times to loop the audio. Use 0 for no loops, and -1 for an infinite loop.
-	 * @param {Number} [volume] The volume of the sound between 0 and 1. Defaults to the current value on the instance.
-	 * @param {Number} [pan=instance.pan] The pan of the sound between -1 and 1. Defaults to current instance value.
+	 * @param {PlayPropsConfig} playProps A PlayPropsConfig object.
 	 * @return {Boolean} If the sound can start playing. If there are no available channels, or the instance fails to
 	 * start, this will return false.
 	 * @protected
 	 * @static
 	 */
-	s._beginPlaying = function (instance, interrupt, offset, loop, volume, pan) {
-		if (!SoundChannel.add(instance, interrupt)) {
+	s._beginPlaying = function (instance, playProps) {
+		if (!SoundChannel.add(instance, playProps.interrupt)) {
 			return false;
 		}
-		var result = instance._beginPlaying(offset, loop, volume, pan);
+		var result = instance._beginPlaying(playProps);
 		if (!result) {
 			var index = createjs.indexOf(this._instances, instance);
 			if (index > -1) {this._instances.splice(index, 1);}

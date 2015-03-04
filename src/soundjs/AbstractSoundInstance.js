@@ -311,43 +311,53 @@ this.createjs = this.createjs || {};
 	 * <h4>Example</h4>
 	 *
 	 *      var myInstance = createjs.Sound.createInstance(mySrc);
-	 *      myInstance.play({offset:1, loop:2, pan:0.5});	// options as object properties
-	 *      myInstance.play(createjs.Sound.INTERRUPT_ANY);	// options as parameters
+	 *      myInstance.play({interrupt:createjs.Sound.INTERRUPT_ANY, loop:2, pan:0.5});
 	 *
-	 * Note that if this sound is already playing, this call will do nothing.
+	 * Note that if this sound is already playing, this call will still set the passed in parameters.
+
+	 * <b>Parameters Deprecated</b><br />
+	 * The parameters for this method are deprecated in favor of a single parameter that is an Object or {{#crossLink "PlayPropsConfig"}}{{/crossLink}}.
 	 *
 	 * @method play
-	 * @param {String | Object} [interrupt="none"|options] How to interrupt any currently playing instances of audio with the same source,
-	 * if the maximum number of instances of the sound are already playing. Values are defined as <code>INTERRUPT_TYPE</code>
-	 * constants on the Sound class, with the default defined by Sound {{#crossLink "Sound/defaultInterruptBehavior:property"}}{{/crossLink}}.
+	 * @param {String | Object} [interrupt="none"|options] <b>This parameter will be renamed playProps in the next release.</b><br />
+	 * This parameter can be an instance of {{#crossLink "PlayPropsConfig"}}{{/crossLink}} or an Object that contains any or all optional properties by name,
+	 * including: interrupt, delay, offset, loop, volume, pan, startTime, and duration (see the above code sample).
 	 * <br /><strong>OR</strong><br />
-	 * This parameter can be an object that contains any or all optional properties by name, including: interrupt,
-	 * delay, offset, loop, volume, and pan (see the above code sample).
-	 * @param {Number} [delay=0] The delay in milliseconds before the sound starts
-	 * @param {Number} [offset=0] How far into the sound to begin playback, in milliseconds.
-	 * @param {Number} [loop=0] The number of times to loop the audio. Use -1 for infinite loops.
-	 * @param {Number} [volume=1] The volume of the sound, between 0 and 1.
-	 * @param {Number} [pan=0] The pan of the sound between -1 (left) and 1 (right). Note that pan is not supported
-	 * for HTML Audio.
+	 * <b>Deprecated</b> How to interrupt any currently playing instances of audio with the same source,
+	 * if the maximum number of instances of the sound are already playing. Values are defined as <code>INTERRUPT_TYPE</code>
+	 * constants on the Sound class, with the default defined by {{#crossLink "Sound/defaultInterruptBehavior:property"}}{{/crossLink}}.
+	 * @param {Number} [delay=0] <b>Deprecated</b> The amount of time to delay the start of audio playback, in milliseconds.
+	 * @param {Number} [offset=0] <b>Deprecated</b> The offset from the start of the audio to begin playback, in milliseconds.
+	 * @param {Number} [loop=0] <b>Deprecated</b> How many times the audio loops when it reaches the end of playback. The default is 0 (no
+	 * loops), and -1 can be used for infinite playback.
+	 * @param {Number} [volume=1] <b>Deprecated</b> The volume of the sound, between 0 and 1. Note that the master volume is applied
+	 * against the individual volume.
+	 * @param {Number} [pan=0] <b>Deprecated</b> The left-right pan of the sound (if supported), between -1 (left) and 1 (right).
+	 * Note that pan is not supported for HTML Audio.
 	 * @return {AbstractSoundInstance} A reference to itself, intended for chaining calls.
 	 */
 	p.play = function (interrupt, delay, offset, loop, volume, pan) {
+		var playProps;
+		if (interrupt instanceof Object || interrupt instanceof createjs.PlayPropsConfig) {
+			playProps = createjs.PlayPropsConfig.create(interrupt);
+		} else {
+			playProps = createjs.PlayPropsConfig.create({interrupt:interrupt, delay:delay, offset:offset, loop:loop, volume:volume, pan:pan});
+		}
+
 		if (this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-			if (interrupt instanceof Object) {
-				offset = interrupt.offset;
-				loop = interrupt.loop;
-				volume = interrupt.volume;
-				pan = interrupt.pan;
+			if (playProps.offset != null) { this.setPosition(playProps.offset) }
+			if (playProps.loop != null) { this.setLoop(playProps.loop); }
+			if (playProps.volume != null) { this.setVolume(playProps.volume); }
+			if (playProps.pan != null) { this.setPan(playProps.pan); }
+			if (playProps.startTime != null) {
+				this.setStartTime(playProps.startTime);
+				this.setDuration(playProps.duration);
 			}
-			if (offset != null) { this.setPosition(offset) }
-			if (loop != null) { this.setLoop(loop); }
-			if (volume != null) { this.setVolume(volume); }
-			if (pan != null) { this.setPan(pan); }
 			if (this._paused) {	this.setPaused(false); }
 			return;
 		}
 		this._cleanUp();
-		createjs.Sound._playInstance(this, interrupt, delay, offset, loop, volume, pan);	// make this an event dispatch??
+		createjs.Sound._playInstance(this, playProps);	// make this an event dispatch??
 		return this;
 	};
 
@@ -692,18 +702,20 @@ this.createjs = this.createjs || {};
 	 * Called by the Sound class when the audio is ready to play (delay has completed). Starts sound playing if the
 	 * src is loaded, otherwise playback will fail.
 	 * @method _beginPlaying
-	 * @param {Number} offset How far into the sound to begin playback, in milliseconds.
-	 * @param {Number} loop The number of times to loop the audio. Use -1 for infinite loops.
-	 * @param {Number} volume The volume of the sound, between 0 and 1.
-	 * @param {Number} pan The pan of the sound between -1 (left) and 1 (right). Note that pan does not work for HTML Audio.
+	 * @param {PlayPropsConfig} playProps A PlayPropsConfig object.
 	 * @return {Boolean} If playback succeeded.
 	 * @protected
 	 */
-	p._beginPlaying = function (offset, loop, volume, pan) {
-		this.setPosition(offset);
-		this.setLoop(loop);
-		this.setVolume(volume);
-		this.setPan(pan);
+	// OJR FlashAudioSoundInstance overwrites this
+	p._beginPlaying = function (playProps) {
+		this.setPosition(playProps.offset);
+		this.setLoop(playProps.loop);
+		this.setVolume(playProps.volume);
+		this.setPan(playProps.pan);
+		if (playProps.startTime != null) {
+			this.setStartTime(playProps.startTime);
+			this.setDuration(playProps.duration);
+		}
 
 		if (this._playbackResource != null && this._position < this._duration) {
 			this._paused = false;
