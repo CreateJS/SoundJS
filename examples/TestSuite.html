@@ -412,17 +412,18 @@
 				return;
 			}
 
+			var playProps = {};
 			var interrupt = $("#interrupt").get(0);
-			var interruptValue = interrupt.options[interrupt.selectedIndex].value;
-			var loop = $(".instanceLoopSlider").slider("option", "value");
-			var delay = $(".delaySlider").slider("option", "value") * 1000;
-			var offset = $(".offsetSlider").slider("option", "value") * 1000;
-			if (offset < 0) {
-				offset = null;
+			playProps.interruptValue = interrupt.options[interrupt.selectedIndex].value;
+			playProps.loop = $(".instanceLoopSlider").slider("option", "value");
+			playProps.delay = $(".delaySlider").slider("option", "value") * 1000;
+			playProps.offset = $(".offsetSlider").slider("option", "value") * 1000;
+			if (playProps.offset < 0) {
+				playProps.offset = null;
 			}
-			var volume = $(".volumeSlider").slider("option", "value") / 100;
-			var pan = $(".panSlider").slider("option", "value");
-			instance.play(interruptValue, delay, offset, loop, volume, pan);
+			playProps.volume = $(".volumeSlider").slider("option", "value") / 100;
+			playProps.pan = $(".panSlider").slider("option", "value");
+			instance.play(playProps);
 		});
 		$("#stopBtn").click(function (event) {
 			var instance = getInstance();
@@ -561,19 +562,20 @@
 		}
 
 		// Options
+		var playProps = {};
 		var interrupt = $("#interrupt").get(0);
-		var interruptValue = interrupt.options[interrupt.selectedIndex].value;
-		var loop = $(".loopSlider").slider("option", "value");
-		var delay = $(".delaySlider").slider("option", "value") * 1000;
-		var offset = $(".offsetSlider").slider("option", "value") * 1000;
-		if (offset < 0) {
-			offset = null;
+		playProps.interruptValue = interrupt.options[interrupt.selectedIndex].value;
+		playProps.loop = $(".loopSlider").slider("option", "value");
+		playProps.delay = $(".delaySlider").slider("option", "value") * 1000;
+		playProps.offset = $(".offsetSlider").slider("option", "value") * 1000;
+		if (playProps.offset < 0) {
+			playProps.offset = null;
 		}
-		var startTime = $(".startTimeSlider").slider("option", "value") * 1000;
-		var duration = $(".durationSlider").slider("option", "value") * 1000;
-		if (duration == 0) {
-			startTime = null;
-			duration = null;
+		playProps.startTime = $(".startTimeSlider").slider("option", "value") * 1000;
+		playProps.duration = $(".durationSlider").slider("option", "value") * 1000;
+		if (playProps.duration == 0) {
+			playProps.startTime = null;
+			playProps.duration = null;
 		}
 
 		for (var i = 0, l = list.options.length; i < l; i++) {
@@ -582,14 +584,14 @@
 			}
 			var item = list.options[i];
 
-			var instance = createjs.Sound.createInstance(item.value, startTime, duration);
+			var instance = createjs.Sound.createInstance(item.value, playProps.startTime, playProps.duration);
 			instance.handleSuccessProxy = createjs.proxy(handlePlaySuccess, instance);	// OJR kind of hacky
 			instance.addEventListener("succeeded", instance.handleSuccessProxy);
 			//instance.addEventListener("interrupted", createjs.proxy(handlePlayFailed,instance));
 			//instance.addEventListener("failed", createjs.proxy(handlePlayFailed,instance));
 			//instance.addEventListener("complete", createjs.proxy(handleSoundComplete,instance));
 
-			instance.play(interruptValue, delay, offset, loop);
+			instance.play(playProps);
 		}
 	}
 

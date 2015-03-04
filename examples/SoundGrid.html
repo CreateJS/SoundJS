@@ -130,7 +130,7 @@ These id's match the ones passed into the audioList array. -->
 
 	function playSound(target) {
 		//Play the sound: play (src, interrupt, delay, offset, loop, volume, pan)
-		var instance = createjs.Sound.play(target.id, createjs.Sound.INTERRUPT_NONE, 0, 0, false, 1);
+		var instance = createjs.Sound.play(target.id);
 		if (instance == null || instance.playState == createjs.Sound.PLAY_FAILED) {
 			return;
 		}
