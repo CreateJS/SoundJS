@@ -37,6 +37,30 @@ this.createjs = this.createjs || {};
 (function () {
 	"use strict";
 	/**
+	 * A class to store the optional play properties passed in {{#crossLink "Sound/play"}}{{/crossLink}} and
+	 * {{#crossLink "AbstractSoundInstance/play"}}{{/crossLink}} calls.
+	 *
+	 * Optional Play Properties Include:
+	 * <ul>
+	 * <li>interrupt - How to interrupt any currently playing instances of audio with the same source,
+	 * if the maximum number of instances of the sound are already playing. Values are defined as <code>INTERRUPT_TYPE</code>
+	 * constants on the Sound class, with the default defined by {{#crossLink "Sound/defaultInterruptBehavior:property"}}{{/crossLink}}.</li>
+	 * <li>delay - The amount of time to delay the start of audio playback, in milliseconds.</li>
+	 * <li>offset - The offset from the start of the audio to begin playback, in milliseconds.</li>
+	 * <li>loop - How many times the audio loops when it reaches the end of playback. The default is 0 (no
+	 * loops), and -1 can be used for infinite playback.</li>
+	 * <li>volume - The volume of the sound, between 0 and 1. Note that the master volume is applied
+	 * against the individual volume.</li>
+	 * <li>pan - The left-right pan of the sound (if supported), between -1 (left) and 1 (right).</li>
+	 * <li>startTime - To create an audio sprite (with duration), the initial offset to start playback and loop from, in milliseconds.</li>
+	 * <li>duration - To create an audio sprite (with startTime), the amount of time to play the clip for, in milliseconds.</li>
+	 * </ul>
+	 *
+	 * <h4>Example</h4>
+	 *
+	 * 	var ppc = new createjs.PlayPropsConfig().set({interrupt: "any", loop: -1, volume: 0.5})
+	 * 	createjs.Sound.play("mySound", ppc);
+	 * 	mySoundInstance.play(ppc);
 	 *
 	 * @class PlayPropsConfig
 	 * @constructor
