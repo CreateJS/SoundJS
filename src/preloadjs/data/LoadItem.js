@@ -49,7 +49,8 @@ this.createjs = this.createjs || {};
 	function LoadItem() {
 		/**
 		 * The source of the file that is being loaded. This property is <b>required</b>. The source can either be a
-		 * string (recommended), or an HTML tag.</li>
+		 * string (recommended), or an HTML tag.
+		 * This can also be an object, but in that case it has to include a type and be handled by a plugin.
 		 * @property src
 		 * @type {String}
 		 * @default null
@@ -57,9 +58,8 @@ this.createjs = this.createjs || {};
 		this.src = null;
 
 		/**
-		 * The source of the file that is being loaded. This property is <strong>required</strong>. The source can
-		 * either be a string (recommended), or an HTML tag. See the {{#crossLink "AbstractLoader"}}{{/crossLink}}
-		 * class for the full list of supported types.
+		 * The type file that is being loaded. The type of the file is usually inferred by the extension, but can also
+		 * be set manually. This is helpful in cases where a file does not have an extension.
 		 * @property type
 		 * @type {String}
 		 * @default null
@@ -154,7 +154,7 @@ this.createjs = this.createjs || {};
 		 * @type {boolean}
 		 * @default Anonymous
 		 */
-		this.crossOrigin = "Anonymous";
+		this.crossOrigin = null;
 
 		/**
 		 * The duration in milliseconds to wait before a request times out. This only applies to tag-based and and XHR

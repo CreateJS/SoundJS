@@ -436,6 +436,11 @@ this.createjs = this.createjs || {};
 			if (req == null) { return false; }
 		}
 
+		// Default to utf-8 for Text requests.
+		if (item.mimeType == null && createjs.RequestUtils.isText(item.type)) {
+			item.mimeType = "text/plain; charset=utf-8";
+		}
+
 		// IE9 doesn't support overrideMimeType(), so we need to check for it.
 		if (item.mimeType && req.overrideMimeType) {
 			req.overrideMimeType(item.mimeType);

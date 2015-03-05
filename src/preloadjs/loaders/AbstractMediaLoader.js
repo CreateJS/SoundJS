@@ -45,6 +45,7 @@ this.createjs = this.createjs || {};
 	 * @param {LoadItem|Object} loadItem
 	 * @param {Boolean} preferXHR
 	 * @param {String} type The type of media to load. Usually "video" or "audio".
+	 * @extends AbstractLoader
 	 * @constructor
 	 */
 	function AbstractMediaLoader(loadItem, preferXHR, type) {

@@ -48,7 +48,7 @@
 	s.ABSOLUTE_PATT = /^(?:\w+:)?\/{2}/i;
 
 	/**
-	 * The Regular Expression used to test file URLS for an absolute path.
+	 * The Regular Expression used to test file URLS for a relative path.
 	 * @property RELATIVE_PATH
 	 * @type {RegExp}
 	 * @static
@@ -239,7 +239,7 @@
 	/**
 	 * Check if item is a valid HTMLVideoElement
 	 * @method isVideoTag
-	 * @param {Objectitem
+	 * @param {Object} item
 	 * @returns {Boolean}
 	 * @static
 	 */
@@ -247,7 +247,7 @@
 		if (window.HTMLVideoElement) {
 			return item instanceof HTMLVideoElement;
 		} else {
-			false;
+			return false;
 		}
 	};
 
@@ -267,6 +267,7 @@
 			case createjs.AbstractLoader.CSS:
 			case createjs.AbstractLoader.SVG:
 			case createjs.AbstractLoader.JAVASCRIPT:
+			case createjs.AbstractLoader.SPRITESHEET:
 				return true;
 			default:
 				return false;

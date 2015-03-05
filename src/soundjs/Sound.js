@@ -167,10 +167,10 @@ this.createjs = this.createjs || {};
 	 * <b>Loading Alternate Paths and Extensionless Files</b><br />
 	 * SoundJS supports loading alternate paths and extensionless files by passing an object for src that has various paths
 	 * with property labels matching the extension.  These labels are how SoundJS determines if the browser will support the sound.
-	 * Priority is determined by the property order (first property is tried first).
+	 * Priority is determined by the property order (first property is tried first).  This is supported by both internal loading
+	 * and loading with PreloadJS.
 	 *
 	 * Note an id is required for playback.
-	 * Note this feature is not yet supported by PreloadJS.
 	 *
 	 * <h4>Example</h4>
 	 *
@@ -910,6 +910,9 @@ this.createjs = this.createjs || {};
 		}
 		loadItem = createjs.LoadItem.create(loadItem);
 		loadItem.path = basePath;
+		if (loadItem.loadTimeout == null) {
+			loadItem.loadTimeout = 8000;
+		}
 
 		if (basePath != null && !(loadItem.src instanceof Object)) {loadItem.src = basePath + src;}
 

@@ -42,11 +42,11 @@ this.createjs = this.createjs || {};
 	 * The base loader, which defines all the generic methods, properties, and events. All loaders extend this class,
 	 * including the {{#crossLink "LoadQueue"}}{{/crossLink}}.
 	 * @class AbstractLoader
-	 * @param {LoadItem|object|string} The item to be loaded.
+	 * @param {LoadItem|object|string} loadItem The item to be loaded.
 	 * @param {Boolean} [preferXHR] Determines if the LoadItem should <em>try</em> and load using XHR, or take a
 	 * tag-based approach, which can be better in cross-domain situations. Not all loaders can load using one or the
 	 * other, so this is a suggested directive.
-	 * @oaram {String} [type] The type of loader. Loader types are defined as constants on the AbstractLoader class,
+	 * @param {String} [type] The type of loader. Loader types are defined as constants on the AbstractLoader class,
 	 * such as {{#crossLink "IMAGE:property"}}{{/crossLink}}, {{#crossLink "CSS:property"}}{{/crossLink}}, etc.
 	 * @extends EventDispatcher
 	 */
@@ -191,6 +191,7 @@ this.createjs = this.createjs || {};
 	 * @property POST
 	 * @type {string}
 	 * @default post
+	 * @static
 	 */
 	s.POST = "POST";
 
@@ -199,6 +200,7 @@ this.createjs = this.createjs || {};
 	 * @property GET
 	 * @type {string}
 	 * @default get
+	 * @static
 	 */
 	s.GET = "GET";
 
@@ -662,7 +664,7 @@ this.createjs = this.createjs || {};
 	 * Handle events from internal requests. By default, loaders will handle, and redispatch the necessary events, but
 	 * this method can be overridden for custom behaviours.
 	 * @method handleEvent
-	 * @param {Event} The event that the internal request dispatches.
+	 * @param {Event} event The event that the internal request dispatches.
 	 * @protected
 	 * @since 0.6.0
 	 */

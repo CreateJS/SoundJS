@@ -46,6 +46,7 @@ this.createjs = this.createjs || {};
 	 * @class SoundLoader
 	 * @param {LoadItem|Object} loadItem
 	 * @param {Boolean} preferXHR
+	 * @extends AbstractMediaLoader
 	 * @constructor
 	 */
 	function SoundLoader(loadItem, preferXHR) {

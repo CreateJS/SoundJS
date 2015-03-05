@@ -39,11 +39,11 @@ this.createjs = this.createjs || {};
 
 	// constructor
 	/**
-	 * A createjs {{#crossLink "Event"}}{{/crossLink}} that is dispatched when progress changes.
+	 * A CreateJS {{#crossLink "Event"}}{{/crossLink}} that is dispatched when progress changes.
 	 * @class ProgressEvent
 	 * @param {Number} loaded The amount that has been loaded. This can be any number relative to the total.
-	 * @param {Number} [total] The total amount that will load. This will default to 0, so does not need to be passed in,
-	 * as long as the loaded value is a progress value (between 0 and 1).
+	 * @param {Number} [total=1] The total amount that will load. This will default to 1, so if the `loaded` value is
+	 * a percentage (between 0 and 1), it can be omitted.
 	 * @todo Consider having this event be a "fileprogress" event as well
 	 * @constructor
 	 */

@@ -60,8 +60,14 @@ this.createjs = this.createjs || {};
 
 	// public methods
 	p.load = function () {
-		this._tag.onstalled = createjs.proxy(this._handleStalled, this);
-		this._tag.onprogress = createjs.proxy(this._handleProgress, this);
+		var sc = createjs.proxy(this._handleStalled, this);
+		this._stalledCallback = sc;
+
+		var pc = createjs.proxy(this._handleProgress, this);
+		this._handleProgress = pc;
+
+		this._tag.addEventListener("stalled", sc);
+		this._tag.addEventListener("progress", pc);
 
 		// This will tell us when audio is buffered enough to play through, but not when its loaded.
 		// The tag doesn't keep loading in Chrome once enough has buffered, and we have decided that behaviour is sufficient.
@@ -104,8 +110,8 @@ this.createjs = this.createjs || {};
 	// protected methods
 	p._clean = function () {
 		this._tag.removeEventListener && this._tag.removeEventListener("canplaythrough", this._loadedHandler);
-		this._tag.onstalled = null;
-		this._tag.onprogress = null;
+		this._tag.removeEventListener("stalled", this._stalledCallback);
+		this._tag.removeEventListener("progress", this._progressCallback);
 
 		this.TagRequest__clean();
 	};
