@@ -345,14 +345,7 @@ this.createjs = this.createjs || {};
 		}
 
 		if (this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-			if (playProps.offset != null) { this.setPosition(playProps.offset) }
-			if (playProps.loop != null) { this.setLoop(playProps.loop); }
-			if (playProps.volume != null) { this.setVolume(playProps.volume); }
-			if (playProps.pan != null) { this.setPan(playProps.pan); }
-			if (playProps.startTime != null) {
-				this.setStartTime(playProps.startTime);
-				this.setDuration(playProps.duration);
-			}
+			this.applyPlayProps(playProps);
 			if (this._paused) {	this.setPaused(false); }
 			return;
 		}
@@ -394,10 +387,28 @@ this.createjs = this.createjs || {};
 		this.removeAllEventListeners();
 	};
 
+	/**
+	 * Takes an PlayPropsConfig or Object with the same properties and sets them on this instance.
+	 * @method applyPlayProps
+	 * @param {PlayPropsConfig | Object} playProps A PlayPropsConfig or object containing the same properties.
+	 * @since 0.6.1
+	 * @return {AbstractSoundInstance} A reference to itself, intended for chaining calls.
+	 */
+	p.applyPlayProps = function(playProps) {
+		if (playProps.offset != null) { this.setPosition(playProps.offset) }
+		if (playProps.loop != null) { this.setLoop(playProps.loop); }
+		if (playProps.volume != null) { this.setVolume(playProps.volume); }
+		if (playProps.pan != null) { this.setPan(playProps.pan); }
+		if (playProps.startTime != null) {
+			this.setStartTime(playProps.startTime);
+			this.setDuration(playProps.duration);
+		}
+		return this;
+	};
+
 	p.toString = function () {
 		return "[AbstractSoundInstance]";
 	};
-
 
 // get/set methods that allow support for IE8
 	/**
@@ -706,7 +717,7 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} If playback succeeded.
 	 * @protected
 	 */
-	// OJR FlashAudioSoundInstance overwrites this
+	// OJR FlashAudioSoundInstance overwirte
 	p._beginPlaying = function (playProps) {
 		this.setPosition(playProps.offset);
 		this.setLoop(playProps.loop);

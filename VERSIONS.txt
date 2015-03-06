@@ -25,6 +25,11 @@ CRITICAL (may break existing content):
 - added SoundInstance.startTime support
 - added PlayPropsConfig class which is now used in all play calls.  Deprecated passing individual properties
 - added startTime and duration handling to SoundInstance.play when passed in an Object or PlayPropsConfig
+- added applyPlayProps to AbstractSoundInstance, to apply multiple properties at once
+- added defaultPlayProps to registerSound and registerSounds, allowing the setting of default play properties that will be applied to each new instance of a given src
+  example: {id: "Humm (mp3)", src: "Humm.mp3", defaultPlayProps:{interrupt:createjs.Sound.INTERRUPT_ANY, loop:-1, offset: 2000}}
+- added get/setDefaultPlayProps to Sound, allowing the retrieval and setting of default play properties that will be applied to each new instance of a given src
+
 
 Version 0.6.0 [December 12, 2014]
 ************************************************************************************************************************

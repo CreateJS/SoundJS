@@ -97,6 +97,7 @@
 		<select id="library" multiple="multiple" class="select"></select><br/>
 
 		<input type="button" id="playSoundBtn" value="Play"/>
+		<input type="button" id="createSoundBtn" value="Create"/>
 
 		<label for="interrupt">Interrupt</label>
 		<select id="interrupt">
@@ -108,9 +109,9 @@
 			<option value="late">Late</option>
 		</select>
 		<input id="stopAllSoundsBtn" name="stopAll" type="button"
-			   value="Stop All Sounds"/>
+			   value="Stop All"/>
 		<input id="muteAllSoundsBtn" name="muteAll" type="button"
-			   value="Mute All Sounds"/>
+			   value="Mute All"/>
 
 		<br/>
 		<br/>
@@ -344,6 +345,7 @@
 
 		$("#library").change(selectItem);
 		$("#playSoundBtn").click(playSound);
+		$("#createSoundBtn").click(createSound);
 		$("#stopAllSoundsBtn").click(function (event) {
 			//clearInterval(audioInterval);
 			createjs.Sound.stop();
@@ -516,7 +518,7 @@
 		var assetsPath = "../_assets/audio/";
 		var sounds = [
 			{id: "Music", src: "M-GameBG.ogg", data: 2},
-			{id: "Humm (mp3)", src: "Humm.mp3"},
+			{id: "Humm (mp3)", src: "Humm.mp3", defaultPlayProps:{interrupt:createjs.Sound.INTERRUPT_ANY, loop:-1, volume:0.5, offset: 2000}},
 			{id: "Humm", src: "Humm.ogg"},
 			{id: "Thunder", src: "Thunder1.ogg", data: 3},
 			{id: "Rat Damage", src: "R-Damage.ogg", type: "sound"},
@@ -524,7 +526,7 @@
 			{src: "Game-AudioSprite.ogg", data: {
 				audioSprite: [
 					{id: "Audio Sprite Break", startTime: 0, duration: 500},
-					{id: "Audio Sprite Shot", startTime: 1000, duration: 245},
+					{id: "Audio Sprite Shot", startTime: 1000, duration: 245, defaultPlayProps:{loop:-1, volume:0.75}},
 					{id: "Audio Sprite Death", startTime: 1700, duration: 1074}
 				]}
 			}
@@ -592,6 +594,31 @@
 			//instance.addEventListener("complete", createjs.proxy(handleSoundComplete,instance));
 
 			instance.play(playProps);
+		}
+	}
+
+	function createSound(event) {
+		var list = $("#library").get(0);
+		if (list.selectedIndex == -1) {
+			return;
+		}
+
+		var startTime = $(".startTimeSlider").slider("option", "value") * 1000;
+		var duration = $(".durationSlider").slider("option", "value") * 1000;
+		if (duration == 0) {
+			startTime = null;
+			duration = null;
+		}
+
+		for (var i = 0, l = list.options.length; i < l; i++) {
+			if (!list.options[i].selected) {
+				continue;
+			}
+			var item = list.options[i];
+			var instance = createjs.Sound.createInstance(item.value, startTime, duration);
+			instance.handleSuccessProxy = null;
+
+			handlePlaySuccess({target:instance});
 		}
 	}
 
@@ -737,7 +764,7 @@
 	function enableSet(name, enabled) {
 		switch (name) {
 			case "sound":
-				enableItems("playControls", enabled, ["playSoundBtn", "interrupt", "loop", "delay", "offset", "startTime", "duration"]);
+				enableItems("playControls", enabled, ["playSoundBtn", "createSoundBtn", "interrupt", "loop", "delay", "offset", "startTime", "duration"]);
 				break;
 			case "instance":
 				enableItems("instanceControls", enabled, ["play", "pause", "stop", "clear", "volume", "instanceLoop", "pan", "pos", "mute", "instanceStartTime", "instanceDuration"]);

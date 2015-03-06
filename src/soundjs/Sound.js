@@ -410,6 +410,8 @@ this.createjs = this.createjs || {};
 	 */
     s.activePlugin = null;
 
+
+// class getter / setter properties
 	/**
 	 * Set the master volume of Sound. The master volume is multiplied against each sound's individual volume.  For
 	 * example, if master volume is 0.5 and a sound's volume is 0.5, the resulting volume is 0.25. To set individual
@@ -506,7 +508,6 @@ this.createjs = this.createjs || {};
 	 * @type {Object}
 	 * @static
 	 * @readOnly
-	 * @final
 	 * @since 0.6.1
 	 */
 	Object.defineProperty(s, "capabilities", {
@@ -516,6 +517,7 @@ this.createjs = this.createjs || {};
 				},
 		set: function (value) { return false;}
 	});
+
 
 // Class Private properties
 	/**
@@ -572,6 +574,17 @@ this.createjs = this.createjs || {};
 	 */
 	s._preloadHash = {};
 
+	/**
+	 * An object hash storing {{#crossLink "PlayPropsConfig"}}{{/crossLink}} via the parsed source that is passed as defaultPlayProps in
+	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}} and {{#crossLink "Sound/registerSounds"}}{{/crossLink}}.
+	 * @property _defaultPlayPropsHash
+	 * @type {Object}
+	 * @protected
+	 * @static
+	 * @since 0.6.1
+	 */
+	s._defaultPlayPropsHash = {};
+
 
 // EventDispatcher methods:
 	s.addEventListener = null;
@@ -621,7 +634,7 @@ this.createjs = this.createjs || {};
 	 * <ul><li>callback: A preload callback that is fired when a file is added to PreloadJS, which provides
 	 *      Sound a mechanism to modify the load parameters, select the correct file format, register the sound, etc.</li>
 	 *      <li>types: A list of file types that are supported by Sound (currently supports "sound").</li>
-	 *      <li>extensions: A list of file extensions that are supported by Sound (see {{#crossLink "Sound.SUPPORTED_EXTENSIONS"}}{{/crossLink}}).</li></ul>
+	 *      <li>extensions: A list of file extensions that are supported by Sound (see {{#crossLink "Sound/SUPPORTED_EXTENSIONS:property"}}{{/crossLink}}).</li></ul>
 	 * @static
 	 * @protected
 	 */
@@ -851,6 +864,10 @@ this.createjs = this.createjs || {};
 				for(var i = data.audioSprite.length; i--; ) {
 					sp = data.audioSprite[i];
 					s._idHash[sp.id] = {src: loadItem.src, startTime: parseInt(sp.startTime), duration: parseInt(sp.duration)};
+
+					if (sp.defaultPlayProps) {
+						s._defaultPlayPropsHash[sp.id] = createjs.PlayPropsConfig.create(sp.defaultPlayProps);
+					}
 				}
 			}
 		}
@@ -868,6 +885,9 @@ this.createjs = this.createjs || {};
 
 		if (loader.type) {loadItem.type = loader.type;}
 
+		if (loadItem.defaultPlayProps) {
+			s._defaultPlayPropsHash[loadItem.src] = createjs.PlayPropsConfig.create(loadItem.defaultPlayProps);
+		}
 		return loader;
 	};
 
@@ -896,21 +916,23 @@ this.createjs = this.createjs || {};
 	 *   duration is the amount of time to play the clip for, in milliseconds.<br/>
 	 * This allows Sound to support audio sprites that are played back by id.
 	 * @param {string} basePath Set a path that will be prepended to src for loading.
+	 * @param {Object | PlayPropsConfig} defaultPlayProps Optional Playback properties that will be set as the defaults on any new AbstractSoundInstance.
+	 * See {{#crossLink "PlayPropsConfig"}}{{/crossLink}} for options.
 	 * @return {Object} An object with the modified values that were passed in, which defines the sound.
 	 * Returns false if the source cannot be parsed or no plugins can be initialized.
 	 * Returns true if the source is already loaded.
 	 * @static
 	 * @since 0.4.0
 	 */
-	s.registerSound = function (src, id, data, basePath) {
-		var loadItem = {src: src, id: id, data:data};
+	s.registerSound = function (src, id, data, basePath, defaultPlayProps) {
+		var loadItem = {src: src, id: id, data:data, defaultPlayProps:defaultPlayProps};
 		if (src instanceof Object && src.src) {
 			basePath = id;
 			loadItem = src;
 		}
 		loadItem = createjs.LoadItem.create(loadItem);
 		loadItem.path = basePath;
-		if (loadItem.loadTimeout == null) {
+		if (loadItem.loadTimeout == null) {	// TODO remove this if loadItem is changed to always return a loadItem
 			loadItem.loadTimeout = 8000;
 		}
 
@@ -977,7 +999,7 @@ this.createjs = this.createjs || {};
 			// TODO document this feature
 		}
 		for (var i = 0, l = sounds.length; i < l; i++) {
-			returnValues[i] = createjs.Sound.registerSound(sounds[i].src, sounds[i].id, sounds[i].data, basePath);
+			returnValues[i] = createjs.Sound.registerSound(sounds[i].src, sounds[i].id, sounds[i].data, basePath, sounds[i].defaultPlayProps);
 		}
 		return returnValues;
 	};
@@ -1278,6 +1300,7 @@ this.createjs = this.createjs || {};
 	s.createInstance = function (src, startTime, duration) {
 		if (!s.initializeDefaultPlugins()) {return new createjs.DefaultSoundInstance(src, startTime, duration);}
 
+		var defaultPlayProps = s._defaultPlayPropsHash[src];	// for audio sprites, which create and store defaults by id
 		src = s._getSrcById(src);
 
 		var details = s._parsePath(src.src);
@@ -1287,6 +1310,11 @@ this.createjs = this.createjs || {};
 			SoundChannel.create(details.src);
 			if (startTime == null) {startTime = src.startTime;}
 			instance = s.activePlugin.create(details.src, startTime, duration || src.duration);
+
+			defaultPlayProps = defaultPlayProps || s._defaultPlayPropsHash[details.src];
+			if(defaultPlayProps) {
+				instance.applyPlayProps(defaultPlayProps);
+			}
 		} else {
 			instance = new createjs.DefaultSoundInstance(src, startTime, duration);
 		}
@@ -1294,6 +1322,24 @@ this.createjs = this.createjs || {};
 		instance.uniqueId = s._lastID++;
 
 		return instance;
+	};
+
+	/**
+	 * Stop all audio (global stop). Stopped audio is reset, and not paused. To play audio that has been stopped,
+	 * call AbstractSoundInstance {{#crossLink "AbstractSoundInstance/play"}}{{/crossLink}}.
+	 *
+	 * <h4>Example</h4>
+	 *
+	 *     createjs.Sound.stop();
+	 *
+	 * @method stop
+	 * @static
+	 */
+	s.stop = function () {
+		var instances = this._instances;
+		for (var i = instances.length; i--; ) {
+			instances[i].stop();  // NOTE stop removes instance from this._instances
+		}
 	};
 
 	/**
@@ -1365,21 +1411,31 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Stop all audio (global stop). Stopped audio is reset, and not paused. To play audio that has been stopped,
-	 * call AbstractSoundInstance {{#crossLink "AbstractSoundInstance/play"}}{{/crossLink}}.
+	 * Set the default playback properties for all new SoundInstances of the passed in src or ID.
+	 * See {{#crossLink "PlayPropsConfig"}}{{/crossLink}} for available properties.
 	 *
-	 * <h4>Example</h4>
-	 *
-	 *     createjs.Sound.stop();
-	 *
-	 * @method stop
-	 * @static
+	 * @method setDefaultPlayProps
+	 * @param {String} src The src or ID used to register the audio.
+	 * @param {Object | PlayPropsConfig} playProps The playback properties you would like to set.
+	 * @since 0.6.1
 	 */
-	s.stop = function () {
-		var instances = this._instances;
-		for (var i = instances.length; i--; ) {
-			instances[i].stop();  // NOTE stop removes instance from this._instances
-		}
+	s.setDefaultPlayProps = function(src, playProps) {
+		src = s._getSrcById(src);
+		s._defaultPlayPropsHash[s._parsePath(src.src).src] = createjs.PlayPropsConfig.create(playProps);
+	};
+
+	/**
+	 * Get the default playback properties for the passed in src or ID.  These properties are applied to all
+	 * new SoundInstances.  Returns null if default does not exist.
+	 *
+	 * @method getDefaultPlayProps
+	 * @param {String} src The src or ID used to register the audio.
+	 * @returns {PlayPropsConfig} returns an existing PlayPropsConfig or null if one does not exist
+	 * @since 0.6.1
+	 */
+	s.getDefaultPlayProps = function(src) {
+		src = s._getSrcById(src);
+		return s._defaultPlayPropsHash[s._parsePath(src.src).src];
 	};
 
 
@@ -1398,8 +1454,9 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s._playInstance = function (instance, playProps) {
-		if (playProps.interrupt == null) {playProps.interrupt = s.defaultInterruptBehavior};
-		if (playProps.delay == null) {playProps.delay = 0;}
+		var defaultPlayProps = s._defaultPlayPropsHash[instance.src] || {};
+		if (playProps.interrupt == null) {playProps.interrupt = defaultPlayProps.interrupt || s.defaultInterruptBehavior};
+		if (playProps.delay == null) {playProps.delay = defaultPlayProps.delay || 0;}
 		if (playProps.offset == null) {playProps.offset = instance.getPosition();}
 		if (playProps.loop == null) {playProps.loop = instance.loop;}
 		if (playProps.volume == null) {playProps.volume = instance.volume;}

@@ -58,7 +58,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * <h4>Example</h4>
 	 *
-	 * 	var ppc = new createjs.PlayPropsConfig().set({interrupt: "any", loop: -1, volume: 0.5})
+	 * 	var ppc = new createjs.PlayPropsConfig().set({interrupt: createjs.Sound.INTERRUPT_ANY, loop: -1, volume: 0.5})
 	 * 	createjs.Sound.play("mySound", ppc);
 	 * 	mySoundInstance.play(ppc);
 	 *
