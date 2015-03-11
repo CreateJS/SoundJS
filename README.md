@@ -7,12 +7,14 @@ like Web Audio, and a Flash fallback. A mechanism has been provided for easily t
 
 
 ## Example
-	createjs.Sound.addEventListener("fileload", handleLoadComplete);
-	createjs.Sound.registerSound({src:"path/to/sound.mp3|path/to/sound.ogg", id:"sound"});
-	function handleLoadComplete(event) {
-		createjs.Sound.play("sound");
-	}
 
+```javascript
+createjs.Sound.addEventListener("fileload", handleLoadComplete);
+createjs.Sound.registerSound({src:"path/to/sound.mp3|path/to/sound.ogg", id:"sound"});
+function handleLoadComplete(event) {
+	createjs.Sound.play("sound");
+}
+```
 
 ## License
 Built by gskinner.com, and released for free under the MIT license, which means you can use it for almost any purpose
