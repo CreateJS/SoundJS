@@ -477,7 +477,7 @@ this.createjs = this.createjs || {};
 	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/muted:property"}}{{/crossLink}} directly as a property
 	 *
 	 * @deprecated
-	 * @method setMute
+	 * @method setMuted
 	 * @param {Boolean} value If the sound should be muted.
 	 * @return {AbstractSoundInstance} A reference to itself, intended for chaining calls.
 	 * @since 0.6.0
@@ -493,7 +493,7 @@ this.createjs = this.createjs || {};
 	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/muted:property"}}{{/crossLink}} directly as a property
 	 *
 	 * @deprecated
-	 * @method getMute
+	 * @method getMuted
 	 * @return {Boolean} If the sound is muted.
 	 * @since 0.6.0
 	 */
