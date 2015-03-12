@@ -932,9 +932,6 @@ this.createjs = this.createjs || {};
 		}
 		loadItem = createjs.LoadItem.create(loadItem);
 		loadItem.path = basePath;
-		if (loadItem.loadTimeout == null) {	// TODO remove this if loadItem is changed to always return a loadItem
-			loadItem.loadTimeout = 8000;
-		}
 
 		if (basePath != null && !(loadItem.src instanceof Object)) {loadItem.src = basePath + src;}
 

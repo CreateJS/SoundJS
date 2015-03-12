@@ -163,22 +163,31 @@ this.createjs = this.createjs || {};
 		 * @type {Number}
 		 * @default 8000 (8 seconds)
 		 */
-		this.loadTimeout = 8000;
+		this.loadTimeout = s.LOAD_TIMEOUT_DEFAULT;
 	};
 
 	var p = LoadItem.prototype = {};
 	var s = LoadItem;
 
 	/**
-	 * Create/validate a LoadItem.
+	 * Default duration in milliseconds to wait before a request times out. This only applies to tag-based and and XHR
+	 * (level one) loading, as XHR (level 2) provides its own timeout event.
+	 * @property LOAD_TIMEOUT_DEFAULT
+	 * @type {number}
+	 * @static
+	 */
+	s.LOAD_TIMEOUT_DEFAULT = 8000;
+
+	/**
+	 * Create a LoadItem.
 	 * <ul>
 	 *     <li>String-based items are converted to a LoadItem with a populated {{#crossLink "src:property"}}{{/crossLink}}.</li>
 	 *     <li>LoadItem instances are returned as-is</li>
-	 *     <li>Objectss are returned as-is</li>
+	 *     <li>Objects are returned with any needed properties added</li>
 	 * </ul>
 	 * @method create
 	 * @param {LoadItem|String|Object} value The load item value
-	 * @returns {Object|LoadItem}
+	 * @returns {LoadItem|Object}
 	 * @static
 	 */
 	s.create = function (value) {
@@ -188,8 +197,10 @@ this.createjs = this.createjs || {};
 			return item;
 		} else if (value instanceof s) {
 			return value;
-		} else if (value instanceof Object) { // Don't modify object, allows users to attach random data to the item.
-			// TODO: Disallow objects with no src?
+		} else if (value instanceof Object && value.src) {
+			if (value.loadTimeout == null) {
+				value.loadTimeout = s.LOAD_TIMEOUT_DEFAULT;
+			}
 			return value;
 		} else {
 			throw new Error("Type not recognized.");
