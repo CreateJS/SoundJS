@@ -24,6 +24,9 @@ module.exports = function (grunt) {
 								"DEBUG": false
 							}
 						},
+						mangle: {
+							except: getExclusions()
+						}
 					},
 					build: {
 						files: {
@@ -236,6 +239,17 @@ module.exports = function (grunt) {
 		}
 
 		return clean;
+	}
+
+	function getExclusions() {
+		var list = getConfigValue("source").concat(getConfigValue("flashaudioplugin_source"));
+		var files = [];
+		for (var i= 0, l=list.length; i<l; i++) {
+			var name = path.basename(list[i], '.js');
+			var letter = name.substr(0,1); // Check for Uppercase (Class), since methods are fine.
+			if (letter.toUpperCase() == letter) { files.push(name); }
+		}
+		return files;
 	}
 
 	function getBuildArgs() {
