@@ -198,6 +198,7 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 	s.playEmptySound = function() {
+		if (s.context == null) {return;}
 		var source = s.context.createBufferSource();
 		source.buffer = s.context.createBuffer(1, 1, 22050);
 		source.connect(s.context.destination);
