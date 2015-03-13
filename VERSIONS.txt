@@ -29,6 +29,8 @@ CRITICAL (may break existing content):
 - added defaultPlayProps to registerSound and registerSounds, allowing the setting of default play properties that will be applied to each new instance of a given src
   example: {id: "Humm (mp3)", src: "Humm.mp3", defaultPlayProps:{interrupt:createjs.Sound.INTERRUPT_ANY, loop:-1, offset: 2000}}
 - added get/setDefaultPlayProps to Sound, allowing the retrieval and setting of default play properties that will be applied to each new instance of a given src
+- fix HTMLAudioPlugin.capabilities.panning value to be false
+- added CordovaAudioPlugin, for use with Cordova based apps including PhoneGap and Ionic
 
 
 Version 0.6.0 [December 12, 2014]
