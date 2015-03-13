@@ -203,8 +203,7 @@ this.createjs = this.createjs || {};
 	 */
 	s.isSupported = function () {
 		s._generateCapabilities();
-		if (s._capabilities == null) {return false;}
-		return true;
+		return (s._capabilities != null);
 	};
 
 	/**
@@ -220,7 +219,7 @@ this.createjs = this.createjs || {};
 		if (t.canPlayType == null) {return null;}
 
 		s._capabilities = {
-			panning:true,
+			panning:false,
 			volume:true,
 			tracks:-1
 		};
