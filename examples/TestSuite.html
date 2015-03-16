@@ -416,7 +416,7 @@
 
 			var playProps = {};
 			var interrupt = $("#interrupt").get(0);
-			playProps.interruptValue = interrupt.options[interrupt.selectedIndex].value;
+			playProps.interrupt = interrupt.options[interrupt.selectedIndex].value;
 			playProps.loop = $(".instanceLoopSlider").slider("option", "value");
 			playProps.delay = $(".delaySlider").slider("option", "value") * 1000;
 			playProps.offset = $(".offsetSlider").slider("option", "value") * 1000;
@@ -566,7 +566,7 @@
 		// Options
 		var playProps = {};
 		var interrupt = $("#interrupt").get(0);
-		playProps.interruptValue = interrupt.options[interrupt.selectedIndex].value;
+		playProps.interrupt = interrupt.options[interrupt.selectedIndex].value;
 		playProps.loop = $(".loopSlider").slider("option", "value");
 		playProps.delay = $(".delaySlider").slider("option", "value") * 1000;
 		playProps.offset = $(".offsetSlider").slider("option", "value") * 1000;
