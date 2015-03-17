@@ -232,8 +232,6 @@ this.createjs = this.createjs || {};
 		return si;
 	};
 
-	// TODO Volume & mute Getter / Setter??
-	// TODO change calls to return nothing or this for chaining??
 	// if a plugin does not support volume and mute, it should set these to null
 	/**
 	 * Set the master volume of the plugin, which affects all SoundInstances.

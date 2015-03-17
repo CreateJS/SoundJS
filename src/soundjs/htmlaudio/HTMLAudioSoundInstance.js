@@ -134,9 +134,9 @@ this.createjs = this.createjs || {};
 		}
 	};
 
-	p._beginPlaying = function (offset, loop, volume, pan) {
+	p._beginPlaying = function (playProps) {
 		this._playbackResource = createjs.HTMLAudioTagPool.get(this.src);
-		return this.AbstractSoundInstance__beginPlaying(offset, loop, volume, pan);
+		return this.AbstractSoundInstance__beginPlaying(playProps);
 	};
 
 	p._handleSoundReady = function (event) {
@@ -250,7 +250,7 @@ this.createjs = this.createjs || {};
 		}
 	};
 
-	p.updateStartTime = function () {
+	p._updateStartTime = function () {
 		this._audioSpriteStopTime = (this._startTime + this._duration) * 0.001;
 
 		if(this.playState == createjs.Sound.PLAY_SUCCEEDED) {

@@ -717,7 +717,7 @@ this.createjs = this.createjs || {};
 	 * @return {Boolean} If playback succeeded.
 	 * @protected
 	 */
-	// OJR FlashAudioSoundInstance overwirte
+	// OJR FlashAudioSoundInstance overwrites
 	p._beginPlaying = function (playProps) {
 		this.setPosition(playProps.offset);
 		this.setLoop(playProps.loop);
@@ -834,8 +834,8 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Internal function that calculates the current position of the playhead and sets it on this._position
-	 * @method _updatePosition
+	 * Internal function that calculates the current position of the playhead and sets this._position to that value
+	 * @method _calculateCurrentPosition
 	 * @protected
 	 * @since 0.6.0
 	 */
@@ -917,7 +917,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Internal function called when AbstractSoundInstance has played to end and is looping
-	 * @method _handleCleanUp
+	 * @method _handleLoop
 	 * @protected
 	 * @since 0.6.0
 	 */
