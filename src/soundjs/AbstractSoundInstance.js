@@ -536,7 +536,7 @@ this.createjs = this.createjs || {};
 	 */
 	p.getPosition = function () {
 		if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-			this._calculateCurrentPosition();	// sets this._position
+			this._position = this._calculateCurrentPosition();
 		}
 		return this._position;
 	};
