@@ -43,5 +43,12 @@
         "../src/soundjs/version_flashplugin.js"
 	],
 
+	"cordovaaudioplugin_source": [
+        "../src/soundjs/codovaaudio/CordovaAudioLoader.js",
+		"../src/soundjs/codovaaudio/CordovaAudioSoundInstance.js",
+		"../src/soundjs/codovaaudio/CordovaAudioPlugin.js",
+        "../src/soundjs/version_cordovaplugin.js"
+	],
+
 	"docs_out_path":"./output/SoundJSDocs/"
 }

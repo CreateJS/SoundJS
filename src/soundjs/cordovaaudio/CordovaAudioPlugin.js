@@ -44,9 +44,19 @@ this.createjs = this.createjs || {};
 	 * using the {{#crossLink "Sound/registerPlugins"}}{{/crossLink}} method.
 	 * This plugin is recommended when building a Cordova based app, but is not required.
 	 *
-	 * <b>NOTE the Cordova Media plugin is required</b>
+	 * <b>NOTE the <a href="http://plugins.cordova.io/#/package/org.apache.cordova.media" target="_blank">Cordova Media plugin</a> is required</b>
 	 *
 	 * 		cordova plugin add org.apache.cordova.media
+	 *
+	 * <h4>Known Issues</h4>
+	 * <b>Audio Position</b>
+	 * <ul>Audio position is calculated asynchronusly by Media.  The SoundJS solution to this problem is two-fold:
+	 * <li>Provide {{#crossLink "CordovaAudioSoundInstance/getCurrentPosition"}}{{/crossLink}} that maps directly to media.getCurrentPosition.</li>
+	 * <li>Provide a best guess position based on elapsed time since playback started, which is synchronized with actual position when the audio is paused or stopped.
+	 * Testing showed this to be fairly reliable within 200ms.</li></ul>
+	 * <b>Cordova Media Docs</b>
+	 * <ul><li>See the <a href="http://plugins.cordova.io/#/package/org.apache.cordova.media" target="_blank">Cordova Media Docs</a> for various known OS issues.</li></ul>
+	 * <br />
 	 *
 	 * @class CordovaAudioPlugin
 	 * @extends AbstractPlugin
