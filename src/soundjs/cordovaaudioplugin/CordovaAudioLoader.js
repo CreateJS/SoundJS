@@ -45,7 +45,6 @@ this.createjs = this.createjs || {};
 	 *
 	 * @class CordovaAudioLoader
 	 * @param {String} loadItem The item to be loaded
-	 * @param {Object} flash The flash instance that will do the preloading.
 	 * @extends XHRRequest
 	 * @protected
 	 */

@@ -69,6 +69,15 @@ this.createjs = this.createjs || {};
 
 // Static Properties
 	/**
+	 * Sets a default playAudioWhenScreenIsLocked property for play calls on iOS devices.
+	 * Individual SoundInstances can alter the default with {{#crossLink "CordovaAudioSoundInstance/playWhenScreenLocked"}}{{/crossLink}}.
+	 * @property playWhenScreenLocked
+	 * @type {boolean}
+	 * @static
+	 */
+	s.playWhenScreenLocked = false;
+
+	/**
 	 * The capabilities of the plugin. This is generated via the {{#crossLink "CordovaAudioPlugin/_generateCapabilities"}}{{/crossLink}}
 	 * method. Please see the Sound {{#crossLink "Sound/getCapabilities"}}{{/crossLink}} method for an overview of all
 	 * of the available properties.
@@ -108,7 +117,7 @@ this.createjs = this.createjs || {};
 		if (t.canPlayType == null) {return null;}
 
 		s._capabilities = {
-			panning:true,
+			panning:false,
 			volume:true,
 			tracks:-1
 		};
@@ -125,6 +134,12 @@ this.createjs = this.createjs || {};
 
 
 // public methods
+	p.create = function (src, startTime, duration) {
+		var si = this.AbstractPlugin_create(src, startTime, duration);
+		si.playWhenScreenLocked = this.playWhenScreenLocked;
+		return si;
+	};
+
 	p.toString = function () {
 		return "[CordovaAudioPlugin]";
 	};
