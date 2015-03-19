@@ -62,9 +62,11 @@ this.createjs = this.createjs || {};
  *      }
  *
  * <h4>Browser Support</h4>
- * Audio will work in browsers which support WebAudio (<a href="http://caniuse.com/audio-api">http://caniuse.com/audio-api</a>)
- * or HTMLAudioElement (<a href="http://caniuse.com/audio">http://caniuse.com/audio</a>). A Flash fallback can be added
- * as well, which will work in any browser that supports the Flash player.
+ * Audio will work in browsers which support WebAudio (<a href="http://caniuse.com/audio-api" target="_blank">http://caniuse.com/audio-api</a>)
+ * or HTMLAudioElement (<a href="http://caniuse.com/audio" target="_blank">http://caniuse.com/audio</a>).
+ * A Flash fallback can be added, which will work in any browser that supports the Flash player.
+ * A Cordova plugin can be added, which will work in any webview that supports
+ * <a href="http://plugins.cordova.io/#/package/org.apache.cordova.media" target="_blank">Cordova.Media</a>
  * @module SoundJS
  * @main SoundJS
  */
