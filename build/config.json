@@ -44,9 +44,9 @@
 	],
 
 	"cordovaaudioplugin_source": [
-        "../src/soundjs/codovaaudio/CordovaAudioLoader.js",
-		"../src/soundjs/codovaaudio/CordovaAudioSoundInstance.js",
-		"../src/soundjs/codovaaudio/CordovaAudioPlugin.js",
+        "../src/soundjs/cordovaaudio/CordovaAudioLoader.js",
+		"../src/soundjs/cordovaaudio/CordovaAudioSoundInstance.js",
+		"../src/soundjs/cordovaaudio/CordovaAudioPlugin.js",
         "../src/soundjs/version_cordovaplugin.js"
 	],
 
