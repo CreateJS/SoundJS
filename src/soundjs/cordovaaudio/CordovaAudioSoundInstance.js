@@ -62,14 +62,6 @@ this.createjs = this.createjs || {};
 
 // Private Properties
 		/**
-		 * Holds the Cordova Media object for this sound, allowing playback.
-		 * @property
-		 * @type {Media}
-		 * @protected
-		 */
-		this._media = null;
-
-		/**
 		 * Used to approximate the playback position by storing the number of milliseconds elapsed since
 		 * 1 January 1970 00:00:00 UTC when playing
 		 * Note that if js clock is out of sync with Media playback, this will become increasingly inaccurate.
@@ -90,16 +82,16 @@ this.createjs = this.createjs || {};
 		// Proxies, make removing listeners easier.
 		this._audioSpriteEndHandler = createjs.proxy(this._handleSoundComplete, this);
 		this._mediaPlayFinishedHandler = createjs.proxy(this._handleSoundComplete, this);
-		this._mediaErrorHandler = createjs.proxy(this._playFailed, this);
+		this._mediaErrorHandler = createjs.proxy(this._handleMediaError, this);
+		this._mediaProgressHandler = createjs.proxy(this._handleMediaProgress, this);
 
-		this._media = new Media(src, this._mediaPlayFinishedHandler, this._mediaErrorHandler);
+		this._playbackResource = new Media(src, this._mediaPlayFinishedHandler, this._mediaErrorHandler, this._mediaProgressHandler);
 
 		if (duration) {
 			this._audioSpriteStopTime = (startTime + duration);
 		} else {
-			this._duration = this._media.getDuration() * 0.001;
+			this._setDurationFromSource();
 		}
-
 	}
 	var p = createjs.extend(CordovaAudioSoundInstance, createjs.AbstractSoundInstance);
 
@@ -128,7 +120,7 @@ this.createjs = this.createjs || {};
 	p.destroy = function() {
 		// call parent function, then release
 		this.AbstractSoundInstance_destroy();
-		this._media.release();
+		this._playbackResource.release();
 	};
 
 	/**
@@ -139,7 +131,7 @@ this.createjs = this.createjs || {};
 	 * @param {Method} [mediaError=null] (Optional) The callback to execute if an error occurs.
 	 */
 	p.getCurrentPosition = function (mediaSuccess, mediaError) {
-		this._media.getCurrentPosition(mediaSuccess, mediaError);
+		this._playbackResource.getCurrentPosition(mediaSuccess, mediaError);
 	};
 
 	p.toString = function () {
@@ -147,6 +139,23 @@ this.createjs = this.createjs || {};
 	};
 
 //Private Methods
+	/**
+	 * media object has failed and likely will never work
+	 * @method _handleMediaError
+	 * @param error
+	 * @private
+	 */
+	p._handleMediaError = function(error) {
+		clearTimeout(this.delayTimeoutId); // clear timeout that plays delayed sound
+
+		this.playState = createjs.Sound.PLAY_FAILED;
+		this._sendEvent("failed");
+	};
+
+	p._handleMediaProgress = function(state) {
+		// do nothing
+	};
+
 	/* don't need these for current looping approach
 	p._removeLooping = function() {
 	};
@@ -157,29 +166,29 @@ this.createjs = this.createjs || {};
 
 	p._handleCleanUp = function () {
 		clearTimeout(this._audioSpriteTimeout);
-		this._media.pause(); // OJR cannot use .stop as it prevents .seekTo from working
+		this._playbackResource.pause(); // OJR cannot use .stop as it prevents .seekTo from working
 		// todo consider media.release
 	};
 
 	p._handleSoundReady = function (event) {
-		this._media.seekTo(this._startTime + this._position);
+		this._playbackResource.seekTo(this._startTime + this._position);
 
 		if (this._duration) {
 			this._audioSpriteTimeout = setTimeout(this._audioSpriteEndHandler, this._duration - this._position)
 		}
 
-		this._media.play({playAudioWhenScreenIsLocked: this.playWhenScreenLocked});
+		this._playbackResource.play({playAudioWhenScreenIsLocked: this.playWhenScreenLocked});
 		this._playStartTime = Date.now();
 	};
 
 	p._pause = function () {
 		clearTimeout(this._audioSpriteTimeout);
-		this._media.pause();
+		this._playbackResource.pause();
 		if (this._playStartTime) {
 			this._position = Date.now() - this._playStartTime;
 			this._playStartTime = null;
 		}
-		this._media.getCurrentPosition(createjs.proxy(this._updatePausePos, this));
+		this._playbackResource.getCurrentPosition(createjs.proxy(this._updatePausePos, this));
 	};
 
 	/**
@@ -200,14 +209,14 @@ this.createjs = this.createjs || {};
 			this._audioSpriteTimeout = setTimeout(this._audioSpriteEndHandler, this._duration - this._position)
 		}
 
-		this._media.play({playAudioWhenScreenIsLocked: this.playWhenScreenLocked});
+		this._playbackResource.play({playAudioWhenScreenIsLocked: this.playWhenScreenLocked});
 		this._playStartTime = Date.now();
 	};
 
 	p._handleStop = function() {
 		clearTimeout(this._audioSpriteTimeout);
-		this._media.pause(); // cannot use .stop because it prevents .seekTo from working
-		this._media.seekTo(this._startTime);
+		this._playbackResource.pause(); // cannot use .stop because it prevents .seekTo from working
+		this._playbackResource.seekTo(this._startTime);
 		if (this._playStartTime) {
 			this._position = 0;
 			this._playStartTime = null;
@@ -216,7 +225,7 @@ this.createjs = this.createjs || {};
 
 	p._updateVolume = function () {
 		var newVolume = (this._muted || createjs.Sound._masterMute) ? 0 : this._volume * createjs.Sound._masterVolume;
-		this._media.volume = newVolume;
+		this._playbackResource.volume = newVolume;
 	};
 
 	p._calculateCurrentPosition = function() {
@@ -230,7 +239,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p._updatePosition = function() {
-		this._media.seekTo(this._startTime + this._position);
+		this._playbackResource.seekTo(this._startTime + this._position);
 		this._playStartTime = Date.now();
 		if (this._duration) {
 			clearTimeout(this._audioSpriteTimeout);
@@ -259,7 +268,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p._setDurationFromSource = function () {
-		this._duration = this._media.getDuration() * 0.001;
+		this._duration = createjs.Sound.activePlugin.getSrcDuration(this.src);	// TODO find a better way to do this that does not break flow
 	};
 
 	createjs.CordovaAudioSoundInstance = createjs.promote(CordovaAudioSoundInstance, "AbstractSoundInstance");

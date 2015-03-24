@@ -65,12 +65,12 @@ this.createjs = this.createjs || {};
 	function CordovaAudioPlugin() {
 		this.AbstractPlugin_constructor();
 
-
-	// Public Properties
 		this._capabilities = s._capabilities;
 
 		this._loaderClass = createjs.CordovaAudioLoader;
 		this._soundInstanceClass = createjs.CordovaAudioSoundInstance;
+
+		this._srcDurationHash = {};
 	}
 
 	var p = createjs.extend(CordovaAudioPlugin, createjs.AbstractPlugin);
@@ -120,7 +120,7 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	s._generateCapabilities = function () {
-		if (s._capabilities != null || !(cordova || PhoneGap || phonegap) || !Media) {return;}
+		if (s._capabilities != null || !(window.cordova || window.PhoneGap || window.phonegap) || !window.Media) {return;}
 
 		// OJR my best guess is that Cordova will have the same limits on playback that the audio tag has, but this could be wrong
 		var t = document.createElement("audio");
@@ -157,6 +157,28 @@ this.createjs = this.createjs || {};
 	// plugin does not support these
 	p.setVolume = p.getVolume = p.setMute = null;
 
+	/**
+	 * Get the duration for a src.  Intended for internal use by CordovaAudioSoundInstance.
+	 * @method getSrcDuration
+	 * @param src
+	 * @returns {Number} The duration of the src or null if it does not exist
+	 */
+	p.getSrcDuration = function(src) {
+		return this._srcDurationHash[src];
+	};
+
+// Private Methods
+	p._handlePreloadComplete = function (event) {
+		var src = event.target.getItem().src;
+		var getRawResult = true;
+		this._srcDurationHash[src] = event.rawResult;
+		this.AbstractPlugin__handlePreloadComplete(event);
+	};
+
+	p.removeSound = function (src) {
+		delete(this._srcDurationHash[src]);
+		this.AbstractPlugin_removeSound(src);
+	};
 
 	createjs.CordovaAudioPlugin = createjs.promote(CordovaAudioPlugin, "AbstractPlugin");
 }());

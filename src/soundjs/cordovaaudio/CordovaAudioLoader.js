@@ -51,13 +51,39 @@ this.createjs = this.createjs || {};
 	function Loader(loadItem) {
 		this.AbstractLoader_constructor(loadItem, true, createjs.AbstractLoader.SOUND);
 
+		/**
+		 * A Media object used to determine if src exists and to get duration
+		 * @property _media
+		 * @type {Media}
+		 * @protected
+		 */
+		this._media = null;
+
+		/**
+		 * A time counter that triggers timeout if loading takes too long
+		 * @property _loadTime
+		 * @type {number}
+		 * @protected
+		 */
+		this._loadTime = 0;
+
+		/**
+		 * The frequency to fire the loading timer until duration can be retrieved
+		 * @property _TIMER_FREQUENCY
+		 * @type {number}
+		 * @protected
+		 */
+		this._TIMER_FREQUENCY = 100;
 	};
 	var p = createjs.extend(Loader, createjs.AbstractLoader);
 
 
 // public methods
 	p.load = function() {
-		this._sendComplete();
+		this._media = new Media(this._item.src, null, createjs.proxy(this._mediaErrorHandler,this));
+		this._media.seekTo(0);	// needed to get duration
+
+		this._getMediaDuration();
 	};
 
 	p.toString = function () {
@@ -66,7 +92,36 @@ this.createjs = this.createjs || {};
 
 
 // private methods
+	/**
+	 * Fires if audio cannot seek, indicating that src does not exist.
+	 * @method _mediaErrorHandler
+	 * @param error
+	 * @protected
+	 */
+	p._mediaErrorHandler = function(error) {
+		this._media.release();
+		this._sendError();
+	};
 
+	/**
+	 * will attempt to get duration of audio until successful or time passes this._item.loadTimeout
+	 * @method _getMediaDuration
+	 * @protected
+	 */
+	p._getMediaDuration = function() {
+		this._rawResult = this._media.getDuration() * 1000;
+		if (this._rawResult < 0) {
+			this._loadTime += this._TIMER_FREQUENCY;
+			if (this._loadTime > this._item.loadTimeout) {
+				this.handleEvent({type:"timeout"});
+			} else {
+				setTimeout(createjs.proxy(this._getMediaDuration, this), this._TIMER_FREQUENCY);
+			}
+		} else {
+			this._media.release();
+			this._sendComplete();
+		}
+	};
 
 	createjs.CordovaAudioLoader = createjs.promote(Loader, "AbstractLoader");
 }());
