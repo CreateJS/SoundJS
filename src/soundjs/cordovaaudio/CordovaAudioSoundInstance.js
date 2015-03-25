@@ -88,7 +88,7 @@ this.createjs = this.createjs || {};
 		this._audioSprite = false;
 
 		// Proxies, make removing listeners easier.
-		this._audioSpriteEndHandler = createjs.proxy(this._handleSoundComplete, this);
+		this._audioSpriteEndHandler = createjs.proxy(this._handleAudioSpriteComplete, this);
 		this._mediaPlayFinishedHandler = createjs.proxy(this._handleSoundComplete, this);
 		this._mediaErrorHandler = createjs.proxy(this._handleMediaError, this);
 		this._mediaProgressHandler = createjs.proxy(this._handleMediaProgress, this);
@@ -164,6 +164,10 @@ this.createjs = this.createjs || {};
 		// do nothing
 	};
 
+	p._handleAudioSpriteComplete = function() {
+		this._playbackResource.pause();
+		this._handleSoundComplete();
+	};
 	/* don't need these for current looping approach
 	p._removeLooping = function() {
 	};
@@ -249,7 +253,7 @@ this.createjs = this.createjs || {};
 	p._updatePosition = function() {
 		this._playbackResource.seekTo(this._startTime + this._position);
 		this._playStartTime = Date.now();
-		if (this._duration) {
+		if (this._audioSprite) {
 			clearTimeout(this._audioSpriteTimeout);
 			this._audioSpriteTimeout = setTimeout(this._audioSpriteEndHandler, this._duration - this._position)
 		}
@@ -260,18 +264,19 @@ this.createjs = this.createjs || {};
 	};
 
 	p._updateStartTime = function () {
-		this._audioSpriteStopTime = (this._startTime + this._duration);
+		this._audioSprite = true;
 
 		if(this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-
+			// do nothing
 		}
 	};
 
 	p._updateDuration = function () {
-		this._audioSpriteStopTime = (this._startTime + this._duration);
+		this._audioSprite
 
 		if(this.playState == createjs.Sound.PLAY_SUCCEEDED) {
-
+			clearTimeout(this._audioSpriteTimeout);
+			this._audioSpriteTimeout = setTimeout(this._audioSpriteEndHandler, this._duration - this.position)
 		}
 	};
 

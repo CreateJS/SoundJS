@@ -171,7 +171,8 @@ this.createjs = this.createjs || {};
 	p._handlePreloadComplete = function (event) {
 		var src = event.target.getItem().src;
 		this._srcDurationHash[src] = event.result;
-		this.AbstractPlugin__handlePreloadComplete(event);
+		this._audioSources[src] = event.result;
+		//this.AbstractPlugin__handlePreloadComplete(event);	// we don't want to do the rest of this
 	};
 
 	p.removeSound = function (src) {
