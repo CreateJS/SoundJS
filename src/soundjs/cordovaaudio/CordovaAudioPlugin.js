@@ -170,8 +170,7 @@ this.createjs = this.createjs || {};
 // Private Methods
 	p._handlePreloadComplete = function (event) {
 		var src = event.target.getItem().src;
-		var getRawResult = true;
-		this._srcDurationHash[src] = event.rawResult;
+		this._srcDurationHash[src] = event.result;
 		this.AbstractPlugin__handlePreloadComplete(event);
 	};
 

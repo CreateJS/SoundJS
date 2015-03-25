@@ -109,8 +109,8 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._getMediaDuration = function() {
-		this._rawResult = this._media.getDuration() * 1000;
-		if (this._rawResult < 0) {
+		this._result = this._media.getDuration() * 1000;
+		if (this._result < 0) {
 			this._loadTime += this._TIMER_FREQUENCY;
 			if (this._loadTime > this._item.loadTimeout) {
 				this.handleEvent({type:"timeout"});

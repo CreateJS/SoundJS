@@ -67,7 +67,7 @@ this.createjs = this.createjs || {};
 		 * Note that if js clock is out of sync with Media playback, this will become increasingly inaccurate.
 		 * @property _playStartTime
 		 * @type {Number}
-		 * @private
+		 * @protected
 		 */
 		this._playStartTime = null;
 
@@ -75,9 +75,17 @@ this.createjs = this.createjs || {};
 		 * A TimeOut used to trigger the end and possible loop of audio sprites.
 		 * @property _audioSpriteTimeout
 		 * @type {null}
-		 * @private
+		 * @protected
 		 */
 		this._audioSpriteTimeout = null;
+
+		/**
+		 * Boolean value that indicates if we are using an audioSprite
+		 * @property _audioSprite
+		 * @type {boolean}
+		 * @protected
+		 */
+		this._audioSprite = false;
 
 		// Proxies, make removing listeners easier.
 		this._audioSpriteEndHandler = createjs.proxy(this._handleSoundComplete, this);
@@ -88,7 +96,7 @@ this.createjs = this.createjs || {};
 		this._playbackResource = new Media(src, this._mediaPlayFinishedHandler, this._mediaErrorHandler, this._mediaProgressHandler);
 
 		if (duration) {
-			this._audioSpriteStopTime = (startTime + duration);
+			this._audioSprite = true;
 		} else {
 			this._setDurationFromSource();
 		}
@@ -173,7 +181,7 @@ this.createjs = this.createjs || {};
 	p._handleSoundReady = function (event) {
 		this._playbackResource.seekTo(this._startTime + this._position);
 
-		if (this._duration) {
+		if (this._audioSprite) {
 			this._audioSpriteTimeout = setTimeout(this._audioSpriteEndHandler, this._duration - this._position)
 		}
 
@@ -205,7 +213,7 @@ this.createjs = this.createjs || {};
 	};
 
 	p._resume = function () {
-		if (this._duration) {
+		if (this._audioSprite) {
 			this._audioSpriteTimeout = setTimeout(this._audioSpriteEndHandler, this._duration - this._position)
 		}
 
@@ -225,7 +233,7 @@ this.createjs = this.createjs || {};
 
 	p._updateVolume = function () {
 		var newVolume = (this._muted || createjs.Sound._masterMute) ? 0 : this._volume * createjs.Sound._masterVolume;
-		this._playbackResource.volume = newVolume;
+		this._playbackResource.setVolume(newVolume);
 	};
 
 	p._calculateCurrentPosition = function() {
