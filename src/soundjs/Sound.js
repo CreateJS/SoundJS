@@ -1142,6 +1142,7 @@ this.createjs = this.createjs || {};
 		} else {
 			src = s._getSrcById(src).src;
 		}
+		if(s._preloadHash[src] == undefined) {return false;}
 		return (s._preloadHash[src][0] == true);  // src only loads once, so if it's true for the first it's true for all
 	};
 

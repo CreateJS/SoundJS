@@ -32,6 +32,7 @@ CRITICAL (may break existing content):
 - fix HTMLAudioPlugin.capabilities.panning value to be false
 - fix HTMLAudioPlugin.updateStartTime to correct HTMLAudioPlugin._updateStartTime
 - added CordovaAudioPlugin, for use with Cordova based apps including PhoneGap and Ionic
+- fix Sound.loadComplete throwing errors for src that has not been loaded instead of expected false
 
 
 Version 0.6.0 [December 12, 2014]
