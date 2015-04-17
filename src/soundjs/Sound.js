@@ -328,11 +328,11 @@ this.createjs = this.createjs || {};
 	 * A very detailed list of file formats can be found at <a href="http://www.fileinfo.com/filetypes/audio" target="_blank">http://www.fileinfo.com/filetypes/audio</a>.
 	 * @property SUPPORTED_EXTENSIONS
 	 * @type {Array[String]}
-	 * @default ["mp3", "ogg", "org", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"]
+	 * @default ["mp3", "ogg", "opus", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"]
 	 * @since 0.4.0
 	 * @static
 	 */
-	s.SUPPORTED_EXTENSIONS = ["mp3", "ogg", "org", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"];
+	s.SUPPORTED_EXTENSIONS = ["mp3", "ogg", "opus", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"];
 
 	/**
 	 * Some extensions use another type of extension support to play (one of them is a codex).  This allows you to map
