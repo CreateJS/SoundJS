@@ -101,9 +101,10 @@ this.createjs = this.createjs || {};
 	 *
 	 * <h4>Example</h4>
 	 *
+	 *      createjs.FlashAudioPlugin.swfPath = "../src/soundjs/flashaudio";
 	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashAudioPlugin]);
 	 *      createjs.Sound.alternateExtensions = ["mp3"];
-	 *      createjs.Sound.on("fileload", createjs.proxy(this.loadHandler, (this));
+	 *      createjs.Sound.on("fileload", createjs.proxy(this.loadHandler, (this)));
 	 *      createjs.Sound.registerSound("path/to/mySound.ogg", "sound");
 	 *      function loadHandler(event) {
      *          // This is fired for each sound that is registered.
