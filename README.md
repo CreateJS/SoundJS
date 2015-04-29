@@ -25,8 +25,8 @@ Built by gskinner.com, and released for free under the MIT license, which means 
 * Find examples and more information at the [SoundJS web site](http://soundjs.com/)
 * Read the [documentation](http://createjs.com/Docs/SoundJS/)
 * Discuss, share projects, and interact with other users on [reddit](http://www.reddit.com/r/createjs/).
-* Ask technical questions on [Stack Overflow](http://stackoverflow.com/questions/tagged/createjs).
-* File verified bugs or formal feature requests using Issues on [GitHub](https://github.com/createjs/).
+* Ask technical questions on [Stack Overflow](http://stackoverflow.com/questions/tagged/soundjs).
+* File verified bugs or formal feature requests using Issues on [GitHub](https://github.com/CreateJS/SoundJS/issues).
 * Have a look at the included [examples](https://github.com/CreateJS/SoundJS/tree/master/examples) and
 [API documentation](http://createjs.com/Docs/SoundJS/) for more in-depth information.
 
