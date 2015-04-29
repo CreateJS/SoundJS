@@ -2,8 +2,8 @@
 
 SoundJS is a library to make working with audio on the web easier. It provides a consistent API for playing audio in
 different browsers, including using a target plugin model to provide an easy way to provide additional audio plugins
-like Web Audio, and a Flash fallback. A mechanism has been provided for easily tying in audio preloading to
-[PreloadJS](http://preloadjs.com)
+like a Flash fallback. A mechanism has been provided for easily tying in audio preloading to
+[PreloadJS](http://preloadjs.com).
 
 
 ## Example
@@ -24,7 +24,9 @@ Built by gskinner.com, and released for free under the MIT license, which means 
 ## Support and Resources
 * Find examples and more information at the [SoundJS web site](http://soundjs.com/)
 * Read the [documentation](http://createjs.com/Docs/SoundJS/)
-* You can also ask questions and interact with other users at our [Community](http://community.createjs.com) site.
+* Discuss, share projects, and interact with other users on [reddit](http://www.reddit.com/r/createjs/).
+* Ask technical questions on [Stack Overflow](http://stackoverflow.com/questions/tagged/createjs).
+* File verified bugs or formal feature requests using Issues on [GitHub](https://github.com/createjs/).
 * Have a look at the included [examples](https://github.com/CreateJS/SoundJS/tree/master/examples) and
 [API documentation](http://createjs.com/Docs/SoundJS/) for more in-depth information.
 
@@ -35,7 +37,7 @@ Built by gskinner.com, and released for free under the MIT license, which means 
 The core API for playing sounds. Call createjs.Sound.play(sound, ...options), and a sound instance is created that can be
 used to control the audio, and dispatches events when it is complete, loops, or is interrupted.
 
-### [SoundInstance](http://createjs.com/Docs/SoundJS/classes/SoundInstance.html)
+### [SoundInstance](http://createjs.com/Docs/SoundJS/classes/AbstractSoundInstance.html)
 A controllable sound object that wraps the actual plugin implementation, providing a consistent API for audio playback,
 no matter what happens in the background. Sound instances can be paused, muted, and stopped; and the volume, pan (where
 available), and position changed using the simple API.
@@ -47,6 +49,10 @@ run locally, and the HTML audio plugin will be used instead.
 ### [HTMLAudioPlugin](http://createjs.com/Docs/SoundJS/classes/HTMLAudioPlugin.html)
 The fallback built-in plugin, which manages audio playback via the HTML5 <audio> tag. This will be used in instances
 where the WebAudio plugin is not available.
+
+### CordovaAudioPlugin
+An additional plugin which will playback audio in a Cordova app and tools that utilize Cordova such as PhoneGap or Ionic.
+You must manually register this plugin. Currently only available on github with SoundJS-Next.
 
 ### [FlashAudioPlugin](http://createjs.com/Docs/SoundJS/classes/FlashAudioPlugin.html)
 An additional plugin which uses a flash shim (and SWFObject) to playback audio using Flash. You must manually set up and
