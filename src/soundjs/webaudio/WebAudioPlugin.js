@@ -77,15 +77,6 @@ this.createjs = this.createjs || {};
 		this._panningModel = s._panningModel;;
 
 		/**
-		 * The internal master volume value of the plugin.
-		 * @property _volume
-		 * @type {Number}
-		 * @default 1
-		 * @protected
-		 */
-		this._volume = 1;
-
-		/**
 		 * The web audio context, which WebAudio uses to play audio. All nodes that interact with the WebAudioPlugin
 		 * need to be created within this context.
 		 * @property context

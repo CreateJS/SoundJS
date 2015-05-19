@@ -81,6 +81,15 @@ this.createjs = this.createjs || {};
 		this._soundInstances = {};
 
 		/**
+		 * The internal master volume value of the plugin.
+		 * @property _volume
+		 * @type {Number}
+		 * @default 1
+		 * @protected
+		 */
+		this._volume = 1;
+
+		/**
 		 * A reference to a loader class used by a plugin that must be set.
 		 * @type {Object}
 		 * @protected
