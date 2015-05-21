@@ -1,5 +1,9 @@
 Version NEXT [not yet released]
 ****************************************************************************************************
+
+
+Version 0.6.1 [May 21,2015]
+****************************************************************************************************
 CRITICAL (may break existing content):
 - removed support for ie8 and deprecated related get/set methods
 
