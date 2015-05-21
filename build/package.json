@@ -1,8 +1,8 @@
 {
   "name": "SoundJS",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "SoundJS Docs",
-  "url": "http://www.createjs.com/#!/SoundJS",
+  "url": "http://www.createjs.com/soundjs",
   "logo": "assets/docs-icon-SoundJS.png",
   "repository": "git@github.com:CreateJS/SoundJS.git",
   "devDependencies": {
