@@ -268,11 +268,9 @@ this.createjs = this.createjs || {};
 		}
 	};
 
-	/*	This should never change
 	p._setDurationFromSource = function () {
 		this._duration = createjs.HTMLAudioTagPool.getDuration(this.src);
 	};
-	*/
 
 	createjs.HTMLAudioSoundInstance = createjs.promote(HTMLAudioSoundInstance, "AbstractSoundInstance");
 }());

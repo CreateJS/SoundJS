@@ -143,7 +143,7 @@ this.createjs = this.createjs || {};
 	 */
 	s.getDuration= function (src) {
 		var t = s._tags[src];
-		if (t == null) {return 0;}
+		if (t == null || !t.duration) {return 0;}	// OJR duration is NaN if loading has not completed
 		return t.duration * 1000;
 	};
 
