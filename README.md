@@ -50,7 +50,7 @@ run locally, and the HTML audio plugin will be used instead.
 The fallback built-in plugin, which manages audio playback via the HTML5 <audio> tag. This will be used in instances
 where the WebAudio plugin is not available.
 
-### CordovaAudioPlugin
+### [CordovaAudioPlugin](http://createjs.com/docs/soundjs/classes/CordovaAudioPlugin.html)
 An additional plugin which will playback audio in a Cordova app and tools that utilize Cordova such as PhoneGap or Ionic.
 You must manually register this plugin. Currently only available on github with SoundJS-Next.
 
