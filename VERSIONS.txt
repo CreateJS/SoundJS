@@ -1,6 +1,6 @@
 Version NEXT [not yet released]
 ****************************************************************************************************
-
+- fixed an issue in HTMLAudioPlugin that prevented SoundInstances created before loading was complete from playing (github issue 167)
 
 Version 0.6.1 [May 21,2015]
 ****************************************************************************************************

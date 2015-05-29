@@ -270,6 +270,7 @@ this.createjs = this.createjs || {};
 
 	p._setDurationFromSource = function () {
 		this._duration = createjs.HTMLAudioTagPool.getDuration(this.src);
+		this._playbackResource = null;
 	};
 
 	createjs.HTMLAudioSoundInstance = createjs.promote(HTMLAudioSoundInstance, "AbstractSoundInstance");
