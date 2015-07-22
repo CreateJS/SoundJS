@@ -52,7 +52,7 @@ where the WebAudio plugin is not available.
 
 ### [CordovaAudioPlugin](http://createjs.com/docs/soundjs/classes/CordovaAudioPlugin.html)
 An additional plugin which will playback audio in a Cordova app and tools that utilize Cordova such as PhoneGap or Ionic.
-You must manually register this plugin. Currently only available on github with SoundJS-Next.
+You must manually register this plugin. Currently available on github since SoundJS-0.6.1.
 
 ### [FlashAudioPlugin](http://createjs.com/Docs/SoundJS/classes/FlashAudioPlugin.html)
 An additional plugin which uses a flash shim (and SWFObject) to playback audio using Flash. You must manually set up and
