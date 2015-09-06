@@ -126,9 +126,10 @@ this.createjs = this.createjs || {};
 	};
 
 	p.destroy = function() {
-		// call parent function, then release
-		this.AbstractSoundInstance_destroy();
+		// pause and release the playback resource, then call parent function
+		this._playbackResource.pause();
 		this._playbackResource.release();
+		this.AbstractSoundInstance_destroy();
 	};
 
 	/**
@@ -178,7 +179,7 @@ this.createjs = this.createjs || {};
 
 	p._handleCleanUp = function () {
 		clearTimeout(this._audioSpriteTimeout);
-		this._playbackResource.pause(); // OJR cannot use .stop as it prevents .seekTo from working
+		// OJR cannot use .stop as it prevents .seekTo from working
 		// todo consider media.release
 	};
 
