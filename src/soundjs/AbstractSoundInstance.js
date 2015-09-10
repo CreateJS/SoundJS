@@ -166,7 +166,7 @@ this.createjs = this.createjs || {};
 		});
 
 		/**
-		 * The length of the audio clip, in milliseconds.
+		 * Sets or gets the length of the audio clip, value is in milliseconds.
 		 *
 		 * @property duration
 		 * @type {Number}
@@ -225,7 +225,7 @@ this.createjs = this.createjs || {};
 		});
 
 		/**
-		 * Determines if the audio is currently muted.
+		 * Mutes or unmutes the current audio instance.
 		 *
 		 * @property muted
 		 * @type {Boolean}
@@ -239,7 +239,7 @@ this.createjs = this.createjs || {};
 		});
 
 		/**
-		 * Tells you if the audio is currently paused.
+		 * Pauses or resumes the current audio instance.
 		 *
 		 * @property paused
 		 * @type {Boolean}
@@ -356,7 +356,9 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Stop playback of the instance. Stopped sounds will reset their position to 0, and calls to {{#crossLink "AbstractSoundInstance/resume"}}{{/crossLink}}
-	 * will fail.  To start playback again, call {{#crossLink "AbstractSoundInstance/play"}}{{/crossLink}}.
+	 * will fail. To start playback again, call {{#crossLink "AbstractSoundInstance/play"}}{{/crossLink}}.
+     *
+     * If you don't want to lose your position use yourSoundInstance.paused = true instead. {{#crossLink "AbstractSoundInstance/paused"}}{{/crossLink}}.
 	 *
 	 * <h4>Example</h4>
 	 *
