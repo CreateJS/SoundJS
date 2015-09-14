@@ -154,6 +154,20 @@ this.createjs = this.createjs || {};
 	 */
 	s.context = null;
 
+	/**
+	 * The scratch buffer that will be assigned to the buffer property of a source node on close.
+	 * Works around an iOS Safari bug: https://github.com/CreateJS/SoundJS/issues/102
+	 *
+	 * Advanced users can set this to an existing source node, but <b>must</b> do so before they call
+	 * {{#crossLink "Sound/registerPlugins"}}{{/crossLink}} or {{#crossLink "Sound/initializeDefaultPlugins"}}{{/crossLink}}.
+	 *
+	 * @property _scratchBuffer
+	 * @type {AudioBuffer}
+	 * @protected
+	 * @static
+	 */
+	 s._scratchBuffer = null;
+
 
 // Static Public Methods
 	/**
@@ -191,7 +205,7 @@ this.createjs = this.createjs || {};
 	s.playEmptySound = function() {
 		if (s.context == null) {return;}
 		var source = s.context.createBufferSource();
-		source.buffer = s.context.createBuffer(1, 1, 22050);
+		source.buffer = s._scratchBuffer;
 		source.connect(s.context.destination);
 		source.start(0, 0, 0);
 	};
@@ -252,6 +266,10 @@ this.createjs = this.createjs || {};
 			} else {
 				return null;
 			}
+		}
+
+		if (s._scratchBuffer == null) {
+			s._scratchBuffer = s.context.createBuffer(1, 1, 22050);
 		}
 
 		s._compatibilitySetUp();
@@ -327,6 +345,7 @@ this.createjs = this.createjs || {};
 	p._addPropsToClasses = function() {
 		var c = this._soundInstanceClass;
 		c.context = this.context;
+		c._scratchBuffer = this._scratchBuffer;
 		c.destinationNode = this.gainNode;
 		c._panningModel = this._panningModel;
 
