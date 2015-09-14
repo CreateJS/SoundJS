@@ -146,6 +146,16 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Note this is only intended for use by advanced users.
+	 * <br />The scratch buffer that will be assigned to the buffer property of a source node on close.  
+	 * This is and should be the same scratch buffer referenced by {{#crossLink "WebAudioPlugin"}}{{/crossLink}}.
+  	 * @property _scratchBuffer
+	 * @type {AudioBufferSourceNode}
+	 * @static
+	 */
+	s._scratchBuffer = null;
+
+	/**
+	 * Note this is only intended for use by advanced users.
 	 * <br /> Audio node from WebAudioPlugin that sequences to <code>context.destination</code>
 	 * @property destinationNode
 	 * @type {AudioNode}
@@ -225,6 +235,9 @@ this.createjs = this.createjs || {};
 		if(audioNode) {
 			audioNode.stop(0);
 			audioNode.disconnect(0);
+			// necessary to prevent leak on iOS Safari 7-9. will throw in almost all other
+			// browser implementations.
+			try { audioNode.buffer = s._scratchBuffer; } catch(e) {}
 			audioNode = null;
 		}
 		return audioNode;
