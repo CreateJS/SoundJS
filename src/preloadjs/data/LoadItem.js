@@ -39,7 +39,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * All loaders accept an item containing the properties defined in this class. If a raw object is passed instead,
-	 * it will not be affected, but it must contain at least a {{#crossLink "src:property"}}{{/crossLink}} property. A
+	 * it will not be affected, but it must contain at least a {{#crossLink "LoadItem/src:property"}}{{/crossLink}} property. A
 	 * string path or HTML tag is also acceptable, but it will be automatically converted to a LoadItem using the
 	 * {{#crossLink "create"}}{{/crossLink}} method by {{#crossLink "AbstractLoader"}}{{/crossLink}}
 	 * @class LoadItem
