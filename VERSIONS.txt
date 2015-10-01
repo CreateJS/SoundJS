@@ -1,6 +1,16 @@
 Version NEXT [not yet released]
 ****************************************************************************************************
-- fixed an issue in HTMLAudioPlugin that prevented SoundInstances created before loading was complete from playing (github issue 167)
+CRITICAL
+- fixed pan issue introduced in Chrome 44, where undefined pan defaulted to left channel only
+
+*****
+- fixed an issue in HTMLAudioPlugin that prevented SoundInstances created before loading was
+  complete from playing (github issue 167)
+- bower updates
+- documentation updates
+- added a reuseable scratch buffer, instead of recreating each time (thanks @konistehrad)
+- added automatic "playEmptySound" support on iOS to unlock the WebAudio context
+
 
 Version 0.6.1 [May 21,2015]
 ****************************************************************************************************

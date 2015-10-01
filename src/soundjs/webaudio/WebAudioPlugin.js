@@ -168,6 +168,15 @@ this.createjs = this.createjs || {};
 	 */
 	 s._scratchBuffer = null;
 
+	/**
+	 * Indicated whether audio on iOS has been unlocked, which requires a touchend/mousedown event that plays an
+	 * empty sound.
+	 * @property _unlocked
+	 * @type {boolean}
+	 * @private
+	 */
+	s._unlocked = false;
+
 
 // Static Public Methods
 	/**
@@ -267,15 +276,19 @@ this.createjs = this.createjs || {};
 				return null;
 			}
 		}
-
 		if (s._scratchBuffer == null) {
 			s._scratchBuffer = s.context.createBuffer(1, 1, 22050);
 		}
 
 		s._compatibilitySetUp();
 
-		// playing this inside of a touch event will enable audio on iOS, which starts muted
-		s.playEmptySound();
+		// Listen for document level clicks to unlock WebAudio on iOS. See the _unlock method.
+		if ("ontouchstart" in window && s.context.state != "running") {
+			s._unlock(); // When played inside of a touch event, this will enable audio on iOS immediately.
+			document.addEventListener("mousedown", s._unlock, true);
+			document.addEventListener("touchend", s._unlock, true);
+		}
+
 
 		s._capabilities = {
 			panning:true,
@@ -325,6 +338,27 @@ this.createjs = this.createjs || {};
 
 		// panningModel
 		s._panningModel = 0;
+	};
+
+	/**
+	 * Try to unlock audio on iOS. This is triggered from either WebAudio plugin setup (which will work if inside of
+	 * a `mousedown` or `touchend` event stack), or the first document touchend/mousedown event. If it fails (touchend
+	 * will fail if the user presses for too long, indicating a scroll event instead of a click event.
+	 *
+	 * Note that earlier versions of iOS supported `touchstart` for this, but iOS9 removed this functionality. Adding
+	 * a `touchstart` event to support older platforms may preclude a `mousedown` even from getting fired on iOS9, so we
+	 * stick with `mousedown` and `touchend`.
+	 * @method _unlock
+	 * @private
+	 */
+	s._unlock = function() {
+		if (s._unlocked) { return; }
+		s.playEmptySound();
+		if (s.context.state == "running") {
+			document.removeEventListener("mousedown", s._unlock, true);
+			document.removeEventListener("touchend", s._unlock, true);
+			s._unlocked = true;
+		}
 	};
 
 
