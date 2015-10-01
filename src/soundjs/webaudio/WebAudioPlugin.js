@@ -345,7 +345,7 @@ this.createjs = this.createjs || {};
 	p._addPropsToClasses = function() {
 		var c = this._soundInstanceClass;
 		c.context = this.context;
-		c._scratchBuffer = this._scratchBuffer;
+		c._scratchBuffer = s._scratchBuffer;
 		c.destinationNode = this.gainNode;
 		c._panningModel = this._panningModel;
 
