@@ -12,6 +12,12 @@ CRITICAL
 - added automatic "playEmptySound" support on iOS to unlock the WebAudio context
 
 
+Version 0.6.1-HOTFIX [October 8, 2015]
+****************************************************************************************************
+- fixed issue with panning in Chrome, caused by an unset pan value in WebAudio. This minor fix is
+  provided to fix existing content online that was broken with a browser update.
+
+
 Version 0.6.1 [May 21,2015]
 ****************************************************************************************************
 CRITICAL (may break existing content):

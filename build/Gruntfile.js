@@ -336,6 +336,9 @@ module.exports = function (grunt) {
 		"updateversion", "combine", "uglify", "clearversion", "copy:src"
 	]);
 
+	/** Aliased task for WebStorm quick-run */
+	grunt.registerTask('_next_sound', ["next"]);
+
 	/**
 	 * Task for exporting a release build (version based on package.json)
 	 *

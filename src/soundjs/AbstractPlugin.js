@@ -159,7 +159,7 @@ this.createjs = this.createjs || {};
 		this._audioSources[loadItem.src] = true;
 		this._soundInstances[loadItem.src] = [];
 		loader = new this._loaderClass(loadItem);
-		loader.on("complete", createjs.proxy(this._handlePreloadComplete, this));
+		loader.on("complete", this._handlePreloadComplete, this);
 		this._loaders[loadItem.src] = loader;
 		return loader;
 	};
@@ -171,7 +171,7 @@ this.createjs = this.createjs || {};
 	 * @param {Loader} loader The sound URI to load.
 	 */
 	p.preload = function (loader) {
-		loader.on("error", createjs.proxy(this._handlePreloadError, this));
+		loader.on("error", this._handlePreloadError, this);
 		loader.load();
 	};
 

@@ -109,12 +109,12 @@ this.createjs = this.createjs || {};
 	 *      createjs.FlashAudioPlugin.swfPath = "../src/soundjs/flashaudio";
 	 *      createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashAudioPlugin]);
 	 *      createjs.Sound.alternateExtensions = ["mp3"];
-	 *      createjs.Sound.on("fileload", createjs.proxy(this.loadHandler, (this)));
+	 *      createjs.Sound.on("fileload", this.loadHandler, this);
 	 *      createjs.Sound.registerSound("path/to/mySound.ogg", "sound");
 	 *      function loadHandler(event) {
      *          // This is fired for each sound that is registered.
      *          var instance = createjs.Sound.play("sound");  // play using id.  Could also use full source path or event.src.
-     *          instance.on("complete", createjs.proxy(this.handleComplete, this));
+     *          instance.on("complete", this.handleComplete, this);
      *          instance.volume = 0.5;
 	 *      }
 	 *
@@ -127,9 +127,9 @@ this.createjs = this.createjs || {};
 	 *
 	 * Sound can be used as a plugin with PreloadJS to help preload audio properly. Audio preloaded with PreloadJS is
 	 * automatically registered with the Sound class. When audio is not preloaded, Sound will do an automatic internal
-	 * load. As a result, it may fail to play the first time play is called if the audio is not finished loading. Use the
-	 * {{#crossLink "Sound/fileload"}}{{/crossLink}} event to determine when a sound has finished internally preloading.
-	 * It is recommended that all audio is preloaded before it is played.
+	 * load. As a result, it may fail to play the first time play is called if the audio is not finished loading. Use
+	 * the {{#crossLink "Sound/fileload:event"}}{{/crossLink}} event to determine when a sound has finished internally
+	 * preloading. It is recommended that all audio is preloaded before it is played.
 	 *
 	 *      var queue = new createjs.LoadQueue();
 	 *		queue.installPlugin(createjs.Sound);
@@ -157,28 +157,47 @@ this.createjs = this.createjs || {};
 	 *		// after load is complete
 	 *		createjs.Sound.play("sound2");
 	 *
-	 * <b>Mobile Safe Approach</b><br />
-	 * Mobile devices require sounds to be played inside of a user initiated event (touch/click) in varying degrees.
-	 * As of SoundJS 0.4.1, you can launch a site inside of a user initiated event and have audio playback work. To
-	 * enable as broadly as possible, the site needs to setup the Sound plugin in its initialization (for example via
-	 * <code>createjs.Sound.initializeDefaultPlugins();</code>), and all sounds need to be played in the scope of the
-	 * application.  See the MobileSafe demo for a working example.
+	 * <b>Mobile Playback</b><br />
+	 * Devices running iOS require the WebAudio context to be "unlocked" by playing at least one sound inside of a user-
+	 * initiated event (such as touch/click). Earlier versions of SoundJS included a "MobileSafe" sample, but this is no
+	 * longer necessary as of SoundJS 0.6.2.
+	 * <ul>
+	 *     <li>
+	 *         In SoundJS 0.4.1 and above, you can either initialize plugins or use the {{#crossLink "WebAudioPlugin/playEmptySound"}}{{/crossLink}}
+	 *         method in the call stack of a user input event to manually unlock the audio context.
+	 *     </li>
+	 *     <li>
+	 *         In SoundJS 0.6.2 and above, SoundJS will automatically listen for the first document-level "mousedown"
+	 *         and "touchend" event, and unlock WebAudio. This will continue to check these events until the WebAudio
+	 *         context becomes "unlocked" (changes from "suspended" to "running")
+	 *     </li>
+	 *     <li>
+	 *         Both the "mousedown" and "touchend" events can be used to unlock audio in iOS9+, the "touchstart" event
+	 *         will work in iOS8 and below. The "touchend" event will only work in iOS9 when the gesture is interpreted
+	 *         as a "click", so if the user long-presses the button, it will no longer work.
+	 *     </li>
+	 *     <li>
+	 *         When using the <a href="http://www.createjs.com/docs/easeljs/classes/Touch.html">EaselJS Touch class</a>,
+	 *         the "mousedown" event will not fire when a canvas is clicked, since MouseEvents are prevented, to ensure
+	 *         only touch events fire. To get around this, you can either rely on "touchend", or:
+	 *         <ol>
+	 *             <li>Set the `allowDefault` property on the Touch class constructor to `true` (defaults to `false`).</li>
+	 *             <li>Set the `preventSelection` property on the EaselJS `Stage` to `false`.</li>
+	 *         </ol>
+	 *         These settings may change how your application behaves, and are not recommended.
+	 *     </li>
+	 * </ul>
 	 *
-	 * <h4>Example</h4>
+	 * <b>Loading Alternate Paths and Extension-less Files</b><br />
+	 * SoundJS supports loading alternate paths and extension-less files by passing an object instead of a string for
+	 * the `src` property, which is a hash using the format `{extension:"path", extension2:"path2"}`. These labels are
+	 * how SoundJS determines if the browser will support the sound. This also enables multiple formats to live in
+	 * different folders, or on CDNs, which often has completely different filenames for each file.
 	 *
-	 *     document.getElementById("status").addEventListener("click", handleTouch, false);    // works on Android and iPad
-	 *     function handleTouch(event) {
-	 *         document.getElementById("status").removeEventListener("click", handleTouch, false);    // remove the listener
-	 *         var thisApp = new myNameSpace.MyApp();    // launch the app
-	 *     }
-	 *
-	 * <b>Loading Alternate Paths and Extensionless Files</b><br />
-	 * SoundJS supports loading alternate paths and extensionless files by passing an object for src that has various paths
-	 * with property labels matching the extension.  These labels are how SoundJS determines if the browser will support the sound.
 	 * Priority is determined by the property order (first property is tried first).  This is supported by both internal loading
 	 * and loading with PreloadJS.
 	 *
-	 * Note an id is required for playback.
+	 * <em>Note: an id is required for playback.</em>
 	 *
 	 * <h4>Example</h4>
 	 *
@@ -191,7 +210,7 @@ this.createjs = this.createjs || {};
 	 *		createjs.Sound.addEventListener("fileload", handleLoad);
 	 *		createjs.Sound.registerSounds(sounds);
 	 *
-	 * <h4>Known Browser and OS issues</h4>
+	 * <h3>Known Browser and OS issues</h3>
 	 * <b>IE 9 HTML Audio limitations</b><br />
 	 * <ul><li>There is a delay in applying volume changes to tags that occurs once playback is started. So if you have
 	 * muted all sounds, they will all play during this delay until the mute applies internally. This happens regardless of
@@ -200,20 +219,23 @@ this.createjs = this.createjs || {};
 	 * encoding with 64kbps works.</li>
 	 * <li>Occasionally very short samples will get cut off.</li>
 	 * <li>There is a limit to how many audio tags you can load and play at once, which appears to be determined by
-	 * hardware and browser settings.  See {{#crossLink "HTMLAudioPlugin.MAX_INSTANCES"}}{{/crossLink}} for a safe estimate.</li></ul>
+	 * hardware and browser settings.  See {{#crossLink "HTMLAudioPlugin.MAX_INSTANCES"}}{{/crossLink}} for a safe
+	 * estimate.</li></ul>
 	 *
 	 * <b>Firefox 25 Web Audio limitations</b>
 	 * <ul><li>mp3 audio files do not load properly on all windows machines, reported
 	 * <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=929969" target="_blank">here</a>. </br>
-	 * For this reason it is recommended to pass another FF supported type (ie ogg) first until this bug is resolved, if possible.</li></ul>
+	 * For this reason it is recommended to pass another FF supported type (ie ogg) first until this bug is resolved, if
+	 * possible.</li></ul>
 
 	 * <b>Safari limitations</b><br />
 	 * <ul><li>Safari requires Quicktime to be installed for audio playback.</li></ul>
 	 *
 	 * <b>iOS 6 Web Audio limitations</b><br />
-	 * <ul><li>Sound is initially muted and will only unmute through play being called inside a user initiated event
-	 * (touch/click).</li>
-	 * <li>A bug exists that will distort un-cached web audio when a video element is present in the DOM that has audio at a different sampleRate.</li>
+	 * <ul><li>Sound is initially locked, and must be unlocked via a user-initiated event. Please see the section on
+	 * Mobile Playback above.</li>
+	 * <li>A bug exists that will distort un-cached web audio when a video element is present in the DOM that has audio
+	 * at a different sampleRate.</li>
 	 * </ul>
 	 *
 	 * <b>Android HTML Audio limitations</b><br />
@@ -222,8 +244,8 @@ this.createjs = this.createjs || {};
 	 * a delay.</li></ul>
 	 *
 	 * <b>Web Audio and PreloadJS</b><br />
-	 * <ul><li>Web Audio must be loaded through XHR, therefore when used with PreloadJS tag loading is not possible.  This means that tag loading cannot
-	 * be used to avoid cross domain issues if WebAudioPlugin is used</li><ul>
+	 * <ul><li>Web Audio must be loaded through XHR, therefore when used with PreloadJS, tag loading is not possible.
+	 * This means that tag loading can not be used to avoid cross domain issues.</li><ul>
 	 *
 	 * @class Sound
 	 * @static
