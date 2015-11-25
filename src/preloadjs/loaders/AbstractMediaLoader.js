@@ -56,6 +56,8 @@ this.createjs = this.createjs || {};
 
 		// protected properties
 		this._tagSrcAttribute = "src";
+
+        this.on("initialize", this._updateXHR, this);
 	};
 
 	var p = createjs.extend(AbstractMediaLoader, createjs.AbstractLoader);
@@ -91,6 +93,20 @@ this.createjs = this.createjs || {};
 		}
 	};
 
+    // protected methods
+    /**
+     * Before the item loads, set its mimeType and responseType.
+     * @property _updateXHR
+     * @param {Event} event
+     * @private
+     */
+    p._updateXHR = function (event) {
+        // Only exists for XHR
+        if (event.loader.setResponseType) {
+            event.loader.setResponseType("blob");
+        }
+    };
+
 	/**
 	 * The result formatter for media files.
 	 * @method _formatResult
@@ -102,7 +118,10 @@ this.createjs = this.createjs || {};
 		this._tag.removeEventListener && this._tag.removeEventListener("canplaythrough", this._loadedHandler);
 		this._tag.onstalled = null;
 		if (this._preferXHR) {
-			loader.getTag().src = loader.getResult(true);
+            var URL = window.URL || window.webkitURL;
+            var result = loader.getResult(true);
+
+			loader.getTag().src = URL.createObjectURL(result);
 		}
 		return loader.getTag();
 	};

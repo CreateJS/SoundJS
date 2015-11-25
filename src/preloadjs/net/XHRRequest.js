@@ -50,7 +50,7 @@ this.createjs = this.createjs || {};
 	 * for an overview of supported file properties.
 	 * @extends AbstractLoader
 	 */
-	function XHRRequest(item) {
+	function XHRRequest (item) {
 		this.AbstractRequest_constructor(item);
 
 		// protected properties
@@ -177,15 +177,28 @@ this.createjs = this.createjs || {};
 		}
 
 		//Events
-		this._request.addEventListener("loadstart", this._handleLoadStartProxy, false);
-		this._request.addEventListener("progress", this._handleProgressProxy, false);
-		this._request.addEventListener("abort", this._handleAbortProxy, false);
-		this._request.addEventListener("error",this._handleErrorProxy, false);
-		this._request.addEventListener("timeout", this._handleTimeoutProxy, false);
+		if (this._request.addEventListener != null) {
+			this._request.addEventListener("loadstart", this._handleLoadStartProxy, false);
+			this._request.addEventListener("progress", this._handleProgressProxy, false);
+			this._request.addEventListener("abort", this._handleAbortProxy, false);
+			this._request.addEventListener("error", this._handleErrorProxy, false);
+			this._request.addEventListener("timeout", this._handleTimeoutProxy, false);
 
-		// Note: We don't get onload in all browsers (earlier FF and IE). onReadyStateChange handles these.
-		this._request.addEventListener("load", this._handleLoadProxy, false);
-		this._request.addEventListener("readystatechange", this._handleReadyStateChangeProxy, false);
+			// Note: We don't get onload in all browsers (earlier FF and IE). onReadyStateChange handles these.
+			this._request.addEventListener("load", this._handleLoadProxy, false);
+			this._request.addEventListener("readystatechange", this._handleReadyStateChangeProxy, false);
+		} else {
+			// IE9 support
+			this._request.onloadstart = this._handleLoadStartProxy;
+			this._request.onprogress = this._handleProgressProxy;
+			this._request.onabort = this._handleAbortProxy;
+			this._request.onerror = this._handleErrorProxy;
+			this._request.ontimeout = this._handleTimeoutProxy;
+
+			// Note: We don't get onload in all browsers (earlier FF and IE). onReadyStateChange handles these.
+			this._request.onload = this._handleLoadProxy;
+			this._request.onreadystatechange = this._handleReadyStateChangeProxy;
+		}
 
 		// Set up a timeout if we don't have XHR2
 		if (this._xhrLevel == 1) {
@@ -205,6 +218,11 @@ this.createjs = this.createjs || {};
 	};
 
 	p.setResponseType = function (type) {
+		// Some old browsers doesn't support blob, so we convert arraybuffer to blob after response is downloaded
+		if (type === 'blob') {
+			type = window.URL ? 'blob' : 'arraybuffer';
+			this._responseType = type;
+		}
 		this._request.responseType = type;
 	};
 
@@ -327,6 +345,21 @@ this.createjs = this.createjs || {};
 		}
 
 		this._response = this._getResponse();
+		// Convert arraybuffer back to blob
+		if (this._responseType === 'arraybuffer') {
+			try {
+				this._response = new Blob([this._response]);
+			} catch (e) {
+				// Fallback to use BlobBuilder if Blob constructor is not supported
+				// Tested on Android 2.3 ~ 4.2 and iOS5 safari
+				window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
+				if (e.name === 'TypeError' && window.BlobBuilder) {
+					var builder = new BlobBuilder();
+					builder.append(this._response);
+					this._response = builder.getBlob();
+				}
+			}
+		}
 		this._clean();
 
 		this.dispatchEvent(new createjs.Event("complete"));
@@ -429,11 +462,14 @@ this.createjs = this.createjs || {};
 			for (var i = 0, l = s.ACTIVEX_VERSIONS.length; i < l; i++) {
 				var axVersion = s.ACTIVEX_VERSIONS[i];
 				try {
-					req = new ActiveXObject(axVersions);
+					req = new ActiveXObject(axVersion);
 					break;
-				} catch (e) {}
+				} catch (e) {
+				}
 			}
-			if (req == null) { return false; }
+			if (req == null) {
+				return false;
+			}
 		}
 
 		// Default to utf-8 for Text requests.
@@ -499,13 +535,23 @@ this.createjs = this.createjs || {};
 	p._clean = function () {
 		clearTimeout(this._loadTimeout);
 
-		this._request.removeEventListener("loadstart", this._handleLoadStartProxy);
-		this._request.removeEventListener("progress", this._handleProgressProxy);
-		this._request.removeEventListener("abort", this._handleAbortProxy);
-		this._request.removeEventListener("error",this._handleErrorProxy);
-		this._request.removeEventListener("timeout", this._handleTimeoutProxy);
-		this._request.removeEventListener("load", this._handleLoadProxy);
-		this._request.removeEventListener("readystatechange", this._handleReadyStateChangeProxy);
+		if (this._request.removeEventListener != null) {
+			this._request.removeEventListener("loadstart", this._handleLoadStartProxy);
+			this._request.removeEventListener("progress", this._handleProgressProxy);
+			this._request.removeEventListener("abort", this._handleAbortProxy);
+			this._request.removeEventListener("error", this._handleErrorProxy);
+			this._request.removeEventListener("timeout", this._handleTimeoutProxy);
+			this._request.removeEventListener("load", this._handleLoadProxy);
+			this._request.removeEventListener("readystatechange", this._handleReadyStateChangeProxy);
+		} else {
+			this._request.onloadstart = null;
+			this._request.onprogress = null;
+			this._request.onabort = null;
+			this._request.onerror = null;
+			this._request.ontimeout = null;
+			this._request.onload = null;
+			this._request.onreadystatechange = null;
+		}
 	};
 
 	p.toString = function () {
