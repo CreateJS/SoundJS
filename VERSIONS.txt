@@ -10,6 +10,7 @@ CRITICAL
 - documentation updates
 - added a reuseable scratch buffer, instead of recreating each time (thanks @konistehrad)
 - added automatic "playEmptySound" support on iOS to unlock the WebAudio context
+- bug fixes
 
 
 Version 0.6.1-HOTFIX [October 8, 2015]
