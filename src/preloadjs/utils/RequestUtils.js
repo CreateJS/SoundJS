@@ -150,9 +150,9 @@
 		}
 
 		if (idx != -1) {
-			return src.slice(0, idx) + '?' + this._formatQueryString(data, query);
+			return src.slice(0, idx) + '?' + this.formatQueryString(data, query);
 		} else {
-			return src + '?' + this._formatQueryString(data, query);
+			return src + '?' + this.formatQueryString(data, query);
 		}
 	};
 
