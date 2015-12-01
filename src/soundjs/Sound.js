@@ -994,7 +994,7 @@ this.createjs = this.createjs || {};
 	 *          {src:"asset0.ogg", id:"example"},
 	 *          {src:"asset1.ogg", id:"1", data:6},
 	 *          {src:"asset2.mp3", id:"works"}
-	 *          {src:{mp3:"path1/asset3.mp3", ogg:"path2/asset3NoExtension}, id:"better"}
+	 *          {src:{mp3:"path1/asset3.mp3", ogg:"path2/asset3NoExtension"}, id:"better"}
 	 *      ];
 	 *      createjs.Sound.alternateExtensions = ["mp3"];	// if the passed extension is not supported, try this extension
 	 *      createjs.Sound.on("fileload", handleLoad); // call handleLoad when each sound loads
