@@ -86,7 +86,7 @@
     </p>
 
     <textarea class="brush: js; highlight:[1]" readonly>
-        createjs.Sound.addEventListener("fileload", handleFileLoad);
+        createjs.Sound.on("fileload", handleFileLoad);
         function handleFileLoad(event) {
         	// A sound has been preloaded.
         	console.log("Preloaded:", event.id, event.src);
@@ -110,7 +110,7 @@
     </p>
 
     <textarea class="brush: js; highlight:[3,4,5,6]" readonly>
-        createjs.Sound.addEventListener("fileload", handleFileLoad);
+        createjs.Sound.on("fileload", handleFileLoad);
         createjs.Sound.alternateExtensions = ["mp3"];
         createjs.Sound.registerSounds(
 			[{id:"music1", src:"music.mp3"},
@@ -155,8 +155,8 @@
 
     <textarea class="brush: js;" readonly>
         var queue = new createjs.LoadQueue();
-        queue.addEventListener("fileload", handleFileLoad);
-        queue.addEventListener("complete", handleComplete);
+        queue.on("fileload", handleFileLoad);
+        queue.on("complete", handleComplete);
 
         queue.loadFile({id:"myImage", src:"assets/image.jpg"});
         // OR
@@ -186,7 +186,7 @@
         var queue = new createjs.LoadQueue();
         createjs.Sound.alternateExtensions = ["mp3"];
         queue.installPlugin(createjs.Sound);
-        queue.addEventListener("complete", handleComplete);
+        queue.on("complete", handleComplete);
         queue.loadFile({id:"mySound", src:"assets/sound.ogg"});
     </textarea>
 
