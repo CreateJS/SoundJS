@@ -1,4 +1,8 @@
-Version 0.6.2 [October 5, 2015]
+Version NEXT [Not yet released]
+****************************************************************************************************
+
+
+Version 0.6.2 [November 26, 2015]
 ****************************************************************************************************
 CRITICAL
 - fixed pan issue introduced in Chrome 44, where undefined pan defaulted to left channel only
