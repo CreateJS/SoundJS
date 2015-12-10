@@ -9,18 +9,22 @@ CRITICAL
 
 *****
 - fixed an issue in HTMLAudioPlugin that prevented SoundInstances created before loading was
-  complete from playing (github issue 167)
-- bower updates
-- documentation updates
-- added a reuseable scratch buffer, instead of recreating each time (thanks @konistehrad)
+	complete from playing (github issue 167)
+- Additional cleanup when setting duration
+- documentation and README updates
+- added a reuseable scratch buffer, instead of recreating each time (thanks @konistehrad/@naranjamcanica)
 - added automatic "playEmptySound" support on iOS to unlock the WebAudio context
-- bug fixes
+- bower updates: Removed bower.json from exclusions
 
 
 Version 0.6.1-HOTFIX [October 8, 2015]
 ****************************************************************************************************
+CRITICAL
 - fixed issue with panning in Chrome, caused by an unset pan value in WebAudio. This minor fix is
-  provided to fix existing content online that was broken with a browser update.
+	provided to fix existing content online that was broken with a browser update, and has been
+	patched on the CDN
+
+	If you need to use 0.6.1, there is a 0.6.1-HOTFIX branch in GitHub. Otherwise use 0.6.2 or newer.
 
 
 Version 0.6.1 [May 21,2015]
