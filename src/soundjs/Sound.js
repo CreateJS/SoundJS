@@ -963,7 +963,7 @@ this.createjs = this.createjs || {};
 		loadItem = createjs.LoadItem.create(loadItem);
 		loadItem.path = basePath;
 
-		if (basePath != null && !(loadItem.src instanceof Object)) {loadItem.src = basePath + src;}
+		if (basePath != null && !(loadItem.src instanceof Object)) {loadItem.src = basePath + loadItem.src;}
 
 		var loader = s._registerSound(loadItem);
 		if(!loader) {return false;}
