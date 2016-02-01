@@ -3,14 +3,15 @@
 SoundJS is a library to make working with audio on the web easier. It provides a consistent API for playing audio in
 different browsers, including using a target plugin model to provide an easy way to provide additional audio plugins
 like a Flash fallback. A mechanism has been provided for easily tying in audio preloading to
-[PreloadJS](http://preloadjs.com).
+[PreloadJS](http://createjs.com/preloadjs/).
 
 
 ## Example
 
 ```javascript
-createjs.Sound.addEventListener("fileload", handleLoadComplete);
-createjs.Sound.registerSound({src:"path/to/sound.mp3|path/to/sound.ogg", id:"sound"});
+createjs.Sound.on("fileload", handleLoadComplete);
+createjs.Sound.alternateExtensions = ["mp3"];
+createjs.Sound.registerSound({src:"path/to/sound.ogg", id:"sound"});
 function handleLoadComplete(event) {
 	createjs.Sound.play("sound");
 }
@@ -23,12 +24,12 @@ Built by gskinner.com, and released for free under the MIT license, which means 
 
 ## Support and Resources
 * Find examples and more information at the [SoundJS web site](http://soundjs.com/)
-* Read the [documentation](http://createjs.com/Docs/SoundJS/)
+* Read the [documentation](http://createjs.com/docs/soundjs/)
 * Discuss, share projects, and interact with other users on [reddit](http://www.reddit.com/r/createjs/).
 * Ask technical questions on [Stack Overflow](http://stackoverflow.com/questions/tagged/soundjs).
 * File verified bugs or formal feature requests using Issues on [GitHub](https://github.com/CreateJS/SoundJS/issues).
 * Have a look at the included [examples](https://github.com/CreateJS/SoundJS/tree/master/examples) and
-[API documentation](http://createjs.com/Docs/SoundJS/) for more in-depth information.
+[API documentation](http://createjs.com/docs/soundjs/) for more in-depth information.
 
 
 ## Classes
@@ -58,5 +59,5 @@ You must manually register this plugin. Currently available on github since Soun
 An additional plugin which uses a flash shim (and SWFObject) to playback audio using Flash. You must manually set up and
 register this plugin.
 
-## [Documentation and examples](http://createjs.com/Docs/SoundJS/)
+## [Documentation and examples](http://createjs.com/docs/soundjs/)
 Have a look at the included examples and API documentation for more in-depth information.
