@@ -1,5 +1,8 @@
 Version NEXT [Not yet released]
 ****************************************************************************************************
+* Changed XHR error conditions to only include 400-599. Specifically removed status=0 as an error,
+  	which affects compiled applications.
+* Fixed issue where values don't get appended to GET requests in XHRRequest
 
 
 Version 0.6.2 [November 26, 2015]

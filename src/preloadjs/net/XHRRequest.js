@@ -209,7 +209,7 @@ this.createjs = this.createjs || {};
 		try {
 			if (!this._item.values || this._item.method == createjs.AbstractLoader.GET) {
 				this._request.send();
-			} else if (this._item.method == createjs.AbstractLoader.POST) {
+			} else {
 				this._request.send(createjs.RequestUtils.formatQueryString(this._item.values));
 			}
 		} catch (error) {
@@ -374,29 +374,26 @@ this.createjs = this.createjs || {};
 	 */
 	p._handleTimeout = function (event) {
 		this._clean();
-
 		this.dispatchEvent(new createjs.ErrorEvent("PRELOAD_TIMEOUT", null, event));
 	};
 
 // Protected
 	/**
 	 * Determine if there is an error in the current load. This checks the status of the request for problem codes. Note
-	 * that this does not check for an actual response. Currently, it only checks for 404 or 0 error code.
+	 * that this does not check for an actual response. Currently, it only checks for error codes between 400 and 599
 	 * @method _checkError
 	 * @return {int} If the request status returns an error code.
 	 * @private
 	 */
 	p._checkError = function () {
-		//LM: Probably need additional handlers here, maybe 501
 		var status = parseInt(this._request.status);
-
-		switch (status) {
-			case 404:   // Not Found
-			case 0:     // Not Loaded
-				return new Error(status);
+		if (status >= 400 && status <= 599) {
+			return new Error(status);
+		} else {
+			return null;
 		}
-		return null;
 	};
+
 
 	/**
 	 * Validate the response. Different browsers have different approaches, some of which throw errors when accessed
