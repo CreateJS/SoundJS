@@ -153,6 +153,32 @@ this.createjs = this.createjs || {};
 		});
 
 		/**
+		 * The filter frequency of the sound, between 0 and half the sample rate. Note that filter is not supported by HTML Audio.
+		 *
+		 * @property filterFrequency
+		 * @type {Number}
+		 * @default 22050
+		 */
+		this._filterFrequency =  22050;
+		Object.defineProperty(this, "filterFrequency", {
+			get: this.getFilterFrequency,
+			set: this.setFilterFrequency
+		});
+
+		/**
+		 * The filter quality factor of the sound, between 0.0001 and 1000. Note that filter is not supported by HTML Audio.
+		 *
+		 * @property filterFrequency
+		 * @type {Number}
+		 * @default 1
+		 */
+		this._filterQ =  1;
+		Object.defineProperty(this, "filterQ", {
+			get: this.getFilterQ,
+			set: this.setFilterQ
+		});
+
+		/**
 		 * Audio sprite property used to determine the starting offset.
 		 * @property startTime
 		 * @type {Number}
@@ -527,6 +553,58 @@ this.createjs = this.createjs || {};
 	 */
 	p.getPan = function () {
 		return this._pan;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterFrequency:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method setFilterFrequency
+	 * @param {Number} value The filter frequency value, between 0 and half the sample rate.
+	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
+	 */
+	p.setFilterFrequency = function (value) {
+		if(value == this._filterFrequency) { return this; }
+		this._filterFrequency = value;
+		this._updateFilter();
+		return this;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterFrequency:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method getFilterFrequency
+	 * @return {Number} The value of the filter frequency, between 0 and half the sample rate.
+	 */
+	p.getFilterFrequency = function () {
+		return this._filterFrequency;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterQ:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method setFilterQ
+	 * @param {Number} value The filter quality factor, between 0.0001 and 1000.
+	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
+	 */
+	p.setFilterQ = function (value) {
+		if(value == this._filterQ) { return this; }
+		this._filterQ = value;
+		this._updateFilter();
+		return this;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterQ:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method getFilterQ
+	 * @return {Number} The value of the filter frequency, between 0.0001 and 1000.
+	 */
+	p.getFilterQ = function () {
+		return this._filterQ;
 	};
 
 	/**

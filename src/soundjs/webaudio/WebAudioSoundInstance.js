@@ -80,6 +80,16 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * NOTE this is only intended for use by advanced users.
+		 * <br />A filterNode allowing frequency filtering. Connected to WebAudioSoundInstance {{#crossLink "WebAudioSoundInstance/panNode:property"}}{{/crossLink}}.
+		 * @property filterNode
+		 * @type {BiquadFilterNode}
+		 * @since 0.6.?
+		 */
+		this.filterNode = s.context.createBiquadFilter();
+		this.filterNode.connect(this.panNode); //filter node => pan node => gain node
+
+		/**
+		 * NOTE this is only intended for use by advanced users.
 		 * <br />sourceNode is the audio source. Connected to WebAudioSoundInstance {{#crossLink "WebAudioSoundInstance/panNode:property"}}{{/crossLink}}.
 		 * @property sourceNode
 		 * @type {AudioNode}
@@ -196,6 +206,11 @@ this.createjs = this.createjs || {};
 		// z need to be -0.5 otherwise the sound only plays in left, right, or center
 	};
 
+	p._updateFilter = function() {
+		this.filterNode.frequency.value = this._filterFrequency;
+		this.filterNode.Q.value = this._filterQ;
+	};
+
 	p._removeLooping = function(value) {
 		this._sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
 	};
@@ -271,7 +286,8 @@ this.createjs = this.createjs || {};
 	p._createAndPlayAudioNode = function(startTime, offset) {
 		var audioNode = s.context.createBufferSource();
 		audioNode.buffer = this.playbackResource;
-		audioNode.connect(this.panNode);
+		//audioNode.connect(this.panNode);
+		audioNode.connect(this.filterNode);
 		var dur = this._duration * 0.001;
 		audioNode.startTime = startTime + dur;
 		audioNode.start(audioNode.startTime, offset+(this._startTime*0.001), dur - offset);
