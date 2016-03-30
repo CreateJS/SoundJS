@@ -266,6 +266,21 @@ this.createjs = this.createjs || {};
 		return supported;
 	};
 
+	s._createContext = function() {
+		if (s.context == null) {
+			if (window.AudioContext) {
+				s.context = new AudioContext();
+			} else if (window.webkitAudioContext) {
+				s.context = new webkitAudioContext();
+			} else {
+				return null;
+			}
+		}
+		if (s._scratchBuffer == null) {
+			s._scratchBuffer = s.context.createBuffer(1, 1, 22050);
+		}
+	};
+
 	/**
 	 * Determine the capabilities of the plugin. Used internally. Please see the Sound API {{#crossLink "Sound/getCapabilities"}}{{/crossLink}}
 	 * method for an overview of plugin capabilities.
@@ -279,17 +294,18 @@ this.createjs = this.createjs || {};
 		var t = document.createElement("audio");
 		if (t.canPlayType == null) {return null;}
 
-		if (s.context == null) {
-			if (window.AudioContext) {
-				s.context = new AudioContext();
-			} else if (window.webkitAudioContext) {
-				s.context = new webkitAudioContext();
-			} else {
-				return null;
-			}
-		}
-		if (s._scratchBuffer == null) {
-			s._scratchBuffer = s.context.createBuffer(1, 1, 22050);
+		s._createContext();
+
+		if ((s.context.sampleRate == 48000) && (s.context.state != "running")) {
+			// Workaround for iOS audio corruption bug; when the context sample rate
+			// is 48000, we're likely encountering this bug. Re-creating the context
+			// (after playing something to it) avoids this bug. Also checking the
+			// state acts as an extra check that we're indeed on iOS.
+			s.playEmptySound();
+
+			s.context = null;
+			s._scratchBuffer = null;
+			s._createContext();
 		}
 
 		s._compatibilitySetUp();
