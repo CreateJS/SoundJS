@@ -205,6 +205,19 @@ this.createjs = this.createjs || {};
 		});
 
 		/**
+		 * The distortion value in amount. Note that distortion is not supported by HTML Audio.
+		 *
+		 * @property distortionAmount
+		 * @type {Number}
+		 * @default 0
+		 */
+		this._distortionAmount =  0;
+		Object.defineProperty(this, "distortionAmount", {
+			get: this.getDistortionAmount,
+			set: this.setDistortionAmount
+		});
+
+		/**
 		 * Audio sprite property used to determine the starting offset.
 		 * @property startTime
 		 * @type {Number}
@@ -658,14 +671,14 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterDetune:property"}}{{/crossLink}} directly as a property
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterType:property"}}{{/crossLink}} directly as a property
 	 *
 	 * @deprecated
-	 * @method getFilterDetune
-	 * @return {Number} The filter detune value in cents.
+	 * @method getFilterType
+	 * @return {String} The filter type, one of the following: "lowpass" "highpass" bandpass".
 	 */
-	p.getFilterDetune= function () {
-		return this._filterDetune;
+	p.getFilterType = function () {
+		return this._filterType;
 	};
 
 	/**
@@ -685,14 +698,41 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterType:property"}}{{/crossLink}} directly as a property
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterDetune:property"}}{{/crossLink}} directly as a property
 	 *
 	 * @deprecated
-	 * @method getFilterType
-	 * @return {String} The filter type, one of the following: "lowpass" "highpass" bandpass".
+	 * @method getFilterDetune
+	 * @return {Number} The filter detune value in cents.
 	 */
-	p.getFilterType = function () {
-		return this._filterType;
+	p.getFilterDetune = function () {
+		return this._filterDetune;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/distortionAmount:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method setDistortionAmount
+	 * @param {Number} The distortion value in amount.
+	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
+	 */
+	p.setDistortionAmount = function (value) {
+		if(value == this._distortionAmount) { return this; }
+
+		this._distortionAmount = value;
+		this._updateDistortion();
+		return this;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/distortionAmount:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method getDistortionAmount
+	 * @return {Number} The distortion value in amount.
+	 */
+	p.getDistortionAmount = function () {
+		return this._distortionAmount;
 	};
 
 	/**
