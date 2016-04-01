@@ -192,6 +192,19 @@ this.createjs = this.createjs || {};
 		});
 
 		/**
+		 * The filter detune value in cents. Note that filter is not supported by HTML Audio.
+		 *
+		 * @property filterDetune
+		 * @type {Number}
+		 * @default 0
+		 */
+		this._filterDetune =  0;
+		Object.defineProperty(this, "filterDetune", {
+			get: this.getFilterDetune,
+			set: this.setFilterDetune
+		});
+
+		/**
 		 * Audio sprite property used to determine the starting offset.
 		 * @property startTime
 		 * @type {Number}
@@ -638,8 +651,35 @@ this.createjs = this.createjs || {};
 		};
 
 		if (typeof acceptedTypes[value] === 'undefined') { return false; }
-		
+
 		this._filterType = value;
+		this._updateFilter();
+		return this;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterDetune:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method getFilterDetune
+	 * @return {Number} The filter detune value in cents.
+	 */
+	p.getFilterDetune= function () {
+		return this._filterDetune;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterDetune:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method setFilterDetune
+	 * @param {Number} The filter detune value in cents.
+	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
+	 */
+	p.setFilterDetune = function (value) {
+		if(value == this._filterDetune) { return this; }
+
+		this._filterDetune= value;
 		this._updateFilter();
 		return this;
 	};
