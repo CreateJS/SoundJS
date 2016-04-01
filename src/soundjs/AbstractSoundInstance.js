@@ -179,6 +179,19 @@ this.createjs = this.createjs || {};
 		});
 
 		/**
+		 * The filter type, one of the following: "lowpass" "highpass" bandpass". Note that filter is not supported by HTML Audio.
+		 *
+		 * @property filterType
+		 * @type {String}
+		 * @default "lowpass"
+		 */
+		this._filterType =  "lowpass";
+		Object.defineProperty(this, "filterType", {
+			get: this.getFilterType,
+			set: this.setFilterType
+		});
+
+		/**
 		 * Audio sprite property used to determine the starting offset.
 		 * @property startTime
 		 * @type {Number}
@@ -605,6 +618,41 @@ this.createjs = this.createjs || {};
 	 */
 	p.getFilterQ = function () {
 		return this._filterQ;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterType:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method setFilterType
+	 * @param {String} The filter type, one of the following: "lowpass" "highpass" bandpass".
+	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
+	 */
+	p.setFilterType = function (value) {
+		if(value == this._filterType) { return this; }
+
+		var acceptedTypes = {
+			"lowpass" : true,
+			"highpass" : true,
+			"bandpass" : true
+		};
+
+		if (typeof acceptedTypes[value] === 'undefined') { return false; }
+		
+		this._filterType = value;
+		this._updateFilter();
+		return this;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterType:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method getFilterType
+	 * @return {String} The filter type, one of the following: "lowpass" "highpass" bandpass".
+	 */
+	p.getFilterType = function () {
+		return this._filterType;
 	};
 
 	/**

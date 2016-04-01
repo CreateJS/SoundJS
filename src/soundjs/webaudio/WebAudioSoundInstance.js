@@ -209,6 +209,7 @@ this.createjs = this.createjs || {};
 	p._updateFilter = function() {
 		this.filterNode.frequency.value = this._filterFrequency;
 		this.filterNode.Q.value = this._filterQ;
+		this.filterNode.type = this._filterType;
 	};
 
 	p._removeLooping = function(value) {
