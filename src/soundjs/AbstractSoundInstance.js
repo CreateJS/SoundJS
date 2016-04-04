@@ -218,6 +218,20 @@ this.createjs = this.createjs || {};
 		});
 
 		/**
+		 * The convolver buffer to use on the convolver node. This can be an audioBuffer or a filepath, and will be handled appropriately depending on which.
+		 * Note that convolver is not supported by HTML Audio.
+		 *
+		 * @property convolverBuffer
+		 * @type {String} || {AudioBuffer}
+		 * @default null
+		 */
+		this._convolverBuffer =  null;
+		Object.defineProperty(this, "convolverBuffer", {
+			get: this.getConvolverBuffer,
+			set: this.setConvolverBuffer
+		});
+
+		/**
 		 * Audio sprite property used to determine the starting offset.
 		 * @property startTime
 		 * @type {Number}
@@ -734,6 +748,44 @@ this.createjs = this.createjs || {};
 	p.getDistortionAmount = function () {
 		return this._distortionAmount;
 	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/convolverBuffer:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method setConvolverBuffer
+	 * @param {String} The filepath to an impulse response WAV || {AudioBuffer} The audio buffer to use as the convoler's buffer.
+	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
+	 */
+	p.setConvolverBuffer = function (buffer) {
+		if (typeof buffer === 'string') {
+			//if a filepath is passed, must import it as an arraybuffer and decode
+			this._getConvolverBufferFromFilepath(buffer);
+		}
+		else {
+			if (typeof AudioBuffer !== 'undefined' && buffer instanceof AudioBuffer) {
+				//audio buffer is passed, set it directly
+				this._convolverBuffer = buffer;
+				this._updateConvolver();
+			}
+			else {
+				return false;
+			}
+		}
+		return this;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/convolverBuffer:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method getConvolverBuffer
+	 * @return {AudioBuffer} The audio buffer being used as the convolver's buffer.
+	 */
+	p.getConvolverBuffer = function () {
+		return this._convolverBuffer;
+	};
+
 
 	/**
 	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/position:property"}}{{/crossLink}} directly as a property

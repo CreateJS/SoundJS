@@ -80,13 +80,24 @@ this.createjs = this.createjs || {};
 
 		/**
 		 * NOTE this is only intended for use by advanced users.
-		 * <br />A filterNode allowing frequency filtering. Connected to WebAudioSoundInstance {{#crossLink "WebAudioSoundInstance/panNode:property"}}{{/crossLink}}.
+		 * <br />A  ConvolverNode allowing application of convolver buffers (e.g. reverb) Connected to WebAudioSoundInstance {{#crossLink "WebAudioSoundInstance/panNode:property"}}{{/crossLink}}.
+		 * @property  convolverNode
+		 * @type { ConvolverNode}
+		 * @since 0.6.?
+		 */
+		this.convolverNode = s.context.createConvolver();
+		this.convolverNode.buffer = this.testBuffer;
+		this.convolverNode.connect(this.panNode); //convolver node => pan node => gain node
+
+		/**
+		 * NOTE this is only intended for use by advanced users.
+		 * <br />A filterNode allowing frequency filtering. Connected to WebAudioSoundInstance {{#crossLink "WebAudioSoundInstance/convolverNode:property"}}{{/crossLink}}.
 		 * @property filterNode
 		 * @type {BiquadFilterNode}
 		 * @since 0.6.?
 		 */
 		this.filterNode = s.context.createBiquadFilter();
-		this.filterNode.connect(this.panNode); //filter node => pan node => gain node
+		this.filterNode.connect(this.convolverNode); //filter node => convolver node => pan node => gain node
 
 		/**
 		 * NOTE this is only intended for use by advanced users.
@@ -96,7 +107,7 @@ this.createjs = this.createjs || {};
 		 * @since 0.6.?
 		 */
 		this.distortionNode = s.context.createWaveShaper();
-		this.distortionNode.connect(this.filterNode); //distortion node => filter node => pan node => gain node
+		this.distortionNode.connect(this.filterNode); //distortion node => filter node => convolver node => pan node => gain node
 
 		/**
 		 * NOTE this is only intended for use by advanced users.
@@ -244,6 +255,27 @@ this.createjs = this.createjs || {};
 		this.distortionNode.curve = this._makeDistortionCurve(this._distortionAmount);
 	};
 
+	p._updateConvolver = function() {
+		this.convolverNode.buffer = this._convolverBuffer;
+	};
+
+	p._getConvolverBufferFromFilepath = function(filepath) {
+		// grab audio track via XHR for convolver node
+		var req = new XMLHttpRequest();
+		req.open('GET', filepath, true);
+		req.responseType = 'arraybuffer';
+
+		var self = this; //save this reference
+		req.onload = function() {
+		  var audioData = req.response;
+		  s.context.decodeAudioData(audioData, function(buffer) {
+		  	self._convolverBuffer = buffer;
+		  	self._updateConvolver();
+		    }, function(e){"Error with decoding audio data" + e.err});
+		}
+		req.send();
+	};
+
 	p._removeLooping = function(value) {
 		this._sourceNodeNext = this._cleanUpAudioNode(this._sourceNodeNext);
 	};
@@ -317,10 +349,13 @@ this.createjs = this.createjs || {};
 	 * @since 0.4.1
 	 */
 	p._createAndPlayAudioNode = function(startTime, offset) {
+		console.log('createandplayaudionode');
 		var audioNode = s.context.createBufferSource();
 		audioNode.buffer = this.playbackResource;
-		//audioNode.connect(this.panNode);
 		audioNode.connect(this.distortionNode);
+		//audioNode.connect(this.convolverNode);
+		console.log('connected to convolverNode');
+
 		var dur = this._duration * 0.001;
 		audioNode.startTime = startTime + dur;
 		audioNode.start(audioNode.startTime, offset+(this._startTime*0.001), dur - offset);
