@@ -972,8 +972,8 @@ this.createjs = this.createjs || {};
 		s._preloadHash[loadItem.src].push(loadItem);
 		if (s._preloadHash[loadItem.src].length == 1) {
 			// OJR note this will disallow reloading a sound if loading fails or the source changes
-			loader.on("complete", createjs.proxy(this._handleLoadComplete, this));
-			loader.on("error", createjs.proxy(this._handleLoadError, this));
+			loader.on("complete", this._handleLoadComplete, this);
+			loader.on("error", this._handleLoadError, this);
 			s.activePlugin.preload(loader);
 		} else {
 			if (s._preloadHash[loadItem.src][0] == true) {return true;}
