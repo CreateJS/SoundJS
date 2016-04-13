@@ -54,7 +54,7 @@
 
 	// global variables
 	var stage;              // the stage we draw everything to
-	var h, w;               // variables to store the width and height of the canvas
+	var w, h;               // store the width and height of the canvas
 	var centerX, centerY;   // variables to hold the center point, so that tick is quicker
 	var messageField;       // Message display field
 	var assetsPath = "../_assets/audio/";   // Create a single item to load.
@@ -76,13 +76,11 @@
 			return;
 		}
 
-		// create a new stage and point it at our canvas:
-		var canvas = document.getElementById("testCanvas");
-		stage = new createjs.Stage(canvas);
+		stage = new createjs.Stage("testCanvas");
 
-		// set the width and height, so we only have to access this data once (quicker)
-		h = canvas.height;
-		w = canvas.width;
+		// Store the width and height, so we only have to access this data once (quicker)
+		h = stage.canvas.height;
+		w = stage.canvas.width;
 		// calculate the center point, so we only have to do this math once (quicker)
 		centerX = w >> 1;
 		centerY = h >> 1;
@@ -96,12 +94,12 @@
 		stage.addChild(messageField);
 		stage.update(); 	//update the stage to show text
 
-		createjs.Sound.addEventListener("fileload", createjs.proxy(handleLoad, this)); // add an event listener for when load is completed
-		createjs.Sound.registerSound(src);  // register sound, which preloads by default
+		createjs.Sound.on("fileload", handleLoad, this); // add an event listener for when load is completed
+		createjs.Sound.registerSound(src);  // register sound, which will preload automatically
 	}
 
 	function handleLoad(evt) {
-		// get the context.  NOTE to connect to existing nodes we need to work in the same context.
+		// get the context. NOTE to connect to existing nodes we need to work in the same context.
 		var context = createjs.Sound.activePlugin.context;
 
 		// create an analyser node
