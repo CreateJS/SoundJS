@@ -53,12 +53,12 @@ this.createjs = this.createjs || {};
 		this.AbstractMediaLoader_constructor(loadItem, preferXHR, createjs.AbstractLoader.SOUND);
 
 		// protected properties
-		if (createjs.RequestUtils.isAudioTag(loadItem)) {
+		if (createjs.DomUtils.isAudioTag(loadItem)) {
 			this._tag = loadItem;
-		} else if (createjs.RequestUtils.isAudioTag(loadItem.src)) {
+		} else if (createjs.DomUtils.isAudioTag(loadItem.src)) {
 			this._tag = loadItem;
-		} else if (createjs.RequestUtils.isAudioTag(loadItem.tag)) {
-			this._tag = createjs.RequestUtils.isAudioTag(loadItem) ? loadItem : loadItem.src;
+		} else if (createjs.DomUtils.isAudioTag(loadItem.tag)) {
+			this._tag = createjs.DomUtils.isAudioTag(loadItem) ? loadItem : loadItem.src;
 		}
 
 		if (this._tag != null) {
@@ -84,7 +84,7 @@ this.createjs = this.createjs || {};
 
 	// protected methods
 	p._createTag = function (src) {
-		var tag = document.createElement("audio");
+		var tag = createjs.Elements.audio();
 		tag.autoplay = false;
 		tag.preload = "none";
 

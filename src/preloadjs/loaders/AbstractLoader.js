@@ -203,18 +203,20 @@ this.createjs = this.createjs || {};
 	 * @property POST
 	 * @type {string}
 	 * @default post
+	 * @deprecated Use Methods.POST instead
 	 * @static
 	 */
-	s.POST = "POST";
+	s.POST = createjs.Methods.POST;
 
 	/**
 	 * Defines a GET request, use for a method value when loading data.
 	 * @property GET
 	 * @type {string}
 	 * @default get
+	 * @deprecated Use Methods.GET instead
 	 * @static
 	 */
-	s.GET = "GET";
+	s.GET = createjs.Methods.GET;
 
 	/**
 	 * The preload type for generic binary types. Note that images are loaded as binary files when using XHR.
@@ -222,9 +224,10 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default binary
 	 * @static
+	 * @deprecated Use createjs.Types.BINARY instead
 	 * @since 0.6.0
 	 */
-	s.BINARY = "binary";
+	s.BINARY = createjs.Types.BINARY;
 
 	/**
 	 * The preload type for css files. CSS files are loaded using a &lt;link&gt; when loaded with XHR, or a
@@ -233,9 +236,10 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default css
 	 * @static
+	 * @deprecated Use createjs.Types.CSS instead
 	 * @since 0.6.0
 	 */
-	s.CSS = "css";
+	s.CSS = createjs.Types.CSS;
 
 	/**
 	 * The preload type for image files, usually png, gif, or jpg/jpeg. Images are loaded into an &lt;image&gt; tag.
@@ -243,9 +247,10 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default image
 	 * @static
+	 * @deprecated Use createjs.Types.IMAGE instead
 	 * @since 0.6.0
 	 */
-	s.IMAGE = "image";
+	s.IMAGE = createjs.Types.IMAGE;
 
 	/**
 	 * The preload type for javascript files, usually with the "js" file extension. JavaScript files are loaded into a
@@ -258,9 +263,10 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default javascript
 	 * @static
+	 * @deprecated Use createjs.Types.JAVASCRIPT instead
 	 * @since 0.6.0
 	 */
-	s.JAVASCRIPT = "javascript";
+	s.JAVASCRIPT = createjs.Types.JAVASCRIPT;
 
 	/**
 	 * The preload type for json files, usually with the "json" file extension. JSON data is loaded and parsed into a
@@ -271,9 +277,10 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default json
 	 * @static
+	 * @deprecated Use createjs.Types.JSON instead
 	 * @since 0.6.0
 	 */
-	s.JSON = "json";
+	s.JSON = createjs.Types.JSON;
 
 	/**
 	 * The preload type for jsonp files, usually with the "json" file extension. JSON data is loaded and parsed into a
@@ -284,9 +291,10 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default jsonp
 	 * @static
+	 * @deprecated Use createjs.Types.JSONP instead
 	 * @since 0.6.0
 	 */
-	s.JSONP = "jsonp";
+	s.JSONP = createjs.Types.JSONP;
 
 	/**
 	 * The preload type for json-based manifest files, usually with the "json" file extension. The JSON data is loaded
@@ -298,6 +306,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default manifest
 	 * @static
+	 * @deprecated Use createjs.Types.MANIFEST instead
 	 * @since 0.6.0
 	 */
 	s.MANIFEST = "manifest";
@@ -309,9 +318,10 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default sound
 	 * @static
+	 * @deprecated Use createjs.Types.SOUND instead
 	 * @since 0.6.0
 	 */
-	s.SOUND = "sound";
+	s.SOUND = createjs.Types.SOUND;
 
 	/**
 	 * The preload type for video files, usually mp4, ts, or ogg. When loading via tags, video is loaded into an
@@ -320,9 +330,10 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default video
 	 * @static
+	 * @deprecated Use createjs.Types.VIDEO instead
 	 * @since 0.6.0
 	 */
-	s.VIDEO = "video";
+	s.VIDEO = createjs.Types.VIDEO;
 
 	/**
 	 * The preload type for SpriteSheet files. SpriteSheet files are JSON files that contain string image paths.
@@ -330,9 +341,10 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default spritesheet
 	 * @static
+	 * @deprecated Use createjs.Types.SPRITESHEET instead
 	 * @since 0.6.0
 	 */
-	s.SPRITESHEET = "spritesheet";
+	s.SPRITESHEET = createjs.Types.SPRITESHEET;
 
 	/**
 	 * The preload type for SVG files.
@@ -340,9 +352,10 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default svg
 	 * @static
+	 * @deprecated Use createjs.Types.SVG instead
 	 * @since 0.6.0
 	 */
-	s.SVG = "svg";
+	s.SVG = createjs.Types.SVG;
 
 	/**
 	 * The preload type for text files, which is also the default file type if the type can not be determined. Text is
@@ -351,9 +364,10 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default text
 	 * @static
+	 * @deprecated Use createjs.Types.TEXT instead
 	 * @since 0.6.0
 	 */
-	s.TEXT = "text";
+	s.TEXT = createjs.Types.TEXT;
 
 	/**
 	 * The preload type for xml files. XML is loaded into an XML document.
@@ -361,9 +375,10 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default xml
 	 * @static
+	 * @deprecated Use createjs.Types.XML instead
 	 * @since 0.6.0
 	 */
-	s.XML = "xml";
+	s.XML = createjs.Types.XML;
 
 // Events
 	/**
@@ -739,11 +754,11 @@ this.createjs = this.createjs || {};
 	/**
 	 * @method buildPath
 	 * @protected
-	 * @deprecated Use the {{#crossLink "RequestUtils"}}{{/crossLink}} method {{#crossLink "RequestUtils/buildPath"}}{{/crossLink}}
+	 * @deprecated Use the {{#crossLink "URLUtils"}}{{/crossLink}} method {{#crossLink "URLUtils/buildURI"}}{{/crossLink}}
 	 * instead.
 	 */
 	p.buildPath = function (src, data) {
-		return createjs.RequestUtils.buildPath(src, data);
+		return createjs.URLUtils.buildURI(src, data);
 	};
 
 	/**

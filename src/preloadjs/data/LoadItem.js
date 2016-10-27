@@ -109,7 +109,7 @@ this.createjs = this.createjs || {};
 		 * constants on {{#crossLink "AbstractLoader"}}{{/crossLink}}.
 		 * @property method
 		 * @type {String}
-		 * @default get
+		 * @default GET
 		 */
 		this.method = createjs.LoadItem.GET;
 

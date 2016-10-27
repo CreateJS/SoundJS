@@ -111,7 +111,7 @@ this.createjs = this.createjs || {};
 
 		// wdg:: Append the tag AFTER setting the src, or SVG loading on iOS will fail.
 		if (this._tag.parentNode == null) {
-			window.document.body.appendChild(this._tag);
+			createjs.DomUtils.appendToBody(this._tag);
 			this._addedToDOM = true;
 		}
 	};
