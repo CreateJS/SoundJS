@@ -81,7 +81,7 @@ this.createjs = this.createjs||{};
 	 *          console.log(instance == this); // true, "on" uses dispatcher scope by default.
 	 *      });
 	 * 
-	 * If you want to use addEventListener instead, you may want to use Function.bind() or a similar proxy to manage
+	 * If you want to use addEventListener instead, you may want to use function.bind() or a similar proxy to manage
 	 * scope.
 	 *
 	 * <b>Browser support</b>

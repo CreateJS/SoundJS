@@ -81,13 +81,6 @@ this.createjs = this.createjs || {};
 		 */
 		this._addedToDOM = false;
 
-		/**
-		 * Determines what the tags initial style.visibility was, so we can set it correctly after a load.
-		 *
-		 * @type {null}
-		 * @private
-		 */
-		this._startTagVisibility = null;
 	};
 
 	var p = createjs.extend(TagRequest, createjs.AbstractRequest);
@@ -102,8 +95,6 @@ this.createjs = this.createjs || {};
 		evt.loader = this._tag;
 
 		this.dispatchEvent(evt);
-
-		this._hideTag();
 
 		this._loadTimeout = setTimeout(createjs.proxy(this._handleTimeout, this), this._item.loadTimeout);
 
@@ -161,7 +152,6 @@ this.createjs = this.createjs || {};
 		this._result = this.resultFormatter && this.resultFormatter(this) || this._rawResult;
 
 		this._clean();
-		this._showTag();
 
 		this.dispatchEvent("complete");
 	};
@@ -190,15 +180,6 @@ this.createjs = this.createjs || {};
 			this._tag.parentNode.removeChild(this._tag);
 		}
 		clearTimeout(this._loadTimeout);
-	};
-
-	p._hideTag = function() {
-		this._startTagVisibility = this._tag.style.visibility;
-		this._tag.style.visibility = "hidden";
-	};
-
-	p._showTag = function() {
-		this._tag.style.visibility = this._startTagVisibility;
 	};
 
 	/**
