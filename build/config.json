@@ -13,6 +13,8 @@
 		"../src/createjs/events/ErrorEvent.js",
 		"../src/preloadjs/events/ProgressEvent.js",
 		"../src/preloadjs/data/LoadItem.js",
+		"../src/preloadjs/data/Methods.js",
+		"../src/preloadjs/data/Types.js",
 		"../src/preloadjs/utils/RequestUtils.js",
 		"../src/preloadjs/loaders/AbstractLoader.js",
 		"../src/preloadjs/loaders/AbstractMediaLoader.js",
