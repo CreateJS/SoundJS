@@ -4,6 +4,7 @@ Version NEXT [Not yet released]
   	which affects compiled applications.
 * Fixed issue where values don't get appended to GET requests in XHRRequest
 * Added "touchstart" as an audio unlocking event, which seems to be the best for iOS
+* 
 
 
 Version 0.6.2 [November 26, 2015]

@@ -850,6 +850,7 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.initLoad = function (loadItem) {
+		if (loadItem.type == "video") { return true; } // Don't handle video. PreloadJS's plugin model is really aggressive.
 		return s._registerSound(loadItem);
 	};
 
