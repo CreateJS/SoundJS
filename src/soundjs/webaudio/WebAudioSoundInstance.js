@@ -246,9 +246,8 @@ this.createjs = this.createjs || {};
 	p._handleSoundReady = function (event) {
 		this.gainNode.connect(s.destinationNode);  // this line can cause a memory leak.  Nodes need to be disconnected from the audioDestination or any sequence that leads to it.
 
-		var dur = this._duration * 0.001;
-		var pos = this._position * 0.001;
-		if (pos > dur) {pos = dur;}
+		var dur = this._duration * 0.001,
+			pos = Math.max(0, Math.min(dur, this._position)) * 0.001;
 		this.sourceNode = this._createAndPlayAudioNode((s.context.currentTime - dur), pos);
 		this._playbackStartTime = this.sourceNode.startTime - pos;
 
