@@ -49,10 +49,12 @@
 		if (s.container == null) {
 			s.container = document.createElement("div");
 			s.container.id = "preloadjs-container";
-			s.container.style.visibility = "hidden";
-			s.container.style.position = "absolute";
-			s.container.style.width = s.container.style.height = "10px";
-			s.container.style.transform = s.container.style.msTransform = s.container.style.webkitTransform = s.container.style.oTransform = "translate(-10px, -10px)"; //LM: Not working
+			var style = s.container.style;
+			style.visibility = "hidden";
+			style.position = "absolute";
+			style.width = s.container.style.height = "10px";
+			style.overflow = "hidden";
+			style.transform = style.msTransform = style.webkitTransform = style.oTransform = "translate(-10px, -10px)"; //LM: Not working
 			s.getBody().appendChild(s.container);
 		}
 		s.container.appendChild(el);
