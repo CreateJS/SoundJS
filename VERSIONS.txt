@@ -6,6 +6,7 @@ Version NEXT [Not yet released]
 * Added "touchstart" as an audio unlocking event, which seems to be the best for iOS
 * Checked if preload candidates are videos, since SoundJS mistakenly handles these when they are mp4.
 * Added missing Methods and Types classes from recent PreloadJS changes
+* Handled case where audio duration returned < 0, resulting in a DOM Error
 
 
 Version 0.6.2 [November 26, 2015]
