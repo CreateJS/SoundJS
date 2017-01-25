@@ -4,13 +4,13 @@
 
 		"../src/createjs/utils/extend.js",
 		"../src/createjs/utils/promote.js",
-		"../src/createjs/utils/IndexOf.js",
-		"../src/createjs/utils/Proxy.js",
+		"../src/createjs/utils/indexOf.js",
+		"../src/createjs/utils/proxy.js",
 		"../src/createjs/utils/BrowserDetect.js",
 		"../src/createjs/events/EventDispatcher.js",
 		"../src/createjs/events/Event.js",
-
 		"../src/createjs/events/ErrorEvent.js",
+
 		"../src/preloadjs/events/ProgressEvent.js",
 		"../src/preloadjs/data/LoadItem.js",
 		"../src/preloadjs/data/Methods.js",
@@ -32,9 +32,9 @@
 		"../src/soundjs/Sound.js",
 		"../src/soundjs/AbstractSoundInstance.js",
 		"../src/soundjs/AbstractPlugin.js",
-		"../src/soundjs/webAudio/WebAudioLoader.js",
-		"../src/soundjs/webAudio/WebAudioSoundInstance.js",
-		"../src/soundjs/webAudio/WebAudioPlugin.js",
+		"../src/soundjs/webaudio/WebAudioLoader.js",
+		"../src/soundjs/webaudio/WebAudioSoundInstance.js",
+		"../src/soundjs/webaudio/WebAudioPlugin.js",
     	"../src/soundjs/htmlaudio/HTMLAudioTagPool.js",
     	"../src/soundjs/htmlaudio/HTMLAudioSoundInstance.js",
     	"../src/soundjs/htmlaudio/HTMLAudioPlugin.js"
