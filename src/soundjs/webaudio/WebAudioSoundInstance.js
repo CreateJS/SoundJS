@@ -237,7 +237,9 @@ this.createjs = this.createjs || {};
 			audioNode.disconnect(0);
 			// necessary to prevent leak on iOS Safari 7-9. will throw in almost all other
 			// browser implementations.
-			try { audioNode.buffer = s._scratchBuffer; } catch(e) {}
+			if ( createjs.BrowserDetect.isIOS ) {
+				try { audioNode.buffer = s._scratchBuffer; } catch(e) {}
+			}
 			audioNode = null;
 		}
 		return audioNode;
