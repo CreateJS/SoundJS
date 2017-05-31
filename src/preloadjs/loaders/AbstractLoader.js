@@ -420,7 +420,7 @@ this.createjs = this.createjs || {};
 	 * This enables loaders to maintain internal queues, and surface file load errors.
 	 * @event fileerror
 	 * @param {Object} target The object that dispatched the event.
-	 * @param {String} type The even type ("fileerror")
+	 * @param {String} type The event type ("fileerror")
 	 * @param {LoadItem|object} The item that encountered the error
 	 * @since 0.6.0
 	 */
@@ -703,11 +703,13 @@ this.createjs = this.createjs || {};
 			case "complete":
 				this._rawResult = event.target._response;
 				var result = this.resultFormatter && this.resultFormatter(this);
+				// The resultFormatter is asynchronous
 				if (result instanceof Function) {
 					result.call(this,
 							createjs.proxy(this._resultFormatSuccess, this),
 							createjs.proxy(this._resultFormatFailed, this)
 					);
+				// The result formatter is synchronous
 				} else {
 					this._result =  result || this._rawResult;
 					this._sendComplete();
