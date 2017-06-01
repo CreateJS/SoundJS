@@ -271,7 +271,7 @@ this.createjs = this.createjs || {};
 	 * Mute all sounds via the plugin.
 	 * @method setMute
 	 * @param {Boolean} value If all sound should be muted or not. Note that plugin-level muting just looks up
-	 * the mute value of Sound {{#crossLink "Sound/getMute"}}{{/crossLink}}, so this property is not used here.
+	 * the mute value of Sound {{#crossLink "Sound/muted:property"}}{{/crossLink}}, so this property is not used here.
 	 * @return {Boolean} If the mute call succeeds.
 	 */
 	p.setMute = function (value) {

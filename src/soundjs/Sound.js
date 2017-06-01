@@ -573,7 +573,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * An array containing all currently playing instances. This allows Sound to control the volume, mute, and playback of
-	 * all instances when using static APIs like {{#crossLink "Sound/stop"}}{{/crossLink}} and {{#crossLink "Sound/setVolume"}}{{/crossLink}}.
+	 * all instances when using static APIs like {{#crossLink "Sound/stop"}}{{/crossLink}} and {{#crossLink "Sound/volume:property"}}{{/crossLink}}.
 	 * When an instance has finished playback, it gets removed via the {{#crossLink "Sound/finishedPlaying"}}{{/crossLink}}
 	 * method. If the user replays an instance, it gets added back in via the {{#crossLink "Sound/_beginPlaying"}}{{/crossLink}}
 	 * method.
@@ -1341,74 +1341,6 @@ this.createjs = this.createjs || {};
 		for (var i = instances.length; i--; ) {
 			instances[i].stop();  // NOTE stop removes instance from this._instances
 		}
-	};
-
-	/**
-	 * Deprecated, please use {{#crossLink "Sound/volume:property"}}{{/crossLink}} instead.
-	 *
-	 * @method setVolume
-	 * @param {Number} value The master volume value. The acceptable range is 0-1.
-	 * @static
-	 * @deprecated
-	 */
-	s.setVolume = function (value) {
-		if (Number(value) == null) {return false;}
-		value = Math.max(0, Math.min(1, value));
-		s._masterVolume = value;
-		if (!this.activePlugin || !this.activePlugin.setVolume || !this.activePlugin.setVolume(value)) {
-			var instances = this._instances;
-			for (var i = 0, l = instances.length; i < l; i++) {
-				instances[i].setMasterVolume(value);
-			}
-		}
-	};
-
-	/**
-	 * Deprecated, please use {{#crossLink "Sound/volume:property"}}{{/crossLink}} instead.
-	 *
-	 * @method getVolume
-	 * @return {Number} The master volume, in a range of 0-1.
-	 * @static
-	 * @deprecated
-	 */
-	s.getVolume = function () {
-		return this._masterVolume;
-	};
-
-	/**
-	 * Deprecated, please use {{#crossLink "Sound/muted:property"}}{{/crossLink}} instead.
-	 *
-	 * @method setMute
-	 * @param {Boolean} value Whether the audio should be muted or not.
-	 * @return {Boolean} If the mute was set.
-	 * @static
-	 * @since 0.4.0
-	 * @deprecated
-	 */
-	s.setMute = function (value) {
-		if (value == null) {return false;}
-
-		this._masterMute = value;
-		if (!this.activePlugin || !this.activePlugin.setMute || !this.activePlugin.setMute(value)) {
-			var instances = this._instances;
-			for (var i = 0, l = instances.length; i < l; i++) {
-				instances[i].setMasterMute(value);
-			}
-		}
-		return true;
-	};
-
-	/**
-	 * Deprecated, please use {{#crossLink "Sound/muted:property"}}{{/crossLink}} instead.
-	 *
-	 * @method getMute
-	 * @return {Boolean} The mute value of Sound.
-	 * @static
-	 * @since 0.4.0
-	 * @deprecated
-	 */
-	s.getMute = function () {
-		return this._masterMute;
 	};
 
 	/**
