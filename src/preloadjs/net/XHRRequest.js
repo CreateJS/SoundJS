@@ -328,6 +328,9 @@ this.createjs = this.createjs || {};
 	/**
 	 * The XHR request has completed. This is called by the XHR request directly, or by a readyStateChange that has
 	 * <code>request.readyState == 4</code>. Only the first call to this method will be processed.
+	 *
+	 * Note that This method uses {{#crossLink "_checkError"}}{{/crossLink}} to determine if the server has returned an
+	 * error code.
 	 * @method _handleLoad
 	 * @param {Object} event The XHR load event.
 	 * @private
@@ -379,16 +382,25 @@ this.createjs = this.createjs || {};
 
 // Protected
 	/**
-	 * Determine if there is an error in the current load. This checks the status of the request for problem codes. Note
-	 * that this does not check for an actual response. Currently, it only checks for error codes between 400 and 599
+	 * Determine if there is an error in the current load.
+	 * Currently this checks the status of the request for problem codes, and not actual response content:
+	 * <ul>
+	 *     <li>Status codes between 400 and 599 (HTTP error range)</li>
+	 *     <li>A status of 0, but *only when the application is running on a server*. If the application is running
+	 *     on `file:`, then it may incorrectly treat an error on local (or embedded applications) as a successful
+	 *     load.</li>
+	 * </ul>
 	 * @method _checkError
-	 * @return {int} If the request status returns an error code.
+	 * @return {Error} An error with the status code in the `message` argument.
 	 * @private
 	 */
 	p._checkError = function () {
 		var status = parseInt(this._request.status);
 		if (status >= 400 && status <= 599) {
 			return new Error(status);
+		} else if (status == 0) {
+			if ((/^https?:/).test(location.protocol)) { return new Error(0); }
+			return null; // Likely an embedded app.
 		} else {
 			return null;
 		}
