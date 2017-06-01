@@ -124,13 +124,12 @@
 		// enable touch interactions if supported on the current device, and display appropriate message
 		if (createjs.Touch.enable(stage)) {
 			messageField.text = "Touch to start";
+			// wrap our sound playing in a click event so we can be played on mobile devices
+			stage.addEventListener("stagemousedown", startPlayback);
+			stage.update(); 	//update the stage to show text
 		} else {
-			messageField.text = "Click to start";
+			startPlayback();
 		}
-		stage.update(); 	//update the stage to show text
-
-		// wrap our sound playing in a click event so we can be played on mobile devices
-		stage.addEventListener("stagemousedown", startPlayback);
 	}
 
 	// this will start our playback in response to a user click, allowing this demo to work on mobile devices
