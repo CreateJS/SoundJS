@@ -93,18 +93,6 @@ this.createjs = this.createjs || {};
 
 
 	// Public Properties
-		/**
-		 * This is no longer needed as we are now using object pooling for tags.
-		 *
-		 * <b>NOTE this property only exists as a limitation of HTML audio.</b>
-		 * @property defaultNumChannels
-		 * @type {Number}
-		 * @default 2
-		 * @since 0.4.0
-		 * @deprecated
-		 */
-		this.defaultNumChannels = 2;
-
 		this._capabilities = s._capabilities;
 
 		this._loaderClass = createjs.SoundLoader;
