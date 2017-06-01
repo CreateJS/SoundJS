@@ -813,34 +813,6 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Deprecated, please use {{#crossLink "Sound/capabilities:property"}}{{/crossLink}} instead.
-	 *
-	 * @method getCapabilities
-	 * @return {Object} An object containing the capabilities of the active plugin.
-	 * @static
-	 * @deprecated
-	 */
-	s.getCapabilities = function () {
-		if (s.activePlugin == null) {return null;}
-		return s.activePlugin._capabilities;
-	};
-
-	/**
-	 * Deprecated, please use {{#crossLink "Sound/capabilities:property"}}{{/crossLink}} instead.
-	 *
-	 * @method getCapability
-	 * @param {String} key The capability to retrieve
-	 * @return {Number|Boolean} The value of the capability.
-	 * @static
-	 * @see getCapabilities
-	 * @deprecated
-	 */
-	s.getCapability = function (key) {
-		if (s.activePlugin == null) {return null;}
-		return s.activePlugin._capabilities[key];
-	};
-
-	/**
 	 * Process manifest items from <a href="http://preloadjs.com" target="_blank">PreloadJS</a>. This method is intended
 	 * for usage by a plugin, and not for direct interaction.
 	 * @method initLoad

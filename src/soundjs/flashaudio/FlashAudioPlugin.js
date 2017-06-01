@@ -203,7 +203,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * The capabilities of the plugin. This is generated via the {{#crossLink "WebAudioPlugin/_generateCapabilities"}}{{/crossLink}}
-	 * method. Please see the Sound {{#crossLink "Sound/getCapabilities"}}{{/crossLink}} method for a list of available
+	 * method. Please see the Sound {{#crossLink "Sound/capabilities:property"}}{{/crossLink}} method for a list of available
 	 * capabilities.
 	 * @property _capabilities
 	 * @type {Object}
@@ -240,7 +240,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Determine the capabilities of the plugin. Used internally. Please see the Sound API {{#crossLink "Sound/getCapabilities"}}{{/crossLink}}
+	 * Determine the capabilities of the plugin. Used internally. Please see the Sound API {{#crossLink "Sound/capabilities:property"}}{{/crossLink}}
 	 * method for an overview of plugin capabilities.
 	 * @method _generateCapabilities
 	 * @static
