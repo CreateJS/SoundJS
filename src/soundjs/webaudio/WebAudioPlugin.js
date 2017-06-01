@@ -126,10 +126,6 @@ this.createjs = this.createjs || {};
 	}
 	var p = createjs.extend(WebAudioPlugin, createjs.AbstractPlugin);
 
-	// TODO: deprecated
-	// p.initialize = function() {}; // searchable for devs wondering where it is. REMOVED. See docs for details.
-
-
 // Static Properties
 	var s = WebAudioPlugin;
 	/**

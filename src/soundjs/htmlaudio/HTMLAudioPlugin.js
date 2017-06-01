@@ -102,10 +102,6 @@ this.createjs = this.createjs || {};
 	var p = createjs.extend(HTMLAudioPlugin, createjs.AbstractPlugin);
 	var s = HTMLAudioPlugin;
 
-	// TODO: deprecated
-	// p.initialize = function() {}; // searchable for devs wondering where it is. REMOVED. See docs for details.
-
-
 // Static Properties
 	/**
 	 * The maximum number of instances that can be loaded or played. This is a browser limitation, primarily limited to IE9.

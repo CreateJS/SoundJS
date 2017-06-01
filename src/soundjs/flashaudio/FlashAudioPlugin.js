@@ -176,10 +176,6 @@ this.createjs = this.createjs || {};
 	var p = createjs.extend(FlashAudioPlugin, createjs.AbstractPlugin);
 	var s = FlashAudioPlugin;
 
-	// TODO: deprecated
-	// p.initialize = function() {}; // searchable for devs wondering where it is. REMOVED. See docs for details.
-
-
 // Static properties
 	/**
 	 * Event constant for the "registerFlashID" event for cleaner code.
