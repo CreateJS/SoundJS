@@ -475,7 +475,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Please use {{#crossLink "AbstractSoundInstance/pan:property"}}{{/crossLink}} directly as a property
-	 * @method setPan
+	 * @method _setPan
 	 * @protected
 	 * @param {Number} value The pan value, between -1 (left) and 1 (right).
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
@@ -489,7 +489,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Please use {{#crossLink "AbstractSoundInstance/pan:property"}}{{/crossLink}} directly as a property
-	 * @method getPan
+	 * @method _getPan
 	 * @protected
 	 * @return {Number} The value of the pan, between -1 (left) and 1 (right).
 	 */
@@ -499,7 +499,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Please use {{#crossLink "AbstractSoundInstance/position:property"}}{{/crossLink}} directly as a property
-	 * @method getPosition
+	 * @method _getPosition
 	 * @protected
 	 * @return {Number} The position of the playhead in the sound, in milliseconds.
 	 */
@@ -512,7 +512,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Please use {{#crossLink "AbstractSoundInstance/position:property"}}{{/crossLink}} directly as a property
-	 * @method setPosition
+	 * @method _setPosition
 	 * @protected
 	 * @param {Number} value The position to place the playhead, in milliseconds.
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
@@ -527,7 +527,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Please use {{#crossLink "AbstractSoundInstance/startTime:property"}}{{/crossLink}} directly as a property
-	 * @method getStartTime
+	 * @method _getStartTime
 	 * @protected
 	 * @return {Number} The startTime of the sound instance in milliseconds.
 	 */
@@ -537,7 +537,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Please use {{#crossLink "AbstractSoundInstance/startTime:property"}}{{/crossLink}} directly as a property
-	 * @method setStartTime
+	 * @method _setStartTime
 	 * @protected
 	 * @param {number} value The new startTime time in milli seconds.
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
@@ -551,7 +551,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Please use {{#crossLink "AbstractSoundInstance/duration:property"}}{{/crossLink}} directly as a property
-	 * @method getDuration
+	 * @method _getDuration
 	 * @protected
 	 * @return {Number} The duration of the sound instance in milliseconds.
 	 */
@@ -561,7 +561,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Please use {{#crossLink "AbstractSoundInstance/duration:property"}}{{/crossLink}} directly as a property
-	 * @method setDuration
+	 * @method _setDuration
 	 * @protected
 	 * @param {number} value The new duration time in milli seconds.
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
@@ -576,7 +576,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Please use {{#crossLink "AbstractSoundInstance/playbackResource:property"}}{{/crossLink}} directly as a property
-	 * @method setPlayback
+	 * @method _setPlaybackResource
 	 * @protected
 	 * @param {Object} value The new playback resource.
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
@@ -590,7 +590,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Please use {{#crossLink "AbstractSoundInstance/playbackResource:property"}}{{/crossLink}} directly as a property
-	 * @method setPlayback
+	 * @method _getPlaybackResource
 	 * @protected
 	 * @param {Object} value The new playback resource.
 	 * @return {Object} playback resource used for playing audio
@@ -602,7 +602,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Please use {{#crossLink "AbstractSoundInstance/loop:property"}}{{/crossLink}} directly as a property
-	 * @method getLoop
+	 * @method _getLoop
 	 * @protected
 	 * @return {number}
 	 * @since 0.6.0
@@ -613,7 +613,7 @@ this.createjs = this.createjs || {};
 
 	/**
 	 * Please use {{#crossLink "AbstractSoundInstance/loop:property"}}{{/crossLink}} directly as a property
-	 * @method setLoop
+	 * @method _setLoop
 	 * @protected
 	 * @param {number} value The number of times to loop after play.
 	 * @since 0.6.0
