@@ -495,21 +495,21 @@ this.createjs = this.createjs || {};
 		this._xhrLevel = (typeof req.responseType === "string") ? 2 : 1;
 
 		var src = null;
-		if (item.method == createjs.AbstractLoader.GET) {
+		if (item.method == createjs.Methods.GET) {
 			src = createjs.URLUtils.buildURI(item.src, item.values);
 		} else {
 			src = item.src;
 		}
 
 		// Open the request.  Set cross-domain flags if it is supported (XHR level 1 only)
-		req.open(item.method || createjs.AbstractLoader.GET, src, true);
+		req.open(item.method || createjs.Methods.GET, src, true);
 
 		if (crossdomain && req instanceof XMLHttpRequest && this._xhrLevel == 1) {
 			headers["Origin"] = location.origin;
 		}
 
 		// To send data we need to set the Content-type header)
-		if (item.values && item.method == createjs.AbstractLoader.POST) {
+		if (item.values && item.method == createjs.Methods.POST) {
 			headers["Content-Type"] = "application/x-www-form-urlencoded";
 		}
 

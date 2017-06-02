@@ -104,14 +104,14 @@ this.createjs = this.createjs || {};
 		this.data = null;
 
 		/**
-		 * The request method used for HTTP calls. Both {{#crossLink "AbstractLoader/GET:property"}}{{/crossLink}} or
-		 * {{#crossLink "AbstractLoader/POST:property"}}{{/crossLink}} request types are supported, and are defined as
+		 * The request method used for HTTP calls. Both {{#crossLink "Methods/GET:property"}}{{/crossLink}} or
+		 * {{#crossLink "Methods/POST:property"}}{{/crossLink}} request types are supported, and are defined as
 		 * constants on {{#crossLink "AbstractLoader"}}{{/crossLink}}.
 		 * @property method
 		 * @type {String}
 		 * @default GET
 		 */
-		this.method = createjs.LoadItem.GET;
+		this.method = createjs.Methods.GET;
 
 		/**
 		 * An object hash of name/value pairs to send to the server.

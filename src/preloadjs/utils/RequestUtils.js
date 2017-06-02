@@ -52,8 +52,8 @@
 	 */
 	s.isBinary = function (type) {
 		switch (type) {
-			case createjs.AbstractLoader.IMAGE:
-			case createjs.AbstractLoader.BINARY:
+			case createjs.Types.IMAGE:
+			case createjs.Types.BINARY:
 				return true;
 			default:
 				return false;
@@ -69,14 +69,14 @@
 	 */
 	s.isText = function (type) {
 		switch (type) {
-			case createjs.AbstractLoader.TEXT:
-			case createjs.AbstractLoader.JSON:
-			case createjs.AbstractLoader.MANIFEST:
-			case createjs.AbstractLoader.XML:
-			case createjs.AbstractLoader.CSS:
-			case createjs.AbstractLoader.SVG:
-			case createjs.AbstractLoader.JAVASCRIPT:
-			case createjs.AbstractLoader.SPRITESHEET:
+			case createjs.Types.TEXT:
+			case createjs.Types.JSON:
+			case createjs.Types.MANIFEST:
+			case createjs.Types.XML:
+			case createjs.Types.CSS:
+			case createjs.Types.SVG:
+			case createjs.Types.JAVASCRIPT:
+			case createjs.Types.SPRITESHEET:
 				return true;
 			default:
 				return false;
@@ -94,7 +94,7 @@
 	 */
 	s.getTypeByExtension = function (extension) {
 		if (extension == null) {
-			return createjs.AbstractLoader.TEXT;
+			return createjs.Types.TEXT;
 		}
 
 		switch (extension.toLowerCase()) {
@@ -104,27 +104,27 @@
 			case "png":
 			case "webp":
 			case "bmp":
-				return createjs.AbstractLoader.IMAGE;
+				return createjs.Types.IMAGE;
 			case "ogg":
 			case "mp3":
 			case "webm":
-				return createjs.AbstractLoader.SOUND;
+				return createjs.Types.SOUND;
 			case "mp4":
 			case "webm":
 			case "ts":
-				return createjs.AbstractLoader.VIDEO;
+				return createjs.Types.VIDEO;
 			case "json":
-				return createjs.AbstractLoader.JSON;
+				return createjs.Types.JSON;
 			case "xml":
-				return createjs.AbstractLoader.XML;
+				return createjs.Types.XML;
 			case "css":
-				return createjs.AbstractLoader.CSS;
+				return createjs.Types.CSS;
 			case "js":
-				return createjs.AbstractLoader.JAVASCRIPT;
+				return createjs.Types.JAVASCRIPT;
 			case 'svg':
-				return createjs.AbstractLoader.SVG;
+				return createjs.Types.SVG;
 			default:
-				return createjs.AbstractLoader.TEXT;
+				return createjs.Types.TEXT;
 		}
 	};
 
