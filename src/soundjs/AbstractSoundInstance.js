@@ -125,7 +125,7 @@ this.createjs = this.createjs || {};
 		 * The volume of the sound, between 0 and 1.
 		 *
 		 * The actual output volume of a sound can be calculated using:
-		 * <code>myInstance.volume * createjs.Sound.getVolume();</code>
+		 * <code>myInstance.volume * createjs.Sound._getVolume();</code>
 		 *
 		 * @property volume
 		 * @type {Number}
@@ -133,23 +133,22 @@ this.createjs = this.createjs || {};
 		 */
 		this._volume =  1;
 		Object.defineProperty(this, "volume", {
-			get: this.getVolume,
-			set: this.setVolume
+			get: this._getVolume,
+			set: this._setVolume
 		});
 
 		/**
 		 * The pan of the sound, between -1 (left) and 1 (right). Note that pan is not supported by HTML Audio.
 		 *
-		 * <br />Note in WebAudioPlugin this only gives us the "x" value of what is actually 3D audio.
-		 *
+		 * Note in WebAudioPlugin this only gives us the "x" value of what is actually 3D audio
 		 * @property pan
 		 * @type {Number}
 		 * @default 0
 		 */
 		this._pan =  0;
 		Object.defineProperty(this, "pan", {
-			get: this.getPan,
-			set: this.setPan
+			get: this._getPan,
+			set: this._setPan
 		});
 
 		/**
@@ -161,8 +160,8 @@ this.createjs = this.createjs || {};
 		 */
 		this._startTime = Math.max(0, startTime || 0);
 		Object.defineProperty(this, "startTime", {
-			get: this.getStartTime,
-			set: this.setStartTime
+			get: this._getStartTime,
+			set: this._setStartTime
 		});
 
 		/**
@@ -175,8 +174,8 @@ this.createjs = this.createjs || {};
 		 */
 		this._duration = Math.max(0, duration || 0);
 		Object.defineProperty(this, "duration", {
-			get: this.getDuration,
-			set: this.setDuration
+			get: this._getDuration,
+			set: this._setDuration
 		});
 
 		/**
@@ -190,10 +189,10 @@ this.createjs = this.createjs || {};
 		 */
 		this._playbackResource = null;
 		Object.defineProperty(this, "playbackResource", {
-			get: this.getPlaybackResource,
-			set: this.setPlaybackResource
+			get: this._getPlaybackResource,
+			set: this._setPlaybackResource
 		});
-		if(playbackResource !== false && playbackResource !== true) { this.setPlaybackResource(playbackResource); }
+		if(playbackResource !== false && playbackResource !== true) { this._setPlaybackResource(playbackResource); }
 
 		/**
 		 * The position of the playhead in milliseconds. This can be set while a sound is playing, paused, or stopped.
@@ -205,8 +204,8 @@ this.createjs = this.createjs || {};
 		 */
 		this._position = 0;
 		Object.defineProperty(this, "position", {
-			get: this.getPosition,
-			set: this.setPosition
+			get: this._getPosition,
+			set: this._setPosition
 		});
 
 		/**
@@ -220,8 +219,8 @@ this.createjs = this.createjs || {};
 		 */
 		this._loop = 0;
 		Object.defineProperty(this, "loop", {
-			get: this.getLoop,
-			set: this.setLoop
+			get: this._getLoop,
+			set: this._setLoop
 		});
 
 		/**
@@ -234,8 +233,8 @@ this.createjs = this.createjs || {};
 		 */
 		this._muted = false;
 		Object.defineProperty(this, "muted", {
-			get: this.getMuted,
-			set: this.setMuted
+			get: this._getMuted,
+			set: this._setMuted
 		});
 
 		/**
@@ -246,8 +245,8 @@ this.createjs = this.createjs || {};
 		 */
 		this._paused = false;
 		Object.defineProperty(this, "paused", {
-			get: this.getPaused,
-			set: this.setPaused
+			get: this._getPaused,
+			set: this._setPaused
 		});
 
 
@@ -342,7 +341,7 @@ this.createjs = this.createjs || {};
 
 		if (this.playState == createjs.Sound.PLAY_SUCCEEDED) {
 			this.applyPlayProps(playProps);
-			if (this._paused) {	this.setPaused(false); }
+			if (this._paused) {	this._setPaused(false); }
 			return;
 		}
 		this._cleanUp();
@@ -393,13 +392,13 @@ this.createjs = this.createjs || {};
 	 * @return {AbstractSoundInstance} A reference to itself, intended for chaining calls.
 	 */
 	p.applyPlayProps = function(playProps) {
-		if (playProps.offset != null) { this.setPosition(playProps.offset) }
-		if (playProps.loop != null) { this.setLoop(playProps.loop); }
-		if (playProps.volume != null) { this.setVolume(playProps.volume); }
-		if (playProps.pan != null) { this.setPan(playProps.pan); }
+		if (playProps.offset != null) { this._setPosition(playProps.offset) }
+		if (playProps.loop != null) { this._setLoop(playProps.loop); }
+		if (playProps.volume != null) { this._setVolume(playProps.volume); }
+		if (playProps.pan != null) { this._setPan(playProps.pan); }
 		if (playProps.startTime != null) {
-			this.setStartTime(playProps.startTime);
-			this.setDuration(playProps.duration);
+			this._setStartTime(playProps.startTime);
+			this._setDuration(playProps.duration);
 		}
 		return this;
 	};
@@ -410,27 +409,25 @@ this.createjs = this.createjs || {};
 
 // get/set methods that allow support for IE8
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/paused:property"}}{{/crossLink}} directly as a property,
-	 *
-	 * @deprecated
-	 * @method getPaused
-	 * @returns {boolean} If the instance is currently paused
+	 * Please use {{#crossLink "AbstractSoundInstance/paused:property"}}{{/crossLink}} directly as a property.
+	 * @method _getPaused
+	 * @protected
+	 * @return {boolean} If the instance is currently paused
 	 * @since 0.6.0
 	 */
-	p.getPaused = function() {
+	p._getPaused = function() {
 		return this._paused;
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/paused:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
-	 * @method setPaused
+	 * Please use {{#crossLink "AbstractSoundInstance/paused:property"}}{{/crossLink}} directly as a property
+	 * @method _setPaused
+	 * @protected
 	 * @param {boolean} value
 	 * @since 0.6.0
 	 * @return {AbstractSoundInstance} A reference to itself, intended for chaining calls.
 	 */
-	p.setPaused = function (value) {
+	p._setPaused = function (value) {
 		if ((value !== true && value !== false) || this._paused == value) {return;}
 		if (value == true && this.playState != createjs.Sound.PLAY_SUCCEEDED) {return;}
 		this._paused = value;
@@ -444,14 +441,13 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/volume:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
-	 * @method setVolume
+	 * Please use {{#crossLink "AbstractSoundInstance/volume:property"}}{{/crossLink}} directly as a property
+	 * @method _setVolume
+	 * @protected
 	 * @param {Number} value The volume to set, between 0 and 1.
 	 * @return {AbstractSoundInstance} A reference to itself, intended for chaining calls.
 	 */
-	p.setVolume = function (value) {
+	p._setVolume = function (value) {
 		if (value == this._volume) { return this; }
 		this._volume = Math.max(0, Math.min(1, value));
 		if (!this._muted) {
@@ -461,26 +457,24 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/volume:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
-	 * @method getVolume
+	 * Please use {{#crossLink "AbstractSoundInstance/volume:property"}}{{/crossLink}} directly as a property
+	 * @method _getVolume
+	 * @protected
 	 * @return {Number} The current volume of the sound instance.
 	 */
-	p.getVolume = function () {
+	p._getVolume = function () {
 		return this._volume;
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/muted:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
-	 * @method setMuted
+	 * Please use {{#crossLink "AbstractSoundInstance/muted:property"}}{{/crossLink}} directly as a property
+	 * @method _setMuted
+	 * @protected
 	 * @param {Boolean} value If the sound should be muted.
 	 * @return {AbstractSoundInstance} A reference to itself, intended for chaining calls.
 	 * @since 0.6.0
 	 */
-	p.setMuted = function (value) {
+	p._setMuted = function (value) {
 		if (value !== true && value !== false) {return;}
 		this._muted = value;
 		this._updateVolume();
@@ -491,11 +485,11 @@ this.createjs = this.createjs || {};
 	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/muted:property"}}{{/crossLink}} directly as a property
 	 *
 	 * @deprecated
-	 * @method getMuted
+	 * @method _getMuted
 	 * @return {Boolean} If the sound is muted.
 	 * @since 0.6.0
 	 */
-	p.getMuted = function () {
+	p._getMuted = function () {
 		return this._muted;
 	};
 
@@ -507,7 +501,7 @@ this.createjs = this.createjs || {};
 	 * @param {Number} value The pan value, between -1 (left) and 1 (right).
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
 	 */
-	p.setPan = function (value) {
+	p._setPan = function (value) {
 		if(value == this._pan) { return this; }
 		this._pan = Math.max(-1, Math.min(1, value));
 		this._updatePan();
@@ -515,13 +509,12 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/pan:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
+	 * Please use {{#crossLink "AbstractSoundInstance/pan:property"}}{{/crossLink}} directly as a property
 	 * @method getPan
+	 * @protected
 	 * @return {Number} The value of the pan, between -1 (left) and 1 (right).
 	 */
-	p.getPan = function () {
+	p._getPan = function () {
 		return this._pan;
 	};
 
@@ -532,7 +525,7 @@ this.createjs = this.createjs || {};
 	 * @method getPosition
 	 * @return {Number} The position of the playhead in the sound, in milliseconds.
 	 */
-	p.getPosition = function () {
+	p._getPosition = function () {
 		if (!this._paused && this.playState == createjs.Sound.PLAY_SUCCEEDED) {
 			this._position = this._calculateCurrentPosition();
 		}
@@ -540,14 +533,13 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/position:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
+	 * Please use {{#crossLink "AbstractSoundInstance/position:property"}}{{/crossLink}} directly as a property
 	 * @method setPosition
+	 * @protected
 	 * @param {Number} value The position to place the playhead, in milliseconds.
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
 	 */
-	p.setPosition = function (value) {
+	p._setPosition = function (value) {
 		this._position = Math.max(0, value);
 		if (this.playState == createjs.Sound.PLAY_SUCCEEDED) {
 			this._updatePosition();
@@ -556,25 +548,23 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/startTime:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
+	 * Please use {{#crossLink "AbstractSoundInstance/startTime:property"}}{{/crossLink}} directly as a property
 	 * @method getStartTime
+	 * @protected
 	 * @return {Number} The startTime of the sound instance in milliseconds.
 	 */
-	p.getStartTime = function () {
+	p._getStartTime = function () {
 		return this._startTime;
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/startTime:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
+	 * Please use {{#crossLink "AbstractSoundInstance/startTime:property"}}{{/crossLink}} directly as a property
 	 * @method setStartTime
+	 * @protected
 	 * @param {number} value The new startTime time in milli seconds.
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
 	 */
-	p.setStartTime = function (value) {
+	p._setStartTime = function (value) {
 		if (value == this._startTime) { return this; }
 		this._startTime = Math.max(0, value || 0);
 		this._updateStartTime();
@@ -582,26 +572,24 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/duration:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
+	 * Please use {{#crossLink "AbstractSoundInstance/duration:property"}}{{/crossLink}} directly as a property
 	 * @method getDuration
+	 * @protected
 	 * @return {Number} The duration of the sound instance in milliseconds.
 	 */
-	p.getDuration = function () {
+	p._getDuration = function () {
 		return this._duration;
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/duration:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
+	 * Please use {{#crossLink "AbstractSoundInstance/duration:property"}}{{/crossLink}} directly as a property
 	 * @method setDuration
+	 * @protected
 	 * @param {number} value The new duration time in milli seconds.
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
 	 * @since 0.6.0
 	 */
-	p.setDuration = function (value) {
+	p._setDuration = function (value) {
 		if (value == this._duration) { return this; }
 		this._duration = Math.max(0, value || 0);
 		this._updateDuration();
@@ -609,15 +597,14 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/playbackResource:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
+	 * Please use {{#crossLink "AbstractSoundInstance/playbackResource:property"}}{{/crossLink}} directly as a property
 	 * @method setPlayback
+	 * @protected
 	 * @param {Object} value The new playback resource.
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
 	 * @since 0.6.0
 	 **/
-	p.setPlaybackResource = function (value) {
+	p._setPlaybackResource = function (value) {
 		this._playbackResource = value;
 		if (this._duration == 0) { this._setDurationFromSource(); }
 		return this;
@@ -632,7 +619,7 @@ this.createjs = this.createjs || {};
 	 * @return {Object} playback resource used for playing audio
 	 * @since 0.6.0
 	 **/
-	p.getPlaybackResource = function () {
+	p._getPlaybackResource = function () {
 		return this._playbackResource;
 	};
 
@@ -644,19 +631,18 @@ this.createjs = this.createjs || {};
 	 * @return {number}
 	 * @since 0.6.0
 	 **/
-	p.getLoop = function () {
+	p._getLoop = function () {
 		return this._loop;
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/loop:property"}}{{/crossLink}} directly as a property,
-	 *
-	 * @deprecated
+	 * Please use {{#crossLink "AbstractSoundInstance/loop:property"}}{{/crossLink}} directly as a property
 	 * @method setLoop
+	 * @protected
 	 * @param {number} value The number of times to loop after play.
 	 * @since 0.6.0
 	 */
-	p.setLoop = function (value) {
+	p._setLoop = function (value) {
 		if(this._playbackResource != null) {
 			// remove looping
 			if (this._loop != 0 && value == 0) {
@@ -717,13 +703,13 @@ this.createjs = this.createjs || {};
 	 */
 	// OJR FlashAudioSoundInstance overwrites
 	p._beginPlaying = function (playProps) {
-		this.setPosition(playProps.offset);
-		this.setLoop(playProps.loop);
-		this.setVolume(playProps.volume);
-		this.setPan(playProps.pan);
+		this._setPosition(playProps.offset);
+		this._setLoop(playProps.loop);
+		this._setVolume(playProps.volume);
+		this._setPan(playProps.pan);
 		if (playProps.startTime != null) {
-			this.setStartTime(playProps.startTime);
-			this.setDuration(playProps.duration);
+			this._setStartTime(playProps.startTime);
+			this._setDuration(playProps.duration);
 		}
 
 		if (this._playbackResource != null && this._position < this._duration) {
