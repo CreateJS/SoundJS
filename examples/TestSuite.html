@@ -351,7 +351,7 @@
 			createjs.Sound.stop();
 		});
 		$("#muteAllSoundsBtn").click(function (event) {
-			var muted = !createjs.Sound.getMute();
+			var muted = !createjs.Sound.muted;
 			createjs.Sound.muted = muted;
 			$("#muteAllSoundsBtn").attr("value", muted ? "Unmute All Sounds" : "Mute All Sounds");
 		});
