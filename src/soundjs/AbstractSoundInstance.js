@@ -463,10 +463,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/muted:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
+	 * Please use {{#crossLink "AbstractSoundInstance/muted:property"}}{{/crossLink}} directly as a property
 	 * @method _getMuted
+	 * @protected
 	 * @return {Boolean} If the sound is muted.
 	 * @since 0.6.0
 	 */
@@ -475,10 +474,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/pan:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
+	 * Please use {{#crossLink "AbstractSoundInstance/pan:property"}}{{/crossLink}} directly as a property
 	 * @method setPan
+	 * @protected
 	 * @param {Number} value The pan value, between -1 (left) and 1 (right).
 	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
 	 */
@@ -500,10 +498,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/position:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
+	 * Please use {{#crossLink "AbstractSoundInstance/position:property"}}{{/crossLink}} directly as a property
 	 * @method getPosition
+	 * @protected
 	 * @return {Number} The position of the playhead in the sound, in milliseconds.
 	 */
 	p._getPosition = function () {
@@ -592,10 +589,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/playbackResource:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
+	 * Please use {{#crossLink "AbstractSoundInstance/playbackResource:property"}}{{/crossLink}} directly as a property
 	 * @method setPlayback
+	 * @protected
 	 * @param {Object} value The new playback resource.
 	 * @return {Object} playback resource used for playing audio
 	 * @since 0.6.0
@@ -605,10 +601,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/loop:property"}}{{/crossLink}} directly as a property
-	 *
-	 * @deprecated
+	 * Please use {{#crossLink "AbstractSoundInstance/loop:property"}}{{/crossLink}} directly as a property
 	 * @method getLoop
+	 * @protected
 	 * @return {number}
 	 * @since 0.6.0
 	 **/
