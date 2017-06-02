@@ -314,31 +314,12 @@ this.createjs = this.createjs || {};
 	 * The parameters for this method are deprecated in favor of a single parameter that is an Object or {{#crossLink "PlayPropsConfig"}}{{/crossLink}}.
 	 *
 	 * @method play
-	 * @param {String | Object} [interrupt="none"|options] <b>This parameter will be renamed playProps in the next release.</b><br />
-	 * This parameter can be an instance of {{#crossLink "PlayPropsConfig"}}{{/crossLink}} or an Object that contains any or all optional properties by name,
-	 * including: interrupt, delay, offset, loop, volume, pan, startTime, and duration (see the above code sample).
-	 * <br /><strong>OR</strong><br />
-	 * <b>Deprecated</b> How to interrupt any currently playing instances of audio with the same source,
-	 * if the maximum number of instances of the sound are already playing. Values are defined as <code>INTERRUPT_TYPE</code>
-	 * constants on the Sound class, with the default defined by {{#crossLink "Sound/defaultInterruptBehavior:property"}}{{/crossLink}}.
-	 * @param {Number} [delay=0] <b>Deprecated</b> The amount of time to delay the start of audio playback, in milliseconds.
-	 * @param {Number} [offset=0] <b>Deprecated</b> The offset from the start of the audio to begin playback, in milliseconds.
-	 * @param {Number} [loop=0] <b>Deprecated</b> How many times the audio loops when it reaches the end of playback. The default is 0 (no
-	 * loops), and -1 can be used for infinite playback.
-	 * @param {Number} [volume=1] <b>Deprecated</b> The volume of the sound, between 0 and 1. Note that the master volume is applied
-	 * against the individual volume.
-	 * @param {Number} [pan=0] <b>Deprecated</b> The left-right pan of the sound (if supported), between -1 (left) and 1 (right).
-	 * Note that pan is not supported for HTML Audio.
+	 * @param {Object | PlayPropsConfig} props A PlayPropsConfig instance, or an object that contains the parameters to
+	 * play a sound. See the {{#crossLink "PlayPropsConfig"}}{{/crossLink}} for more info.
 	 * @return {AbstractSoundInstance} A reference to itself, intended for chaining calls.
 	 */
-	p.play = function (interrupt, delay, offset, loop, volume, pan) {
-		var playProps;
-		if (interrupt instanceof Object || interrupt instanceof createjs.PlayPropsConfig) {
-			playProps = createjs.PlayPropsConfig.create(interrupt);
-		} else {
-			playProps = createjs.PlayPropsConfig.create({interrupt:interrupt, delay:delay, offset:offset, loop:loop, volume:volume, pan:pan});
-		}
-
+	p.play = function (props) {
+		var playProps = createjs.PlayPropsConfig.create(props);
 		if (this.playState == createjs.Sound.PLAY_SUCCEEDED) {
 			this.applyPlayProps(playProps);
 			if (this._paused) {	this._setPaused(false); }

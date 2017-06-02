@@ -551,7 +551,7 @@ this.createjs = this.createjs || {};
 
 // Class Private properties
 	/**
-	 * Determines if the plugins have been registered. If false, the first call to play() will instantiate the default
+	 * Determines if the plugins have been registered. If false, the first call to {{#crossLink "play"}}{{/crossLink}} will instantiate the default
 	 * plugins ({{#crossLink "WebAudioPlugin"}}{{/crossLink}}, followed by {{#crossLink "HTMLAudioPlugin"}}{{/crossLink}}).
 	 * If plugins have been registered, but none are applicable, then sound playback will fail.
 	 * @property _pluginsRegistered
@@ -1214,11 +1214,12 @@ this.createjs = this.createjs || {};
 	 Static API.
 	 --------------- */
 	/**
-	 * Play a sound and get a {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} to control. If the sound fails to play, a
-	 * AbstractSoundInstance will still be returned, and have a playState of {{#crossLink "Sound/PLAY_FAILED:property"}}{{/crossLink}}.
-	 * Note that even on sounds with failed playback, you may still be able to call AbstractSoundInstance {{#crossLink "AbstractSoundInstance/play"}}{{/crossLink}},
-	 * since the failure could be due to lack of available channels. If the src does not have a supported extension or
-	 * if there is no available plugin, a default AbstractSoundInstance will be returned which will not play any audio, but will not generate errors.
+	 * Play a sound and get a {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} to control. If the sound fails to
+	 * play, an AbstractSoundInstance will still be returned, and have a playState of {{#crossLink "Sound/PLAY_FAILED:property"}}{{/crossLink}}.
+	 * Note that even on sounds with failed playback, you may still be able to call the {{#crossLink "AbstractSoundInstance/play"}}{{/crossLink}},
+	 * method, since the failure could be due to lack of available channels. If the src does not have a supported
+	 * extension or if there is no available plugin, a default AbstractSoundInstance will still be returned, which will
+	 * not play any audio, but will not generate errors.
 	 *
 	 * <h4>Example</h4>
 	 *
@@ -1230,40 +1231,19 @@ this.createjs = this.createjs || {};
 	 *      	var myInstance = createjs.Sound.play("myID", {interrupt: createjs.Sound.INTERRUPT_ANY, loop:-1});
 	 *      }
 	 *
-	 * NOTE to create an audio sprite that has not already been registered, both startTime and duration need to be set.
+	 * NOTE: To create an audio sprite that has not already been registered, both startTime and duration need to be set.
 	 * This is only when creating a new audio sprite, not when playing using the id of an already registered audio sprite.
-	 *
-	 * <b>Parameters Deprecated</b><br />
-	 * The parameters for this method are deprecated in favor of a single parameter that is an Object or {{#crossLink "PlayPropsConfig"}}{{/crossLink}}.
 	 *
 	 * @method play
 	 * @param {String} src The src or ID of the audio.
-	 * @param {String | Object} [interrupt="none"|options] <b>This parameter will be renamed playProps in the next release.</b><br />
-	 * This parameter can be an instance of {{#crossLink "PlayPropsConfig"}}{{/crossLink}} or an Object that contains any or all optional properties by name,
-	 * including: interrupt, delay, offset, loop, volume, pan, startTime, and duration (see the above code sample).
-	 * <br /><strong>OR</strong><br />
-	 * <b>Deprecated</b> How to interrupt any currently playing instances of audio with the same source,
-	 * if the maximum number of instances of the sound are already playing. Values are defined as <code>INTERRUPT_TYPE</code>
-	 * constants on the Sound class, with the default defined by {{#crossLink "Sound/defaultInterruptBehavior:property"}}{{/crossLink}}.
-	 * @param {Number} [delay=0] <b>Deprecated</b> The amount of time to delay the start of audio playback, in milliseconds.
-	 * @param {Number} [offset=0] <b>Deprecated</b> The offset from the start of the audio to begin playback, in milliseconds.
-	 * @param {Number} [loop=0] <b>Deprecated</b> How many times the audio loops when it reaches the end of playback. The default is 0 (no
-	 * loops), and -1 can be used for infinite playback.
-	 * @param {Number} [volume=1] <b>Deprecated</b> The volume of the sound, between 0 and 1. Note that the master volume is applied
-	 * against the individual volume.
-	 * @param {Number} [pan=0] <b>Deprecated</b> The left-right pan of the sound (if supported), between -1 (left) and 1 (right).
-	 * @param {Number} [startTime=null] <b>Deprecated</b> To create an audio sprite (with duration), the initial offset to start playback and loop from, in milliseconds.
-	 * @param {Number} [duration=null] <b>Deprecated</b> To create an audio sprite (with startTime), the amount of time to play the clip for, in milliseconds.
-	 * @return {AbstractSoundInstance} A {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} that can be controlled after it is created.
+	 * @param {Object | PlayPropsConfig} props A PlayPropsConfig instance, or an object that contains the parameters to
+	 * play a sound. See the {{#crossLink "PlayPropsConfig"}}{{/crossLink}} for more info.
+	 * @return {AbstractSoundInstance} A {{#crossLink "AbstractSoundInstance"}}{{/crossLink}} that can be controlled
+	 * after it is created.
 	 * @static
 	 */
-	s.play = function (src, interrupt, delay, offset, loop, volume, pan, startTime, duration) {
-		var playProps;
-		if (interrupt instanceof Object || interrupt instanceof createjs.PlayPropsConfig) {
-			playProps = createjs.PlayPropsConfig.create(interrupt);
-		} else {
-			playProps = createjs.PlayPropsConfig.create({interrupt:interrupt, delay:delay, offset:offset, loop:loop, volume:volume, pan:pan, startTime:startTime, duration:duration});
-		}
+	s.play = function (props) {
+		var playProps = createjs.PlayPropsConfig.create(props);
 		var instance = s.createInstance(src, playProps.startTime, playProps.duration);
 		var ok = s._playInstance(instance, playProps);
 		if (!ok) {instance._playFailed();}
