@@ -153,6 +153,85 @@ this.createjs = this.createjs || {};
 		});
 
 		/**
+		 * The filter frequency of the sound, between 0 and half the sample rate. Note that filter is not supported by HTML Audio.
+		 *
+		 * @property filterFrequency
+		 * @type {Number}
+		 * @default 22050
+		 */
+		this._filterFrequency =  22050;
+		Object.defineProperty(this, "filterFrequency", {
+			get: this.getFilterFrequency,
+			set: this.setFilterFrequency
+		});
+
+		/**
+		 * The filter quality factor of the sound, between 0.0001 and 1000. Note that filter is not supported by HTML Audio.
+		 *
+		 * @property filterFrequency
+		 * @type {Number}
+		 * @default 1
+		 */
+		this._filterQ =  1;
+		Object.defineProperty(this, "filterQ", {
+			get: this.getFilterQ,
+			set: this.setFilterQ
+		});
+
+		/**
+		 * The filter type, one of the following: "lowpass" "highpass" bandpass". Note that filter is not supported by HTML Audio.
+		 *
+		 * @property filterType
+		 * @type {String}
+		 * @default "lowpass"
+		 */
+		this._filterType =  "lowpass";
+		Object.defineProperty(this, "filterType", {
+			get: this.getFilterType,
+			set: this.setFilterType
+		});
+
+		/**
+		 * The filter detune value in cents. Note that filter is not supported by HTML Audio.
+		 *
+		 * @property filterDetune
+		 * @type {Number}
+		 * @default 0
+		 */
+		this._filterDetune =  0;
+		Object.defineProperty(this, "filterDetune", {
+			get: this.getFilterDetune,
+			set: this.setFilterDetune
+		});
+
+		/**
+		 * The distortion value in amount. Note that distortion is not supported by HTML Audio.
+		 *
+		 * @property distortionAmount
+		 * @type {Number}
+		 * @default 0
+		 */
+		this._distortionAmount =  0;
+		Object.defineProperty(this, "distortionAmount", {
+			get: this.getDistortionAmount,
+			set: this.setDistortionAmount
+		});
+
+		/**
+		 * The convolver buffer to use on the convolver node. This can be an audioBuffer or a filepath, and will be handled appropriately depending on which.
+		 * Note that convolver is not supported by HTML Audio.
+		 *
+		 * @property convolverBuffer
+		 * @type {String} || {AudioBuffer}
+		 * @default null
+		 */
+		this._convolverBuffer =  null;
+		Object.defineProperty(this, "convolverBuffer", {
+			get: this.getConvolverBuffer,
+			set: this.setConvolverBuffer
+		});
+
+		/**
 		 * Audio sprite property used to determine the starting offset.
 		 * @property startTime
 		 * @type {Number}
@@ -528,6 +607,185 @@ this.createjs = this.createjs || {};
 	p.getPan = function () {
 		return this._pan;
 	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterFrequency:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method setFilterFrequency
+	 * @param {Number} value The filter frequency value, between 0 and half the sample rate.
+	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
+	 */
+	p.setFilterFrequency = function (value) {
+		if(value == this._filterFrequency) { return this; }
+		this._filterFrequency = value;
+		this._updateFilter();
+		return this;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterFrequency:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method getFilterFrequency
+	 * @return {Number} The value of the filter frequency, between 0 and half the sample rate.
+	 */
+	p.getFilterFrequency = function () {
+		return this._filterFrequency;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterQ:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method setFilterQ
+	 * @param {Number} value The filter quality factor, between 0.0001 and 1000.
+	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
+	 */
+	p.setFilterQ = function (value) {
+		if(value == this._filterQ) { return this; }
+		this._filterQ = value;
+		this._updateFilter();
+		return this;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterQ:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method getFilterQ
+	 * @return {Number} The value of the filter frequency, between 0.0001 and 1000.
+	 */
+	p.getFilterQ = function () {
+		return this._filterQ;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterType:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method setFilterType
+	 * @param {String} The filter type, one of the following: "lowpass" "highpass" bandpass".
+	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
+	 */
+	p.setFilterType = function (value) {
+		if(value == this._filterType) { return this; }
+
+		var acceptedTypes = {
+			"lowpass" : true,
+			"highpass" : true,
+			"bandpass" : true
+		};
+
+		if (typeof acceptedTypes[value] === 'undefined') { return false; }
+
+		this._filterType = value;
+		this._updateFilter();
+		return this;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterType:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method getFilterType
+	 * @return {String} The filter type, one of the following: "lowpass" "highpass" bandpass".
+	 */
+	p.getFilterType = function () {
+		return this._filterType;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterDetune:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method setFilterDetune
+	 * @param {Number} The filter detune value in cents.
+	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
+	 */
+	p.setFilterDetune = function (value) {
+		if(value == this._filterDetune) { return this; }
+
+		this._filterDetune= value;
+		this._updateFilter();
+		return this;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/filterDetune:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method getFilterDetune
+	 * @return {Number} The filter detune value in cents.
+	 */
+	p.getFilterDetune = function () {
+		return this._filterDetune;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/distortionAmount:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method setDistortionAmount
+	 * @param {Number} The distortion value in amount.
+	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
+	 */
+	p.setDistortionAmount = function (value) {
+		if(value == this._distortionAmount) { return this; }
+
+		this._distortionAmount = value;
+		this._updateDistortion();
+		return this;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/distortionAmount:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method getDistortionAmount
+	 * @return {Number} The distortion value in amount.
+	 */
+	p.getDistortionAmount = function () {
+		return this._distortionAmount;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/convolverBuffer:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method setConvolverBuffer
+	 * @param {String} The filepath to an impulse response WAV || {AudioBuffer} The audio buffer to use as the convoler's buffer.
+	 * @return {AbstractSoundInstance} Returns reference to itself for chaining calls
+	 */
+	p.setConvolverBuffer = function (buffer) {
+		if (typeof buffer === 'string') {
+			//if a filepath is passed, must import it as an arraybuffer and decode
+			this._getConvolverBufferFromFilepath(buffer);
+		}
+		else {
+			if (typeof AudioBuffer !== 'undefined' && buffer instanceof AudioBuffer) {
+				//audio buffer is passed, set it directly
+				this._convolverBuffer = buffer;
+				this._updateConvolver();
+			}
+			else {
+				return false;
+			}
+		}
+		return this;
+	};
+
+	/**
+	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/convolverBuffer:property"}}{{/crossLink}} directly as a property
+	 *
+	 * @deprecated
+	 * @method getConvolverBuffer
+	 * @return {AudioBuffer} The audio buffer being used as the convolver's buffer.
+	 */
+	p.getConvolverBuffer = function () {
+		return this._convolverBuffer;
+	};
+
 
 	/**
 	 * DEPRECATED, please use {{#crossLink "AbstractSoundInstance/position:property"}}{{/crossLink}} directly as a property
