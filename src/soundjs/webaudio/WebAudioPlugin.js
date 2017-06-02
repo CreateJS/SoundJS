@@ -229,6 +229,12 @@ this.createjs = this.createjs || {};
 		source.buffer = s._scratchBuffer;
 		source.connect(s.context.destination);
 		source.start(0, 0, 0);
+
+
+		//Chrome 55 fix?!
+        if (source.context.state === 'suspended') {
+            source.context.resume();
+        }
 	};
 
 
@@ -366,8 +372,14 @@ this.createjs = this.createjs || {};
 	 * @private
 	 */
 	s._unlock = function() {
+
+		if(s.context.state === 'suspended') {
+			s.context.resume();
+		}
+
 		if (s._unlocked) { return; }
 		s.playEmptySound();
+
 		if (s.context.state == "running") {
 			document.removeEventListener("mousedown", s._unlock, true);
 			document.removeEventListener("touchend", s._unlock, true);
