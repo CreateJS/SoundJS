@@ -584,7 +584,7 @@ this.createjs = this.createjs || {};
 	 **/
 	p._setPlaybackResource = function (value) {
 		this._playbackResource = value;
-		if (this._duration == 0) { this._setDurationFromSource(); }
+		if (this._duration == 0 && this._playbackResource) { this._setDurationFromSource(); }
 		return this;
 	};
 
