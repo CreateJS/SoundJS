@@ -275,6 +275,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Handles internal preload completion.
 	 * @method _handlePreloadComplete
+	 * @param event
 	 * @protected
 	 */
 	p._handlePreloadComplete = function (event) {
@@ -289,7 +290,7 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
-	 * Handles internal preload erros
+	 * Handles internal preload errors
 	 * @method _handlePreloadError
 	 * @param event
 	 * @protected
