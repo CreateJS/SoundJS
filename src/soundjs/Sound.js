@@ -1242,7 +1242,7 @@ this.createjs = this.createjs || {};
 	 * after it is created.
 	 * @static
 	 */
-	s.play = function (props) {
+	s.play = function (src, props) {
 		var playProps = createjs.PlayPropsConfig.create(props);
 		var instance = s.createInstance(src, playProps.startTime, playProps.duration);
 		var ok = s._playInstance(instance, playProps);
@@ -1279,7 +1279,7 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.createInstance = function (src, startTime, duration) {
-		if (!s.initializeDefaultPlugins()) {return new createjs.DefaultSoundInstance(src, startTime, duration);}
+		if (!s.initializeDefaultPlugins()) { return new createjs.DefaultSoundInstance(src, startTime, duration); }
 
 		var defaultPlayProps = s._defaultPlayPropsHash[src];	// for audio sprites, which create and store defaults by id
 		src = s._getSrcById(src);
@@ -1289,11 +1289,11 @@ this.createjs = this.createjs || {};
 		var instance = null;
 		if (details != null && details.src != null) {
 			SoundChannel.create(details.src);
-			if (startTime == null) {startTime = src.startTime;}
+			if (startTime == null) { startTime = src.startTime; }
 			instance = s.activePlugin.create(details.src, startTime, duration || src.duration);
 
 			defaultPlayProps = defaultPlayProps || s._defaultPlayPropsHash[details.src];
-			if(defaultPlayProps) {
+			if (defaultPlayProps) {
 				instance.applyPlayProps(defaultPlayProps);
 			}
 		} else {
