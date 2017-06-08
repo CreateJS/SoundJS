@@ -1,12 +1,18 @@
 Version NEXT [Not yet released]
 ****************************************************************************************************
-* Changed XHR error conditions to only include 400-599. Specifically removed status=0 as an error,
+CRITICAL
+- removed deprecated properties, particularly getValue/setValue properties, in favour of .value
+	this particularly affects instance and global properties like mute, volume, pan, etc.
+
+OTHER
+* changed XHR error conditions to only include 400-599. Specifically removed status=0 as an error,
   	which affects compiled applications.
-* Fixed issue where values don't get appended to GET requests in XHRRequest
-* Added "touchstart" as an audio unlocking event, which seems to be the best for iOS
-* Checked if preload candidates are videos, since SoundJS mistakenly handles these when they are mp4.
-* Added missing Methods and Types classes from recent PreloadJS changes
-* Handled case where audio duration returned < 0, resulting in a DOM Error
+* fixed issue where values don't get appended to GET requests in XHRRequest
+* added "touchstart" as an audio unlocking event, which seems to be the best for iOS
+* checked if preload candidates are videos, since SoundJS mistakenly handles these when they are mp4.
+* added missing Methods and Types classes from recent PreloadJS changes
+* handled case where audio duration returned < 0, resulting in a DOM Error
+* fixed issue where new instances wouldn't get the global mute/volume (thanks @PythonFanboy)
 
 
 Version 0.6.2 [November 26, 2015]
