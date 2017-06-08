@@ -216,7 +216,7 @@ this.createjs = this.createjs || {};
 
 		clearTimeout(this._soundCompleteTimeout);
 
-		this._playbackStartTime = 0;	// This is used by getPosition
+		this._playbackStartTime = 0;	// This is used by _getPosition
 	};
 
 	/**

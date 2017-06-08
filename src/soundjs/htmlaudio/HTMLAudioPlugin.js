@@ -235,7 +235,7 @@ this.createjs = this.createjs || {};
 
 	p.create = function (src, startTime, duration) {
 		var si = this.AbstractPlugin_create(src, startTime, duration);
-		si.setPlaybackResource(null);
+		si.playbackResource = null;
 		return si;
 	};
 

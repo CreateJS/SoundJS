@@ -145,13 +145,13 @@ this.createjs = this.createjs || {};
 	p._beginPlaying = function (playProps) {
 		if (s._flash == null) { return false; }
 
-		this.setPosition(playProps.offset);
-		this.setLoop(playProps.loop);
-		this.setVolume(playProps.volume);
-		this.setPan(playProps.pan);
+		this.position = playProps.offset;
+		this.loop = playProps.loop;
+		this.volume = playProps.volume;
+		this.pan = playProps.pan;
 		if (playProps.startTime != null) {
-			this.setStartTime(playProps.startTime);
-			this.setDuration(playProps.duration);
+			this.startTime = playProps.startTime;
+			this.duration = playProps.duration;
 		}
 		this._paused = false;
 
