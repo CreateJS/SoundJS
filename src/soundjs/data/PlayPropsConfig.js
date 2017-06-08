@@ -153,12 +153,12 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.create = function (value) {
-		if (value instanceof s || value instanceof Object) {
+		if (value == null || value instanceof s || value instanceof Object) {
 			var ppc = new createjs.PlayPropsConfig();
 			ppc.set(value);
 			return ppc;
-		} else {
-			throw new Error("Type not recognized.");
+		} else if (value == null) {
+			throw new Error("PlayProps configuration not recognized.");
 		}
 	};
 
@@ -175,7 +175,9 @@ this.createjs = this.createjs || {};
 	 * @return {PlayPropsConfig} Returns the instance the method is called on (useful for chaining calls.)
 	*/
 	p.set = function(props) {
-		for (var n in props) { this[n] = props[n]; }
+		if (props != null) {
+			for (var n in props) { this[n] = props[n]; }
+		}
 		return this;
 	};
 

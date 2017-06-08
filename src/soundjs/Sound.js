@@ -1370,7 +1370,7 @@ this.createjs = this.createjs || {};
 		var defaultPlayProps = s._defaultPlayPropsHash[instance.src] || {};
 		if (playProps.interrupt == null) {playProps.interrupt = defaultPlayProps.interrupt || s.defaultInterruptBehavior};
 		if (playProps.delay == null) {playProps.delay = defaultPlayProps.delay || 0;}
-		if (playProps.offset == null) {playProps.offset = instance.getPosition();}
+		if (playProps.offset == null) {playProps.offset = instance.position;}
 		if (playProps.loop == null) {playProps.loop = instance.loop;}
 		if (playProps.volume == null) {playProps.volume = instance.volume;}
 		if (playProps.pan == null) {playProps.pan = instance.pan;}
@@ -1698,8 +1698,8 @@ this.createjs = this.createjs || {};
 			}
 
 			// Audio is a better candidate than the current target, according to playhead
-			if ((interrupt == Sound.INTERRUPT_EARLY && target.getPosition() < replacement.getPosition()) ||
-				(interrupt == Sound.INTERRUPT_LATE && target.getPosition() > replacement.getPosition())) {
+			if ((interrupt == Sound.INTERRUPT_EARLY && target.position < replacement.position) ||
+				(interrupt == Sound.INTERRUPT_LATE && target.position > replacement.position)) {
 					replacement = target;
 			}
 		}
