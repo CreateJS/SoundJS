@@ -185,6 +185,14 @@ this.createjs = this.createjs || {};
 	 */
 	s._unlocked = false;
 
+	/**
+	 * The default sample rate used when checking for iOS compatibility. See {{#crossLink "WebAudioPlugin/_createAudioContext"}}{{/crossLink}}.
+	 * @property DEFAULT_SAMPLE_REATE
+	 * @type {number}
+	 * @default 44100
+	 * @static
+	 */
+	s.DEFAULT_SAMPLE_RATE = 44100;
 
 // Static Public Methods
 	/**
@@ -276,13 +284,8 @@ this.createjs = this.createjs || {};
 		if (t.canPlayType == null) {return null;}
 
 		if (s.context == null) {
-			if (window.AudioContext) {
-				s.context = new AudioContext();
-			} else if (window.webkitAudioContext) {
-				s.context = new webkitAudioContext();
-			} else {
-				return null;
-			}
+			s.context = s._createAudioContext();
+			if (s.context == null) { return null; }
 		}
 		if (s._scratchBuffer == null) {
 			s._scratchBuffer = s.context.createBuffer(1, 1, 22050);
@@ -297,7 +300,6 @@ this.createjs = this.createjs || {};
 			document.addEventListener("touchstart", s._unlock, true);
 			document.addEventListener("touchend", s._unlock, true);
 		}
-
 
 		s._capabilities = {
 			panning:true,
@@ -320,6 +322,42 @@ this.createjs = this.createjs || {};
 			s._capabilities.panning = false;
 		}
 	};
+
+	/**
+	 * Create an audio context for the sound.
+	 *
+	 * This method handles both vendor prefixes (specifically webkit support), as well as a case on iOS where
+	 * audio played with a different sample rate may play garbled when first started. The default sample rate is
+	 * 44,100, however it can be changed using the {{#crossLink "WebAudioPlugin/DEFAULT_SAMPLE_RATE:property"}}{{/crossLink}}.
+	 * @method _createAudioContext
+	 * @return {AudioContext | webkitAudioContext}
+	 * @private
+	 * @static
+	 * @since 1.0.0
+	 */
+	s._createAudioContext = function() {
+		// Slightly modified version of https://github.com/Jam3/ios-safe-audio-context
+		// Resolves issues with first-run contexts playing garbled on iOS.
+		var AudioCtor = (window.AudioContext || window.webkitAudioContext),
+				context = new AudioCtor();
+
+		// Check if hack is necessary. Only occurs in iOS6+ devices
+		// and only when you first boot the iPhone, or play a audio/video
+		// with a different sample rate
+		if (/(iPhone|iPad)/i.test(navigator.userAgent)
+				&& context.sampleRate !== s.DEFAULT_SAMPLE_RATE) {
+			var buffer = context.createBuffer(1, 1, s.DEFAULT_SAMPLE_RATE),
+					dummy = context.createBufferSource();
+			dummy.buffer = buffer;
+			dummy.connect(context.destination);
+			dummy.start(0);
+			dummy.disconnect();
+			context.close() // dispose old context
+
+			context = new AudioCtor();
+		}
+		return context;
+	}
 
 	/**
 	 * Set up compatibility if only deprecated web audio calls are supported.
