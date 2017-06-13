@@ -55,7 +55,7 @@ this.createjs = this.createjs || {};
 	 * @property _tags
 	 * @type {{}}
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._tags = {};
 
@@ -64,7 +64,7 @@ this.createjs = this.createjs || {};
 	 * @property _tagPool
 	 * @type {TagPool}
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._tagPool = new TagPool();
 
@@ -72,7 +72,7 @@ this.createjs = this.createjs || {};
 	 * A hash lookup of if a base audio tag is available, indexed by the audio source
 	 * @property _tagsUsed
 	 * @type {{}}
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._tagUsed = {};

@@ -120,7 +120,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default canplaythrough
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._AUDIO_READY = "canplaythrough";
 
@@ -130,7 +130,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default ended
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._AUDIO_ENDED = "ended";
 
@@ -140,7 +140,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default seeked
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._AUDIO_SEEKED = "seeked";
 
@@ -150,7 +150,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default stalled
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._AUDIO_STALLED = "stalled";
 
@@ -161,7 +161,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default timeupdate
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._TIME_UPDATE = "timeupdate";
 
@@ -171,7 +171,7 @@ this.createjs = this.createjs || {};
 	 * of the available properties.
 	 * @property _capabilities
 	 * @type {Object}
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._capabilities = null;
@@ -195,7 +195,7 @@ this.createjs = this.createjs || {};
 	 * method for an overview of plugin capabilities.
 	 * @method _generateCapabilities
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._generateCapabilities = function () {
 		if (s._capabilities != null) {return;}

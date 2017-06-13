@@ -112,7 +112,7 @@ this.createjs = this.createjs || {};
 	 * @property _capabilities
 	 * @type {Object}
 	 * @default null
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	AbstractPlugin._capabilities = null;

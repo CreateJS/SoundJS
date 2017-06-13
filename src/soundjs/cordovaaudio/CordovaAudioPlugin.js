@@ -93,7 +93,7 @@ this.createjs = this.createjs || {};
 	 * of the available properties.
 	 * @property _capabilities
 	 * @type {Object}
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._capabilities = null;
@@ -117,7 +117,7 @@ this.createjs = this.createjs || {};
 	 * method for an overview of plugin capabilities.
 	 * @method _generateCapabilities
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._generateCapabilities = function () {
 		if (s._capabilities != null || !(window.cordova || window.PhoneGap || window.phonegap) || !window.Media) {return;}

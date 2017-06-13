@@ -69,7 +69,7 @@ this.createjs = this.createjs || {};
 	 * A reference to the Flash instance that gets created.
 	 * @property flash
 	 * @type {Object | Embed}
-	 * @protected
+	 * @private
 	 */
 	s._flash = null;
 
@@ -77,7 +77,7 @@ this.createjs = this.createjs || {};
 	 * A list of loader instances that tried to load before _flash was set
 	 * @property _preloadInstances
 	 * @type {Array}
-	 * @protected
+	 * @private
 	 */
 	s._preloadInstances = [];
 

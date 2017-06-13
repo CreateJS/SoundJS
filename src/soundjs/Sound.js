@@ -384,7 +384,7 @@ this.createjs = this.createjs || {};
 	 * @property FILE_PATTERN
 	 * @type {RegExp}
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s.FILE_PATTERN = /^(?:(\w+:)\/{2}(\w+(?:\.\w+)*\/?))?([/.]*?(?:[^?]+)?\/)?((?:[^/?]+)\.(\w+))(?:\?(\S+)?)?$/;
 
@@ -558,7 +558,7 @@ this.createjs = this.createjs || {};
 	 * @type {Boolean}
 	 * @default false
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._pluginsRegistered = false;
 
@@ -567,7 +567,7 @@ this.createjs = this.createjs || {};
 	 * @property _lastID
 	 * @type {Number}
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._lastID = 0;
 
@@ -579,7 +579,7 @@ this.createjs = this.createjs || {};
 	 * method.
 	 * @property _instances
 	 * @type {Array}
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._instances = [];
@@ -588,7 +588,7 @@ this.createjs = this.createjs || {};
 	 * An object hash storing objects with sound sources, startTime, and duration via there corresponding ID.
 	 * @property _idHash
 	 * @type {Object}
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._idHash = {};
@@ -599,7 +599,7 @@ this.createjs = this.createjs || {};
 	 * and data.
 	 * @property _preloadHash
 	 * @type {Object}
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._preloadHash = {};
@@ -609,7 +609,7 @@ this.createjs = this.createjs || {};
 	 * {{#crossLink "Sound/registerSound"}}{{/crossLink}} and {{#crossLink "Sound/registerSounds"}}{{/crossLink}}.
 	 * @property _defaultPlayPropsHash
 	 * @type {Object}
-	 * @protected
+	 * @private
 	 * @static
 	 * @since 0.6.1
 	 */
@@ -666,7 +666,7 @@ this.createjs = this.createjs || {};
 	 *      <li>types: A list of file types that are supported by Sound (currently supports "sound").</li>
 	 *      <li>extensions: A list of file extensions that are supported by Sound (see {{#crossLink "Sound/SUPPORTED_EXTENSIONS:property"}}{{/crossLink}}).</li></ul>
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s.getPreloadHandlers = function () {
 		return {
@@ -680,7 +680,7 @@ this.createjs = this.createjs || {};
 	 * Used to dispatch fileload events from internal loading.
 	 * @method _handleLoadComplete
 	 * @param event A loader event.
-	 * @protected
+	 * @private
 	 * @static
 	 * @since 0.6.0
 	 */
@@ -707,7 +707,7 @@ this.createjs = this.createjs || {};
 	/**
 	 * Used to dispatch error events from internal preloading.
 	 * @param event
-	 * @protected
+	 * @private
 	 * @since 0.6.0
 	 * @static
 	 */
@@ -818,7 +818,7 @@ this.createjs = this.createjs || {};
 	 * @method initLoad
 	 * @param {Object} src The object to load.
 	 * @return {Object|AbstractLoader} An instance of AbstractLoader.
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s.initLoad = function (loadItem) {
@@ -1154,7 +1154,7 @@ this.createjs = this.createjs || {};
 	 * @param {String} value The path to an audio source.
 	 * @return {Object} A formatted object that can be registered with the {{#crossLink "Sound/activePlugin:property"}}{{/crossLink}}
 	 * and returned to a preloader like <a href="http://preloadjs.com" target="_blank">PreloadJS</a>.
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._parsePath = function (value) {
@@ -1184,7 +1184,7 @@ this.createjs = this.createjs || {};
 	 * @param {Object} value The paths to an audio source, indexed by extension type.
 	 * @return {Object} A formatted object that can be registered with the {{#crossLink "Sound/activePlugin:property"}}{{/crossLink}}
 	 * and returned to a preloader like <a href="http://preloadjs.com" target="_blank">PreloadJS</a>.
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._parseSrc = function (value) {
@@ -1363,7 +1363,7 @@ this.createjs = this.createjs || {};
 	 * @param {PlayPropsConfig} playProps A PlayPropsConfig object.
 	 * @return {Boolean} If the sound can start playing. Sounds that fail immediately will return false. Sounds that
 	 * have a delay will return true, but may still fail to play.
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._playInstance = function (instance, playProps) {
@@ -1399,7 +1399,7 @@ this.createjs = this.createjs || {};
 	 * @param {PlayPropsConfig} playProps A PlayPropsConfig object.
 	 * @return {Boolean} If the sound can start playing. If there are no available channels, or the instance fails to
 	 * start, this will return false.
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._beginPlaying = function (instance, playProps) {
@@ -1421,7 +1421,7 @@ this.createjs = this.createjs || {};
 	 * @method _getSrcById
 	 * @param {String} value The ID the sound was registered with.
 	 * @return {String} The source of the sound if it has been registered with this ID or the value that was passed in.
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._getSrcById = function (value) {
@@ -1434,7 +1434,7 @@ this.createjs = this.createjs || {};
 	 * instances themselves.
 	 * @method _playFinished
 	 * @param {AbstractSoundInstance} instance The instance that finished playback.
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._playFinished = function (instance) {

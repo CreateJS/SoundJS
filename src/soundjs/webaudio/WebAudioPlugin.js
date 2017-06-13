@@ -134,7 +134,7 @@ this.createjs = this.createjs || {};
 	 * @property _capabilities
 	 * @type {Object}
 	 * @default null
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._capabilities = null;
@@ -143,7 +143,7 @@ this.createjs = this.createjs || {};
 	 * Value to set panning model to equal power for WebAudioSoundInstance.  Can be "equalpower" or 0 depending on browser implementation.
 	 * @property _panningModel
 	 * @type {Number / String}
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._panningModel = "equalpower";
@@ -170,7 +170,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * @property _scratchBuffer
 	 * @type {AudioBuffer}
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	 s._scratchBuffer = null;
@@ -234,7 +234,7 @@ this.createjs = this.createjs || {};
 	 * @method _isFileXHRSupported
 	 * @return {Boolean} If XHR is supported.
 	 * @since 0.4.2
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._isFileXHRSupported = function() {
@@ -267,7 +267,7 @@ this.createjs = this.createjs || {};
 	 * method for an overview of plugin capabilities.
 	 * @method _generateCapabilities
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._generateCapabilities = function () {
 		if (s._capabilities != null) {return;}
@@ -329,7 +329,7 @@ this.createjs = this.createjs || {};
 	 *
 	 * @method _compatibilitySetUp
 	 * @static
-	 * @protected
+	 * @private
 	 * @since 0.4.2
 	 */
 	s._compatibilitySetUp = function() {

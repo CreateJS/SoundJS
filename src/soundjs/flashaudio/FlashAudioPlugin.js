@@ -183,7 +183,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default registerflashid
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._REG_FLASHID = "registerflashid";
 
@@ -193,7 +193,7 @@ this.createjs = this.createjs || {};
 	 * @type {String}
 	 * @default unregisterflashid
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._UNREG_FLASHID = "unregisterflashid";
 
@@ -203,7 +203,7 @@ this.createjs = this.createjs || {};
 	 * capabilities.
 	 * @property _capabilities
 	 * @type {Object}
-	 * @protected
+	 * @private
 	 * @static
 	 */
 	s._capabilities = null;
@@ -240,7 +240,7 @@ this.createjs = this.createjs || {};
 	 * method for an overview of plugin capabilities.
 	 * @method _generateCapabilities
 	 * @static
-	 * @protected
+	 * @private
 	 */
 	s._generateCapabilities = function () {
 		if (s._capabilities != null) {return;}
