@@ -88,7 +88,7 @@
 	 * if it is an unusual extension.
 	 * @method getTypeByExtension
 	 * @param {String} extension The file extension to use to determine the load type.
-	 * @return {String} The determined load type (for example, <code>AbstractLoader.IMAGE</code>). Will return `null` if
+	 * @return {String} The determined load type (for example, `createjs.Types.IMAGE`). Will return `null` if
 	 * the type can not be determined by the extension.
 	 * @static
 	 */

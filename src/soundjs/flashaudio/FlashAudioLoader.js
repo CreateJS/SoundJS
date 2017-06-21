@@ -48,7 +48,7 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	function Loader(loadItem) {
-		this.AbstractLoader_constructor(loadItem, false, createjs.AbstractLoader.SOUND);
+		this.AbstractLoader_constructor(loadItem, false, createjs.Types.SOUND);
 
 
 // Public properties

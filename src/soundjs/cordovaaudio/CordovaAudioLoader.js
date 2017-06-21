@@ -49,7 +49,7 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	function Loader(loadItem) {
-		this.AbstractLoader_constructor(loadItem, true, createjs.AbstractLoader.SOUND);
+		this.AbstractLoader_constructor(loadItem, true, createjs.Types.SOUND);
 
 		/**
 		 * A Media object used to determine if src exists and to get duration
