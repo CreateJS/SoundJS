@@ -4,6 +4,7 @@
 
 		"../src/createjs/utils/extend.js",
 		"../src/createjs/utils/promote.js",
+		"../src/createjs/utils/deprecate.js",
 		"../src/createjs/utils/indexOf.js",
 		"../src/createjs/utils/proxy.js",
 		"../src/createjs/utils/BrowserDetect.js",

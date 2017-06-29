@@ -153,10 +153,12 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s.create = function (value) {
-		if (value == null || value instanceof s || value instanceof Object) {
-			var ppc = new createjs.PlayPropsConfig();
-			ppc.set(value);
-			return ppc;
+		if (typeof(value) === "string") {
+			// Handle the old API gracefully.
+			console && (console.warn || console.log)("Deprecated behaviour. Sound.play takes a configuration object instead of individual arguments. See docs for info.");
+			return createjs.PlayPropsConfig().set({interrupt:value});
+		} else if (value == null || value instanceof s || value instanceof Object) {
+			return new createjs.PlayPropsConfig().set(value);
 		} else if (value == null) {
 			throw new Error("PlayProps configuration not recognized.");
 		}

@@ -442,36 +442,63 @@ this.createjs = this.createjs || {};
 
 
 // class getter / setter properties
+
 	/**
 	 * Set the master volume of Sound. The master volume is multiplied against each sound's individual volume.  For
 	 * example, if master volume is 0.5 and a sound's volume is 0.5, the resulting volume is 0.25. To set individual
-	 * sound volume, use AbstractSoundInstance {{#crossLink "AbstractSoundInstance/volume:property"}}{{/crossLink}} instead.
+	 * sound volume, use AbstractSoundInstance {{#crossLink "AbstractSoundInstance/volume:property"}}{{/crossLink}}
+	 * instead.
 	 *
 	 * <h4>Example</h4>
 	 *
 	 *     createjs.Sound.volume = 0.5;
-	 *
 	 *
 	 * @property volume
 	 * @type {Number}
 	 * @default 1
 	 * @since 0.6.1
 	 */
+
+	/**
+	 * The internal volume level. Use {{#crossLink "Sound/volume:property"}}{{/crossLink}} to adjust the master volume.
+	 * @property _masterVolume
+	 * @type {number}
+	 * @default 1
+	 * @private
+	 */
 	s._masterVolume = 1;
-	Object.defineProperty(s, "volume", {
-		get: function () {return this._masterVolume;},
-		set: function (value) {
-				if (Number(value) == null) {return false;}
-				value = Math.max(0, Math.min(1, value));
-				s._masterVolume = value;
-				if (!this.activePlugin || !this.activePlugin.setVolume || !this.activePlugin.setVolume(value)) {
-					var instances = this._instances;
-					for (var i = 0, l = instances.length; i < l; i++) {
-						instances[i].setMasterVolume(value);
-					}
-				}
+
+	/**
+	 * Use the {{#crossLink "Sound/volume:property"}}{{/crossLink}} property instead.
+	 * @method _getMasterVolume
+	 * @private
+	 * @static
+	 * @return {Number}
+	 **/
+	s._getMasterVolume = function() {
+		return this._masterVolume;
+	};
+	// Sound.getMasterVolume is @deprecated. Remove for 1.1+
+	s.getVolume = createjs.deprecate(s._getMasterVolume, "Sound.getVolume");
+	/**
+	 * Use the {{#crossLink "Sound/volume:property"}}{{/crossLink}} property instead.
+	 * @method _setMasterVolume
+	 * @static
+	 * @private
+	 **/
+	s._setMasterVolume = function(value) {
+		if (Number(value) == null) { return; }
+		value = Math.max(0, Math.min(1, value));
+		s._masterVolume = value;
+		if (!this.activePlugin || !this.activePlugin.setVolume || !this.activePlugin.setVolume(value)) {
+			var instances = this._instances;
+			for (var i = 0, l = instances.length; i < l; i++) {
+				instances[i].setMasterVolume(value);
 			}
-	});
+		}
+	};
+	// Sound.stMasterVolume is @deprecated. Remove for 1.1+
+	s.setVolume = createjs.deprecate(s._setMasterVolume, "Sound.setVolume");
 
 	/**
 	 * Mute/Unmute all audio. Note that muted audio still plays at 0 volume. This global mute value is maintained
@@ -489,22 +516,39 @@ this.createjs = this.createjs || {};
 	 * @since 0.6.1
 	 */
 	s._masterMute = false;
-	// OJR references to the methods were not working, so the code had to be duplicated here
-	Object.defineProperty(s, "muted", {
-		get: function () {return this._masterMute;},
-		set: function (value) {
-				if (value == null) {return false;}
 
-				this._masterMute = value;
-				if (!this.activePlugin || !this.activePlugin.setMute || !this.activePlugin.setMute(value)) {
-					var instances = this._instances;
-					for (var i = 0, l = instances.length; i < l; i++) {
-						instances[i].setMasterMute(value);
-					}
-				}
-				return true;
+	/**
+	 * Use the {{#crossLink "Sound/muted:property"}}{{/crossLink}} property instead.
+	 * @method _getMute
+	 * @returns {Boolean}
+	 * @static
+	 * @private
+	 */
+	s._getMute = function () {
+		return this._masterMute;
+	};
+	// Sound.getMute is @deprecated. Remove for 1.1+
+	s.getMute = createjs.deprecate(s._getMute, "Sound.getMute");
+
+	/**
+	 * Use the {{#crossLink "Sound/muted:property"}}{{/crossLink}} property instead.
+	 * @method _setMute
+	 * @param {Boolean} value The muted value
+	 * @static
+	 * @private
+	 */
+	s._setMute = function (value) {
+		if (value == null) { return; }
+		this._masterMute = value;
+		if (!this.activePlugin || !this.activePlugin.setMute || !this.activePlugin.setMute(value)) {
+			var instances = this._instances;
+			for (var i = 0, l = instances.length; i < l; i++) {
+				instances[i].setMasterMute(value);
 			}
-	});
+		}
+	};
+	// Sound.setMute is @deprecated. Remove for 1.1+
+	s.setMute = createjs.deprecate(s._setMute, "Sound.setMute");
 
 	/**
 	 * Get the active plugins capabilities, which help determine if a plugin can be used in the current environment,
@@ -540,12 +584,23 @@ this.createjs = this.createjs || {};
 	 * @readOnly
 	 * @since 0.6.1
 	 */
-	Object.defineProperty(s, "capabilities", {
-		get: function () {
-					if (s.activePlugin == null) {return null;}
-					return s.activePlugin._capabilities;
-				},
-		set: function (value) { return false;}
+
+	/**
+	 * Use the {{#crossLink "Sound/capabilities:property"}}{{/crossLink}} property instead.
+	 * @returns {null}
+	 * @private
+	 */
+	s._getCapabilities = function() {
+		if (s.activePlugin == null) { return null; }
+		return s.activePlugin._capabilities;
+	};
+	// Sound.getCapabilities is @deprecated. Remove for 1.1+
+	s.getCapabilities = createjs.deprecate(s._getCapabilities, "Sound.getCapabilities");
+
+	Object.defineProperties(s, {
+		volume: { get: s._getMasterVolume, set: s._setMasterVolume },
+		muted: { get: s._getMute, set: s._setMute },
+		capabilities: { get: s._getCapabilities }
 	});
 
 
