@@ -156,7 +156,7 @@ this.createjs = this.createjs || {};
 		if (typeof(value) === "string") {
 			// Handle the old API gracefully.
 			console && (console.warn || console.log)("Deprecated behaviour. Sound.play takes a configuration object instead of individual arguments. See docs for info.");
-			return createjs.PlayPropsConfig().set({interrupt:value});
+			return new createjs.PlayPropsConfig().set({interrupt:value});
 		} else if (value == null || value instanceof s || value instanceof Object) {
 			return new createjs.PlayPropsConfig().set(value);
 		} else if (value == null) {
