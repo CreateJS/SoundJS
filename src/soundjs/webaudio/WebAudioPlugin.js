@@ -338,8 +338,9 @@ this.createjs = this.createjs || {};
 	s._createAudioContext = function() {
 		// Slightly modified version of https://github.com/Jam3/ios-safe-audio-context
 		// Resolves issues with first-run contexts playing garbled on iOS.
-		var AudioCtor = (window.AudioContext || window.webkitAudioContext),
-				context = new AudioCtor();
+		var AudioCtor = (window.AudioContext || window.webkitAudioContext);
+		if (AudioCtor == null) { return null; }
+		var context = new AudioCtor();
 
 		// Check if hack is necessary. Only occurs in iOS6+ devices
 		// and only when you first boot the iPhone, or play a audio/video
