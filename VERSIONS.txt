@@ -1,4 +1,4 @@
-Version NEXT [Not yet released]
+Version 1.0.0 (September 14, 2017)
 ****************************************************************************************************
 CRITICAL
 - removed deprecated properties, particularly getValue/setValue properties, in favour of .value
@@ -6,6 +6,11 @@ CRITICAL
 - removed deprecated TYPE duplicates, notably the loader types (LoadQueue.SOUND, AbstractLoader.SOUND)
 	in place of the Types.SOUND, and request methods (LoadQueue.POST, AbstractLoader.POST) in place
 	of Methods.POST.
+- Deprecated get/set methods are now protect with an underscore (eg _setEnabled)
+	The deprecated methods and properties will still work, but will display a console warning when used.
+- Sound.play is no longer overloaded, and only takes a source and an initialization object
+	(or PlayPropsConfig) instead of a bunch of arguments. A console warning will be displayed if  the
+	old approach is used, and additional arguments will be ignored.
 
 *****
 - changed XHR error conditions to only include 400-599. Specifically removed status=0 as an error,
@@ -16,6 +21,8 @@ CRITICAL
 - added missing Methods and Types classes from recent PreloadJS changes
 - handled case where audio duration returned < 0, resulting in a DOM Error
 - fixed issue where new instances wouldn't get the global mute/volume (thanks @PythonFanboy)
+- added a shared createjs.deprecate() method, which wraps old methods and property getter/setters to display
+	a console warning when used.
 
 
 Version 0.6.2 [November 26, 2015]
