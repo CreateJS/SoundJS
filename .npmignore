@@ -1,0 +1,14 @@
+_assets
+build
+bower.json
+dev
+docs
+examples
+extras
+icon.png
+lib/**-NEXT**.js
+spikes
+src
+tests
+tutorials
+VERSIONS.txt

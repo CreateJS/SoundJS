@@ -1,0 +1,41 @@
+{
+  "name": "soundjs",
+  "npmName": "soundjs",
+  "version": "1.0.0",
+  "description": "A JavaScript library that provides a simple API, and powerful features to make working with audio a breeze. Easily ties in audio file loading to PreloadJS.",
+  "main": "soundjs.js",
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "lib": "lib",
+    "test": "tests"
+  },
+  "npmFileMap": [
+    {
+      "basePath": "lib",
+      "files": [
+        "**/*"
+      ]
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CreateJS/SoundJS.git"
+  },
+  "keywords": [
+    "createjs",
+    "soundjs",
+    "gskinner",
+    "javascript",
+    "audio",
+    "webaudio",
+    "html5",
+    "flash"
+  ],
+  "author": "gskinner.com, inc.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CreateJS/SoundJS/issues"
+  },
+  "homepage": "https://createjs.com/soundjs/"
+}
