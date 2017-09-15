@@ -11,6 +11,7 @@ CRITICAL
 - Sound.play is no longer overloaded, and only takes a source and an initialization object
 	(or PlayPropsConfig) instead of a bunch of arguments. A console warning will be displayed if  the
 	old approach is used, and additional arguments will be ignored.
+- Changed version naming to use soundjs.js, instead of containing the version number
 
 *****
 - changed XHR error conditions to only include 400-599. Specifically removed status=0 as an error,
