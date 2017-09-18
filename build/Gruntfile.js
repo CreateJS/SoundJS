@@ -8,10 +8,11 @@ module.exports = function (grunt) {
 
 				// Default values
 				version: 'NEXT',
+				fileVersion: '-<%= version %>',
 				name: 'soundjs',
 
 				// Setup doc names / paths.
-				docsName: '<%= pkg.name %>_docs-<%= version %>',
+				docsName: '<%= pkg.name %>_docs<%= fileVersion %>',
 				docsZip: "<%= docsName %>.zip",
 
 				// Setup Uglify for JS minification.
@@ -30,9 +31,9 @@ module.exports = function (grunt) {
 					},
 					build: {
 						files: {
-							'output/<%= pkg.name.toLowerCase() %>-<%= version %>.min.js': getConfigValue('source'),
-							'output/flashaudioplugin-<%= version %>.min.js': getConfigValue('flashaudioplugin_source'),
-							'output/cordovaaudioplugin-<%= version %>.min.js': getConfigValue('cordovaaudioplugin_source'),
+							'output/<%= pkg.name.toLowerCase() %><%= fileVersion %>.min.js': getConfigValue('source'),
+							'output/flashaudioplugin<%= fileVersion %>.min.js': getConfigValue('flashaudioplugin_source'),
+							'output/cordovaaudioplugin<%= fileVersion %>.min.js': getConfigValue('cordovaaudioplugin_source'),
 						}
 					}
 				},
@@ -71,13 +72,13 @@ module.exports = function (grunt) {
 					},
 					build: {
 						files: {
-							'output/<%= pkg.name.toLowerCase() %>-<%= version %>.combined.js': combineSource([
+							'output/<%= pkg.name.toLowerCase() %><%= fileVersion %>.js': combineSource([
 										{cwd: '', config:'config.json', source:'source'}
 									]),
-							'output/flashaudioplugin-<%= version %>.combined.js': combineSource([
+							'output/flashaudioplugin<%= fileVersion %>.js': combineSource([
 																	{cwd: '', config:'config.json', source:'flashaudioplugin_source'}
 																]),
-							'output/cordovaaudioplugin-<%= version %>.combined.js': combineSource([
+							'output/cordovaaudioplugin<%= fileVersion %>.js': combineSource([
 																	{cwd: '', config:'config.json', source:'cordovaaudioplugin_source'}
 																])
 						}
@@ -135,7 +136,7 @@ module.exports = function (grunt) {
 					},
 					src: {
 						files: [
-							{expand: true, cwd:'./output/', src: '*<%=version %>*.js', dest: '../lib/'}
+							{expand: true, cwd:'./output/', src: '*<%=fileVersion %>*.js', dest: '../lib/'}
 						]
 					}
 				},
@@ -315,6 +316,7 @@ module.exports = function (grunt) {
 	 */
 	grunt.registerTask('setVersion', function () {
 		grunt.config.set('version', grunt.config.get('pkg').version);
+		grunt.config.set('fileVersion', '');
 	});
 
 	/**
