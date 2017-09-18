@@ -1,7 +1,7 @@
 {
   "name": "soundjs",
   "npmName": "soundjs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A JavaScript library that provides a simple API, and powerful features to make working with audio a breeze. Easily ties in audio file loading to PreloadJS.",
   "main": "soundjs.js",
   "jsdelivr": "lib/soundjs.min.js",
