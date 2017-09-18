@@ -14,7 +14,7 @@
 <header  class="SoundJS">
 	<h1>Sound Tween</h1>
 
-	<p>This example shows how to tween volume and pan. Note that HTML audio does not support panning.</p>
+	<p>This example shows how to tween volume and pan. <b>Note that HTML audio does not support panning</b>.</p>
 </header>
 
 <div class="content" id="content">
@@ -129,29 +129,33 @@
 
 	function initSoundTween() {
 		setMessage("Volume Down: 0.0");
-		tween = createjs.Tween.get(soundInstance, {loop: true})
+		tween = createjs.Tween.get(soundInstance, {loop: true, onChange:handleSoundChange})
 				.to({volume: 0.0}, 3 * baseTime)
-				.wait(baseTime).call(setMessage, ["Volume Up: 0.5"])
+				.wait(baseTime)
 				.to({volume: 0.5}, 3 * baseTime)
-				.wait(baseTime).call(setMessage, ["Volume Up: 1.0"])
+				.wait(baseTime)
 				.to({volume: 1.0}, 3 * baseTime)
-				.wait(baseTime).call(setMessage, ["Volume Down: 0.5"])
+				.wait(baseTime)
 				.to({volume: 0.5}, 3 * baseTime)
-				.wait(baseTime).call(setMessage, ["Pan Right: 1.0"])
+				.wait(baseTime)
 				.to({pan: 1}, 3 * baseTime)
-				.wait(baseTime).call(setMessage, ["Pan Center: 0.0"])
+				.wait(baseTime)
 				.to({pan: 0}, 3 * baseTime)
-				.wait(baseTime).call(setMessage, ["Pan Left: -1.0"])
+				.wait(baseTime)
 				.to({pan: -1}, 3 * baseTime)
-				.wait(baseTime).call(setMessage, ["Pan Center: 0.0"])
+				.wait(baseTime)
 				.to({pan: 0}, 3 * baseTime)
-				.wait(baseTime).call(setMessage, ["Volume Down: 0.0, Pan Left: -1.0"])
+				.wait(baseTime)
 				.to({pan: -1, volume: 0.0}, 3 * baseTime)
-				.wait(baseTime).call(setMessage, ["Volume Up: 1.0, Pan Right: 1.0"])
+				.wait(baseTime)
 				.to({pan: 1, volume: 1}, 6 * baseTime)
-				.wait(baseTime).call(setMessage, ["Volume Down: 0.5, Pan Center: 0.0"])
+				.wait(baseTime)
 				.to({pan: 0, volume: 0.5}, 3 * baseTime)
-				.wait(baseTime).call(setMessage, ["Volume Down: 0.0"]);
+				.wait(baseTime)
+	}
+
+	function handleSoundChange() {
+        setMessage("<b>Volume Up:" + soundInstance.volume.toFixed(2) +" Pan Right:" + soundInstance.pan.toFixed(2)) + "</b>";
 	}
 
 	function setMessage(message) {

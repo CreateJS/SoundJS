@@ -33,6 +33,21 @@
 <!-- We also provide hosted minified versions of all CreateJS libraries.
 	http://code.createjs.com -->
 
+<style>
+	.red {
+		color:red;
+		font-size:large;
+	}
+	.blue {
+		color:#0b93d5;
+		font-size:small;
+	}
+	.orange {
+		color:orange;
+		font-size:xx-large;
+
+	}
+</style>
 <script id="editable">
 	var displayMessage;		// the HTML element we use to display messages to the user
 
@@ -95,7 +110,11 @@
 					return;
 				}
 
-				this.sprite = ["pew", "hit", "explode"];	// this code is not needed for sprites, it is used for the looping effect
+				this.sprite = [
+				    {id:"pew", class:"blue"},
+					{id:"hit", class:"red"},
+					{id:"explode", class:"orange"}
+				];	// this code is not needed for sprites, it is used for the looping effect
 				var assetsPath = "../_assets/audio/";
 				var sounds = [
 					// This is an audio sprite.  The sprite property tells SoundJS what ids to use for playback, with time to start playback and length of playback
@@ -133,15 +152,18 @@
 				this.currentStep = 0;
 				this.loops = Math.floor((Math.random() * this.MAX_LOOPS));	// random between 0 and MAX_LOOPS -1
 
-				this.soundInstance = createjs.Sound.play(this.sprite[this.currentStep], {loop: this.loops});
+				var spriteData = this.sprite[this.currentStep];
+
+				this.soundInstance = createjs.Sound.play(spriteData.id, {loop: this.loops});
 				this.soundInstance.addEventListener("loop", this.loopProxy);
 				this.soundInstance.addEventListener("complete", createjs.proxy(this.nextAudioRelay, this));
-				this.displayStatus.innerHTML = this.sprite[this.currentStep];
+				this.displayStatus.innerHTML = '<div class='+spriteData.class+'>'+spriteData.id+'</div>';
 			},
 
 			// update display text
 			handleLoop: function () {
-				this.displayStatus.innerHTML = this.displayStatus.innerHTML + " " + this.sprite[this.currentStep];
+			    var spriteData = this.sprite[this.currentStep];
+				this.displayStatus.innerHTML = this.displayStatus.innerHTML + " " + '<div id="effect" class='+spriteData.class+'>'+spriteData.id+'</div>';
 			},
 
 			// kick off delayed next step of audio loop
@@ -152,16 +174,19 @@
 
 			delayedNextAudio: function () {
 				this.currentStep++;
-				this.soundInstance = createjs.Sound.play(this.sprite[this.currentStep], {loop: this.loops});
+
+				var spriteData = this.sprite[this.currentStep];
+
+				this.soundInstance = createjs.Sound.play(spriteData.id, {loop: this.loops});
 				this.soundInstance.addEventListener("loop", this.loopProxy);
 				this.soundInstance.addEventListener("complete", createjs.proxy(this.handleFinalAudio, this));
-				this.displayStatus.innerHTML = this.sprite[this.currentStep];
+				this.displayStatus.innerHTML = '<div class='+spriteData.class+'>'+spriteData.id+'</div>';
 			},
 
 			// final step of audio loop
 			handleFinalAudio: function () {
 				this.currentStep++;
-				this.soundInstance = createjs.Sound.play(this.sprite[this.currentStep]);
+				this.soundInstance = createjs.Sound.play(this.sprite[this.currentStep].id);
 				this.soundInstance.addEventListener("complete", createjs.proxy(this.nextAudioRelay, this));
 				this.handleLoop();
 
