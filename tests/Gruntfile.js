@@ -6,7 +6,7 @@ module.exports = function (grunt) {
 				jasmine: {
 					run: {
 						src: [
-							'../lib/soundjs-NEXT.combined.js'
+							'../lib/soundjs-NEXT.js'
 						],
 
 						options: {
