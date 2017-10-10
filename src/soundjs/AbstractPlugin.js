@@ -288,7 +288,7 @@ this.createjs = this.createjs || {};
 		this._audioSources[src] = event.result;
 		for (var i = 0, l = this._soundInstances[src].length; i < l; i++) {
 			var item = this._soundInstances[src][i];
-			item.setPlaybackResource(this._audioSources[src]);
+			item.playbackResource = this._audioSources[src];
 			// ToDo consider adding play call here if playstate == playfailed
 			this._soundInstances[src] = null;
 		}
