@@ -136,6 +136,8 @@ this.createjs = this.createjs || {};
 			get: this._getVolume,
 			set: this._setVolume
 		});
+		this.getVolume = createjs.deprecate(this._getVolume, "AbstractSoundInstance.getVolume");
+		this.setVolume = createjs.deprecate(this._setVolume, "AbstractSoundInstance.setVolume");
 
 		/**
 		 * The pan of the sound, between -1 (left) and 1 (right). Note that pan is not supported by HTML Audio.
@@ -150,6 +152,8 @@ this.createjs = this.createjs || {};
 			get: this._getPan,
 			set: this._setPan
 		});
+		this.getPan = createjs.deprecate(this._getPan, "AbstractSoundInstance.getPan");
+		this.setPan = createjs.deprecate(this._setPan, "AbstractSoundInstance.setPan");
 
 		/**
 		 * Audio sprite property used to determine the starting offset.
@@ -163,6 +167,8 @@ this.createjs = this.createjs || {};
 			get: this._getStartTime,
 			set: this._setStartTime
 		});
+		this.getStartTime = createjs.deprecate(this._getStartTime, "AbstractSoundInstance.getStartTime");
+		this.setStartTime = createjs.deprecate(this._setStartTime, "AbstractSoundInstance.setStartTime");
 
 		/**
 		 * Sets or gets the length of the audio clip, value is in milliseconds.
@@ -177,6 +183,8 @@ this.createjs = this.createjs || {};
 			get: this._getDuration,
 			set: this._setDuration
 		});
+		this.getDuration = createjs.deprecate(this._getDuration, "AbstractSoundInstance.getDuration");
+		this.setDuration = createjs.deprecate(this._setDuration, "AbstractSoundInstance.setDuration");
 
 		/**
 		 * Object that holds plugin specific resource need for audio playback.
@@ -193,6 +201,8 @@ this.createjs = this.createjs || {};
 			set: this._setPlaybackResource
 		});
 		if(playbackResource !== false && playbackResource !== true) { this._setPlaybackResource(playbackResource); }
+		this.getPlaybackResource = createjs.deprecate(this._getPlaybackResource, "AbstractSoundInstance.getPlaybackResource");
+		this.setPlaybackResource = createjs.deprecate(this._setPlaybackResource, "AbstractSoundInstance.setPlaybackResource");
 
 		/**
 		 * The position of the playhead in milliseconds. This can be set while a sound is playing, paused, or stopped.
@@ -207,6 +217,8 @@ this.createjs = this.createjs || {};
 			get: this._getPosition,
 			set: this._setPosition
 		});
+		this.getPosition = createjs.deprecate(this._getPosition, "AbstractSoundInstance.getPosition");
+		this.setPosition = createjs.deprecate(this._setPosition, "AbstractSoundInstance.setPosition");
 
 		/**
 		 * The number of play loops remaining. Negative values will loop infinitely.
@@ -222,6 +234,8 @@ this.createjs = this.createjs || {};
 			get: this._getLoop,
 			set: this._setLoop
 		});
+		this.getLoop = createjs.deprecate(this._getLoop, "AbstractSoundInstance.getLoop");
+		this.setLoop = createjs.deprecate(this._setLoop, "AbstractSoundInstance.setLoop");
 
 		/**
 		 * Mutes or unmutes the current audio instance.
@@ -236,6 +250,8 @@ this.createjs = this.createjs || {};
 			get: this._getMuted,
 			set: this._setMuted
 		});
+		this.getMuted = createjs.deprecate(this._getMuted, "AbstractSoundInstance.getMuted");
+		this.setMuted = createjs.deprecate(this._setMuted, "AbstractSoundInstance.setMuted");
 
 		/**
 		 * Pauses or resumes the current audio instance.
@@ -248,6 +264,8 @@ this.createjs = this.createjs || {};
 			get: this._getPaused,
 			set: this._setPaused
 		});
+		this.getPaused = createjs.deprecate(this._getPaused, "AbstractSoundInstance.getPaused");
+		this.setPaused = createjs.deprecate(this._setPaused, "AbstractSoundInstance.setPaused");
 
 
 	// Events
