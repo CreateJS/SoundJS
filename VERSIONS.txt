@@ -24,6 +24,7 @@ CRITICAL
 - fixed issue where new instances wouldn't get the global mute/volume (thanks @PythonFanboy)
 - added a shared createjs.deprecate() method, which wraps old methods and property getter/setters to display
 	a console warning when used.
+- fixed an issue with the initial 1.0.0 build that used a deprecated property that was improperly removed
 
 
 Version 0.6.2 [November 26, 2015]
