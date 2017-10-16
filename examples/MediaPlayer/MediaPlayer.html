@@ -146,7 +146,7 @@
 	http://code.createjs.com -->
 
 <!-- other libraries -->
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 
 <script type="text/javascript" id="editable">
 	function init() {
@@ -249,7 +249,7 @@
 			if (seeking) {
 				return;
 			}
-			$("#thumb").css("left", instance.getPosition() / instance.getDuration() * $("#track").width());
+			$("#thumb").css("left", instance.position / instance.duration * $("#track").width());
 		}, 30);
 	}
 </script>
