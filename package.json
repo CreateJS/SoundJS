@@ -1,28 +1,7 @@
 {
   "name": "soundjs",
-  "npmName": "soundjs",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "A JavaScript library that provides a simple API, and powerful features to make working with audio a breeze. Easily ties in audio file loading to PreloadJS.",
-  "main": "lib/soundjs.js",
-  "jsdelivr": "lib/soundjs.min.js",
-  "directories": {
-    "doc": "docs",
-    "example": "examples",
-    "lib": "lib",
-    "test": "tests"
-  },
-  "npmFileMap": [
-    {
-      "basePath": "lib",
-      "files": [
-        "**/*"
-      ]
-    }
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/CreateJS/SoundJS.git"
-  },
   "keywords": [
     "createjs",
     "soundjs",
@@ -34,9 +13,56 @@
     "flash"
   ],
   "author": "gskinner.com, inc.",
+  "homepage": "https://www.createjs.com/soundjs",
+  "url": "https://www.npmjs.com/package/soundjs",
+  "bugs": "https://github.com/createjs/soundjs/issues",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/CreateJS/SoundJS/issues"
+  "contributors": [
+    "Grant Skinner <grant@gskinner.com> (https://github.com/gskinner)",
+    "Lanny McNie <lanny@gskinner.com> (https://github.com/lannymcnie)",
+    "Wes Gorgichuk <wes@gskinner.com> (https://github.com/wdamien)",
+    "Blair Ludwig <blair@gskinner.com> ()"
+  ],
+  "main": "dist/sound.common.js",
+  "jsnext:main": "dist/sound.es6.js",
+  "jsdelivr": "dist/sound.min.js",
+  "logo": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com:createjs/soundjs.git"
   },
-  "homepage": "https://createjs.com/soundjs/"
+  "npmName": "soundjs",
+  "npmFileMap": [
+    {
+      "basePath": "dist",
+      "files": [
+        "**/*"
+      ]
+    }
+  ],
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "lib": "lib",
+    "test": "tests"
+  },
+  "scripts": {
+    "travis": "cd node_modules/createjs && npm run travis",
+    "lint": "cd node_modules/createjs && npm run lint",
+    "test": "cd node_modules/createjs && npm run test",
+    "test:headless": "cd node_modules/createjs && npm run test:headless",
+    "dev": "cd node_modules/createjs && npm run dev",
+    "build": "cd node_modules/createjs && npm run build",
+    "build:next": "cd node_modules/createjs && npm run build:next",
+    "plugins": "cd node_modules/createjs && npm run plugins",
+    "docs": "cd node_modules/createjs && npm run docs"
+  },
+  "dependencies": {
+    "createjs": "2.0.0"
+  },
+  "devDependencies": {
+    "babel-plugin-external-helpers": "^6.8.0",
+    "babel-preset-env": "^1.6.1"
+  },
+  "engine": "node >= 7.0.0"
 }

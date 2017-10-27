@@ -1,14 +1,32 @@
-_assets
-build
-bower.json
-dev
-docs
-examples
-extras
+# Only the `dist` and `src` directories are served to NPM.
+
+# JetBrains
+.idea/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Atom
+.atom/
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Other
+*.lock
+*.log
+
+# Project
+assets/
+docs/
+examples/
+tests/
+tutorials/
 icon.png
-lib/**-NEXT**.js
-spikes
-src
-tests
-tutorials
-VERSIONS.txt
+bower.json
+CONTRIBUTING.md

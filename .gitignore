@@ -1,22 +1,23 @@
-.DS_Store
-build/output/
-build/tmp/
-*TMP*
+# Packages
 node_modules/
-spikes/
+
+# JetBrains
 .idea/
+
+# Sublime Text
 *.sublime-project
 *.sublime-workspace
-config.local.json
-docs/**/
 
-#-----------------------------
-# INVALID FILES
-# (for cross OS compatibility)
-#-----------------------------
-*[\<\>\:\"\/\\\|\?\*]*
-**/.sass-cache/
-main.css
-*.codekit
-tests/.grunt
-_SpecRunner.html
+# Atom
+.atom/
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Other
+*.lock
+*.log
