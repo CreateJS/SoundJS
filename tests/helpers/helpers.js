@@ -1,5 +1,5 @@
 beforeEach(function () {
-	this.baseAssetsPath = "../_assets/";
+	this.baseAssetsPath = "assets/";
 
 	this.getFilePath = function (fileObj) {
 		if (typeof fileObj == "string") {

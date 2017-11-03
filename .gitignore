@@ -18,6 +18,8 @@ node_modules/
 .DS_Store
 Thumbs.db
 
+# Generated
+docs/
+
 # Other
-*.lock
 *.log
