@@ -121,9 +121,9 @@ describe("SoundJS", function () {
 
 	it("registerSounds() should work", function (done) {
 		var sounds = [
-			{src: "Game-Shot.mp3", id: "shot"},
-			{src: "Game-Spawn.mp3", id: "spawn"},
-			{src: "Humm.mp3", id: "humm"}
+			{ src: "Game-Shot.mp3", id: "shot" },
+			{ src: "Game-Spawn.mp3", id: "spawn" },
+			{ src: "Humm.mp3", id: "humm" }
 		];
 		createjs.Sound.registerSounds(sounds, "audio/");
 
@@ -180,9 +180,9 @@ describe("SoundJS", function () {
 
 	it("stop() should stop all playing sounds.", function (done) {
 		var sounds = [
-			{src: "Game-Shot.mp3", id: "shot"},
-			{src: "Game-Spawn.mp3", id: "spawn"},
-			{src: "Humm.mp3", id: "humm"}
+			{ src: "Game-Shot.mp3", id: "shot" },
+			{ src: "Game-Spawn.mp3", id: "spawn" },
+			{ src: "Humm.mp3", id: "humm" }
 		];
 		createjs.Sound.registerSounds(sounds, "audio/");
 
