@@ -284,14 +284,19 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._handlePreloadComplete = function (event) {
-		var src = event.target.getItem().src;
-		this._audioSources[src] = event.result;
-		for (var i = 0, l = this._soundInstances[src].length; i < l; i++) {
-			var item = this._soundInstances[src][i];
-			item.playbackResource = this._audioSources[src];
-			// ToDo consider adding play call here if playstate == playfailed
-			this._soundInstances[src] = null;
+		var src = event.target.getItem().src,
+				result = event.result,
+				instances = this._soundInstances[src];
+		this._audioSources[src] = result;
+
+		if (instances != null && instances.length > 0) {
+			for (var i=0, l=instances.length; i<l; i++) {
+				instances[i].playbackResource = result;
+				// TODO consider adding play call here if playstate == playfailed
+				// LM: SoundJS policy is not to play sounds late that previously failed, as it could play unexpectedly.
+			}
 		}
+		this._soundInstances[src] = null;
 	};
 
 	/**
@@ -301,7 +306,7 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._handlePreloadError = function(event) {
-		//delete(this._audioSources[src]);
+		//delete(this._audioSources[src]); //LM: Not sure why this was commented out.
 	};
 
 	/**
