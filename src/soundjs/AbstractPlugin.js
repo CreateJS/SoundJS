@@ -227,7 +227,7 @@ this.createjs = this.createjs || {};
 			this._soundInstances[src].push(si);
 		}
 
-		// Plugins that don't have a setVolume should implement a setMasterVolune/setMasterMute
+		// Plugins that don't have a setVolume should implement a setMasterVolume/setMasterMute
 		// So we have to check that here.
 		si.setMasterVolume && si.setMasterVolume(createjs.Sound.volume);
 		si.setMasterMute && si.setMasterMute(createjs.Sound.muted);
