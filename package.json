@@ -47,8 +47,6 @@
     "test": "tests"
   },
   "scripts": {
-    "travis": "cd node_modules/createjs && npm run travis",
-    "lint": "cd node_modules/createjs && npm run lint",
     "test": "cd node_modules/createjs && npm run test",
     "test:headless": "cd node_modules/createjs && npm run test:headless",
     "dev": "cd node_modules/createjs && npm run dev",
@@ -64,5 +62,5 @@
     "babel-plugin-external-helpers": "^6.8.0",
     "babel-preset-env": "^1.6.1"
   },
-  "engine": "node >= 7.0.0"
+  "engine": "node >= 7.10.1"
 }
