@@ -59,8 +59,7 @@
     "createjs": "2.0.0"
   },
   "devDependencies": {
-    "babel-plugin-external-helpers": "^6.8.0",
-    "babel-preset-env": "^1.6.1"
+    
   },
   "engine": "node >= 7.10.1"
 }
