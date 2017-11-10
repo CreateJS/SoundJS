@@ -47,7 +47,5 @@
 export { default as EventDispatcher } from "createjs/src/events/EventDispatcher";
 export { default as Event } from "createjs/src/events/Event";
 export { default as Ticker } from "createjs/src/utils/Ticker";
-
-// TODO: Review this version export.
 // version (templated in gulpfile, pulled from package).
-// export const version = "<%= version %>";
+export const version = "<%= version %>";
