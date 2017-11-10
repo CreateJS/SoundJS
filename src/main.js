@@ -48,4 +48,4 @@ export { default as EventDispatcher } from "createjs/src/events/EventDispatcher"
 export { default as Event } from "createjs/src/events/Event";
 export { default as Ticker } from "createjs/src/utils/Ticker";
 // version (templated in gulpfile, pulled from package).
-export const version = "<%= version %>";
+(window.createjs = (window.createjs || {})).soundjs = "<%= version %>";
