@@ -47,5 +47,13 @@
 export { default as EventDispatcher } from "createjs/src/events/EventDispatcher";
 export { default as Event } from "createjs/src/events/Event";
 export { default as Ticker } from "createjs/src/utils/Ticker";
+
+export { default as Playback } from  "./Playback"
+export { default as Sample } from  "./Sample"
+export { default as Group } from "./Group"
+export { default as Sound } from  "./Sound"
+
+// TODO: Review this version export.
+
 // version (templated in gulpfile, pulled from package).
 (window.createjs = (window.createjs || {})).soundjs = "<%= version %>";
