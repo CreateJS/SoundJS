@@ -271,6 +271,55 @@ var createjs = function(exports) {
     };
     return Event
   }();
+  /**
+   * EventDispatcher provides methods for managing queues of event listeners and dispatching events.
+   *
+   * You can either extend EventDispatcher or mix its methods into an existing prototype or instance by using the
+   * EventDispatcher {{#crossLink "EventDispatcher/initialize"}}{{/crossLink}} method.
+   *
+   * Together with the CreateJS Event class, EventDispatcher provides an extended event model that is based on the
+   * DOM Level 2 event model, including addEventListener, removeEventListener, and dispatchEvent. It supports
+   * bubbling / capture, preventDefault, stopPropagation, stopImmediatePropagation, and handleEvent.
+   *
+   * EventDispatcher also exposes a {{#crossLink "EventDispatcher/on"}}{{/crossLink}} method, which makes it easier
+   * to create scoped listeners, listeners that only run once, and listeners with associated arbitrary data. The
+   * {{#crossLink "EventDispatcher/off"}}{{/crossLink}} method is merely an alias to
+   * {{#crossLink "EventDispatcher/removeEventListener"}}{{/crossLink}}.
+   *
+   * Another addition to the DOM Level 2 model is the {{#crossLink "EventDispatcher/removeAllEventListeners"}}{{/crossLink}}
+   * method, which can be used to listeners for all events, or listeners for a specific event. The Event object also
+   * includes a {{#crossLink "Event/remove"}}{{/crossLink}} method which removes the active listener.
+   *
+   * <h4>Example</h4>
+   * Add EventDispatcher capabilities to the "MyClass" class.
+   *
+   *      EventDispatcher.initialize(MyClass.prototype);
+   *
+   * Add an event (see {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}}).
+   *
+   *      instance.addEventListener("eventName", handlerMethod);
+   *      function handlerMethod(event) {
+   *          console.log(event.target + " Was Clicked");
+   *      }
+   *
+   * <b>Maintaining proper scope</b><br />
+   * Scope (ie. "this") can be be a challenge with events. Using the {{#crossLink "EventDispatcher/on"}}{{/crossLink}}
+   * method to subscribe to events simplifies this.
+   *
+   *      instance.addEventListener("click", function(event) {
+   *          console.log(instance == this); // false, scope is ambiguous.
+   *      });
+   *
+   *      instance.on("click", function(event) {
+   *          console.log(instance == this); // true, "on" uses dispatcher scope by default.
+   *      });
+   *
+   * If you want to use addEventListener instead, you may want to use function.bind() or a similar proxy to manage scope.
+   *
+   *
+   * @class EventDispatcher
+   * @module CreateJS
+   */
   var EventDispatcher = function() {
     // static methods:
     /**
@@ -617,6 +666,28 @@ var createjs = function(exports) {
     };
     return EventDispatcher
   }();
+  /**
+   * The Ticker provides a centralized tick or heartbeat broadcast at a set interval. Listeners can subscribe to the tick
+   * event to be notified when a set time interval has elapsed.
+   *
+   * Note that the interval that the tick event is called is a target interval, and may be broadcast at a slower interval
+   * when under high CPU load. The Ticker class uses a static interface (ex. `Ticker.framerate = 30;`) and
+   * can not be instantiated.
+   *
+   * <h4>Example</h4>
+   *
+   *      createjs.Ticker.addEventListener("tick", handleTick);
+   *      function handleTick(event) {
+   *          // Actions carried out each tick (aka frame)
+   *          if (!event.paused) {
+   *              // Actions carried out when the Ticker is not paused.
+   *          }
+   *      }
+   *
+   * @class TickerAPI
+   * @extends EventDispatcher
+   * @module CreateJS
+   */
   var TickerAPI = function(_EventDispatcher) {
     inherits(TickerAPI, _EventDispatcher);
     // constructor:
@@ -1087,6 +1158,145 @@ var createjs = function(exports) {
    * @module CreateJS
    */
   var Ticker = new TickerAPI("createjs.global");
+  var Sample = function(_EventDispatcher) {
+    inherits(Sample, _EventDispatcher);
+    createClass(Sample, [{
+      key: "volume",
+      set: function set(val) {
+        this.volumeNode.gain.value = val
+      },
+      get: function get() {
+        return this.volumeNode.gain.value
+      }
+    }]);
+
+    function Sample(url) {
+      classCallCheck(this, Sample);
+      var _this = possibleConstructorReturn(this, _EventDispatcher.call(this));
+      var ctx = Sound.context;
+      _this.outputNode = _this.volumeNode = ctx.createGain();
+      _this.fxBus = ctx.createGain();
+      _this.fxBus.connect(_this.outputNode); // TODO: Manage effects chain.
+      _this.playbacks = [];
+      _this.audioBuffer = null;
+      _this._playbackRequested = false;
+      if (url) {
+        _this.loadAudio(url)
+      }
+      Sound._rootGroup.add(_this);
+      return _this
+    }
+    Sample.prototype.play = function play() {
+      if (!this.audioBuffer) {
+        this._playbackRequested = true;
+        return null
+      } else {
+        return this._play()
+      }
+    };
+    Sample.prototype._play = function _play() {
+      var pb = new Playback(this.audioBuffer);
+      this.playbacks.push(pb);
+      pb.outputNode.connect(this.fxBus);
+      return pb
+    };
+    Sample.prototype.loadAudio = function loadAudio(url) {
+      var request = new XMLHttpRequest;
+      request.open("GET", url, true);
+      request.responseType = "arraybuffer";
+      request.onload = this.handleAudioLoaded.bind(this);
+      request.send()
+    };
+    Sample.prototype.handleAudioLoaded = function handleAudioLoaded(loadEvent) {
+      var ctx = Sound.context;
+      var result = loadEvent.target.response;
+      ctx.decodeAudioData(result, this.handleAudioDecoded.bind(this), this.handleAudioDecodeError.bind(this))
+    };
+    Sample.prototype.handleAudioDecoded = function handleAudioDecoded(buffer) {
+      this.audioBuffer = buffer;
+      if (this._playbackRequested) {
+        this._play()
+      }
+    };
+    Sample.prototype.handleAudioDecodeError = function handleAudioDecodeError(e) {
+      console.log("Error decoding audio data.")
+    };
+    return Sample
+  }(EventDispatcher);
+  var Group = function() {
+    function Group() {
+      var parent = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : Sound._rootGroup;
+      classCallCheck(this, Group);
+      var ctx = Sound.context;
+      this.outputNode = this.volumeNode = ctx.createGain();
+      this.inputNode = ctx.createGain();
+      this.fxBus = ctx.createGain();
+      this.inputNode.connect(this.fxBus);
+      this.fxBus.connect(this.outputNode); // TODO: Manage effects chain.
+      this.samples = [];
+      this.subgroups = [];
+      if (parent) {
+        parent.add(this)
+      }
+    }
+    Group.prototype.add = function add(groupOrSample) {
+      if (groupOrSample instanceof Group) {
+        this._addGroup(groupOrSample)
+      } else if (groupOrSample instanceof Sample) {
+        this._addSample(groupOrSample)
+      }
+    };
+    Group.prototype._addGroup = function _addGroup(subgroup) {
+      this.subgroups.push(subgroup);
+      subgroup.outputNode.connect(this.inputNode)
+    };
+    Group.prototype._addSample = function _addSample(sample) {
+      this.samples.push(sample);
+      sample.outputNode.connect(this.fxBus)
+    };
+    return Group
+  }();
+  var Sound = function() {
+    function Sound() {
+      classCallCheck(this, Sound)
+    }
+    Sound.pause = function pause() {
+      // TODO: actually implement pausing and unpausing - just putting this here as a reminder that suspend exists.
+      Sound.context.suspend()
+    };
+    createClass(Sound, null, [{
+      key: "context",
+      get: function get() {
+        if (!Sound._context) {
+          var ctxClass = window.AudioContext || window.webkitAudioContext;
+          Sound._context = new ctxClass
+        }
+        return Sound._context
+      }
+    }, {
+      key: "_rootGroup",
+      get: function get() {
+        if (!Sound.__rootGroup) {
+          Sound.__rootGroup = new Group(null);
+          Sound.__rootGroup.outputNode.connect(Sound.context.destination)
+        }
+        return Sound.__rootGroup
+      }
+    }]);
+    return Sound
+  }();
+  var Playback = function Playback(audioBuffer) {
+    var playImmediately = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+    classCallCheck(this, Playback);
+    var ctx = Sound.context;
+    this.outputNode = this.volumeNode = ctx.createGain();
+    this.fxBus = ctx.createGain();
+    this.fxBus.connect(this.outputNode);
+    this._sourceNode = ctx.createBufferSource();
+    this._sourceNode.buffer = audioBuffer;
+    this._sourceNode.connect(this.outputNode);
+    playImmediately && this._sourceNode.start(0)
+  };
   /**
    * The Sound JavaScript library manages the playback of audio on the web. It works via plugins which abstract the actual audio
    * implementation, so playback is possible on any platform without specific knowledge of what mechanisms are necessary
@@ -1132,12 +1342,17 @@ var createjs = function(exports) {
    * @main SoundJS
    */
   // re-export shared classes
+  // export { default as Group } from  "./Sample"
+  // TODO: Review this version export.
   // version (templated in gulpfile, pulled from package).
-  var version = "2.0.0";
-  exports.version = version;
+  (window.createjs = window.createjs || {}).soundjs = "2.0.0";
   exports.EventDispatcher = EventDispatcher;
   exports.Event = Event;
   exports.Ticker = Ticker;
+  exports.Playback = Playback;
+  exports.Sample = Sample;
+  exports.Group = Group;
+  exports.Sound = Sound;
   return exports
-}(this.createjs || {});
+}({});
 //# sourceMappingURL=sound-NEXT.js.map
