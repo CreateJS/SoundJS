@@ -20,14 +20,42 @@ export default class Playback extends EventDispatcher {
         // Audio tree setup
         this.outputNode = this.volumeNode = ctx.createGain();
         this.fxBus = ctx.createGain();
-
         this.fxBus.connect(this.outputNode);
 
-        this._sourceNode = ctx.createBufferSource();
-        this._sourceNode.buffer = audioBuffer;
+        // Data tracking
+        this.buffer = audioBuffer;
+        this._startTime = null;
+        this._elapsedOffset = 0; // The amount of time elapsed, including pauses.
+        this._paused = false;
 
+        this._play(); // TODO: 10ms fade in to prevent clicks
+    }
+
+    _play(delay = 0, offset = 0){
+        let ctx = Sound.context;
+
+        if(this._sourceNode){
+            return; // Do nothing - sound is already playing. Playing multiple sounds should be done by playing the sample again.
+        }
+
+        this._sourceNode || this._createSourceNode();
+        this._sourceNode.start(delay, offset);
+
+        this._startTime = ctx.currentTime;
+        this._elapsedOffset = offset;
+        this._paused = false;
+    }
+
+    _createSourceNode(){
+        let ctx = Sound.context;
+
+        this._sourceNode = ctx.createBufferSource();
+        this._sourceNode.buffer = this.buffer;
         this._sourceNode.connect(this.outputNode);
-        playImmediately && this._sourceNode.start(0); // TODO: 10ms fade in to prevent clicks
+
+        this._sourceNode.onended = this.handleEnded.bind(this);
+    }
+
     pause(){
         if(!this.playing){ return; }
 
