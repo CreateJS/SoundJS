@@ -25,8 +25,13 @@ export default class Sample extends EventDispatcher {
         this.audioBuffer = null;
         this._playbackRequested = false;
 
-        if(url){
-            this.loadAudio(url);
+
+        if(url instanceof ArrayBuffer){
+            ctx.decodeAudioData(url, this.handleAudioDecoded.bind(this), this.handleAudioDecodeError.bind(this));
+        }else if(url instanceof AudioBuffer){
+            this.audioBuffer = url;
+        }else if(typeof url === "string"){
+            this.loadAudio(url); // This works for data URLs too
         }
 
         if(parent){
