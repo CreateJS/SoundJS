@@ -14,5 +14,26 @@ export default class Playback {
 
         this._sourceNode.connect(this.outputNode);
         playImmediately && this._sourceNode.start(0); // TODO: 10ms fade in to prevent clicks
+    pause(){
+        if(!this.playing){ return; }
+
+        this._elapsedOffset = this.elapsed;
+        this._sourceNode.stop();
+        this._sourceNode = null;
+        this._paused = true;
+    }
+
+    resume(){
+        if(!this.paused){ return; }
+
+        this.dispatchEvent("paused");
+        this._play(0, this._elapsedOffset);
+        this._paused = false;
+    }
+
+    stop(){
+        this.destroy();
+    }
+
     }
 }
