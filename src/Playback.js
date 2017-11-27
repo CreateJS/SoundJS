@@ -4,6 +4,11 @@ export default class Playback {
 
     constructor(audioBuffer, playImmediately = true){
         let ctx = Sound.context;
+
+    get duration(){ return this.buffer.duration; }
+    get playing(){ return Boolean(this._sourceNode); }
+    get paused(){ return this._paused; }
+
         this.outputNode = this.volumeNode = ctx.createGain();
         this.fxBus = ctx.createGain();
 
