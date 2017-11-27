@@ -29,4 +29,4 @@ export default class Sound {
         // TODO: start time, duration.
         return new Sample(src);
     }
-}()
+}
