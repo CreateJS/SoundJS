@@ -51,6 +51,20 @@ export default class Sample extends EventDispatcher {
         return pb;
     }
 
+    pause(){
+        this.playbacks.forEach( (pb) => pb.pause() );
+    }
+
+    resume(){
+        this.playbacks.forEach( (pb) => pb.resume() );
+    }
+
+    stop(){
+        this.playbacks.forEach( (pb) => pb.stop() );
+    }
+
+    // Loading and Decoding
+
     loadAudio(url){
         let request = new XMLHttpRequest();
         request.open('GET', url, true);
