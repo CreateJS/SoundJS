@@ -77,5 +77,21 @@ export default class Playback extends EventDispatcher {
         this.destroy();
     }
 
+    destroy(){
+        this._sourceNode && this._sourceNode.stop();
+        this._sourceNode = null;
+        this._paused = false;
+        this.dispatchEvent("destroyed");
+    }
+
+    handleEnded(){
+        if(this.paused){
+            // Do nothing - the buffer just sent an ended event, but this is because the Playback was just paused,
+            // and the pause function already dispatched an event.
+        }else{
+            this.dispatchEvent("ended");
+            this.destroy();
+        }
+
     }
 }
