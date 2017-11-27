@@ -1,14 +1,23 @@
 import Sound from "./Sound";
+import {EventDispatcher} from "./main";
 
-export default class Playback {
+export default class Playback extends EventDispatcher {
 
-    constructor(audioBuffer, playImmediately = true){
+    get elapsed(){
         let ctx = Sound.context;
+        return ctx.currentTime - this._startTime + this._elapsedOffset
+    }
 
     get duration(){ return this.buffer.duration; }
     get playing(){ return Boolean(this._sourceNode); }
     get paused(){ return this._paused; }
 
+    constructor(audioBuffer){
+        super();
+
+        let ctx = Sound.context;
+
+        // Audio tree setup
         this.outputNode = this.volumeNode = ctx.createGain();
         this.fxBus = ctx.createGain();
 
