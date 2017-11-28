@@ -39,5 +39,31 @@ export default class Group{
         sample.outputNode.connect(this.fxBus);
     }
 
+    // NOTE: depending on group architecture, play/pause/resume  may need to change. E.G. if loops within the group structure are allowed,
+    // then we need to check if we've played a group before in this call of play before playing it, to prevent infinite looping.
+
+    /**
+     * Plays all samples in this group, and in all subgroups.
+     */
+    play(){
+        this.samples.forEach(   s => s.play() );
+        this.subgroups.forEach( g => g.play() );
+    }
+
+    /**
+     * Pauses all samples in this group, and in all subgroups.
+     */
+    pause(){
+        this.samples.forEach(   s => s.pause() );
+        this.subgroups.forEach( g => g.pause() );
+    }
+
+    /**
+     * Unpauses all samples in this group, and in all subgroups.
+     */
+    resume(){
+        this.samples.forEach(   s => s.resume() );
+        this.subgroups.forEach( g => g.resume() );
+    }
 
 }
