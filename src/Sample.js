@@ -39,6 +39,12 @@ export default class Sample extends EventDispatcher {
         }
     }
 
+    /**
+     * Play the sample. This creates and starts a new Playback of the sample, if it's loaded. If it's not loaded, calling this function
+     * will make the Sample play when it finishes loading. A sample will only play once when it finishes loading, no matter how many
+     * times play was called.
+     * @returns {*}
+     */
     play(){
         if(!this.audioBuffer){
             this._playbackRequested = true;
@@ -56,14 +62,23 @@ export default class Sample extends EventDispatcher {
         return pb;
     }
 
+    /**
+     * Pause all playbacks of this sample.
+     */
     pause(){
         this.playbacks.forEach( (pb) => pb.pause() );
     }
 
+    /**
+     * Resume all paused playbacks of this sample.
+     */
     resume(){
         this.playbacks.forEach( (pb) => pb.resume() );
     }
 
+    /**
+     * Stop all playbacks of this sample, destroying them.
+     */
     stop(){
         this.playbacks.forEach( (pb) => pb.stop() );
     }
