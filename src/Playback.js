@@ -74,7 +74,7 @@ export default class Playback extends EventDispatcher {
     }
 
     stop(){
-        this.destroy();
+        this.destroy(); // An event will be dispatched in response to the _sourceNode being told to stop in the destroy function, so nothing is dispatched here.
     }
 
     destroy(){
@@ -89,7 +89,7 @@ export default class Playback extends EventDispatcher {
             // Do nothing - the buffer just sent an ended event, but this is because the Playback was just paused,
             // and the pause function already dispatched an event.
         }else{
-            this.dispatchEvent("ended");
+            this.dispatchEvent("end");
             this.destroy();
         }
 
