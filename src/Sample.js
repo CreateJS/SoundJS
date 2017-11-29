@@ -12,13 +12,24 @@ export default class Sample extends EventDispatcher {
         return this.volumeNode.gain.value;
     }
 
+    set pan(val){
+        this.panNode.pan.value = val;
+    }
+
+    get pan(){
+        return this.panNode.pan.value;
+    }
+
     constructor(url, parent = Sound._rootGroup){
         super();
         let ctx = Sound.context;
         this.outputNode = this.volumeNode = ctx.createGain();
-        this.fxBus = ctx.createGain();
 
-        this.fxBus.connect(this.outputNode); // TODO: Manage effects chain.
+        this.panNode = ctx.createStereoPanner();
+        this.panNode.connect(this.outputNode);
+
+        this.fxBus = ctx.createGain();
+        this.fxBus.connect(this.panNode); // TODO: Manage effects chain.
 
         this.playbacks = [];
 
