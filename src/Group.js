@@ -66,4 +66,9 @@ export default class Group{
         this.subgroups.forEach( g => g.resume() );
     }
 
+    stop(){
+        this.samples.forEach(   s => s.stop() );
+        this.subgroups.forEach( g => g.stop() );
+    }
+
 }
