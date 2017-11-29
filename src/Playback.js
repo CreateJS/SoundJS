@@ -59,6 +59,7 @@ export default class Playback extends EventDispatcher {
     pause(){
         if(!this.playing){ return; }
 
+        // this.dispatchEvent("paused");
         this._elapsedOffset = this.elapsed;
         this._sourceNode.stop();
         this._sourceNode = null;
@@ -68,7 +69,6 @@ export default class Playback extends EventDispatcher {
     resume(){
         if(!this.paused){ return; }
 
-        this.dispatchEvent("paused");
         this._play(0, this._elapsedOffset);
         this._paused = false;
     }
