@@ -70,6 +70,9 @@ export default class Sample extends EventDispatcher {
 
         this.playbacks.push(pb);
         pb.outputNode.connect(this.fxBus);
+
+        pb.addEventListener("destroyed", this.handlePlaybackDestroyed.bind(this));
+
         return pb;
     }
 
@@ -120,5 +123,13 @@ export default class Sample extends EventDispatcher {
 
     handleAudioDecodeError(e){
         console.log("Error decoding audio data.")
+    }
+
+    handlePlaybackDestroyed(e){
+        let index = this.playbacks.indexOf(e.target);
+        if(index > -1){
+            this.playbacks.splice(index, 1);
+        }
+        this.dispatchEvent("playbackDestroyed")
     }
 }
