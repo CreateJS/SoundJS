@@ -46,17 +46,24 @@ export default class Sound {
             let extension = Sound.fileExtensionPriorityList[i];
             let result = testElement.canPlayType("audio/" + extension);
 
-            if(result === "probably"){
-                return extension; // Return the first one the browser thinks it can support.
-            }else if(result === "maybe" && bestMaybe === null){
-                bestMaybe = extension;
+            switch(result){
+                case "probably":
+                    return extension; // Found a good one, return it
+                case "maybe":
+                    if(!Sound.strictFallbacks){
+                        return extension // Not in strict mode, 'maybe' is okay.
+                    }else if(bestMaybe === null){
+                        bestMaybe = extension; // Haven't found a best maybe yet, store this one off in case we don't find a "probably".
+                    }
+                    break;
+                case "":
+                    // no-op
+                default:
+                    // no-op
             }
         }
 
-        if(bestMaybe && !Sound.strictFallbacks){
-            // We didn't find a probably, so return our best 'maybe' unless strict fallbacks are enabled.
-            return bestMaybe;
-        }
+        // We didn't find anything, so return our best maybe, or null if we didn't even find one of those.
         return bestMaybe || null;
     }
 
