@@ -2,31 +2,30 @@ import Group from "./Group"
 import Sample from "./Sample";
 
 export default class Sound {
-    static get context(){
-        if(!Sound._context){
-            let ctxClass = window.AudioContext || window.webkitAudioContext;
-            Sound._context =  new ctxClass();
-        }
 
-        return Sound._context;
+    // Sets up all static class defaults. This function is immediately invoked below the Sound class definition to ensure it runs.
+    static _initialize(){
+        let soundContextClass = window.AudioContext || window.webkitAudioContext;
+        Sound.__context = new soundContextClass();
+
+        Sound.__rootGroup = new Group(null);
+        Sound.__rootGroup.outputNode.connect(Sound.context.destination);
+
+        Sound.__fileExtensionPriorityList = ["mp3"];
+        Sound._strictFallbacks = true;
     }
 
-    static get _rootGroup(){
-        if(!Sound.__rootGroup){
-            Sound.__rootGroup = new Group(null);
-            Sound.__rootGroup.outputNode.connect(Sound.context.destination);
-        }
+    // Read-only properties
+    static get context(){ return Sound.__context; }
+    static get _rootGroup(){ return Sound.__rootGroup; }
 
-        return Sound.__rootGroup;
-    }
+    // Simple static properties
+    static get strictFallbacks (){ return Sound._strictFallbacks; }
+    static set strictFallbacks(val){ Sound._strictFallbacks = val; }
 
-    static get fileExtensionPriorityList(){
-        if(!Sound.__fileExtensionPriorityList){
-            Sound.__fileExtensionPriorityList = ['mp3']
-        }
+    // More complex static properties
 
-        return Sound.__fileExtensionPriorityList;
-    }
+    static get fileExtensionPriorityList(){ return Sound.__fileExtensionPriorityList; }
 
     static set fileExtensionPriorityList(newList){
         let list = Sound.fileExtensionPriorityList;
@@ -67,16 +66,6 @@ export default class Sound {
         return bestMaybe || null;
     }
 
-    static get strictFallbacks (){
-        if(Sound._strictFallbacks === undefined){
-            Sound._strictFallbacks = true;
-        }
-
-        return Sound._strictFallbacks;
-    }
-
-    static set strictFallbacks(val){ Sound._strictFallbacks = val; }
-
     static pause(){
         // TODO: actually implement pausing and unpausing - just putting this here as a reminder that suspend exists.
         Sound.context.suspend();
@@ -87,3 +76,5 @@ export default class Sound {
         return new Sample(src);
     }
 }
+
+Sound._initialize();
