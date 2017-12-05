@@ -80,21 +80,21 @@ export default class Sample extends EventDispatcher {
      * Pause all playbacks of this sample.
      */
     pause(){
-        this.playbacks.forEach( (pb) => pb.pause() );
+        this.playbacks.slice().forEach( (pb) => pb.pause() );
     }
 
     /**
      * Resume all paused playbacks of this sample.
      */
     resume(){
-        this.playbacks.forEach( (pb) => pb.resume() );
+        this.playbacks.slice().forEach( (pb) => pb.resume() );
     }
 
     /**
      * Stop all playbacks of this sample, destroying them.
      */
     stop(){
-        this.playbacks.forEach( (pb) => pb.stop() );
+        this.playbacks.slice().forEach( (pb) => pb.stop() );
     }
 
     // Loading and Decoding
