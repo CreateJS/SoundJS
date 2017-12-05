@@ -20,6 +20,10 @@ export default class Sample extends EventDispatcher {
         return this.panNode.pan.value;
     }
 
+    get duration(){
+        return this.audioBuffer ? this.audioBuffer.duration : null;
+    }
+
     constructor(url, parent = Sound._rootGroup){
         super();
         let ctx = Sound.context;
