@@ -40,13 +40,33 @@ export default class Sample extends EventDispatcher {
         this.audioBuffer = null;
         this._playbackRequested = false;
 
+        this.src = null;
+
 
         if(url instanceof ArrayBuffer){
             ctx.decodeAudioData(url, this.handleAudioDecoded.bind(this), this.handleAudioDecodeError.bind(this));
         }else if(url instanceof AudioBuffer){
             this.audioBuffer = url;
         }else if(typeof url === "string"){
-            this.loadAudio(url); // This works for data URLs too
+            if(/^data:.*?,/.test(url)){ // Test for Data URL, and if it is one, we can just pass it to an XHR to load.
+                this.loadAudio(url);
+            }else{
+                // Not a data URL, so let's doublecheck the file extension before loading.
+                let extensionExp = /\.\w+$/;
+                let result = extensionExp.exec(url);
+                if(result === null){
+                    // No file extension, so add one
+                    url = url.concat("." + Sound.fallbackFileExtension);
+                }else{
+                    // Found a file extension. Check if it's supported. If it's definitely not, fall back.
+                    let extension = result[0].substr(1);
+                    if(!Sound.isExtensionSupported(extension)){
+                        url = url.replace(extensionExp, "." + Sound.fallbackFileExtension);
+                    }
+                }
+                this.src = url;
+                this.loadAudio(url); // This works for data URLs too
+            }
         }
 
         if(parent){
@@ -120,13 +140,23 @@ export default class Sample extends EventDispatcher {
     handleAudioDecoded(buffer){
         this.audioBuffer = buffer;
 
+        this.dispatchEvent("ready");
+
         if(this._playbackRequested){
             this._play();
         }
     }
 
     handleAudioDecodeError(e){
-        console.log("Error decoding audio data.")
+        console.warn("Error decoding audio data in Sample. ")
+    }
+
+    handlePlaybackEnd(e){
+        this.dispatchEvent("playbackEnd");
+    }
+
+    handlePlaybackStopped(e){
+        this.dispatchEvent("playbackStop");
     }
 
     handlePlaybackDestroyed(e){

@@ -66,6 +66,13 @@ export default class Sound {
         return bestMaybe || null;
     }
 
+    static isExtensionSupported(extension){
+        let testElement = document.createElement("audio");
+        let result = testElement.canPlayType("audio/" + extension);
+        return result !== "";
+        // return Sound.strictFallbacks ? result === "probably" : result !== "";
+    }
+
     static pause(){
         // TODO: actually implement pausing and unpausing - just putting this here as a reminder that suspend exists.
         Sound.context.suspend();
