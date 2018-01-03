@@ -1,5 +1,5 @@
 import Sound from "./Sound";
-import {EventDispatcher} from "./main";
+import EventDispatcher from "@createjs/core/src/events/EventDispatcher";
 
 export default class Playback extends EventDispatcher {
 

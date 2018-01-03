@@ -55,11 +55,10 @@
     "plugins": "cd node_modules/@createjs/build && npm run plugins",
     "docs": "cd node_modules/@createjs/build && npm run docs"
   },
-  "dependencies": {
-
-  },
+  "dependencies": {},
   "devDependencies": {
-
+    "babel-jest": "^22.0.4",
+    "jest": "^22.0.4"
   },
   "engine": "node >= 7.10.1"
 }
