@@ -13,6 +13,7 @@ export default class Sound {
 
         Sound.__fileExtensionPriorityList = ["mp3"];
         Sound._strictFallbacks = true;
+        Sound._idHash = {};
     }
 
     // Read-only properties
@@ -66,11 +67,25 @@ export default class Sound {
         return bestMaybe || null;
     }
 
-    static isExtensionSupported(extension){
-        let testElement = document.createElement("audio");
-        let result = testElement.canPlayType("audio/" + extension);
-        return result !== "";
-        // return Sound.strictFallbacks ? result === "probably" : result !== "";
+    static registerSound(sampleOrSource, id){
+        if(sampleOrSource instanceof Sample){
+            Sound._idHash[id] = sampleOrSource;
+        }else{
+            Sound._idHash[id] = new Sample(sampleOrSource);
+        }
+    }
+
+    static removeSound(){
+
+    }
+
+    static isExtensionSupported(pathOrExtension, strict = true){
+        // The file extension is assumed to be either "everything after the last '.' character", or, if there is no ., the whole string.
+        let match = /\.(\w+)$/.exec(pathOrExtension);
+        let ext = match ? match[1] : pathOrExtension;
+        let result = document.createElement("audio").canPlayType("audio/" + ext);
+        //return result !== "";
+        return strict ? result === "probably" : result !== "";
     }
 
     static pause(){

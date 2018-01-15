@@ -48,30 +48,63 @@ export default class Sample extends EventDispatcher {
         }else if(url instanceof AudioBuffer){
             this.audioBuffer = url;
         }else if(typeof url === "string"){
-            if(/^data:.*?,/.test(url)){ // Test for Data URL, and if it is one, we can just pass it to an XHR to load.
+            if(/^data:.*?,/.test(url)){ // Test for Data URL
+                // Data URLs can just be loaded by XHR, so pass it in
                 this.loadAudio(url);
             }else{
-                // Not a data URL, so let's doublecheck the file extension before loading.
-                let extensionExp = /\.\w+$/;
-                let result = extensionExp.exec(url);
-                if(result === null){
-                    // No file extension, so add one
-                    url = url.concat("." + Sound.fallbackFileExtension);
-                }else{
-                    // Found a file extension. Check if it's supported. If it's definitely not, fall back.
-                    let extension = result[0].substr(1);
-                    if(!Sound.isExtensionSupported(extension)){
-                        url = url.replace(extensionExp, "." + Sound.fallbackFileExtension);
-                    }
+                // Assumed to be a regular url at this point
+                this.src = this._ensureValidFileExtension(url);
+                this.loadAudio(this.src);
+            }
+        }else if( url instanceof Array){
+            for(let i = 0; i < url.length; i++){
+                let u = url[i];
+                if(Sound.isExtensionSupported(u, false)){
+                    this.src = u;
+                    this.loadAudio(this.src);
+                    break;
                 }
-                this.src = url;
-                this.loadAudio(url); // This works for data URLs too
+            }
+        }else if( typeof url === "object" ){
+            // Assume a source of the format: {<ext>:<url>} e.g. {mp3: path/to/file/sound.mp3, ogg: other/path/soundFileWithNoExtension}
+            for(let ext in url){
+                if(!url.hasOwnProperty(ext)){continue;}
+                if(Sound.isExtensionSupported(ext, false)){
+                    this.src = url[ext];
+                    this.loadAudio(this.src);
+                    break;
+                }
             }
         }
 
         if(parent){
             parent.add(this);
         }
+    }
+
+    _ensureValidFileExtension(url){
+        // Not a data URL, so let's doublecheck the file extension before loading.
+        let extensionExp = /\.\w+$/;
+        let result = extensionExp.exec(url);
+        if(result === null){
+            // No file extension, so add one
+            url = url.concat("." + Sound.fallbackFileExtension);
+        }else{
+            // Found a file extension. Check if it's supported. If it's definitely not, fall back.
+            let extension = result[0].substr(1);
+            if(!Sound.isExtensionSupported(extension)){
+                url = url.replace(extensionExp, "." + Sound.fallbackFileExtension);
+            }
+        }
+        return url;
+    }
+
+    clone(){
+        let o = new Sample(this.audioBuffer);
+        o.volume = this.volume;
+        o.pan = this.pan;
+        // TODO: clone FX chain
+        return o;
     }
 
     /**
@@ -95,6 +128,8 @@ export default class Sample extends EventDispatcher {
         this.playbacks.push(pb);
         pb.outputNode.connect(this.fxBus);
 
+        pb.addEventListener("end", this.handlePlaybackEnd.bind(this));
+        pb.addEventListener("stop", this.handlePlaybackStopped.bind(this));
         pb.addEventListener("destroyed", this.handlePlaybackDestroyed.bind(this));
 
         return pb;

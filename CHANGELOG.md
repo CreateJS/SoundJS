@@ -2,6 +2,12 @@
 
 A history of releases.
 
+### v2.0.0 (Date TBD)
+***
+#### BREAKING
+- Full retrofit of the SoundJS architecture. Web Audio is now the main focus, and plugins have been removed. New classes to assist in sound management.
+- Change in fallback method: If a url with a file extension is provided, SoundJS will try to play that file extension even if the browser reports a 'maybe' on whether it supports that file type. Providing a URL without a file extension will go down the fallbacks list, like the old behaviour.
+
 ### v1.0.0 (September 14, 2017)
 ***
 ##### CRITICAL
