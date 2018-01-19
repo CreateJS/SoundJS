@@ -166,6 +166,19 @@ export default class Sample extends EventDispatcher {
         request.send();
     }
 
+    /**
+     * Destroy this sample. Halts and destroys all playbacks, and dispatches a destruction event, which should be reacted
+     * to by any containers (e.g. Groups or any external tracking) containing this sample by removing it from their lists
+     * so it can be garbage collected.
+     */
+    destroy(){
+        this.stop();
+        // TODO: review approach for preventing future plays.
+        this._play = () => {throw new Error("Cannot play Sample after it has been destroyed.")};
+        this.dispatchEvent("destroyed");
+        this.removeAllEventListeners();
+    }
+
     handleAudioLoaded(loadEvent){
         let ctx = Sound.context;
         let result = loadEvent.target.response;

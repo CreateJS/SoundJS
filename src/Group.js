@@ -1,9 +1,11 @@
 import Sound from "./Sound"
 import Sample from "./Sample";
+import {EventDispatcher} from "./main";
 
-export default class Group{
+export default class Group extends EventDispatcher{
 
     constructor(parent = Sound._rootGroup){
+        super();
         let ctx = Sound.context;
         this.outputNode = this.volumeNode = ctx.createGain();
 
@@ -37,6 +39,7 @@ export default class Group{
     _addSample(sample){
         this.samples.push(sample);
         sample.outputNode.connect(this.fxBus);
+        sample.on("destroyed", this.handleSampleDestroyed, this);
     }
 
     // NOTE: depending on group architecture, play/pause/resume  may need to change. E.G. if loops within the group structure are allowed,
@@ -69,6 +72,15 @@ export default class Group{
     stop(){
         this.samples.forEach(   s => s.stop() );
         this.subgroups.forEach( g => g.stop() );
+    }
+
+    handleSampleDestroyed(e){
+        let index = this.samples.indexOf(e.target);
+        if(index > -1){
+            this.samples.splice(index, 1);
+        }
+        this.dispatchEvent("sampleDestroyed");
+        console.log("Sample destroyed");
     }
 
 }
