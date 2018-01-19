@@ -92,7 +92,7 @@ export default class Sample extends EventDispatcher {
         }else{
             // Found a file extension. Check if it's supported. If it's definitely not, fall back.
             let extension = result[0].substr(1);
-            if(!Sound.isExtensionSupported(extension)){
+            if(!Sound.isExtensionSupported(extension, false)){
                 url = url.replace(extensionExp, "." + Sound.fallbackFileExtension);
             }
         }
