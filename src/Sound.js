@@ -67,16 +67,64 @@ export default class Sound {
         return bestMaybe || null;
     }
 
+    /**
+     * Register a sample for static access via Sound.playSound(id); If a source (e.g. a URL) is given instead of a sample, a sample will
+     * be created with that source. If no ID is given, the source of the sample will be used, if possible. If the ID is
+     * already in use, the sound will not be registered and this function will throw an error.
+     * @param sampleOrSource
+     * @param id
+     */
     static registerSound(sampleOrSource, id){
-        if(sampleOrSource instanceof Sample){
-            Sound._idHash[id] = sampleOrSource;
-        }else{
-            Sound._idHash[id] = new Sample(sampleOrSource);
+        id = id || Sound._generateRegistrationId(sampleOrSource);
+        let sample = (sampleOrSource instanceof Sample) ? sampleOrSource : new Sample(sampleOrSource);
+
+        if(Sound._idHash[id]){
+            // Id is in use. Fail and error if the sample provided doesn't match the existing sample...
+            if(Sound._idHash[id] !== sample ){
+                throw new Error("Error registering sound - ID already in use.")
+            }
+            // ... or silently do nothing if they do match.
+            return;
+        }
+
+        Sound._idHash[id] = sample;
+    }
+
+    /**
+     * Generates a usable id for registering a sound under, in the case the user didn't provide one. Will use a provided
+     * source as an ID, or uses the Sample's source if a sample was provided.
+     * @param sampleOrSource The source or sample to generate an ID for.
+     * @returns {*}
+     * @private
+     */
+    static _generateRegistrationId(sampleOrSource){
+        return (sampleOrSource instanceof Sample) ? sample.src : sampleOrSource;
+    }
+
+    static removeSound(id){
+        let sample = Sound._idHash[id];
+        if(sample){
+            delete Sound._idHash[id];
+            sample.destroy();
         }
     }
 
-    static removeSound(){
-
+    /**
+     * Play a sound - either a previously registered one, or, if not found, assume the "id" is a source and attempt to
+     * make a sample and play it.
+     * @param idOrSrc The identifier of the sound to play.
+     * @param playProps Optional. The properties to apply to the sound.
+     */
+    static play(idOrSrc, playProps){
+        let registered = Sound._idHash[idOrSrc]; // Will this cause problems with people trying to make a new sample?
+        if(registered){
+            registered.play();
+            return registered;
+        }else{
+            let sample = new Sample(idOrSrc);
+            sample.play();
+            return sample;
+        }
     }
 
     static isExtensionSupported(pathOrExtension, strict = true){
