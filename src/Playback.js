@@ -124,12 +124,13 @@ export default class Playback extends EventDispatcher {
     }
 
     stop(){
+        // change this to just kick off the fadeout. Need to check and set flags, too.
         this.dispatchEvent("stop");
         this.destroy(); // An event will be dispatched in response to the _sourceNode being told to stop in the destroy function, so nothing is dispatched here.
     }
 
     _stopCore(){
-
+        // after the crossfade, do the actual stopping part.
     }
 
     destroy(){
@@ -141,6 +142,9 @@ export default class Playback extends EventDispatcher {
         this._sourceNode = null;
         this._paused = false;
         this.dispatchEvent("destroyed");
+        // TODO: review approach for preventing future plays.
+        this._play = () => {throw new Error("Cannot play Playback after it has been destroyed.")};
+        this.removeAllEventListeners();
     }
 
     handleEnded(){
