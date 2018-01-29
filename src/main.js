@@ -44,15 +44,10 @@
  */
 
 // re-export shared classes
-export { default as EventDispatcher } from "@createjs/build/src/events/EventDispatcher";
-export { default as Event } from "@createjs/build/src/events/Event";
-export { default as Ticker } from "@createjs/build/src/utils/Ticker";
+export { default as EventDispatcher } from "@createjs/core/src/events/EventDispatcher";
+export { default as Event } from "@createjs/core/src/events/Event";
 // sound
-export { default as Playback } from  "./Playback"
-export { default as Sample } from  "./Sample"
-export { default as Group } from "./Group"
-export { default as Sound } from  "./Sound"
-
-// inject version into window
-const v = (window.createjs = window.createjs || { v: {} });
-v.s = "<%= version %>";
+export { default as Playback } from "./Playback";
+export { default as Sample } from "./Sample";
+export { default as Group } from "./Group";
+export { default as Sound } from "./Sound";
