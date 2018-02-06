@@ -136,15 +136,66 @@ class Sound {
         return strict ? result === "probably" : result !== "";
     }
 
+    static purgeSamples(urlOrId){
+    	// TODO: Implement. Intention: search the group tree for all samples with a matching URL or ID and destroy them.
+	}
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// GROUP PARITY:
+	// These functions make the root static Sound object 'grouplike' - you can interact with it like it were a group and
+	// it will affect all sounds in SounJS's group tree.
+
+	/*static get samples(){
+    	return this._rootGroup.samples;
+	}
+
+	static get groups(){
+    	return this._rootGroup.subgroups;
+	}*/
+
     static pause(){
-        // TODO: actually implement pausing and unpausing - just putting this here as a reminder that suspend exists.
-        Sound.context.suspend();
+        this._rootGroup.pause();
     }
+
+    static resume(){
+    	this._rootGroup.resume();
+	}
+
+	static add(sampleOrGroup){
+    	this._rootGroup.add(sampleOrGroup);
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// SOUNDJS 1 PARITY:
+	// These functions are mostly passthroughs to new implementations, and exist to allow some backwards compatability
+	// with soundJS 1.
+
 
     static createInstance(src, startTime = null, duration = null){
         // TODO: start time, duration.
         return new Sample(src);
     }
+
+    getDefaultPlayProps(src){
+    	// TODO: implement. Search IDs and active samples for one that matches the src, and get the default play props of that sound.
+	}
+
+	setDefaultPlayProps(src, props){
+
+	}
+
+	registerSounds(){
+    	// TODO Implement. Iterate over list, call registerSound on each.
+	}
+
+	removeSounds(){
+    	// TODO: Implement. Iterated calls to removeSound?
+	}
+
+	removeAllSounds(){
+    	// TODO: Implement. Call purgeSamples with no argument?
+	}
 }
 
 Sound._initialize();

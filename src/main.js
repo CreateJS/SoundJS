@@ -40,7 +40,6 @@
  * IE8 and earlier are not supported, even with the Flash fallback. To support earlier browsers, you can use an older
  * version of SoundJS (version 0.5.2 and earlier).
  *
- * @main SoundJS
  */
 
 // re-export shared classes

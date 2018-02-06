@@ -24,63 +24,79 @@ class Sample extends EventDispatcher {
         return this.audioBuffer ? this.audioBuffer.duration : null;
     }
 
-    constructor(url, parent = Sound._rootGroup){
-        super();
-        let ctx = Sound.context;
-        this.outputNode = this.volumeNode = ctx.createGain();
+    set parent(val){
+    	this._parent = val;
+    	this.outputNode.connect(parent.inputNode);
+	}
 
-        this.panNode = ctx.createStereoPanner();
-        this.panNode.connect(this.outputNode);
+	get parent(){
+    	return this._parent;
+	}
 
-        this.fxBus = ctx.createGain();
-        this.fxBus.connect(this.panNode); // TODO: Manage effects chain.
+	constructor(url, parent = Sound._rootGroup) {
+		super();
+		let ctx = Sound.context;
+		this.outputNode = this.volumeNode = ctx.createGain();
 
-        this.playbacks = [];
+		this.panNode = ctx.createStereoPanner();
+		this.panNode.connect(this.outputNode);
 
-        this.audioBuffer = null;
-        this._playbackRequested = false;
+		this.fxBus = ctx.createGain();
+		this.fxBus.connect(this.panNode); // TODO: Manage effects chain.
 
-        this.src = null;
+		this.playbacks = [];
 
+		this.audioBuffer = null;
+		this._playbackRequested = false;
 
-        if(url instanceof ArrayBuffer){
-            ctx.decodeAudioData(url, this.handleAudioDecoded.bind(this), this.handleAudioDecodeError.bind(this));
-        }else if(url instanceof AudioBuffer){
-            this.audioBuffer = url;
-        }else if(typeof url === "string"){
-            if(/^data:.*?,/.test(url)){ // Test for Data URL
-                // Data URLs can just be loaded by XHR, so pass it in
-                this.loadAudio(url);
-            }else{
-                // Assumed to be a regular url at this point
-                this.src = this._ensureValidFileExtension(url);
-                this.loadAudio(this.src);
-            }
-        }else if( url instanceof Array){
-            for(let i = 0; i < url.length; i++){
-                let u = url[i];
-                if(Sound.isExtensionSupported(u, false)){
-                    this.src = u;
-                    this.loadAudio(this.src);
-                    break;
-                }
-            }
-        }else if( typeof url === "object" ){
-            // Assume a source of the format: {<ext>:<url>} e.g. {mp3: path/to/file/sound.mp3, ogg: other/path/soundFileWithNoExtension}
-            for(let ext in url){
-                if(!url.hasOwnProperty(ext)){continue;}
-                if(Sound.isExtensionSupported(ext, false)){
-                    this.src = url[ext];
-                    this.loadAudio(this.src);
-                    break;
-                }
-            }
-        }
+		this.src = null;
 
-        if(parent){
-            parent.add(this);
-        }
-    }
+		this.resolveUrl(url);
+
+		if (parent) {
+			parent.add(this);
+		}
+	}
+
+	resolveUrl(url) {
+		let ctx = Sound.context;
+
+		if (url instanceof ArrayBuffer) {
+			ctx.decodeAudioData(url, this.handleAudioDecoded.bind(this), this.handleAudioDecodeError.bind(this));
+		} else if (url instanceof AudioBuffer) {
+			this.audioBuffer = url;
+		} else if (typeof url === "string") {
+			if (/^data:.*?,/.test(url)) { // Test for Data URL
+				// Data URLs can just be loaded by XHR, so pass it in
+				this.loadAudio(url);
+			} else {
+				// Assumed to be a regular url at this point
+				this.src = this._ensureValidFileExtension(url);
+				this.loadAudio(this.src);
+			}
+		} else if (url instanceof Array) {
+			for (let i = 0; i < url.length; i++) {
+				let u = url[i];
+				if (Sound.isExtensionSupported(u, false)) {
+					this.src = u;
+					this.loadAudio(this.src);
+					break;
+				}
+			}
+		} else if (typeof url === "object") {
+			// Assume a source of the format: {<ext>:<url>} e.g. {mp3: path/to/file/sound.mp3, ogg: other/path/soundFileWithNoExtension}
+			for (let ext in url) {
+				if (!url.hasOwnProperty(ext)) {
+					continue;
+				}
+				if (Sound.isExtensionSupported(ext, false)) {
+					this.src = url[ext];
+					this.loadAudio(this.src);
+					break;
+				}
+			}
+		}
+	}
 
     _ensureValidFileExtension(url){
         // Not a data URL, so let's doublecheck the file extension before loading.
