@@ -1,7 +1,7 @@
 import Sound from "./Sound";
 import EventDispatcher from "@createjs/core/src/events/EventDispatcher";
 
-export default class Playback extends EventDispatcher {
+class Playback extends EventDispatcher {
 
     get elapsed(){
         let ctx = Sound.context;
@@ -95,3 +95,5 @@ export default class Playback extends EventDispatcher {
 
     }
 }
+
+export default Playback;

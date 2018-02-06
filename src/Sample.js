@@ -2,7 +2,7 @@ import Sound from "./Sound";
 import Playback from "./Playback";
 import EventDispatcher from "@createjs/core/src/events/EventDispatcher";
 
-export default class Sample extends EventDispatcher {
+class Sample extends EventDispatcher {
 
     set volume(val){
         this.volumeNode.gain.value = val;
@@ -167,3 +167,5 @@ export default class Sample extends EventDispatcher {
         this.dispatchEvent("playbackDestroyed")
     }
 }
+
+export default Sample;

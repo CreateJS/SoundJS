@@ -1,7 +1,7 @@
-import Sound from "./Sound"
+import Sound from "./Sound";
 import Sample from "./Sample";
 
-export default class Group{
+class Group {
 
     constructor(parent = Sound._rootGroup){
         let ctx = Sound.context;
@@ -72,3 +72,5 @@ export default class Group{
     }
 
 }
+
+export default Group;
