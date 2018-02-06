@@ -1,8 +1,9 @@
-import Sound from "./Sound"
+import Sound from "./Sound";
 import Sample from "./Sample";
 import {EventDispatcher} from "./main";
 
-export default class Group extends EventDispatcher{
+
+class Group extends EventDispatcher{
 
     constructor(parent = Sound._rootGroup){
         super();
@@ -84,3 +85,6 @@ export default class Group extends EventDispatcher{
     }
 
 }
+
+export default Group;
+

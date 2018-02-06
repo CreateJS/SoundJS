@@ -1,3 +1,6 @@
+// run the master setup file first
+require('@createjs/build/tests/setup');
+
 beforeEach(function () {
 	this.baseAssetsPath = "assets/";
 

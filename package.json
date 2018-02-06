@@ -1,5 +1,5 @@
 {
-  "name": "soundjs",
+  "name": "@createjs/soundjs",
   "version": "2.0.0",
   "description": "A JavaScript library that provides a simple API and powerful features to make working with audio a breeze. Easily ties in audio file loading to PreloadJS.",
   "keywords": [
@@ -47,19 +47,17 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "cd node_modules/createjs && npm run test",
-    "test:headless": "cd node_modules/createjs && npm run test:headless",
-    "dev": "cd node_modules/createjs && npm run dev",
-    "build": "cd node_modules/createjs && npm run build",
-    "build:next": "cd node_modules/createjs && npm run build:next",
-    "plugins": "cd node_modules/createjs && npm run plugins",
-    "docs": "cd node_modules/createjs && npm run docs"
+    "test": "jest -c ./tests/jest.config.js",
+    "lint": "cd node_modules/@createjs/build && gulp lint",
+    "dev": "cd node_modules/@createjs/build && gulp dev --format=global",
+    "build": "cd node_modules/@createjs/build && gulp build",
+    "plugins": "cd node_modules/@createjs/build && gulp plugins",
+    "docs": "cd node_modules/@createjs/docs && npm run gen"
   },
-  "dependencies": {
-    "createjs": "2.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
-    
+    "babel-jest": "^22.0.4",
+    "jest": "^22.0.4"
   },
   "engine": "node >= 7.10.1"
 }

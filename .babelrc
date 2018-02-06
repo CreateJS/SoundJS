@@ -1,0 +1,3 @@
+{
+	"extends": "@createjs/build/.rollup-babelrc"
+}
