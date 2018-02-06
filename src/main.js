@@ -43,10 +43,10 @@
  */
 
 // re-export shared classes
-export { default as EventDispatcher } from "@createjs/core/src/events/EventDispatcher";
-export { default as Event } from "@createjs/core/src/events/Event";
+export {default as EventDispatcher} from "@createjs/core/src/events/EventDispatcher";
+export {default as Event} from "@createjs/core/src/events/Event";
 // sound
-export { default as Playback } from "./Playback";
-export { default as Sample } from "./Sample";
-export { default as Group } from "./Group";
-export { default as Sound } from "./Sound";
+export {default as Playback} from "./Playback";
+export {default as Sample} from "./Sample";
+export {default as Group} from "./Group";
+export {default as Sound} from "./Sound";
