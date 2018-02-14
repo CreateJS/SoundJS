@@ -160,6 +160,20 @@ class Sound {
 
 	static purgeSamples(urlOrId) {
 		// TODO: Implement. Intention: search the group tree for all samples with a matching URL or ID and destroy them.
+
+		let samples = null;
+		if(urlOrId === "" || urlOrId === undefined){
+			samples = Sound._rootGroup._getAllSampleDescendants();
+		}else{
+			samples = Sound._rootGroup._getSampleDescendantsBySource(urlOrId)
+		}
+
+		if(Sound._idHash[urlOrId]){
+			Sound.removeSound(urlOrId);
+		}
+
+		samples.forEach(  s => s.destroy()  );
+
 	}
 
 
