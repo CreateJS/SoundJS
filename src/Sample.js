@@ -20,6 +20,30 @@ class Sample extends EventDispatcher {
 		return this.panNode.pan.value;
 	}
 
+	set muted(val){
+		this._muted = Boolean(val);
+	}
+
+	get muted(){
+		return this._muted;
+	}
+
+	set paused(val){
+		this._paused = Boolean(val);
+	}
+
+	get paused(){
+		return this._paused;
+	}
+
+	set loop(val){
+		this._loop = val;
+	}
+
+	get loop(){
+		return this._loop;
+	}
+
 	get duration() {
 		return this.audioBuffer ? this.audioBuffer.duration : null;
 	}
@@ -214,7 +238,7 @@ class Sample extends EventDispatcher {
 	}
 
 	handleAudioDecodeError(e) {
-		console.warn("Error decoding audio data in Sample. ")
+		console.warn("Error decoding audio data in Sample.")
 	}
 
 	handlePlaybackEnd(e) {
@@ -231,6 +255,32 @@ class Sample extends EventDispatcher {
 			this.playbacks.splice(index, 1);
 		}
 		this.dispatchEvent("playbackDestroyed")
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// SoundJS 1.0 Parity
+
+
+	makePlayPropsObj(){
+		return {
+			volume: this.volume,
+			loop: this.loop,
+			delay: this.delay,
+			duration: this.playDuration,
+			pan: this.pan,
+			interrupt: this.interrupt,
+			offset: this.offset
+		};
+	}
+
+	consumePlayPropsObj(o){
+		this.volume = o.volume === undefined ? this.volume : o.volume;
+		this.loop = o.loop === undefined ? this.loop : o.loop;
+		this.delay = o.delay === undefined ? this.delay : o.delay;
+		this.playDuration = o.duration === undefined ? this.duration : o.duration;
+		this.pan = o.pan === undefined ? this.pan : o.pan;
+		this.interrupt = o.interrupt === undefined ? this.interrupt : o.interrupt;
+		this.offset = o.offset === undefined? this.offset : o.offset;
 	}
 }
 
