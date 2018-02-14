@@ -89,16 +89,22 @@ class Sound {
 	 * @param sampleOrSource
 	 * @param id
 	 */
-	static registerSound(sampleOrSource, id) {
-		id = id || Sound._generateRegistrationId(sampleOrSource);
-		let sample = (sampleOrSource instanceof Sample) ? sampleOrSource : new Sample(sampleOrSource);
+	static registerSound(sampleData, id, defaultPlayProps) {
+		id = id || Sound._generateRegistrationId(sampleData);
+		let sample = (sampleData instanceof Sample) ? sampleData : new Sample(sampleData);
 
 		if (Sound._idHash[id]) {
-			// Id is in use. Fail and error if the sample provided doesn't match the existing sample...
-			if (Sound._idHash[id] !== sample) {
+			// Id is in use. Check for a match.
+			if (Sound._idHash[id] === sampleData || Sound._idHash[id].src === sampleData) {		// Match logic: If a sample was provided, it must be exactly equal to the already registered sample.
+																																												// If a source was provided, compare the source to the source of the existing sample, and if they match, the samples match.
+																																												// Note that this will always fail for data URLs and array buffers, as these are too large and not stored in a sample's src.
+				// Silently do nothing if the samples match...
+
+			}else{
+				// ... or throw an error if there's a conflict.
 				throw new Error("Error registering sound - ID already in use.")
 			}
-			// ... or silently do nothing if they do match.
+
 			return;
 		}
 
