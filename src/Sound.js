@@ -143,6 +143,7 @@ class Sound {
 			return registered;
 		} else {
 			let sample = new Sample(idOrSrc);
+			Sound.registerSound(sample);
 			sample.play();
 			return sample;
 		}
