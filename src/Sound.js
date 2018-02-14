@@ -119,7 +119,7 @@ class Sound {
 	 * @private
 	 */
 	static _generateRegistrationId(sampleOrSource) {
-		return (sampleOrSource instanceof Sample) ? sample.src : sampleOrSource;
+		return (sampleOrSource instanceof Sample) ? sampleOrSource.src : sampleOrSource;
 	}
 
 	static removeSound(id) {
