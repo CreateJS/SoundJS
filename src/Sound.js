@@ -207,16 +207,25 @@ class Sound {
 
 	}
 
-	registerSounds() {
-		// TODO Implement. Iterate over list, call registerSound on each.
+	/**
+	 * Register multiple sounds at once. TODO: expected args? 
+	 * @param sounds
+	 */
+	static registerSounds(sounds) {
+		sounds.forEach( s => Sound.registerSound(s) )
 	}
 
-	removeSounds() {
-		// TODO: Implement. Iterated calls to removeSound?
+	/**
+	 * Remove multiple sounds registered by either Sound.play or Sound.registerSound. Takes the same type of argument as
+	 * removeSound (aka an ID), but as an array, for multiple removals at once.
+	 * @param sounds
+	 */
+	static removeSounds(sounds) {
+		sounds.forEach( s => Sound.removeSound(s)  );
 	}
 
-	removeAllSounds() {
-		// TODO: Implement. Call purgeSamples with no argument?
+	static removeAllSounds() {
+		Sound.purgeSamples();
 	}
 }
 
