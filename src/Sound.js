@@ -122,11 +122,19 @@ class Sound {
 		return (sampleOrSource instanceof Sample) ? sampleOrSource.src : sampleOrSource;
 	}
 
+	/**
+	 * Removes a sample previously registered for static tracking, either by Sound.play or Sound.registerSound. For the removal
+	 * of a single sample, use sample.destroy. To remove all samples with a given url source, use Sound.purgeSamples
+	 * @param id
+	 */
 	static removeSound(id) {
+		// TODO: basepath?
 		let sample = Sound._idHash[id];
 		if (sample) {
 			delete Sound._idHash[id];
 			sample.destroy();
+		}else{
+			throw new Error("Could not remove sample - sample not found.")
 		}
 	}
 
@@ -147,6 +155,13 @@ class Sound {
 			sample.play();
 			return sample;
 		}
+	}
+
+	/**
+	 * Stops ALL sounds that SoundJS is playing.
+	 */
+	static stop(){
+		Sound._rootGroup.stop();
 	}
 
 	static isExtensionSupported(pathOrExtension, strict = true) {
