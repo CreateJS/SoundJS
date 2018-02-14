@@ -1,6 +1,6 @@
 import Sound from "./Sound";
 import Sample from "./Sample";
-import {EventDispatcher} from "./main";
+import EventDispatcher from "@createjs/core/src/events/EventDispatcher";
 
 
 class Group extends EventDispatcher {
@@ -82,6 +82,32 @@ class Group extends EventDispatcher {
 		}
 		this.dispatchEvent("sampleDestroyed");
 		console.log("Sample destroyed");
+	}
+
+	_getSampleDescendantsBySource(src){
+		let out = new Set();
+
+		this.samples.forEach( s => {  if(s.src === src){  out.add(s)  }   }); // Return all samples in this group that match...
+
+		this.subgroups.forEach( g => {                                    // ... and recursively run on subgroups, too
+			let sub = g._getSampleDescendantsBySource(src);
+			sub.forEach(s => out.add(s))
+		});
+
+		return Array.from(out);
+	}
+
+	_getAllSampleDescendants(){
+		let out = new Set();
+
+		this.samples.forEach(  s => out.add(s)  ); 												// Return all samples in this group...
+
+		this.subgroups.forEach( g => {                                    // ... and recursively run on subgroups, too
+			let sub = g._getAllSampleDescendants(src);
+			sub.forEach(s => out.add(s))
+		});
+
+		return Array.from(out);
 	}
 
 }
