@@ -57,7 +57,7 @@ class Sample extends EventDispatcher {
 		return this._parent;
 	}
 
-	constructor(url, parent = Sound._rootGroup) {
+	constructor(src, parent = Sound._rootGroup) {
 		super();
 		let ctx = Sound.context;
 		this.outputNode = this.volumeNode = ctx.createGain();
@@ -75,46 +75,49 @@ class Sample extends EventDispatcher {
 
 		this.src = null;
 
-		this.resolveUrl(url);
+		this._resolveSource(src);
+
+		this.muted = false;
+		this.paused = false;
 
 		if (parent) {
 			parent.add(this);
 		}
 	}
 
-	resolveUrl(url) {
+	_resolveSource(src) {
 		let ctx = Sound.context;
 
-		if (url instanceof ArrayBuffer) {
-			ctx.decodeAudioData(url, this.handleAudioDecoded.bind(this), this.handleAudioDecodeError.bind(this));
-		} else if (url instanceof AudioBuffer) {
-			this.audioBuffer = url;
-		} else if (typeof url === "string") {
-			if (/^data:.*?,/.test(url)) { // Test for Data URL
+		if (src instanceof ArrayBuffer) {
+			ctx.decodeAudioData(src, this.handleAudioDecoded.bind(this), this.handleAudioDecodeError.bind(this));
+		} else if (src instanceof AudioBuffer) {
+			this.audioBuffer = src;
+		} else if (typeof src === "string") {
+			if (/^data:.*?,/.test(src)) { // Test for Data URL
 				// Data URLs can just be loaded by XHR, so pass it in
-				this.loadAudio(url);
+				this.loadAudio(src);
 			} else {
 				// Assumed to be a regular url at this point
-				this.src = this._ensureValidFileExtension(url);
+				this.src = this._ensureValidFileExtension(src);
 				this.loadAudio(this.src);
 			}
-		} else if (url instanceof Array) {
-			for (let i = 0; i < url.length; i++) {
-				let u = url[i];
+		} else if (src instanceof Array) {
+			for (let i = 0; i < src.length; i++) {
+				let u = src[i];
 				if (Sound.isExtensionSupported(u, false)) {
 					this.src = u;
 					this.loadAudio(this.src);
 					break;
 				}
 			}
-		} else if (typeof url === "object") {
+		} else if (typeof src === "object") {
 			// Assume a source of the format: {<ext>:<url>} e.g. {mp3: path/to/file/sound.mp3, ogg: other/path/soundFileWithNoExtension}
-			for (let ext in url) {
-				if (!url.hasOwnProperty(ext)) {
+			for (let ext in src) {
+				if (!src.hasOwnProperty(ext)) {
 					continue;
 				}
 				if (Sound.isExtensionSupported(ext, false)) {
-					this.src = url[ext];
+					this.src = src[ext];
 					this.loadAudio(this.src);
 					break;
 				}
