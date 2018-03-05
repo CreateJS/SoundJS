@@ -36,12 +36,12 @@ class Sample extends EventDispatcher {
 		return this._paused;
 	}
 
-	set loop(val){
-		this._loop = val;
+	set loops(val){
+		this._loops = val;
 	}
 
-	get loop(){
-		return this._loop;
+	get loops(){
+		return this._loops;
 	}
 
 	get duration() {
@@ -166,7 +166,7 @@ class Sample extends EventDispatcher {
 	}
 
 	_play() {
-		let pb = new Playback(this.audioBuffer);
+		let pb = new Playback(this.audioBuffer, {loops: this.loops});
 
 		this.playbacks.push(pb);
 		pb.outputNode.connect(this.fxBus);
@@ -267,7 +267,7 @@ class Sample extends EventDispatcher {
 	makePlayPropsObj(){
 		return {
 			volume: this.volume,
-			loop: this.loop,
+			loops: this.loops,
 			delay: this.delay,
 			duration: this.playDuration,
 			pan: this.pan,
@@ -278,7 +278,7 @@ class Sample extends EventDispatcher {
 
 	consumePlayPropsObj(o){
 		this.volume = o.volume === undefined ? this.volume : o.volume;
-		this.loop = o.loop === undefined ? this.loop : o.loop;
+		this.loops = o.loops === undefined ? this.loops : o.loops;
 		this.delay = o.delay === undefined ? this.delay : o.delay;
 		this.playDuration = o.duration === undefined ? this.duration : o.duration;
 		this.pan = o.pan === undefined ? this.pan : o.pan;

@@ -132,7 +132,7 @@ class Playback extends EventDispatcher {
 	loop() {
 		this._sourceNode = null;
 		this._play(0, 0); // TODO: delay and offeset?
-		if (this.remainingLoops !== -1) {
+		if (this.remainingLoops > 0) {
 			this.remainingLoops--;
 		}
 
@@ -171,7 +171,7 @@ class Playback extends EventDispatcher {
 		} else {
 			// Reached end of playback. Loop if we have remaining loops - destroy otherwise.
 
-			if (this.remainingLoops > 0) {
+			if (this.remainingLoops !== 0) {
 				this.dispatchEvent("end");
 				this.loop();
 			} else {
