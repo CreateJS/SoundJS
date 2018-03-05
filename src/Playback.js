@@ -25,7 +25,7 @@ class Playback extends EventDispatcher {
 
 		let ctx = Sound.context;
 
-		this.fademaskDuration = 0.01;
+		this.fademaskDuration = 0.02;
 		this.fademaskCallback = null;
 
 		// Audio tree setup
@@ -58,6 +58,7 @@ class Playback extends EventDispatcher {
 			return; // Do nothing - sound is already playing. Playing multiple sounds should be done by playing the sample again.
 		}
 
+		this.fademaskerNode.gain.value = 0;
 		this._sourceNode || this._createSourceNode();
 		this._sourceNode.start(delay, offset);
 		this._fademaskIn();
@@ -81,9 +82,11 @@ class Playback extends EventDispatcher {
 	_fademaskOut() {
 		this.fademaskerNode.gain.value = 1;
 		this.fademaskerNode.gain.linearRampToValueAtTime(0, createjs.Sound.context.currentTime + this.fademaskDuration);
+		//this.fademaskerNode.gain.setTargetAtTime(0, createjs.Sound.context.currentTime, 1);
 
 		if (this.fademaskCallback) {
-			this.fademaskCallback.apply(this)
+			//this.fademaskCallback.apply(this)
+			window.setTimeout( () => { this.fademaskCallback.apply(this); this.fademaskCallback = null;}, (this.fademaskDuration * 1100) | 0)
 		}
 	}
 
@@ -92,7 +95,7 @@ class Playback extends EventDispatcher {
 
 		this._sourceNode = ctx.createBufferSource();
 		this._sourceNode.buffer = this.buffer;
-		this._sourceNode.connect(this.outputNode);
+		this._sourceNode.connect(this.fxBus);
 
 		this._sourceNode.onended = this.handleEnded.bind(this);
 	}
@@ -104,8 +107,8 @@ class Playback extends EventDispatcher {
 
 		// this.dispatchEvent("paused");
 		if (this.fademaskDuration > 0) {
-			this._fademaskOut();
 			this.requestFademaskCallback(this._pauseCore);
+			this._fademaskOut();
 		}
 	}
 
