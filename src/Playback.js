@@ -168,7 +168,7 @@ class Playback extends EventDispatcher {
 			throw new Error("Cannot play Playback after it has been destroyed.")
 		};
 		this.removeAllEventListeners();
-		this.fademaskerNode.removeAllEventListeners();
+		this.declicker.removeAllEventListeners();
 	}
 
 	handleEnded() {
