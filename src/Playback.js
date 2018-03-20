@@ -26,13 +26,34 @@ class Playback extends EventDispatcher {
 
 		let ctx = Sound.context;
 
-		this.fademaskDuration = 0.02;
-		this.fademaskCallback = null;
+		this._buildWebAudioTree();
 
-		// Audio tree setup
 		this.declicker = new Declicker(this.fademaskerNode);
 		this.declicker.on("fadeOutComplete", this.handleFadeMaskComplete, this);
 		// Currently no need to listen to the fade-in complete.
+
+		// Internal playback data tracking
+		this.buffer = audioBuffer;
+		this._startTime = null;
+		this._elapsedOffset = 0; // The amount of time spent playing the audio
+		this._paused = false;
+		this._pausing = false;
+		this._stopping = false;
+
+		// Play properties
+
+		let loops = Number(options.loops);
+		this.remainingLoops = loops ? Math.max(loops | 0, -1) : 0;
+
+		this.delay   = isNaN(Number(options.delay )) ? 0 : Number(options.delay);			// 0 default
+		this.offset  = isNaN(Number(options.offset)) ? 0 : Number(options.offset);		// 0 default
+		this.playDuration = options.playDuration; 																		// No default needed, undefined means "play until end"
+
+		this._play(this.delay, this.offset, this.playDuration);
+	}
+
+	_buildWebAudioTree(){
+		let ctx = Sound.context;
 		this.outputNode = this.faderNode = ctx.createGain();
 
 		this.volumeNode = ctx.createGain();
@@ -43,19 +64,9 @@ class Playback extends EventDispatcher {
 
 		this.fxBus = ctx.createGain();
 		this.fxBus.connect(this.fademaskerNode);
-
-		// Data tracking
-		this.buffer = audioBuffer;
-		this._startTime = null;
-		this._elapsedOffset = 0; // The amount of time elapsed, including pauses.
-		this._paused = false;
-
-		this.remainingLoops = options.loops ? Math.max(options.loops | 0, -1) : 0;
-
-		this._play(); // TODO: 10ms fade in to prevent clicks
 	}
 
-	_play(delay = 0, offset = 0) {
+	_play(delay = 0, offset = 0, duration = undefined) {
 		let ctx = Sound.context;
 
 		if (this._sourceNode) {
@@ -80,6 +91,14 @@ class Playback extends EventDispatcher {
 		this._sourceNode.connect(this.fxBus);
 
 		this._sourceNode.onended = this.handleEnded.bind(this);
+	}
+
+	loop() {
+		this._sourceNode = null;
+		this._play(0, this.offset, this.playDuration);
+		if (this.remainingLoops > 0) {
+			this.remainingLoops--;
+		}
 	}
 
 	pause() {
