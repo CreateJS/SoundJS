@@ -57,7 +57,7 @@ class Sample extends EventDispatcher {
 		return this._parent;
 	}
 
-	constructor(src, parent = Sound._rootGroup) {
+	constructor(src, options = {}, parent = Sound._rootGroup) {
 		super();
 		let ctx = Sound.context;
 		this.outputNode = this.volumeNode = ctx.createGain();
@@ -74,6 +74,14 @@ class Sample extends EventDispatcher {
 		this._playbackRequested = false;
 
 		this.src = null;
+
+		this.volume  = isNaN(Number(options.volume)) ? 1 : Number(options.volume); 		// 1 default
+		this.loops   = isNaN(Number(options.loops )) ? 0 : Math.max(Number(options.loops) | 0, -1);		// 0 default, >= -1, integers only
+		this.delay   = isNaN(Number(options.delay )) ? 0 : Number(options.delay);			// 0 default
+		this.pan     = isNaN(Number(options.pan   )) ? 0 : Number(options.pan); 			// 0 default
+		this.offset  = isNaN(Number(options.offset)) ? 0 : Number(options.offset);		// 0 default
+
+		this.playDuration = options.playDuration; 																		// No default needed, undefined means "play until end"
 
 		this._resolveSource(src);
 
@@ -146,7 +154,8 @@ class Sample extends EventDispatcher {
 		let o = new Sample(this.audioBuffer);
 		o.volume = this.volume;
 		o.pan = this.pan;
-		// TODO: clone FX chain
+		o.loops = this.loops;
+		// TODO: clone FX chain, other properties
 		return o;
 	}
 
@@ -166,7 +175,7 @@ class Sample extends EventDispatcher {
 	}
 
 	_play() {
-		let pb = new Playback(this.audioBuffer, {loops: this.loops});
+		let pb = new Playback(this.audioBuffer, {loops: this.loops, playDuration: this.playDuration, offset: this.offset, delay: this.delay});
 
 		this.playbacks.push(pb);
 		pb.outputNode.connect(this.fxBus);
@@ -266,24 +275,24 @@ class Sample extends EventDispatcher {
 
 	makePlayPropsObj(){
 		return {
-			volume: this.volume,
-			loops: this.loops,
-			delay: this.delay,
-			duration: this.playDuration,
-			pan: this.pan,
+			volume:    this.volume,
+			loops:     this.loops,
+			delay:     this.delay,
+			duration:  this.playDuration,
+			pan:       this.pan,
 			interrupt: this.interrupt,
-			offset: this.offset
+			offset:    this.offset
 		};
 	}
 
 	consumePlayPropsObj(o){
-		this.volume = o.volume === undefined ? this.volume : o.volume;
-		this.loops = o.loops === undefined ? this.loops : o.loops;
-		this.delay = o.delay === undefined ? this.delay : o.delay;
-		this.playDuration = o.duration === undefined ? this.duration : o.duration;
-		this.pan = o.pan === undefined ? this.pan : o.pan;
-		this.interrupt = o.interrupt === undefined ? this.interrupt : o.interrupt;
-		this.offset = o.offset === undefined? this.offset : o.offset;
+		this.volume = o.volume         === undefined ? this.volume    : o.volume;
+		this.loops = o.loops           === undefined ? this.loops     : o.loops;
+		this.delay = o.delay           === undefined ? this.delay     : o.delay;
+		this.playDuration = o.duration === undefined ? this.duration  : o.duration;
+		this.pan = o.pan               === undefined ? this.pan       : o.pan;
+		this.interrupt = o.interrupt   === undefined ? this.interrupt : o.interrupt;
+		this.offset = o.offset         === undefined ? this.offset    : o.offset;
 	}
 }
 
