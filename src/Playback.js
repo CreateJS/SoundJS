@@ -1,5 +1,6 @@
 import Sound from "./Sound";
 import EventDispatcher from "@createjs/core/src/events/EventDispatcher";
+import Declicker from "./utils/Declicker"
 
 class Playback extends EventDispatcher {
 
@@ -13,11 +14,11 @@ class Playback extends EventDispatcher {
 	}
 
 	get playing() {
-		return Boolean(this._sourceNode);
+		return Boolean(this._sourceNode) && !this.paused && !this._stopping;
 	}
 
 	get paused() {
-		return this._paused;
+		return this._pausing || this._paused;
 	}
 
 	constructor(audioBuffer, options = {}) {
@@ -29,6 +30,9 @@ class Playback extends EventDispatcher {
 		this.fademaskCallback = null;
 
 		// Audio tree setup
+		this.declicker = new Declicker(this.fademaskerNode);
+		this.declicker.on("fadeOutComplete", this.handleFadeMaskComplete, this);
+		// Currently no need to listen to the fade-in complete.
 		this.outputNode = this.faderNode = ctx.createGain();
 
 		this.volumeNode = ctx.createGain();
@@ -60,34 +64,12 @@ class Playback extends EventDispatcher {
 
 		this.fademaskerNode.gain.value = 0;
 		this._sourceNode || this._createSourceNode();
-		this._sourceNode.start(delay, offset);
-		this._fademaskIn();
+		this._sourceNode.start(ctx.currentTime + delay, offset, duration);
+		this.declicker.fadeIn();
 
 		this._startTime = ctx.currentTime;
 		this._elapsedOffset = offset;
 		this._paused = false;
-	}
-
-	/**
-	 * Fade-mask the sound with a 10ms fade-in as it starts to play. Also known as declicking. This prevents audible 'click' sounds caused by
-	 * an audio sample
-	 * @private
-	 */
-	_fademaskIn() {
-		this.fademaskerNode.gain.value = 0;
-		this.fademaskerNode.gain.linearRampToValueAtTime(1, createjs.Sound.context.currentTime + this.fademaskDuration);
-
-	}
-
-	_fademaskOut() {
-		this.fademaskerNode.gain.value = 1;
-		this.fademaskerNode.gain.linearRampToValueAtTime(0, createjs.Sound.context.currentTime + this.fademaskDuration);
-		//this.fademaskerNode.gain.setTargetAtTime(0, createjs.Sound.context.currentTime, 1);
-
-		if (this.fademaskCallback) {
-			//this.fademaskCallback.apply(this)
-			window.setTimeout( () => { this.fademaskCallback.apply(this); this.fademaskCallback = null;}, (this.fademaskDuration * 1100) | 0)
-		}
 	}
 
 	_createSourceNode() {
@@ -101,15 +83,28 @@ class Playback extends EventDispatcher {
 	}
 
 	pause() {
-		if (!this.playing) {
+		if (!this.playing) { // This checks for paused, pausing, stopping and stopped.
 			return;
 		}
 
-		// this.dispatchEvent("paused");
-		if (this.fademaskDuration > 0) {
-			this.requestFademaskCallback(this._pauseCore);
-			this._fademaskOut();
+		this.dispatchEvent("paused");
+		this._pausing = true;
+		this.declicker.fadeOut();
+	}
+
+	resume() {
+
+		if(this._stopping){
+			// Do nothing - interrupting a stop is not allowed.
+		}else if(this._paused){
+			this._play(0, this._elapsedOffset);
+			this._paused = false;
+		}else if(this._pausing){
+			this.declicker.cancelFade();
+			this._pausing = false;
 		}
+
+		// Implicitly does nothing if the sound is neither paused nor pausing.
 	}
 
 	_pauseCore() {
@@ -117,35 +112,27 @@ class Playback extends EventDispatcher {
 
 		this._sourceNode.stop();
 		this._sourceNode = null;
+		this._pausing = false;
 		this._paused = true;
 	}
 
-	resume() {
-		if (!this.paused) {
+	stop() {
+		if (this._stopping) { // Already stopping - don't need to stop again.
 			return;
 		}
 
-		this._play(0, this._elapsedOffset);
-		this._paused = false;
-	}
-
-	loop() {
-		this._sourceNode = null;
-		this._play(0, 0); // TODO: delay and offeset?
-		if (this.remainingLoops > 0) {
-			this.remainingLoops--;
+		if(this._paused){
+			this._stopCore(); // Not playing currently - can stop immediately.
 		}
 
-	}
-
-	stop() {
-		// change this to just kick off the fadeout. Need to check and set flags, too.
-		this.dispatchEvent("stop");
-		this.destroy(); // An event will be dispatched in response to the _sourceNode being told to stop in the destroy function, so nothing is dispatched here.
+		this.dispatchEvent("stopped");
+		this._stopping = true;
+		this.declicker.fadeOut();
 	}
 
 	_stopCore() {
 		// after the crossfade, do the actual stopping part.
+		this.destroy(); // An "end" event will be dispatched in response to the _sourceNode being told to stop in the destroy function, so is not needed here.
 	}
 
 	destroy() {
@@ -162,6 +149,7 @@ class Playback extends EventDispatcher {
 			throw new Error("Cannot play Playback after it has been destroyed.")
 		};
 		this.removeAllEventListeners();
+		this.fademaskerNode.removeAllEventListeners();
 	}
 
 	handleEnded() {
@@ -178,29 +166,17 @@ class Playback extends EventDispatcher {
 				// No event here - the destroy function dispatches an end event.
 				this.destroy();
 			}
-
 		}
-
 	}
 
-	requestFademaskCallback(callbackFunc) {
-		let priorityOrder = [this._stopCore, this._pauseCore];
-
-		for (let i = 0; i < priorityOrder.length; i++) {
-			let p = priorityOrder[i];
-			if (this.fademaskCallback === p) {
-				// The current callback is higher priority, so don't change.
-				return false;
-			} else if (callbackFunc === p) {
-				// The new callback is okay
-				this.fademaskCallback = callbackFunc;
-				return true;
-			}
+	handleFadeMaskComplete(){
+		if(this._stopping){
+			this._stopCore();
+		}else if(this._pausing) {
+			this._pauseCore();
 		}
-
-		// No valid callback
-		return false;
 	}
+
 }
 
 export default Playback;
