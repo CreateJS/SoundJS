@@ -294,6 +294,12 @@ class Sample extends EventDispatcher {
 		this.interrupt = o.interrupt   === undefined ? this.interrupt : o.interrupt;
 		this.offset = o.offset         === undefined ? this.offset    : o.offset;
 	}
+
+	addEffect(effect){
+		effect.attach(this.outputNode);
+		this.fxBus.disconnect();
+		this.fxBus.connect(effect.inputNode);
+	}
 }
 
 export default Sample;

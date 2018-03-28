@@ -42,11 +42,14 @@
  *
  */
 
-// re-export shared classes
-export {default as EventDispatcher} from "@createjs/core/src/events/EventDispatcher";
-export {default as Event} from "@createjs/core/src/events/Event";
 // sound
 export {default as Playback} from "./Playback";
 export {default as Sample} from "./Sample";
 export {default as Group} from "./Group";
 export {default as Sound} from "./Sound";
+//effects
+import Effect from "./effects/Effect"
+import LowPassFilter from "./effects/LowPassFilter"
+import HighPassFilter from "./effects/HighPassFilter"
+const FX = {Effect, LowPassFilter, HighPassFilter};
+export { FX };
