@@ -228,11 +228,41 @@ class Sound {
 		return new Sample(src);
 	}
 
-	getDefaultPlayProps(src) {
-		// TODO: implement. Search IDs and active samples for one that matches the src, and get the default play props of that sound.
+	static getSampleBySrc(src){
+		let list = Sound.getSamplesBySrc(src);
+		if(list){
+			return list[0];
+		}else{
+			return null;
+		}
 	}
 
-	setDefaultPlayProps(src, props) {
+	static getSamplesBySrc(src){
+		return this._rootGroup._getSampleDescendantsBySource(src);
+	}
+
+	static getDefaultPlayProps(sampleOrId) {
+		// TODO: implement. Search IDs and active samples for one that matches the src, and get the default play props of that sound.
+
+		let sample = sampleOrId instanceof Sample ? sampleOrId : Sound._idHash[sampleOrId];
+
+		if(sample){
+			return sample.makePlayPropsObj();
+		}else{
+			// TODO: Revisit this, like with setDefaultPlayProps
+			return null;
+		}
+	}
+
+	static setDefaultPlayProps(sampleOrId, props) {
+		if(sampleOrSrcOrId instanceof Sample){
+			sampleOrSrcOrId.consumePlayPropsObj(props);
+		}else if(Sound._rootGroup[sampleOrSrcOrId]){
+			Sound._rootGroup[sampleOrSrcOrId].consumePlayPropsObj(props);
+		}else{
+			// TODO: Revisit this behaviour
+			throw new Error(`Couldn't set default play props on ${sampleOrId}: object is neither a sample nor an ID of a statically stored sound.` )
+		}
 
 	}
 
