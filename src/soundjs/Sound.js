@@ -456,6 +456,7 @@ this.createjs = this.createjs || {};
 	 * @property volume
 	 * @type {Number}
 	 * @default 1
+	 * @static
 	 * @since 0.6.1
 	 */
 
@@ -478,6 +479,11 @@ this.createjs = this.createjs || {};
 	s._getMasterVolume = function() {
 		return this._masterVolume;
 	};
+
+	/**
+	 * @method getMasterVolume
+	 * @deprecated Use the {{#crossLink "Sound/volume:property"}}{{/crossLink}} property instead.
+	 */
 	// Sound.getMasterVolume is @deprecated. Remove for 1.1+
 	s.getVolume = createjs.deprecate(s._getMasterVolume, "Sound.getVolume");
 	/**
@@ -497,7 +503,12 @@ this.createjs = this.createjs || {};
 			}
 		}
 	};
-	// Sound.stMasterVolume is @deprecated. Remove for 1.1+
+
+	/**
+	 * @method setVolume
+	 * @deprecated Use the {{#crossLink "Sound/volume:property"}}{{/crossLink}} property instead.
+	 */
+	// Sound.setVolume is @deprecated. Remove for 1.1+
 	s.setVolume = createjs.deprecate(s._setMasterVolume, "Sound.setVolume");
 
 	/**
@@ -513,6 +524,7 @@ this.createjs = this.createjs || {};
 	 * @property muted
 	 * @type {Boolean}
 	 * @default false
+	 * @static
 	 * @since 0.6.1
 	 */
 	s._masterMute = false;
@@ -527,6 +539,11 @@ this.createjs = this.createjs || {};
 	s._getMute = function () {
 		return this._masterMute;
 	};
+
+	/**
+	 * @method getMute
+	 * @deprecated Use the {{#crossLink "Sound/muted:property"}}{{/crossLink}} property instead.
+	 */
 	// Sound.getMute is @deprecated. Remove for 1.1+
 	s.getMute = createjs.deprecate(s._getMute, "Sound.getMute");
 
@@ -547,6 +564,11 @@ this.createjs = this.createjs || {};
 			}
 		}
 	};
+
+	/**
+	 * @method setMute
+	 * @deprecated Use the {{#crossLink "Sound/muted:property"}}{{/crossLink}} property instead.
+	 */
 	// Sound.setMute is @deprecated. Remove for 1.1+
 	s.setMute = createjs.deprecate(s._setMute, "Sound.setMute");
 
@@ -594,6 +616,11 @@ this.createjs = this.createjs || {};
 		if (s.activePlugin == null) { return null; }
 		return s.activePlugin._capabilities;
 	};
+
+	/**
+	 * @method getCapabilities
+	 * @deprecated Use the {{#crossLink "Sound/capabilities:property"}}{{/crossLink}} property instead.
+	 */
 	// Sound.getCapabilities is @deprecated. Remove for 1.1+
 	s.getCapabilities = createjs.deprecate(s._getCapabilities, "Sound.getCapabilities");
 
