@@ -508,10 +508,7 @@ this.createjs = this.createjs || {};
 	 * @protected
 	 */
 	p._isCanceled = function () {
-		if (window.createjs == null || this.canceled) {
-			return true;
-		}
-		return false;
+		return this.canceled;
 	};
 
 	/**
