@@ -22,13 +22,14 @@ export default class LowPassFilter extends Effect {
 	constructor(cutoffFrequency = 2000, Q = 1){
 		super();
 
-		this.filterNode = this.outputNode = Sound.context.createBiquadFilter();
+		this.filterNode = Sound.context.createBiquadFilter();
 
 		this.filterNode.type = "lowpass";
 		this.frequency = cutoffFrequency;
 		this.Q = Q;
 
-		this.inputNode.connect(this.filterNode);
+		this.effectBus.connect(this.filterNode);
+		this.filterNode.connect(this.wetGain);
 	}
 
 

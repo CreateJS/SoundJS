@@ -296,10 +296,12 @@ class Sample extends EventDispatcher {
 	}
 
 	addEffect(effect){
-		effect.attach(this.outputNode);
+		effect.connect(this.outputNode);
 		this.fxBus.disconnect();
 		this.fxBus.connect(effect.inputNode);
 	}
+
+
 }
 
 export default Sample;
