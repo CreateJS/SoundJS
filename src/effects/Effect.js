@@ -21,6 +21,7 @@ export default class Effect {
 		this.dryGain.gain.value = 0;
 
 		this._enabled = true;
+		this.owner = null; // The Sample, Playback or Group that owns this effect - used for checking when adding an effect to prevent being added to multiple locations
 	}
 
 	/**
