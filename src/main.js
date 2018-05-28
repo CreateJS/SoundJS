@@ -51,5 +51,7 @@ export {default as Sound} from "./Sound";
 import Effect from "./effects/Effect"
 import LowPassFilter from "./effects/LowPassFilter"
 import HighPassFilter from "./effects/HighPassFilter"
-const FX = {Effect, LowPassFilter, HighPassFilter};
+import BiquadFilter from "./effects/BiquadFilter"
+const FX = {Effect, LowPassFilter, HighPassFilter, BiquadFilter};
 export { FX };
+
