@@ -8,7 +8,7 @@ export default class LowPassFilter extends Effect {
 	}
 
 	get Q(){
-		return this.filterNode.Q;
+		return this.filterNode.Q.value;
 	}
 
 	set frequency(val){
@@ -16,7 +16,7 @@ export default class LowPassFilter extends Effect {
 	}
 
 	get frequency(){
-		return this.filterNode.frequency;
+		return this.filterNode.frequency.value;
 	}
 
 	constructor(cutoffFrequency = 2000, Q = 1){
