@@ -4,16 +4,15 @@ import Effect from "./Effect"
 export default class BiquadFilter extends Effect {
 
 	static _initialize(){
-		BiquadFilter.TYPES ={
-			HIGHPASS: "highpass",
-			LOWPASS: "lowpass",
-			BANDPASS: "bandpass",
-			LOWSHELF: "lowshelf",
-			HIGHSHELF: "highshelf",
-			PEAKING: "peaking",
-			NOTCH: "notch",
-			ALLPASS: "allpass"
-		};
+		// Filter types.
+			BiquadFilter.HIGHPASS = "highpass";
+			BiquadFilter.LOWPASS = "lowpass";
+			BiquadFilter.BANDPASS = "bandpass";
+			BiquadFilter.LOWSHELF = "lowshelf";
+			BiquadFilter.HIGHSHELF = "highshelf";
+			BiquadFilter.PEAKING = "peaking";
+			BiquadFilter.NOTCH = "notch";
+			BiquadFilter.ALLPASS = "allpass";
 	}
 
 	set type(val){
