@@ -73,6 +73,10 @@ class Playback extends EventDispatcher {
 			return; // Do nothing - sound is already playing. Playing multiple sounds should be done by playing the sample again.
 		}
 
+		if(duration === null){
+			duration = undefined; // Makes a null value result in 'play until the end of the buffer' instead of 0 play duration.
+		}
+
 		this.fademaskerNode.gain.value = 0;
 		this._sourceNode || this._createSourceNode();
 		this._sourceNode.start(ctx.currentTime + delay, offset, duration);

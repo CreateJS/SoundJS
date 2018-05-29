@@ -288,13 +288,14 @@ class Sample extends EventDispatcher {
 	}
 
 	consumePlayPropsObj(o){
-		this.volume = o.volume         === undefined ? this.volume    : o.volume;
-		this.loops = o.loops           === undefined ? this.loops     : o.loops;
-		this.delay = o.delay           === undefined ? this.delay     : o.delay;
-		this.playDuration = o.duration === undefined ? this.duration  : o.duration;
-		this.pan = o.pan               === undefined ? this.pan       : o.pan;
-		this.interrupt = o.interrupt   === undefined ? this.interrupt : o.interrupt;
-		this.offset = o.offset         === undefined ? this.offset    : o.offset;
+		this.volume  = isNaN(Number(o.volume)) ? this.volume : Number(o.volume);
+		this.loops   = isNaN(Number(o.loops )) ? this.loops  : Math.max(Number(o.loops) | 0, -1);		// must be >= -1, and an integer
+		this.delay   = isNaN(Number(o.delay )) ? this.delay  : Number(o.delay);
+		this.pan     = isNaN(Number(o.pan   )) ? this.pan    : Number(o.pan);
+		this.offset  = isNaN(Number(o.offset)) ? this.offset : Number(o.offset);
+
+		this.interrupt = (  o.interrupt === undefined ? this.interrupt : o.interrupt);
+		this.playDuration = o.hasOwnProperty('playDuration') ? o.playDuration : this.playDuration;	// "undefined" is a valid value (means play to end). Null, in SJS2, also means play to end.
 	}
 
 	addEffect(effect){
