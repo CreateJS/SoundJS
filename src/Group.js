@@ -29,18 +29,59 @@ class Group extends EventDispatcher {
 			this._addGroup(groupOrSample);
 		} else if (groupOrSample instanceof Sample) {
 			this._addSample(groupOrSample);
+		}else{
+			console.warn("Warning: Attempted to add an object that was not a Group or a Sample as a child to a Group; object was ignored.")
 		}
 	}
 
 	_addGroup(subgroup) {
+		if(subgroup.parent){
+			subgroup.parent._remove(subgroup);
+		}
+		subgroup.parent = this;
 		this.subgroups.push(subgroup);
 		subgroup.outputNode.connect(this.inputNode);
 	}
 
 	_addSample(sample) {
+		if(sample.parent){
+			sample.parent._remove(sample);
+		}
+		sample.parent = this;
 		this.samples.push(sample);
-		sample.outputNode.connect(this.fxBus);
+		sample.outputNode.connect(this.inputNode);
 		sample.on("destroyed", this.handleSampleDestroyed, this);
+	}
+
+	// Shouldn't be used during normal usage, and is normally only called as part of an add to another group.
+	_remove(groupOrSample){
+		if (groupOrSample instanceof Group) {
+			this._removeGroup(groupOrSample);
+		} else if (groupOrSample instanceof Sample) {
+			this._removeSample(groupOrSample);
+		}
+	}
+
+	_removeGroup(subgroup){
+		let index = this.subgroups.indexOf(subgroup);
+
+		if(index === -1){
+			throw new Error("Cannot remove subgroup from group - group not found in subgroups list.")
+		}
+
+		subgroup.outputNode.disconnect(this.inputNode);
+		this.subgroups.splice(index, 1);
+	}
+
+	_removeSample(sample){
+		let index = this.samples.indexOf(sample);
+
+		if(index === -1){
+			throw new Error("Cannot remove sample from group - group not found in samples list.")
+		}
+
+		sample.outputNode.disconnect(this.inputNode);
+		this.samples.splice(index, 1);
 	}
 
 	// NOTE: depending on group architecture, play/pause/resume  may need to change. E.G. if loops within the group structure are allowed,
