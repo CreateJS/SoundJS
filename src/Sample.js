@@ -312,10 +312,19 @@ class Sample extends EventDispatcher {
 		this.playDuration = o.hasOwnProperty('playDuration') ? o.playDuration : this.playDuration;	// "undefined" is a valid value (means play to end). Null, in SJS2, also means play to end.
 	}
 
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Effects
+
 	addEffect(effect){
-		effect.connect(this.outputNode);
-		this.fxBus.disconnect();
-		this.fxBus.connect(effect.inputNode);
+		this.effects = this._effects.concat([effect]);
+	}
+
+	getEffects(){
+		return this._effects;
+	}
+
+	cloneEffects(){
+		// TODO: implement.
 	}
 
 	set effects(effects){
