@@ -29,11 +29,25 @@ class Sample extends EventDispatcher {
 	}
 
 	set paused(val){
-		this._paused = Boolean(val);
+		if(val){
+			this.pause();
+		}else{
+			this.resume();
+		}
 	}
 
 	get paused(){
-		return this._paused;
+		if(this.playbacks.length < 1){
+			return false;
+		}
+
+		for(let i = 0; i < this.playbacks.length; i++){
+			if(!this.playbacks[i].paused){
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	set loops(val){
