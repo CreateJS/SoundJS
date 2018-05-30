@@ -62,15 +62,6 @@ class Sample extends EventDispatcher {
 		return this.audioBuffer ? this.audioBuffer.duration : null;
 	}
 
-	set parent(val) {
-		this._parent = val;
-		this.outputNode.connect(parent.inputNode);
-	}
-
-	get parent() {
-		return this._parent;
-	}
-
 	constructor(src, options = {}, parent = Sound._rootGroup) {
 		super();
 		let ctx = Sound.context;
@@ -102,7 +93,6 @@ class Sample extends EventDispatcher {
 		this._resolveSource(src);
 
 		this.muted = false;
-		this.paused = false;
 
 		if (parent) {
 			parent.add(this);
