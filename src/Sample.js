@@ -80,7 +80,7 @@ class Sample extends EventDispatcher {
 		this.panNode.connect(this.outputNode);
 
 		this.fxBus = ctx.createGain();
-		this.fxBus.connect(this.panNode); // TODO: Manage effects chain.
+		this.fxBus.connect(this.panNode);
 
 		this.playbacks = [];
 
