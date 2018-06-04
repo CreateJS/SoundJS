@@ -6,7 +6,25 @@ class Playback extends EventDispatcher {
 
 	get elapsed() {
 		let ctx = Sound.context;
-		return ctx.currentTime - this._startTime + this._elapsedOffset
+		if(this._paused){
+			return this._positionOffset - this.offset - this._remainingDelay;
+		}else{
+			return ctx.currentTime - this._startTime + this._positionOffset - this.offset;
+		}
+	}
+
+	get position(){
+		let ctx = Sound.context;
+		if(this._paused){
+			return this._positionOffset;
+		}else{
+			if(this.elapsed < 0){
+				// If we're counting down during a delay, show where we'll start playing.
+				return this.offset;
+			}else{
+				return ctx.currentTime - this._startTime + this._positionOffset;
+			}
+		}
 	}
 
 	get duration() {
@@ -35,9 +53,10 @@ class Playback extends EventDispatcher {
 		// Internal playback data tracking
 		this.buffer = audioBuffer;
 		this._startTime = null;
-		this._elapsedOffset = 0; // The amount of time spent playing the audio
-		this._paused = false;
-		this._pausing = false;
+		this._positionOffset = 0; // Progress offset. Essentially, 'where will this start playing again if we resume', but also used in calculations while a sound is playing.
+		this._remainingDelay = 0; // If paused during a delay, this tracks how much delay is left when resumed.
+		this._paused   = false;
+		this._pausing  = false;
 		this._stopping = false;
 
 		// Play properties
@@ -47,7 +66,7 @@ class Playback extends EventDispatcher {
 
 		this.delay   = isNaN(Number(options.delay )) ? 0 : Number(options.delay);			// 0 default
 		this.offset  = isNaN(Number(options.offset)) ? 0 : Number(options.offset);		// 0 default
-		this.playDuration = options.playDuration; 																		// No default needed, undefined means "play until end"
+		this.playDuration = options.playDuration;																	// No default needed, undefined and null are both valid values
 
 		this._play(this.delay, this.offset, this.playDuration);
 	}
@@ -64,9 +83,11 @@ class Playback extends EventDispatcher {
 
 		this.fxBus = ctx.createGain();
 		this.fxBus.connect(this.fademaskerNode);
+
+		// TODO: Pan node?
 	}
 
-	_play(delay = 0, offset = 0, duration = undefined) {
+	_play(delay = 0, offset = 0, duration = this.buffer.duration) {
 		let ctx = Sound.context;
 
 		if (this._sourceNode) {
@@ -82,8 +103,8 @@ class Playback extends EventDispatcher {
 		this._sourceNode.start(ctx.currentTime + delay, offset, duration);
 		this.declicker.fadeIn();
 
-		this._startTime = ctx.currentTime;
-		this._elapsedOffset = offset;
+		this._startTime = ctx.currentTime + delay;
+		this._positionOffset = offset;
 		this._paused = false;
 	}
 
@@ -116,11 +137,10 @@ class Playback extends EventDispatcher {
 	}
 
 	resume() {
-
 		if(this._stopping){
 			// Do nothing - interrupting a stop is not allowed.
 		}else if(this._paused){
-			this._play(0, this._elapsedOffset);
+			this._play(this._remainingDelay, this._positionOffset);
 			this._paused = false;
 		}else if(this._pausing){
 			this.declicker.cancelFade();
@@ -131,7 +151,12 @@ class Playback extends EventDispatcher {
 	}
 
 	_pauseCore() {
-		this._elapsedOffset = this.elapsed;
+		this._positionOffset = this.position;
+		if(this.elapsed < 0){
+			this._remainingDelay = -this.elapsed;
+		}else{
+			this._remainingDelay = 0;
+		}
 
 		this._sourceNode.stop();
 		this._sourceNode = null;
