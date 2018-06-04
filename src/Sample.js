@@ -4,6 +4,16 @@ import EventDispatcher from "@createjs/core/src/events/EventDispatcher";
 
 class Sample extends EventDispatcher {
 
+	get elapsed(){
+		if(this.playbacks.length === 0) { return 0; }
+		return this.playbacks[this.playbacks.length-1].elapsed;
+	}
+
+	get position(){
+		if(this.playbacks.length === 0) { return 0; }
+		return this.playbacks[this.playbacks.length-1].position;
+	}
+
 	set volume(val) {
 		this.volumeNode.gain.value = val;
 	}
