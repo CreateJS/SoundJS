@@ -104,9 +104,8 @@ class Sample extends EventDispatcher {
 
 		this.muted = false;
 
-		if (parent) {
-			parent.add(this);
-		}
+		this.parent = null; // Set to null here only to show that this variable exists on Samples. Samples should always have a parent group.
+		parent.add(this);
 	}
 
 	_resolveSource(src) {
