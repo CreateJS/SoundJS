@@ -87,6 +87,7 @@ class Playback extends EventDispatcher {
 		// TODO: Pan node?
 	}
 
+	// duration now defaults to buffer duration - iOS/Safari throws a dom exception 11 if a source node is told to start with undefined duration.
 	_play(delay = 0, offset = 0, duration = this.buffer.duration) {
 		let ctx = Sound.context;
 
