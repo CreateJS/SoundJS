@@ -23,7 +23,7 @@ class Sample extends EventDispatcher {
 	}
 
 	set pan(val) {
-		this.panNode.pan.value = val;
+		this.panNode.setPosition(val, 0, 0.5);
 	}
 
 	get pan() {
@@ -77,7 +77,7 @@ class Sample extends EventDispatcher {
 		let ctx = Sound.context;
 		this.outputNode = this.volumeNode = ctx.createGain();
 
-		this.panNode = this.postFxNode = ctx.createStereoPanner();
+		this.panNode = this.postFxNode = ctx.createPanner();
 		this.panNode.connect(this.outputNode);
 
 		this.fxBus = ctx.createGain();
