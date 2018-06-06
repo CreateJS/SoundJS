@@ -1,8 +1,9 @@
 import Sound from "./Sound";
 import EventDispatcher from "@createjs/core/src/events/EventDispatcher";
 import Declicker from "./utils/Declicker"
+import AbstractAudioWrapper from "./AbstractAudioWrapper";
 
-class Playback extends EventDispatcher {
+class Playback extends AbstractAudioWrapper {
 
 	get elapsed() {
 		let ctx = Sound.context;
@@ -41,10 +42,10 @@ class Playback extends EventDispatcher {
 
 	constructor(audioBuffer, options = {}) {
 		super();
-
 		let ctx = Sound.context;
 
-		this._buildWebAudioTree();
+		this.fademaskerNode = ctx.createGain();
+		this.fademaskerNode.connect(this.fxBus);
 
 		this.declicker = new Declicker(this.fademaskerNode);
 		this.declicker.on("fadeOutComplete", this.handleFadeMaskComplete, this);
@@ -69,22 +70,6 @@ class Playback extends EventDispatcher {
 		this.playDuration = options.playDuration;																	// No default needed, undefined and null are both valid values
 
 		this._play(this.delay, this.offset, this.playDuration);
-	}
-
-	_buildWebAudioTree(){
-		let ctx = Sound.context;
-		this.outputNode = this.faderNode = ctx.createGain();
-
-		this.volumeNode = ctx.createGain();
-		this.volumeNode.connect(this.outputNode);
-
-		this.fademaskerNode = ctx.createGain();
-		this.fademaskerNode.connect(this.volumeNode);
-
-		this.fxBus = ctx.createGain();
-		this.fxBus.connect(this.fademaskerNode);
-
-		// TODO: Pan node?
 	}
 
 	// duration now defaults to buffer duration - iOS/Safari throws a dom exception 11 if a source node is told to start with undefined duration.
@@ -114,7 +99,7 @@ class Playback extends EventDispatcher {
 
 		this._sourceNode = ctx.createBufferSource();
 		this._sourceNode.buffer = this.buffer;
-		this._sourceNode.connect(this.fxBus);
+		this._sourceNode.connect(this.fademaskerNode);
 
 		this._sourceNode.onended = this.handleEnded.bind(this);
 	}

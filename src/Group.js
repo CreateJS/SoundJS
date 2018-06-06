@@ -1,25 +1,22 @@
 import Sound from "./Sound";
 import Sample from "./Sample";
 import EventDispatcher from "@createjs/core/src/events/EventDispatcher";
+import AbstractAudioWrapper from "./AbstractAudioWrapper";
 
 
-class Group extends EventDispatcher {
+class Group extends AbstractAudioWrapper {
 
 	constructor(parent = Sound._rootGroup) {
 		super();
 		let ctx = Sound.context;
-		this.outputNode = this.volumeNode = ctx.createGain();
 
 		this.inputNode = ctx.createGain();
-		this.fxBus = ctx.createGain();
-
 		this.inputNode.connect(this.fxBus);
-		this.fxBus.connect(this.outputNode); // TODO: Manage effects chain.
 
 		this.samples = [];
 		this.subgroups = [];
 
-		if (parent) {
+		if(parent){
 			parent.add(this);
 		}
 	}
