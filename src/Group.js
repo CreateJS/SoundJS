@@ -6,7 +6,7 @@ import AbstractAudioWrapper from "./AbstractAudioWrapper";
 
 class Group extends AbstractAudioWrapper {
 
-	constructor(parent = Sound._rootGroup) {
+	constructor(parent) {
 		super();
 		let ctx = Sound.context;
 
@@ -15,6 +15,10 @@ class Group extends AbstractAudioWrapper {
 
 		this.samples = [];
 		this.subgroups = [];
+
+		if(!parent || !(parent instanceof Group)){
+			parent = Sound._rootGroup;
+		}
 
 		if(parent){
 			parent.add(this);
