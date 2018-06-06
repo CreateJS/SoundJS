@@ -36,6 +36,14 @@ class Playback extends AbstractAudioWrapper {
 		return Boolean(this._sourceNode) && !this.paused && !this._stopping;
 	}
 
+	set paused(val){
+		if(val){
+			this.pause();
+		}else{
+			this.resume();
+		}
+	}
+
 	get paused() {
 		return this._pausing || this._paused;
 	}
