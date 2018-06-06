@@ -136,6 +136,9 @@ class Sample extends AbstractAudioWrapper {
 		o.volume = this.volume;
 		o.pan = this.pan;
 		o.loops = this.loops;
+		o.delay = this.delay;
+		o.offset = this.offset;
+		o.interrupt = this.interrupt;
 		// TODO: clone FX chain, other properties
 		return o;
 	}
