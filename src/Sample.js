@@ -146,17 +146,19 @@ class Sample extends AbstractAudioWrapper {
 	 * times play was called.
 	 * @returns {*}
 	 */
-	play() {
+	play(playProps) {
 		if (!this.audioBuffer) {
 			this._playbackRequested = true;
+			this._requestedPlaybackPlayprops = playProps;
 			return null;
 		} else {
-			return this._play();
+			return this._play(playProps);
 		}
 	}
 
-	_play() {
-		let pb = new Playback(this.audioBuffer, {loops: this.loops, playDuration: this.playDuration, offset: this.offset, delay: this.delay});
+	_play(playProps) {
+		playProps = playProps || {loops: this.loops, playDuration: this.playDuration, offset: this.offset, delay: this.delay};
+		let pb = new Playback(this.audioBuffer, playProps);
 
 		this.playbacks.push(pb);
 		pb.outputNode.connect(this.fxBus);
@@ -226,7 +228,7 @@ class Sample extends AbstractAudioWrapper {
 		this.dispatchEvent("ready");
 
 		if (this._playbackRequested) {
-			this._play();
+			this._play(this._requestedPlaybackPlayprops);
 		}
 	}
 
@@ -259,14 +261,16 @@ class Sample extends AbstractAudioWrapper {
 			volume:    this.volume,
 			loops:     this.loops,
 			delay:     this.delay,
-			duration:  this.playDuration,
 			pan:       this.pan,
+			offset:    this.offset,
 			interrupt: this.interrupt,
-			offset:    this.offset
+			duration:  this.playDuration
 		};
 	}
 
 	consumePlayPropsObj(o){
+		if(!o){return;}
+
 		this.volume  = isNaN(Number(o.volume)) ? this.volume : Number(o.volume);
 		this.loops   = isNaN(Number(o.loops )) ? this.loops  : Math.max(Number(o.loops) | 0, -1);		// must be >= -1, and an integer
 		this.delay   = isNaN(Number(o.delay )) ? this.delay  : Number(o.delay);
