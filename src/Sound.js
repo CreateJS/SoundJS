@@ -72,7 +72,7 @@ class Sound {
 					}
 					break;
 				case "":
-				// no-op
+				// this extension not supported, no-op
 				default:
 				// no-op
 			}
