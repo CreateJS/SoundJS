@@ -219,9 +219,12 @@ class Sample extends AbstractAudioWrapper {
 	}
 
 	handleAudioLoaded(loadEvent) {
-		let ctx = Sound.context;
-		let result = loadEvent.target.response;
-		ctx.decodeAudioData(result, this.handleAudioDecoded.bind(this), this.handleAudioDecodeError.bind(this));
+		let xhr = loadEvent.target;
+		if(xhr.readyState === 4 && xhr.status === 200){
+			let ctx = Sound.context;
+			let result = loadEvent.target.response;
+			ctx.decodeAudioData(result, this.handleAudioDecoded.bind(this), this.handleAudioDecodeError.bind(this));
+		}
 	}
 
 	handleAudioDecoded(buffer) {
