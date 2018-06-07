@@ -53,7 +53,7 @@ class Sound {
 
 	static get fallbackFileExtension() {
 		// Look up the fallback file extension each time. Performance cost should be small (since sound loading should be gated by
-		// the sound loading part), and the array of fallback file extensions may have changed without our knowledge.
+		// the loading part), and the array of fallback file extensions may have changed without our knowledge.
 
 		let testElement = document.createElement("audio");
 		let bestMaybe = null;
@@ -198,7 +198,7 @@ class Sound {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// GROUP PARITY:
 	// These functions make the root static Sound object 'grouplike' - you can interact with it like it were a group and
-	// it will affect all sounds in SounJS's group tree.
+	// it will affect all sounds in SoundJS's group tree.
 
 	/*static get samples(){
     	return this._rootGroup.samples;
@@ -226,22 +226,8 @@ class Sound {
 	// with soundJS 1.
 
 
-	static createInstance(src, startTime = null, duration = null) {
-		// TODO: start time, duration.
-		return new Sample(src);
-	}
-
-	static getSampleBySrc(src){
-		let list = Sound.getSamplesBySrc(src);
-		if(list){
-			return list[0];
-		}else{
-			return null;
-		}
-	}
-
-	static getSamplesBySrc(src){
-		return this._rootGroup._getSampleDescendantsBySource(src);
+	/*static createInstance(src, offset, playDuration) {
+		return new Sample(src, {offset: offset, playDuration: playDuration});
 	}
 
 	static getDefaultPlayProps(sampleOrId) {
@@ -267,10 +253,24 @@ class Sound {
 			throw new Error(`Couldn't set default play props on ${sampleOrId}: object is neither a sample nor an ID of a statically stored sound.` )
 		}
 
+	}*/
+
+	static getSampleBySrc(src){
+		let list = Sound.getSamplesBySrc(src);
+		if(list){
+			return list[0];
+		}else{
+			return null;
+		}
 	}
 
+	static getSamplesBySrc(src){
+		return this._rootGroup._getSampleDescendantsBySource(src);
+	}
+
+
 	/**
-	 * Register multiple sounds at once. TODO: expected args? 
+	 * Register multiple sounds at once. TODO: expected args?
 	 * @param sounds
 	 */
 	static registerSounds(sounds) {
