@@ -89,7 +89,7 @@ class Playback extends AbstractAudioWrapper {
 		}
 
 		if(duration === null){
-			duration = undefined; // Makes a null value result in 'play until the end of the buffer' instead of 0 play duration.
+			duration = this.buffer.duration; // Makes a null value result in 'play until the end of the buffer' instead of 0 play duration.
 		}
 
 		this.fademaskerNode.gain.value = 0;
