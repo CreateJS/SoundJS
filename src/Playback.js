@@ -125,6 +125,11 @@ class Playback extends AbstractAudioWrapper {
 			return;
 		}
 
+		if(this.declicker.isFadingIn){
+			// We're okay cancelling a fade-in to pause.
+			this.declicker.cancelFade();
+		}
+
 		this.dispatchEvent("paused");
 		this._pausing = true;
 		this.declicker.fadeOut();
