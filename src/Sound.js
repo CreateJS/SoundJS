@@ -149,12 +149,13 @@ class Sound {
 	static play(idOrSrc, playProps) {
 		let registered = Sound._idHash[idOrSrc]; // Will this cause problems with people trying to make a new sample?
 		if (registered) {
-			registered.play();
+			registered.play(playProps);
 			return registered;
 		} else {
+			// ID not found. Assume it is a source.
 			let sample = new Sample(idOrSrc);
-			Sound.registerSound(sample);
-			sample.play();
+			Sound.registerSound(sample, idOrSrc);
+			sample.play(playProps);
 			return sample;
 		}
 	}
