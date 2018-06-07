@@ -24,7 +24,7 @@ class Sound {
 		return Sound.__context;
 	}
 
-	static get _rootGroup() {
+	static get rootGroup() {
 		return Sound.__rootGroup;
 	}
 
@@ -163,7 +163,7 @@ class Sound {
 	 * Stops ALL sounds that SoundJS is playing.
 	 */
 	static stop(){
-		Sound._rootGroup.stop();
+		Sound.rootGroup.stop();
 	}
 
 	static isExtensionSupported(pathOrExtension, strict = true) {
@@ -180,9 +180,9 @@ class Sound {
 
 		let samples = null;
 		if(urlOrId === "" || urlOrId === undefined){
-			samples = Sound._rootGroup._getAllSampleDescendants();
+			samples = Sound.rootGroup._getAllSampleDescendants();
 		}else{
-			samples = Sound._rootGroup._getSampleDescendantsBySource(urlOrId)
+			samples = Sound.rootGroup._getSampleDescendantsBySource(urlOrId)
 		}
 
 		if(Sound._idHash[urlOrId]){
@@ -200,23 +200,23 @@ class Sound {
 	// it will affect all sounds in SoundJS's group tree.
 
 	/*static get samples(){
-    	return this._rootGroup.samples;
+    	return this.rootGroup.samples;
 	}
 
 	static get groups(){
-    	return this._rootGroup.subgroups;
+    	return this.rootGroup.subgroups;
 	}*/
 
 	static pause() {
-		this._rootGroup.pause();
+		this.rootGroup.pause();
 	}
 
 	static resume() {
-		this._rootGroup.resume();
+		this.rootGroup.resume();
 	}
 
 	static add(sampleOrGroup) {
-		this._rootGroup.add(sampleOrGroup);
+		this.rootGroup.add(sampleOrGroup);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -245,8 +245,8 @@ class Sound {
 	static setDefaultPlayProps(sampleOrId, props) {
 		if(sampleOrSrcOrId instanceof Sample){
 			sampleOrSrcOrId.consumePlayPropsObj(props);
-		}else if(Sound._rootGroup[sampleOrSrcOrId]){
-			Sound._rootGroup[sampleOrSrcOrId].consumePlayPropsObj(props);
+		}else if(Sound.rootGroup[sampleOrSrcOrId]){
+			Sound.rootGroup[sampleOrSrcOrId].consumePlayPropsObj(props);
 		}else{
 			// TODO: Revisit this behaviour
 			throw new Error(`Couldn't set default play props on ${sampleOrId}: object is neither a sample nor an ID of a statically stored sound.` )
@@ -264,7 +264,7 @@ class Sound {
 	}
 
 	static getSamplesBySrc(src){
-		return this._rootGroup._getSampleDescendantsBySource(src);
+		return this.rootGroup._getSampleDescendantsBySource(src);
 	}
 
 

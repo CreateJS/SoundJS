@@ -48,7 +48,7 @@ class Sample extends AbstractAudioWrapper {
 		return this.audioBuffer ? this.audioBuffer.duration : null;
 	}
 
-	constructor(src, options = {}, parent = Sound._rootGroup) {
+	constructor(src, options = {}, parent = Sound.rootGroup) {
 		super();
 		let ctx = Sound.context;
 

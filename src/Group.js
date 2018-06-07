@@ -16,7 +16,7 @@ class Group extends AbstractAudioWrapper {
 		this.subgroups = [];
 
 		if(!parent || !(parent instanceof Group)){
-			parent = Sound._rootGroup;
+			parent = Sound.rootGroup;
 		}
 
 		if(parent){
