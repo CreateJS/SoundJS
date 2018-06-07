@@ -97,14 +97,13 @@ class Sound {
 			if (Sound._idHash[id] === sampleData || Sound._idHash[id].src === sampleData) {		// Match logic: If a sample was provided, it must be exactly equal to the already registered sample.
 																																												// If a source was provided, compare the source to the source of the existing sample, and if they match, the samples match.
 																																												// Note that this will always fail for data URLs and array buffers, as these are too large and not stored in a sample's src.
-				// Silently do nothing if the samples match...
-				
+				// Sound already exists, but if they registered with props, they probably expect those props:
+				defaultPlayProps && Sound._idHash[id].consumePlayPropsObj(defaultPlayProps);
+				return;
 			}else{
-				// ... or throw an error if there's a conflict.
-				throw new Error("Error registering sound - ID already in use.")
+				// Throw an error if there's a conflict.
+				throw new Error(`Error registering sound with id "${id}" - id already in use.`)
 			}
-
-			return;
 		}
 
 		// No existing entry found, so create this sample (or use the existing one) and store for later use:
