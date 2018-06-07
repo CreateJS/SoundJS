@@ -1,5 +1,4 @@
 import Sound from "./Sound";
-import EventDispatcher from "@createjs/core/src/events/EventDispatcher";
 import Declicker from "./utils/Declicker"
 import AbstractAudioWrapper from "./AbstractAudioWrapper";
 

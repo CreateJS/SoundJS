@@ -1,6 +1,5 @@
 import Sound from "./Sound";
 import Sample from "./Sample";
-import EventDispatcher from "@createjs/core/src/events/EventDispatcher";
 import AbstractAudioWrapper from "./AbstractAudioWrapper";
 
 
