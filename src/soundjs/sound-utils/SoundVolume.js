@@ -5,6 +5,9 @@ createjs.soundUtils = createjs.soundUtils || {};
 
 createjs.soundUtils.SoundVolume = (function () {
 
+	var SOUND_MIN = 0,
+		SOUND_MAX = 1;
+
 	var _soundPlugin = null,
 		_soundInstance = null;
 
@@ -58,7 +61,7 @@ createjs.soundUtils.SoundVolume = (function () {
 	}
 
 	function adjustMasterVolumeToLimit(value) {
-		return Math.max(0, Math.min(1, value));
+		return Math.max(SOUND_MIN, Math.min(SOUND_MAX, value));
 	}
 
 	function _getMute () {

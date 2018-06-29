@@ -5,7 +5,9 @@ createjs.soundUtils = createjs.soundUtils || {};
 
 createjs.soundUtils.SoundParser = (function () {
 
-	var FILE_PATTERN = /^(?:(\w+:)\/{2}(\w+(?:\.\w+)*\/?))?([/.]*?(?:[^?]+)?\/)?((?:[^/?]+)\.(\w+))(?:\?(\S+)?)?$/;
+	var FILE_PATTERN = /^(?:(\w+:)\/{2}(\w+(?:\.\w+)*\/?))?([/.]*?(?:[^?]+)?\/)?((?:[^/?]+)\.(\w+))(?:\?(\S+)?)?$/,
+		MATCH_NAME = 4,
+		MATCH_EXTENSION = 5;
 
 	var _soundVolume = null;
 
@@ -32,15 +34,15 @@ createjs.soundUtils.SoundParser = (function () {
 		var match = value.match(FILE_PATTERN);
 		if (match == null) { return false; }
 
-		var name = match[4];
-		var ext = match[5];
+		var name = match[MATCH_NAME];
+		var ext = match[MATCH_EXTENSION];
 		var c = _soundVolume.capabilities;
 		var i = 0;
 		while (!c[ext]) {
 			ext = this.alternateExtensions[i++];
 			if (i > this.alternateExtensions.length) { return null; }	// no extensions are supported
 		}
-		value = value.replace("."+match[5], "."+ext);
+		value = value.replace("."+match[MATCH_EXTENSION], "."+ext);
 
 		var ret = {name:name, src:value, extension:ext};
 		return ret;
