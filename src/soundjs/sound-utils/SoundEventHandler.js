@@ -28,40 +28,40 @@ createjs.soundUtils.SoundEventHandler = (function (){
     return SoundEventHandler;
 
     function _handleLoadComplete(event, preloadHash) {
-		var src = event.target.getItem().src;
-		if (!preloadHash[src]) {return;}
+		var source = event.target.getItem().src;
+		if (!preloadHash[source]) {return;}
 
-		for (var i = 0, l = preloadHash[src].length; i < l; i++) {
-			var item = preloadHash[src][i];
-			preloadHash[src][i] = true;
+		for (var i = 0, l = preloadHash[source].length; i < l; i++) {
+			var preloadItem = preloadHash[source][i];
+			preloadHash[source][i] = true;
 
 			if (!this.hasEventListener("fileload")) { continue; }
 
 			var event = new createjs.Event("fileload");
-			event.src = item.src;
-			event.id = item.id;
-			event.data = item.data;
-			event.sprite = item.sprite;
+			event.src = preloadItem.src;
+			event.id = preloadItem.id;
+			event.data = preloadItem.data;
+			event.sprite = preloadItem.sprite;
 
 			this.dispatchEvent(event);
 		}
 	}
 
     function _handleLoadError(event, preloadHash) {
-		var src = event.target.getItem().src;
-		if (!preloadHash[src]) {return;}
+		var source = event.target.getItem().src;
+		if (!preloadHash[source]) {return;}
 
-		for (var i = 0, l = preloadHash[src].length; i < l; i++) {
-			var item = preloadHash[src][i];
-			preloadHash[src][i] = false;
+		for (var i = 0, l = preloadHash[source].length; i < l; i++) {
+			var preloadItem = preloadHash[source][i];
+			preloadHash[source][i] = false;
 
 			if (!this.hasEventListener("fileerror")) { continue; }
 
 			var event = new createjs.Event("fileerror");
-			event.src = item.src;
-			event.id = item.id;
-			event.data = item.data;
-			event.sprite = item.sprite;
+			event.src = preloadItem.src;
+			event.id = preloadItem.id;
+			event.data = preloadItem.data;
+			event.sprite = preloadItem.sprite;
 
 			this.dispatchEvent(event);
 		}

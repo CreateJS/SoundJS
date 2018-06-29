@@ -5,15 +5,15 @@ createjs.soundUtils = createjs.soundUtils || {};
 
 createjs.soundUtils.SoundChannel = (function () {
 
-	var SoundChannel = function (src, max) {
-		this.init(src, max);
+	var SoundChannel = function (source, max) {
+		this.init(source, max);
 	};
 
 	var prototype = SoundChannel.prototype;
 	prototype.constructor = SoundChannel;
 
-	prototype.init = function (src, max) {
-		this.src = src;
+	prototype.init = function (source, max) {
+		this.src = source;
 		this.max = max || this.maxDefault;
 
 		if (this.max == -1) {
@@ -131,24 +131,24 @@ createjs.soundUtils.SoundChannel = (function () {
 		return false;
 	}
 
-	function create(src, max) {
-		var channel = SoundChannel.get(src);
+	function create(source, max) {
+		var channel = SoundChannel.get(source);
 		if (channel == null) {
-			SoundChannel.channels[src] = new SoundChannel(src, max);
+			SoundChannel.channels[source] = new SoundChannel(source, max);
 			return true;
 		}
 
 		return false;
 	}
 
-	function removeSrc(src) {
-		var channel = SoundChannel.get(src);
+	function removeSrc(source) {
+		var channel = SoundChannel.get(source);
 		if (channel == null) {
 			return false;
 		}
 
 		channel._removeAll();	// this stops and removes all active instances
-		delete(SoundChannel.channels[src]);
+		delete(SoundChannel.channels[source]);
 
 		return true;
 	}
@@ -183,8 +183,8 @@ createjs.soundUtils.SoundChannel = (function () {
 		return p.maxDefault;
 	}
 
-	function get(src) {
-		return SoundChannel.channels[src];
+	function get(source) {
+		return SoundChannel.channels[source];
 	}
   
 })();

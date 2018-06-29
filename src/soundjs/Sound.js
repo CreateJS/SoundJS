@@ -20,35 +20,33 @@ createjs.Sound = (function () {
 		throw "Sound cannot be instantiated";
 	}
 
-	var s = Sound;
-
 // Static Properties
-	s.INTERRUPT_ANY = InterruptMode.INTERRUPT_ANY;
-	s.INTERRUPT_EARLY = InterruptMode.INTERRUPT_EARLY;
-	s.INTERRUPT_LATE = InterruptMode.INTERRUPT_LATE;
-	s.INTERRUPT_NONE = InterruptMode.INTERRUPT_NONE;
+	Sound.INTERRUPT_ANY = InterruptMode.INTERRUPT_ANY;
+	Sound.INTERRUPT_EARLY = InterruptMode.INTERRUPT_EARLY;
+	Sound.INTERRUPT_LATE = InterruptMode.INTERRUPT_LATE;
+	Sound.INTERRUPT_NONE = InterruptMode.INTERRUPT_NONE;
 
-	s.PLAY_INITED = PlayState.PLAY_INITED;
-	s.PLAY_SUCCEEDED = PlayState.PLAY_SUCCEEDED;
-	s.PLAY_INTERRUPTED = PlayState.PLAY_INTERRUPTED;
-	s.PLAY_FINISHED = PlayState.PLAY_FINISHED;
-	s.PLAY_FAILED = PlayState.PLAY_FAILED;
+	Sound.PLAY_INITED = PlayState.PLAY_INITED;
+	Sound.PLAY_SUCCEEDED = PlayState.PLAY_SUCCEEDED;
+	Sound.PLAY_INTERRUPTED = PlayState.PLAY_INTERRUPTED;
+	Sound.PLAY_FINISHED = PlayState.PLAY_FINISHED;
+	Sound.PLAY_FAILED = PlayState.PLAY_FAILED;
 
-	s.SUPPORTED_EXTENSIONS = ["mp3", "ogg", "opus", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"];
+	Sound.SUPPORTED_EXTENSIONS = ["mp3", "ogg", "opus", "mpeg", "wav", "m4a", "mp4", "aiff", "wma", "mid"];
 
-	s.EXTENSION_MAP = {
+	Sound.EXTENSION_MAP = {
 		m4a:"mp4"
 	};
 
-	s.FILE_PATTERN = SoundParser.FILE_PATTERN;
+	Sound.FILE_PATTERN = SoundParser.FILE_PATTERN;
 
 // class getter / setter properties
 	
-	s.getVolume = _soundVolume.getVolume;
-	s.setVolume = _soundVolume.setVolume;
-	s.getMute = _soundVolume.getMute;
-	s.setMute = _soundVolume.setMute;
-	s.getCapabilities = _soundVolume.getCapabilities;
+	Sound.getVolume = _soundVolume.getVolume;
+	Sound.setVolume = _soundVolume.setVolume;
+	Sound.getMute = _soundVolume.getMute;
+	Sound.setMute = _soundVolume.setMute;
+	Sound.getCapabilities = _soundVolume.getCapabilities;
 
 	Object.defineProperties(s, {
 		volume: { get: _getMasterVolume, set: _setMasterVolume },
@@ -61,38 +59,38 @@ createjs.Sound = (function () {
 
 
 // EventDispatcher methods:
-	s.addEventListener = _soundEventHandler.addEventListener;
-	s.removeEventListener = _soundEventHandler.removeEventListener;
-	s.removeAllEventListeners = _soundEventHandler.removeAllEventListeners;
-	s.dispatchEvent = _soundEventHandler.dispatchEvent;
-	s.hasEventListener = _soundEventHandler.hasEventListener;
-	s._listeners = _soundEventHandler._listeners;
+	Sound.addEventListener = _soundEventHandler.addEventListener;
+	Sound.removeEventListener = _soundEventHandler.removeEventListener;
+	Sound.removeAllEventListeners = _soundEventHandler.removeAllEventListeners;
+	Sound.dispatchEvent = _soundEventHandler.dispatchEvent;
+	Sound.hasEventListener = _soundEventHandler.hasEventListener;
+	Sound._listeners = _soundEventHandler._listeners;
 
 // Class Public Methods
-	s.getPreloadHandlers = getPreloadHandlers;
-	s.registerPlugins = _soundPlugin.registerPlugins;
-	s.initializeDefaultPlugins = _soundPlugin.initializeDefaultPlugins;
-	s.isReady = _soundPlugin.isReady;
-	s.initLoad = _soundRegister.initLoad;
-	s.registerSound = _soundRegister.registerSound;
-	s.registerSounds = _soundRegister.registerSounds;
-	s.removeSound = _soundRegister.removeSound;
-	s.removeSounds = _soundRegister.removeSounds;
-	s.removeAllSounds = _soundRegister.removeAllSounds;
-	s.loadComplete = _soundRegister.loadComplete;
-	s.play = _soundInstance.play;
-	s.createInstance = _soundInstance.createInstance;
-	s.stop = _soundInstance.setStop;
-	s.setDefaultPlayProps = _soundRegister.setDefaultPlayProps;
-	s.getDefaultPlayProps = _soundRegister.getDefaultPlayProps;
+	Sound.getPreloadHandlers = getPreloadHandlers;
+	Sound.registerPlugins = _soundPlugin.registerPlugins;
+	Sound.initializeDefaultPlugins = _soundPlugin.initializeDefaultPlugins;
+	Sound.isReady = _soundPlugin.isReady;
+	Sound.initLoad = _soundRegister.initLoad;
+	Sound.registerSound = _soundRegister.registerSound;
+	Sound.registerSounds = _soundRegister.registerSounds;
+	Sound.removeSound = _soundRegister.removeSound;
+	Sound.removeSounds = _soundRegister.removeSounds;
+	Sound.removeAllSounds = _soundRegister.removeAllSounds;
+	Sound.loadComplete = _soundRegister.loadComplete;
+	Sound.play = _soundInstance.play;
+	Sound.createInstance = _soundInstance.createInstance;
+	Sound.stop = _soundInstance.setStop;
+	Sound.setDefaultPlayProps = _soundRegister.setDefaultPlayProps;
+	Sound.getDefaultPlayProps = _soundRegister.getDefaultPlayProps;
 
 	return Sound;
 
 	function getPreloadHandlers() {
 		return {
-			callback:createjs.proxy(s.initLoad, s),
+			callback:createjs.proxy(Sound.initLoad, s),
 			types:["sound"],
-			extensions:s.SUPPORTED_EXTENSIONS
+			extensions:Sound.SUPPORTED_EXTENSIONS
 		};
 	}
 
