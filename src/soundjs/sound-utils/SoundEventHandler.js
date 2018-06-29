@@ -29,7 +29,9 @@ createjs.soundUtils.SoundEventHandler = (function (){
 
     function _handleLoadComplete(event, preloadHash) {
 		var source = event.target.getItem().src;
-		if (!preloadHash[source]) {return;}
+		if (!preloadHash || !preloadHash[source]) {
+			return;
+		}
 
 		for (var i = 0, l = preloadHash[source].length; i < l; i++) {
 			var preloadItem = preloadHash[source][i];
@@ -49,7 +51,9 @@ createjs.soundUtils.SoundEventHandler = (function (){
 
     function _handleLoadError(event, preloadHash) {
 		var source = event.target.getItem().src;
-		if (!preloadHash[source]) {return;}
+		if (!preloadHash || !preloadHash[source]) {
+			return;
+		}
 
 		for (var i = 0, l = preloadHash[source].length; i < l; i++) {
 			var preloadItem = preloadHash[source][i];

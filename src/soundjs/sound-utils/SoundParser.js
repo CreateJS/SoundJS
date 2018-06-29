@@ -35,16 +35,16 @@ createjs.soundUtils.SoundParser = (function () {
 		if (match == null) { return false; }
 
 		var name = match[MATCH_NAME];
-		var ext = match[MATCH_EXTENSION];
-		var c = _soundVolume.capabilities;
+		var extension = match[MATCH_EXTENSION];
+		var capabilities = _soundVolume.capabilities;
 		var i = 0;
-		while (!c[ext]) {
-			ext = this.alternateExtensions[i++];
+		while (!capabilities[extension]) {
+			extension = this.alternateExtensions[i++];
 			if (i > this.alternateExtensions.length) { return null; }	// no extensions are supported
 		}
-		value = value.replace("."+match[MATCH_EXTENSION], "."+ext);
+		value = value.replace("."+match[MATCH_EXTENSION], "."+extension);
 
-		var ret = {name:name, src:value, extension:ext};
+		var ret = {name:name, src:value, extension:extension};
 		return ret;
 	}
 
