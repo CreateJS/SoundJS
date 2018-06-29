@@ -92,14 +92,7 @@ createjs.soundUtils.SoundInstance = (function () {
 
 		var instance = null;
 		if (details != null && details.src != null) {
-			SoundChannel.create(details.src);
-			if (startTime == null) { startTime = src.startTime; }
-			instance = _soundPlugin.activePlugin.create(details.src, startTime, duration || src.duration);
-
-			defaultPlayProps = defaultPlayProps || _soundRegister.defaultPlayPropsHash[details.src];
-			if (defaultPlayProps) {
-				instance.applyPlayProps(defaultPlayProps);
-			}
+			createInstanceFromDetails(detals);
 		} else {
 			instance = new createjs.DefaultSoundInstance(src, startTime, duration);
 		}
@@ -121,5 +114,16 @@ createjs.soundUtils.SoundInstance = (function () {
 		for (var i = _instances.length; i--; ) {
 			_instances[i].stop();  // NOTE stop removes instance from this._instances
 		}
+    }
+
+    function createInstanceFromDetails(details) {
+        SoundChannel.create(details.src);
+        if (startTime == null) { startTime = src.startTime; }
+        instance = _soundPlugin.activePlugin.create(details.src, startTime, duration || src.duration);
+
+        defaultPlayProps = defaultPlayProps || _soundRegister.defaultPlayPropsHash[details.src];
+        if (defaultPlayProps) {
+            instance.applyPlayProps(defaultPlayProps);
+        }
     }
 })();

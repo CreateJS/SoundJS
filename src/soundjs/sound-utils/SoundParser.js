@@ -31,11 +31,11 @@ createjs.soundUtils.SoundParser = (function () {
 			value = value.toString();
 		}
 
-		var match = value.match(FILE_PATTERN);
-		if (match == null) { return false; }
+		var fileOptions = parseFileOptions(value);
+		if (!fileOptions) { return false; }
 
-		var name = match[MATCH_NAME];
-		var extension = match[MATCH_EXTENSION];
+		var name = fileOptions.name;
+		var extension = fileOptions.extension;
 		var capabilities = _soundVolume.capabilities;
 		var i = 0;
 		while (!capabilities[extension]) {
@@ -44,7 +44,7 @@ createjs.soundUtils.SoundParser = (function () {
 		}
 		value = value.replace("."+match[MATCH_EXTENSION], "."+extension);
 
-		var ret = {name:name, src:value, extension:extension};
+		var ret = { name: name, src:value, extension: extension };
 		return ret;
 	}
 
@@ -69,5 +69,17 @@ createjs.soundUtils.SoundParser = (function () {
 		}
 
 		return ret;
+	}
+
+	function parseFileOptions(value) {
+		var match = value.match(FILE_PATTERN);
+		if (!match) {
+			return null;
+		}
+
+		return {
+			name: match[MATCH_NAME],
+			extension = match[MATCH_EXTENSION]
+		};
 	}
 })();
