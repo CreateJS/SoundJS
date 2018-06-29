@@ -17,7 +17,7 @@ createjs.soundUtils.SoundRegister = (function () {
 		_soundPlugin = soundPlugin;
 		_soundParser = soundParser;
 
-		this.defaultPlayPropsHash = null;
+		this.defaultPlayPropsHash = {};
 	};
     
 	var prototype = SoundRegister.prototype;
@@ -145,6 +145,7 @@ createjs.soundUtils.SoundRegister = (function () {
 	}
 
 	function loadComplete(src) {
+		if (!src) { return false; }
 		if (!_soundPlugin.isReady()) { return false; }
 		var details = _soundParser.parsePath(src);
 		if (details) {
@@ -157,6 +158,7 @@ createjs.soundUtils.SoundRegister = (function () {
 	}
 
     function _registerSound(loadItem) {
+		if (!loadItem) { return false; }
 		if (!_soundPlugin.initializeDefaultPlugins()) {return false;}
 
 		var details;
@@ -212,11 +214,19 @@ createjs.soundUtils.SoundRegister = (function () {
 	}
 
 	function setDefaultPlayProps(src, playProps) {
+		if (!src || !playProps) {
+			return;
+		}
+
 		src = _getSrcById(src);
 		this.defaultPlayPropsHash[_soundParser.parsePath(src.src).src] = createjs.PlayPropsConfig.create(playProps);
 	}
 
 	function getDefaultPlayProps(src) {
+		if (!src) {
+			return;
+		}
+
 		src = _getSrcById(src);
 		return this.defaultPlayPropsHash[_soundParser.parsePath(src.src).src];
 	}

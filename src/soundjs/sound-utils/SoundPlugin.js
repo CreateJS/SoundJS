@@ -33,7 +33,7 @@ createjs.soundUtils.SoundPlugin = (function () {
 
 	function _registerPlugin(plugin) {
 		// Note: Each plugin is passed in as a class reference, but we store the activePlugin as an instance
-		if (plugin.isSupported()) {
+		if (plugin && plugin.isSupported()) {
 			this.activePlugin = new plugin();
 			return true;
 		}
