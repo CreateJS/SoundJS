@@ -169,6 +169,8 @@ class Playback extends AbstractAudioWrapper {
 
 		if(this._paused){
 			this._stopCore(); // Not playing currently - can stop immediately.
+			this.dispatchEvent("stopped");
+			return;
 		}
 
 		this.dispatchEvent("stopped");
