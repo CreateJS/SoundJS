@@ -48,9 +48,9 @@ class Sample extends AbstractAudioWrapper {
 		return this.audioBuffer ? this.audioBuffer.duration : null;
 	}
 
-	constructor(src, options = {}, parent = Sound.rootGroup) {
+	constructor(src, options = {}, parent = Sound.rootGroup ) {
 		super();
-		let ctx = Sound.context;
+		//let ctx = Sound.context;
 
 		this.playbacks = [];
 
@@ -67,7 +67,8 @@ class Sample extends AbstractAudioWrapper {
 
 		this.playDuration = options.playDuration; 																		// No default needed, undefined means "play until end"
 
-		this._resolveSource(src);
+		//this._resolveSource(src);
+		Sound.requestBuffer(src).then( (result) => {this.src = result.bufferId; this.handleAudioDecoded(result.audioBuffer);} );
 
 		this.parent = null; // Set to null here only to show that this variable exists on Samples. Samples should always have a parent group.
 		parent.add(this);
@@ -223,7 +224,10 @@ class Sample extends AbstractAudioWrapper {
 		if(xhr.readyState === 4 && xhr.status === 200){
 			let ctx = Sound.context;
 			let result = loadEvent.target.response;
-			ctx.decodeAudioData(result, this.handleAudioDecoded.bind(this), this.handleAudioDecodeError.bind(this));
+
+			Sound.requestBuffer(result).then( (ab) => { this.handleAudioDecoded(ab); } );
+
+			//ctx.decodeAudioData(result, this.handleAudioDecoded.bind(this), this.handleAudioDecodeError.bind(this));
 		}
 	}
 

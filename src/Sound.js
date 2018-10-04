@@ -17,6 +17,9 @@ class Sound {
 		Sound.__fileExtensionPriorityList = ["mp3"];
 		Sound._strictFallbacks = true;
 		Sound._idHash = {};
+		Sound._arrayBufferIdSuffix = 0;
+		Sound._audioBufferIdSuffix = 0;
+		Sound._audioBuffers = {};
 	}
 
 	// Read-only properties
@@ -287,6 +290,234 @@ class Sound {
 
 	static removeAllSounds() {
 		Sound.purgeSamples();
+	}
+
+
+	/********************
+	 * TODO: This requestBuffer function is the last thing I was working on, and it's very unfinished and untested. There's
+	 * also duplicates of this code in Sample that will be defunct if/when this works.
+	 *
+	 * Possible improvement planned: For Data URLs, don't store the Data URL as a string, just decode the buffer each time
+	 * and compare against that e.g. as if you had been provided an audio buffer
+	 *
+	 * This should also be chopped up into separate functions when it's confirmed working to clean up some of this mess
+	 */
+
+	static requestBuffer(data, sample){
+		return new Promise( (resolve, reject) => {
+			if(data instanceof ArrayBuffer){
+				Sound._fetchByArrayBuffer(data, resolve, reject);
+
+			}else if(data instanceof AudioBuffer){
+				Sound._fetchByAudioBuffer(data, resolve, reject);
+
+			}else if (typeof data === "string"){
+				Sound._fetchByString(data, resolve, reject);
+
+			} else if (data instanceof Array) {
+				Sound._fetchByUrlArray(data, resolve, reject);
+
+			} else if (typeof data === "object") {
+				Sound._fetchByUrlHash(data, resolve, reject);
+
+			}
+		});
+	}
+
+	static _fetchByArrayBuffer(buffer, resolve, reject){
+		if(buffer.soundJsId){
+			console.log("buffer found");
+			resolve(Sound._audioBuffers[data.soundJsId]);
+		}else{
+			Sound.decodeArrayBuffer(data).then(
+				(audioBuffer) => {
+					buffer.soundJsId = "ab_" + Sound._arrayBufferIdSuffix++;
+					Sound._audioBuffers[buffer.soundJsId] = audioBuffer;
+					window.ab = buffer;
+					resolve({audioBuffer: audioBuffer, bufferId: data.soundJsId});
+				});
+		}
+	}
+
+	static _fetchByAudioBuffer(buffer, resolve, reject){
+		// Check to see if we already have it.
+		for(let id in Sound._audioBuffers){
+			if(data === Sound._audioBuffers[id]){ // Checks memory addresses, rather than compares arrays, so this is fast
+				console.log("Request buffer: existing audio buffer found by mem address match");
+				resolve({audioBuffer: data, bufferId: id});
+				return;
+			}
+		}
+
+		// Didn't find an identical memory address, so let's check the actual data for a match.
+		let audioBufferCompare = (a, b) => {
+			if(a.length !== b.length){ return false; } // Length check saves expensive by-element comparison in most cases.
+			for(let i = 0; i < a.length; i++){
+				if(a[i] !== b[i]){ return false; }
+			}
+			return true;
+		};
+
+		for(let id in Sound._audioBuffers){
+			let buf = Sound._audioBuffers[id];
+
+			if(audioBufferCompare(buf, data)){
+				// Found an identical buffer, so just use it.
+				console.log("request buffer: existing audio buffer found by direct data comparison.");
+				resolve({audioBuffer: Sound._audioBuffers[id], bufferId: id});
+				return;
+			}
+		}
+
+		//If we reach here, it means no identical buffer was found, so this is new and we should store it.
+		console.log("Storing new audio buffer");
+
+		let id = "audioBuffer_" + Sound._audioBufferIdSuffix++;
+		Sound._audioBuffers[id] = data;
+		resolve({audioBuffer: data, bufferId: id});
+	}
+
+	static _fetchByString(data, resolve, reject){
+		console.log("found string url");
+
+		let ab = this._audioBuffers[data];
+
+		if(ab){
+			resolve({audioBuffer: ab, bufferId: data}); // TODO: this check is duplicated in the individual cases, so remove at least one
+			return;
+		}
+
+		// Buffer not found. Load and decode.
+		if (/^data:.*?,/.test(data)) { // Test for Data URL
+			console.log("found data url");
+			let ab = Sound._audioBuffers[data];
+			if(ab){
+				resolve({audioBuffer: ab, bufferId: data});// TODO: Improve so we're not storing data URLs on Samples.
+			}else{
+				// Data URLs can just be loaded by XHR, so do so
+				Sound.loadAndDecodeAudio(data).then( (audioBuffer) => {
+					Sound._audioBuffers[data] = audioBuffer;
+					resolve({audioBuffer: audioBuffer, bufferId: data})} ); // TODO: Improve so we're not storing data URLs on Samples.
+			}
+
+		} else {
+			// Assumed to be a regular url at this point
+			/*this.src = */ let src = Sound.ensureValidFileExtension(data);
+			console.log("found regular string url");
+			let ab = Sound._audioBuffers[src];
+			if(ab){
+				resolve({audioBuffer: ab, bufferId: src})
+			}else{
+				Sound.loadAndDecodeAudio(src).then ( (audioBuffer) => {
+					Sound._audioBuffers[data] = audioBuffer;
+					resolve({audioBuffer: audioBuffer, bufferId: data})
+				});
+			}
+
+		}
+	}
+
+	static _fetchByUrlArray(arr, resolve, reject){
+		for (let i = 0; i < src.length; i++) {
+			let url = arr[i];
+			if (!Sound.isExtensionSupported(url, false)) {
+				continue;
+			}
+			let ab = Sound._audioBuffers[url];
+			if(ab){
+				resolve({audioBuffer: ab, bufferId: url});
+			}else{
+				Sound.loadAndDecodeAudio(url).then ( (audioBuffer) => {
+					Sound._audioBuffers[url] = audioBuffer;
+					resolve({audioBuffer: audioBuffer, bufferId: url})
+				});
+			}
+
+			break; // We found the first (and thus highest priority) workable extension, and don't need to keep looking
+		}
+		reject("No supported files types found in URL array");
+	}
+
+	static _fetchByUrlHash(hash, resolve, reject){
+		// Assume a source of the format: {<ext>:<url>} e.g. {mp3: path/to/file/sound.mp3, ogg: other/path/soundFileWithNoExtension}
+		for (let ext in data) {
+			if (!data.hasOwnProperty(ext) || !Sound.isExtensionSupported(ext, false) ) {
+				continue;
+			}
+			//this.src = src[ext];
+			let ab = Sound._audioBuffers[data[ext]];
+			if(ab){
+				resolve({audioBuffer: ab, bufferId: data[ext]});
+			}else{
+				Sound.loadAndDecodeAudio(data[ext]).then ( (audioBuffer) => {
+					Sound._audioBuffers[data[ext]] = audioBuffer;
+					resolve({audioBuffer: audioBuffer, bufferId: data[ext]})
+				});
+			}
+			break; // We only need one valid url
+		}
+	}
+
+	static loadAndDecodeAudio(src){
+		return new Promise( (resolve, reject) => {
+			Sound.loadAudio(src).then( (arrayBuffer) => {
+				Sound.decodeArrayBuffer(arrayBuffer).then ( (audioBuffer) => resolve(audioBuffer))
+			})
+		});
+	}
+
+	static loadAudio(src){
+		return new Promise( (resolve, reject) => {
+			let request = new XMLHttpRequest();
+			request.open('GET', src, true);
+			request.responseType = 'arraybuffer';
+			request.onload = (loadEvent) => {
+				let xhr = loadEvent.target;
+				if(xhr.readyState === 4 && xhr.status === 200){
+					let result = xhr.response;
+					resolve(result);
+				}else{
+					reject(loadEvent);
+				}
+			};
+
+			request.send();
+		});
+	}
+
+	static decodeArrayBuffer(arrayBuffer){
+		return new Promise( (resolve, reject) => {
+			Sound.context.decodeAudioData(arrayBuffer,
+				(result) => { // Success
+					resolve(result);
+				}
+				,
+				(error) => { // Error
+					reject(error);
+				});
+		});
+	}
+
+	static ensureValidFileExtension(url) {
+		// Not a data URL, so let's doublecheck the file extension before loading.
+		let extensionExp = /\.\w+$/;
+		let result = extensionExp.exec(url);
+		if (result === null) {
+			// No file extension, so add one
+			url = url.concat("." + Sound.fallbackFileExtension);
+		} else {
+			// Found a file extension. Check if it's supported. If it's definitely not, fall back.
+			let extension = result[0].substr(1);
+			if (!Sound.isExtensionSupported(extension, false)) {
+				url = url.replace(extensionExp, "." + Sound.fallbackFileExtension);
+			}
+		}
+		return url;
+	}
+
+
+	static releaseBuffer(id, sample){
+
 	}
 }
 
