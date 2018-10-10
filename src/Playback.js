@@ -179,7 +179,8 @@ class Playback extends AbstractAudioWrapper {
 	}
 
 	_stopCore() {
-		// after the crossfade, do the actual stopping part.
+		// after the declick fade, do the actual stopping part.
+		this._stopping = false;
 		this.destroy(); // An "end" event will be dispatched in response to the _sourceNode being told to stop in the destroy function, so is not needed here.
 	}
 
@@ -203,7 +204,7 @@ class Playback extends AbstractAudioWrapper {
 	handleEnded() {
 		if (this.paused) {
 			// Do nothing - the buffer just sent an ended event, but this is because the Playback was just paused,
-			// and the pause function already dispatched an event.
+			// and the pause function already dispatched a pause event.
 		} else {
 			// Reached end of playback. Loop if we have remaining loops - destroy otherwise.
 
