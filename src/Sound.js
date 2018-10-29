@@ -304,46 +304,136 @@ class Sound {
 	 */
 
 	static requestBuffer(data, sample){
-		return new Promise( (resolve, reject) => {
+
+		// ID reservation must be synchronous - other requests may be made for the same buffer before the promise resolves,
+		// even if the audio is already loaded.
+		let id = Sound._reserveId(data);
+
+		if(!id){
+			return null; // Will likely cause errors as functions calling this will be expecting a promise,
+										// but we're already in an error state if the reserved id was null. May improve later.
+		}
+
+		if(Sound._audioBuffers[id] instanceof Promise){
+			// This buffer has already been requested. Return that promise.
+			console.log("Already loading - we have a promise. returning");
+			return Sound._audioBuffers[id];
+		}
+
+		if(Sound._audioBuffers[id] instanceof AudioBuffer){
+			console.log("buffer already exists - returning");
+			return new Promise( (resolve, reject) => { resolve({audioBuffer: Sound._audioBuffers[id], bufferId: id}); } );
+		}
+
+		// We have an ID, but we don't already have a pending promise for the buffer, so kick off the load/decode:
+
+		let pr = new Promise( (resolve, reject) => {
+
+			if(Sound._audioBuffers[id] instanceof AudioBuffer){
+				// We already have this buffer. Resolve immediately:
+				console.log("AudioBuffer already in list");
+				resolve({audioBuffer: Sound._audioBuffers[id], bufferId: id});  // incorrect
+				return;
+			}
+
+			// Don't have this buffer yet - load and decode, then store it off for future use and resolve:
+
 			if(data instanceof ArrayBuffer){
-				Sound._fetchByArrayBuffer(data, resolve, reject);
+				Sound._fetchByArrayBuffer(data, id, resolve, reject);
+				console.log("Fetching by array buffer");
 
 			}else if(data instanceof AudioBuffer){
-				Sound._fetchByAudioBuffer(data, resolve, reject);
+				Sound._fetchByAudioBuffer(data, id, resolve, reject);
+				console.log("Fetching by audio buffer");
 
 			}else if (typeof data === "string"){
-				Sound._fetchByString(data, resolve, reject);
+				Sound._fetchByString(data, id, resolve, reject);
+				console.log("Fetching by string");
 
 			} else if (data instanceof Array) {
-				Sound._fetchByUrlArray(data, resolve, reject);
+				Sound._fetchByUrlArray(data, id, resolve, reject);
+				console.log("Fetching by url array");
 
 			} else if (typeof data === "object") {
-				Sound._fetchByUrlHash(data, resolve, reject);
+				Sound._fetchByUrlHash(data, id, resolve, reject);
+				console.log("Fetching by url hash");
 
 			}
 		});
-	}
 
-	static _fetchByArrayBuffer(buffer, resolve, reject){
-		if(buffer.soundJsId){
-			console.log("buffer found");
-			resolve(Sound._audioBuffers[data.soundJsId]);
-		}else{
-			Sound.decodeArrayBuffer(data).then(
-				(audioBuffer) => {
-					buffer.soundJsId = "ab_" + Sound._arrayBufferIdSuffix++;
-					Sound._audioBuffers[buffer.soundJsId] = audioBuffer;
-					window.ab = buffer;
-					resolve({audioBuffer: audioBuffer, bufferId: data.soundJsId});
-				});
+		// Now store off the promise so that other people requesting the same buffer get the same promise, and return
+
+		if(!(Sound._audioBuffers[id] instanceof AudioBuffer)){
+			// Need to check if the AudioBuffer already is in place. The above promise may resolve synchronously sometimes,
+			// so it may have already placed an already-loaded AudioBuffer into the top level hash.
+			console.log("storing promise");
+			Sound._audioBuffers[id] = pr;
 		}
+		return pr;
 	}
 
-	static _fetchByAudioBuffer(buffer, resolve, reject){
+	static _reserveId(data){
+		if(data instanceof ArrayBuffer){
+			data.soundJsId = data.soundJsId || "ab_" + Sound._arrayBufferIdSuffix++;
+			return data.soundJsId;
+
+		}else if(data instanceof AudioBuffer){
+			data.soundJsId = data.soundJsId || "audioBuffer_" + Sound._audioBufferIdSuffix++;
+			return data.soundJsId;
+
+		}else if (typeof data === "string"){
+			return data;
+
+		} else if (data instanceof Array) {
+			return this._reserveIdFromUrlArray(data);
+
+		} else if (typeof data === "object") {
+			return this._reserveIdFromUrlHash(data);
+
+		}
+	};
+
+	static _reserveIdFromUrlArray(arr){
+		for (let i = 0; i < arr.length; i++) {
+			let url = arr[i];
+			if (Sound.isExtensionSupported(url, false)) {
+				return url;
+			}
+		}
+		console.warn("Warning: Attempted to create an audiobuffer from a url array, but didn't find any supported file types. Requested urls were:");
+		console.log(arr);
+		return null;
+	}
+
+	static _reserveIdFromUrlHash(o){
+		// Assume a source of the format: {<ext>:<url>} e.g. {mp3: path/to/file/sound.mp3, ogg: other/path/soundFileWithNoExtension}
+		for (let ext in o) {
+			if ( o.hasOwnProperty(ext) && Sound.isExtensionSupported(ext, false) ) {
+				return o[ext];
+			}
+		}
+		console.error("Warning: Attempted to create an audiobuffer from a url hash, but didn't find any supported file types. Requested urls were:");
+		console.log(o);
+		return null;
+	}
+
+	static _fetchByArrayBuffer(buffer, id, resolve, reject){
+		Sound.decodeArrayBuffer(buffer).then( (audioBuffer) => {
+			Sound._audioBuffers[id] = audioBuffer;
+			resolve({audioBuffer: audioBuffer, bufferId: id});
+		});
+	}
+
+	static _fetchByAudioBuffer( buffer, id, resolve, reject){
+		Sound._audioBuffers[id] = buffer;
+		resolve({audioBuffer: buffer, bufferId: id});
+	}
+
+/*	static _fetchByAudioBuffer(buffer, resolve, reject){
 		// Check to see if we already have it.
 		for(let id in Sound._audioBuffers){
 			if(data === Sound._audioBuffers[id]){ // Checks memory addresses, rather than compares arrays, so this is fast
-				console.log("Request buffer: existing audio buffer found by mem address match");
+				console.error("Request buffer: existing audio buffer found by mem address match");
 				resolve({audioBuffer: data, bufferId: id});
 				return;
 			}
@@ -375,83 +465,88 @@ class Sound {
 		let id = "audioBuffer_" + Sound._audioBufferIdSuffix++;
 		Sound._audioBuffers[id] = data;
 		resolve({audioBuffer: data, bufferId: id});
-	}
+	}*/
 
-	static _fetchByString(data, resolve, reject){
+	static _fetchByString(data, id, resolve, reject){
 		console.log("found string url");
 
-		let ab = this._audioBuffers[data];
+		let ab = Sound._audioBuffers[id];
 
 		if(ab){
-			resolve({audioBuffer: ab, bufferId: data}); // TODO: this check is duplicated in the individual cases, so remove at least one
+			resolve({audioBuffer: ab, bufferId: id}); // TODO: this check is duplicated in the individual cases, so remove at least one
 			return;
 		}
 
 		// Buffer not found. Load and decode.
 		if (/^data:.*?,/.test(data)) { // Test for Data URL
 			console.log("found data url");
-			let ab = Sound._audioBuffers[data];
-			if(ab){
+			let ab = Sound._audioBuffers[id];
+			if(ab instanceof AudioBuffer){
 				resolve({audioBuffer: ab, bufferId: data});// TODO: Improve so we're not storing data URLs on Samples.
 			}else{
 				// Data URLs can just be loaded by XHR, so do so
 				Sound.loadAndDecodeAudio(data).then( (audioBuffer) => {
-					Sound._audioBuffers[data] = audioBuffer;
+					Sound._audioBuffers[id] = audioBuffer;
 					resolve({audioBuffer: audioBuffer, bufferId: data})} ); // TODO: Improve so we're not storing data URLs on Samples.
 			}
 
 		} else {
 			// Assumed to be a regular url at this point
-			/*this.src = */ let src = Sound.ensureValidFileExtension(data);
+			let src = Sound.ensureValidFileExtension(data);
 			console.log("found regular string url");
+			// Checks to see if we might have stored a buffer with this URL (after possibly changing the file extension):
 			let ab = Sound._audioBuffers[src];
-			if(ab){
+			if(ab instanceof AudioBuffer){
 				resolve({audioBuffer: ab, bufferId: src})
 			}else{
 				Sound.loadAndDecodeAudio(src).then ( (audioBuffer) => {
-					Sound._audioBuffers[data] = audioBuffer;
-					resolve({audioBuffer: audioBuffer, bufferId: data})
+					Sound._audioBuffers[id] = audioBuffer;
+					resolve({audioBuffer: audioBuffer, bufferId: id})
 				});
 			}
-
 		}
 	}
 
-	static _fetchByUrlArray(arr, resolve, reject){
-		for (let i = 0; i < src.length; i++) {
+	static _fetchByUrlArray(arr, id, resolve, reject){
+		let ab = Sound._audioBuffers[id];
+		if(ab instanceof AudioBuffer) {
+			resolve({audioBuffer: ab, bufferId: id});
+		}
+
+		for (let i = 0; i < arr.length; i++) {
 			let url = arr[i];
 			if (!Sound.isExtensionSupported(url, false)) {
 				continue;
 			}
-			let ab = Sound._audioBuffers[url];
-			if(ab){
-				resolve({audioBuffer: ab, bufferId: url});
+			let ab = Sound._audioBuffers[id];
+			if(ab instanceof AudioBuffer){
+				resolve({audioBuffer: ab, bufferId: id});
 			}else{
 				Sound.loadAndDecodeAudio(url).then ( (audioBuffer) => {
-					Sound._audioBuffers[url] = audioBuffer;
-					resolve({audioBuffer: audioBuffer, bufferId: url})
+					Sound._audioBuffers[id] = audioBuffer;
+					resolve({audioBuffer: audioBuffer, bufferId: id})
 				});
 			}
 
-			break; // We found the first (and thus highest priority) workable extension, and don't need to keep looking
+			return; // We found the first (and thus highest priority) workable extension, and don't need to keep looking
 		}
 		reject("No supported files types found in URL array");
 	}
 
-	static _fetchByUrlHash(hash, resolve, reject){
+	static _fetchByUrlHash(hash, id, resolve, reject){
 		// Assume a source of the format: {<ext>:<url>} e.g. {mp3: path/to/file/sound.mp3, ogg: other/path/soundFileWithNoExtension}
 		for (let ext in data) {
 			if (!data.hasOwnProperty(ext) || !Sound.isExtensionSupported(ext, false) ) {
 				continue;
 			}
 			//this.src = src[ext];
-			let ab = Sound._audioBuffers[data[ext]];
-			if(ab){
+			let ab = Sound._audioBuffers[id]; // TODO cleanup, move out of loop
+			if(ab instanceof AudioBuffer){
 				resolve({audioBuffer: ab, bufferId: data[ext]});
 			}else{
 				Sound.loadAndDecodeAudio(data[ext]).then ( (audioBuffer) => {
-					Sound._audioBuffers[data[ext]] = audioBuffer;
-					resolve({audioBuffer: audioBuffer, bufferId: data[ext]})
+					Sound._audioBuffers[id] = audioBuffer;
+					resolve({audioBuffer: audioBuffer, bufferId: id})
 				});
 			}
 			break; // We only need one valid url
@@ -515,6 +610,29 @@ class Sound {
 		return url;
 	}
 
+/*
+	handleAudioLoaded(loadEvent) {
+		let xhr = loadEvent.target;
+		if(xhr.readyState === 4 && xhr.status === 200){
+			let ctx = Sound.context;
+			let result = loadEvent.target.response;
+			ctx.decodeAudioData(result, this.handleAudioDecoded.bind(this), this.handleAudioDecodeError.bind(this));
+		}
+	}
+
+	handleAudioDecoded(buffer) {
+		this.audioBuffer = buffer;
+
+		this.dispatchEvent("ready");
+
+		if (this._playbackRequested) {
+			this._play(this._requestedPlaybackPlayprops);
+		}
+	}
+
+	handleAudioDecodeError(e) {
+		console.warn("Error decoding audio data in Sample.")
+	}*/
 
 	static releaseBuffer(id, sample){
 
