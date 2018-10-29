@@ -429,44 +429,6 @@ class Sound {
 		resolve({audioBuffer: buffer, bufferId: id});
 	}
 
-/*	static _fetchByAudioBuffer(buffer, resolve, reject){
-		// Check to see if we already have it.
-		for(let id in Sound._audioBuffers){
-			if(data === Sound._audioBuffers[id]){ // Checks memory addresses, rather than compares arrays, so this is fast
-				console.error("Request buffer: existing audio buffer found by mem address match");
-				resolve({audioBuffer: data, bufferId: id});
-				return;
-			}
-		}
-
-		// Didn't find an identical memory address, so let's check the actual data for a match.
-		let audioBufferCompare = (a, b) => {
-			if(a.length !== b.length){ return false; } // Length check saves expensive by-element comparison in most cases.
-			for(let i = 0; i < a.length; i++){
-				if(a[i] !== b[i]){ return false; }
-			}
-			return true;
-		};
-
-		for(let id in Sound._audioBuffers){
-			let buf = Sound._audioBuffers[id];
-
-			if(audioBufferCompare(buf, data)){
-				// Found an identical buffer, so just use it.
-				console.log("request buffer: existing audio buffer found by direct data comparison.");
-				resolve({audioBuffer: Sound._audioBuffers[id], bufferId: id});
-				return;
-			}
-		}
-
-		//If we reach here, it means no identical buffer was found, so this is new and we should store it.
-		console.log("Storing new audio buffer");
-
-		let id = "audioBuffer_" + Sound._audioBufferIdSuffix++;
-		Sound._audioBuffers[id] = data;
-		resolve({audioBuffer: data, bufferId: id});
-	}*/
-
 	static _fetchByString(data, id, resolve, reject){
 		console.log("found string url");
 
