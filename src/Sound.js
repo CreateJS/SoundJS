@@ -20,6 +20,41 @@ class Sound {
 		Sound._arrayBufferIdSuffix = 0;
 		Sound._audioBufferIdSuffix = 0;
 		Sound._audioBuffers = {};
+
+		Sound._unlockingEvents = ["click", "touchstart", "touchend", "mousedown", "mouseup"];
+
+		Sound._unlockingEvents.forEach( (evtName) => {
+			window.addEventListener(evtName, Sound.unlockAudio);
+		});
+
+		Sound.onunlock = null;
+
+	}
+
+	static unlockAudio(){
+		if(Sound.context.state === "suspended"){
+			let pr = Sound.context.resume();
+
+			pr.then( () => {
+				Sound.dispatchEvent("audioUnlocked");
+
+				Sound._unlockingEvents.forEach( (evtName) => window.removeEventListener(evtName, Sound.unlockAudio));
+
+				if(Sound.onunlock){
+					Sound.onunlock();
+				}
+			}).catch( (reason) =>{
+				console.log(`Resuming audio context failed with the following error:`);
+				console.log(reason);
+			});
+
+			return pr;
+		}else if(Sound.context.state === "running"){
+			// Remove listeners.
+			Sound._unlockingEvents.forEach( (evtName) => window.removeEventListener(evtName, Sound.unlockAudio));
+
+			// TODO: should this call the audio unlock callback?
+		}
 	}
 
 	// Read-only properties
