@@ -42,6 +42,9 @@
  *
  */
 
+// core
+export { Event, EventDispatcher } from "@createjs/core";
+
 // sound
 export {default as Playback} from "./Playback";
 export {default as Sample} from "./Sample";
@@ -55,4 +58,3 @@ import HighPassFilter from "./effects/HighPassFilter"
 import BiquadFilter from "./effects/BiquadFilter"
 const FX = {Effect, LowPassFilter, HighPassFilter, BiquadFilter};
 export { FX };
-

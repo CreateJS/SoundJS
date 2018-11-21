@@ -1,4 +1,4 @@
-import EventDispatcher from "@createjs/core/src/events/EventDispatcher";
+import { EventDispatcher } from "@createjs/core";
 import Sound from "../Sound";
 
 export default class Declicker extends EventDispatcher {

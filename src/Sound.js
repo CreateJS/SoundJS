@@ -1,6 +1,6 @@
 import Group from "./Group";
 import Sample from "./Sample";
-import EventDispatcher from "@createjs/core/src/events/EventDispatcher";
+import { EventDispatcher } from "@createjs/core";
 
 class Sound {
 
