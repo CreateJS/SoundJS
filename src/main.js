@@ -46,15 +46,15 @@
 export { Event, EventDispatcher } from "@createjs/core";
 
 // sound
-export {default as Playback} from "./Playback";
-export {default as Sample} from "./Sample";
-export {default as Group} from "./Group";
-export {default as AudioSpriteSheet} from "./AudioSpriteSheet";
-export {default as Sound} from "./Sound";
-//effects
+export { default as Playback } from "./Playback";
+export { default as Sample } from "./Sample";
+export { default as Group } from "./Group";
+export { default as AudioSpriteSheet } from "./AudioSpriteSheet";
+export { default as Sound } from "./Sound";
+// effects
 import Effect from "./effects/Effect"
 import LowPassFilter from "./effects/LowPassFilter"
 import HighPassFilter from "./effects/HighPassFilter"
 import BiquadFilter from "./effects/BiquadFilter"
-const FX = {Effect, LowPassFilter, HighPassFilter, BiquadFilter};
+const FX = { Effect, LowPassFilter, HighPassFilter, BiquadFilter };
 export { FX };

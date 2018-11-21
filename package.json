@@ -1,0 +1,60 @@
+{
+  "name": "@createjs/soundjs",
+  "version": "2.0.0-beta.4",
+  "description": "A JavaScript library that provides a simple API and powerful features to make working with audio a breeze. Easily ties in audio file loading to PreloadJS.",
+  "keywords": [
+    "createjs",
+    "soundjs",
+    "gskinner",
+    "javascript",
+    "audio",
+    "webaudio",
+    "html5",
+    "flash"
+  ],
+  "author": "gskinner.com, inc.",
+  "homepage": "https://createjs.com/soundjs",
+  "url": "https://npmjs.com/package/soundjs",
+  "bugs": "https://github.com/createjs/soundjs/issues",
+  "license": "MIT",
+  "contributors": [
+    "Blair Ludwig <blair@gskinner.com>",
+    "Grant Skinner <grant@gskinner.com> (https://github.com/gskinner)"
+  ],
+  "main": "dist/soundjs.cjs.js",
+  "module": "src/main.js",
+  "logo": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/createjs/soundjs.git"
+  },
+  "scripts": {
+    "test": "cd node_modules/@createjs/build && npm test",
+    "dev": "cd node_modules/@createjs/build && gulp dev --format=iife",
+    "build": "cd node_modules/@createjs/build && gulp build",
+    "docs": "cd node_modules/@createjs/docs && npm run gen"
+  },
+  "dependencies": {
+    "@createjs/core": "2.0.0-beta.4"
+  },
+  "devDependencies": {
+    "@createjs/build": "2.0.0-beta.4",
+    "@createjs/easeljs": "2.0.0-beta.4"
+  },
+  "engine": "node >= 8.9.0",
+  "npmName": "soundjs",
+  "npmFileMap": [
+    {
+      "basePath": "dist",
+      "files": [
+        "**/*"
+      ]
+    }
+  ],
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "lib": "dist",
+    "test": "tests"
+  },
+}

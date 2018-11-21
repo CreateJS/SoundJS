@@ -20,6 +20,7 @@ like a Flash fallback (included, but must be used separately from the combined/m
 #### NPM
 
 `npm install @createjs/soundjs --save`
+
 `yarn add @createjs/soundjs`
 
 <!---
