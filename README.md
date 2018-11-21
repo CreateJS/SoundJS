@@ -12,7 +12,7 @@ SoundJS is a library to make working with audio on the web easier. It provides a
 different browsers, including using a target plugin model to provide an easy way to provide additional audio plugins
 like a Flash fallback (included, but must be used separately from the combined/minified version).
 
-... [CreateJS](https://createjs.com/) suite: [EaselJS](https://github.com/createjs/easeljs),
+[CreateJS](https://createjs.com/) suite: [EaselJS](https://github.com/createjs/easeljs),
 [PreloadJS](https://github.com/createjs/preloadjs), and [TweenJS](https://github.com/createjs/tweenjs).
 
 ## Installation
@@ -20,7 +20,9 @@ like a Flash fallback (included, but must be used separately from the combined/m
 #### NPM
 
 `npm install @createjs/soundjs --save`
+`yarn add @createjs/soundjs`
 
+<!---
 #### CDN
 
 `<script src="https://code.createjs.com/2.0/soundjs.min.js"></script>`
@@ -30,6 +32,7 @@ like a Flash fallback (included, but must be used separately from the combined/m
 ```javascript
 // TODO
 ```
+--->
 
 ## Support and Resources
 - Find examples and more information at the [SoundJS web site](http://createjs.com/soundjs).
