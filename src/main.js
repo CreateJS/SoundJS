@@ -46,6 +46,7 @@
 export {default as Playback} from "./Playback";
 export {default as Sample} from "./Sample";
 export {default as Group} from "./Group";
+export {default as AudioSpriteSheet} from "./AudioSpriteSheet";
 export {default as Sound} from "./Sound";
 //effects
 import Effect from "./effects/Effect"
