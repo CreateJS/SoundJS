@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scribble Score</title>
+
+	<style>
+		#staff{
+			height: 365px;
+			width: 720px;
+			position: absolute;
+			left: 80px;
+			top: 40px;
+		}
+
+		.noteColumn {
+			height: 100%;
+			width: 75px;
+			display: inline-block;
+		}
+
+		.noteCell {
+			width: 100%;
+			height: 75px;
+			border-style: dashed;
+			cursor: pointer;
+		}
+
+		.i0 {
+			background-image: url("./assets/art/sjs2_examples_neonscore_instruments_small.png");
+			background-position: 0 -75px;
+		}
+
+		.active > .i0{
+			background-position: 0 0;
+		}
+
+		.i1 {
+			background-image: url("./assets/art/sjs2_examples_neonscore_instruments_small.png");
+			background-position: -75px -75px;
+		}
+
+		.active > .i1{
+			background-position: -75px 0;
+		}
+
+		.i2 {
+			background-image: url("./assets/art/sjs2_examples_neonscore_instruments_small.png");
+			background-position: -150px -75px;
+		}
+
+		.active > .i2{
+			background-position: -150px 0;
+		}
+
+		.i3{
+			background-image: url("./assets/art/sjs2_examples_neonscore_instruments_small.png");
+			background-position: -300px -75px;
+		}
+
+		.active > .i3{
+			background-position: -300px 0;
+		}
+
+		#instrumentPanel{
+			height: 130px;
+			position: absolute;
+			left: 40px;
+			top: 450px;
+			width: 800px;
+		}
+
+		#instrumentPanel > div {
+			background-image: url("./assets/art/sjs2_examples_neonscore_instruments.png");
+			height: 100%;
+			width: 130px;
+			display: inline-block;
+			cursor: pointer;
+			margin-left: 20px;
+			margin-right: 20px;
+		}
+
+		#pianoSelector {
+			background-position: 0 -130px;
+		}
+
+		#pianoSelector.active{
+			background-position: 0 0;
+		}
+
+		#xyloSelector{
+			background-position: -130px -130px;
+		}
+
+		#xyloSelector.active{
+			background-position: -130px 0;
+		}
+
+		#violinSelector{
+			background-position: -260px -130px;
+		}
+
+		#violinSelector.active{
+			background-position: -260px 0;
+		}
+
+		#guitarSelector{
+			background-position: -520px -130px;
+		}
+
+		#guitarSelector.active{
+			background-position: -520px 0;
+		}
+	</style>
+</head>
+<body>
+
+<div id="staff">
+	<div class="noteColumn">
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+	</div>
+	<div class="noteColumn">
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+	</div>
+	<div class="noteColumn">
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+	</div>
+	<div class="noteColumn">
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+	</div>
+	<div class="noteColumn">
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+	</div>
+	<div class="noteColumn">
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+	</div>
+	<div class="noteColumn">
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+	</div>
+	<div class="noteColumn">
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+		<div class="noteCell"></div>
+	</div>
+</div>
+
+<div id="instrumentPanel">
+	<div id="pianoSelector" class="active"></div>
+	<div id="xyloSelector"></div>
+	<div id="violinSelector"></div>
+	<div id="guitarSelector"></div>
+</div>
+
+
+
+	<canvas id="mainCanvas" width="800" height="600"></canvas>
+
+	<script src="../../node_modules/@createjs/easeljs/dist/easeljs.min.js"></script>
+	<script src="../../dist/soundjs-NEXT.js"></script>
+	<script type="text/javascript">
+
+		let staff = document.getElementById("staff");
+		staff.addEventListener("mousedown", handleStaffClick);
+
+		let instrumentPanel = document.getElementById("instrumentPanel");
+
+		document.getElementById("pianoSelector").addEventListener( "mousedown", (e)=> selectInstrument(0));
+		document.getElementById("xyloSelector").addEventListener( "mousedown", (e)=> selectInstrument(1));
+		document.getElementById("violinSelector").addEventListener( "mousedown", (e)=> selectInstrument(2));
+		document.getElementById("guitarSelector").addEventListener( "mousedown", (e)=> selectInstrument(3));
+
+		let currentInstrument = 0;
+
+		let activeColumnIndex = 0;
+
+		let bpm = 240;
+		let beatLength = 60/bpm;
+
+		window.setInterval( () => {
+			staff.children[activeColumnIndex].classList.remove("active");
+			activeColumnIndex = (activeColumnIndex + 1) % staff.children.length;
+			staff.children[activeColumnIndex].classList.add("active");
+
+			playNotes();
+		}, beatLength * 1000);
+
+		let pitches = [900, 700, 400, 200, 0];
+		let samples = [];
+
+		samples.push(new createjs.Sample("./assets/audio/sjs_examples_neonote_piano.mp3"));
+		samples.push(new createjs.Sample("./assets/audio/sjs_examples_neonote_xylo.mp3"));
+		samples.push(new createjs.Sample("./assets/audio/sjs_examples_neonote_violin.mp3"));
+		samples.push(new createjs.Sample("./assets/audio/sjs_examples_neonote_guitar.mp3"));
+
+		function playNotes(){
+
+			let currentColumn = staff.children[activeColumnIndex];
+
+			for(let i = 0; i < currentColumn.children.length; i++){
+				let cell = currentColumn.children[i];
+				for(let j = 0; j < 4; j++){
+					if(cell.classList.contains("i" + j)){
+						samples[j].play({detune: pitches[i]});
+					}
+				}
+			}
+		}
+
+		function handleSelect(clicked){
+			if(activeInstrument){
+				activeInstrument.gotoAndStop(activeInstrument.currentFrame+5);
+			}
+
+			clicked.gotoAndStop(clicked.currentFrame-5);
+			activeInstrument = clicked;
+		}
+
+		function handleStaffClick(e){
+			let cell = e.target;
+			if(cell.classList.contains("i" + currentInstrument)){
+				cell.classList.remove("i" + currentInstrument);
+				return;
+			}else{
+				cell.className = "noteCell"; // remove whatever instruments it had before;
+				cell.classList.add("i" + currentInstrument);
+			}
+		}
+
+		function selectInstrument(index){
+			instrumentPanel.children[currentInstrument].classList.remove("active");
+			currentInstrument = index;
+			instrumentPanel.children[currentInstrument].classList.add("active");
+
+		}
+	</script>
+</body>
+</html>

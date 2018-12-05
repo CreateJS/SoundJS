@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Sound Scene</title>
+	<style>
+
+		#clickables{
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 800px;
+			height: 600px;
+			background-image: unset;
+		}
+
+		div {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 240px;
+			height: 240px;
+			background-image: url("./assets/art/stories.png");
+		}
+
+		#cat{
+			background-image: url("./assets/art/cat.png");
+			width: 460px;
+			height: 330px;
+			left: 190px;
+			top: 185px;
+		}
+
+		#cat.click{
+			background-position: -462px 0;
+		}
+
+		#mouse{
+			left: 50px;
+			top: 25px;
+
+		}
+
+		#mouse.click{
+			background-position: -240px 0;
+		}
+
+		#milk{
+			left: 290px;
+			background-position: 0 -240px;
+		}
+
+		#milk.click{
+			background-position: -240px -240px;
+		}
+
+		#book{
+			left: 530px;
+			top: 25px;
+			background-position: -480px -240px;
+		}
+
+		#book.click{
+			background-position: 0 -480px;
+		}
+
+		#fish{
+			top: 240px;
+			background-position: -240px -480px;
+		}
+
+		#fish.click{
+			background-position: -480px -480px
+		}
+
+		#scratch{
+			top: 240px;
+			left: 580px;
+			background-position: 0 -720px;
+		}
+
+		#scratch.click{
+			background-position: -240px -720px;
+		}
+	</style>
+</head>
+<body>
+<canvas id="mainCanvas" width="800" height="600"></canvas>
+
+<div id="clickables">
+	<div id="cat"></div>
+	<div id="mouse"></div>
+	<div id="milk"></div>
+	<div id="book"></div>
+	<div id="fish"></div>
+	<div id="scratch"></div>
+</div>
+
+
+<script src="../../node_modules/@createjs/easeljs/dist/easeljs.min.js"></script>
+<script src="../../dist/soundjs-NEXT.js"></script>
+<script src="sound_scene.js" ></script>
+
+<script>
+
+	let clickables = document.getElementById("clickables").children;
+	let mouseDowned = [];
+
+	for(let i = 0; i < clickables.length; i++){
+		clickables[i].addEventListener("mousedown", (e) => {e.target.className = "click"; mouseDowned.push(e.target)});
+	}
+
+	window.addEventListener("mouseup", clearMouseDowns);
+
+	function clearMouseDowns(){
+		while(mouseDowned.length > 0){
+			let o = mouseDowned.pop();
+			o.className = "";
+		}
+	}
+
+	let catDiv =			document.getElementById("cat");
+	let mouseDiv = 		document.getElementById("mouse");
+	let milkDiv =  		document.getElementById("milk");
+	let bookDiv =  		document.getElementById("book");
+	let fishDiv =  		document.getElementById("fish");
+	let scratchDiv = 	document.getElementById("scratch");
+
+	let meow = new createjs.Sample("./assets/audio/meow.mp3");
+	let mouseScream = new createjs.Sample("assets/audio/mouse_scream.mp3");
+	let purr = new createjs.Sample("./assets/audio/purring.mp3");
+	let lowPurr = new createjs.Sample("./assets/audio/purring2.mp3");
+	let splash = new createjs.Sample("./assets/audio/splash.mp3");
+	let glassFall = new createjs.Sample("./assets/audio/glass_fall.mp3");
+	let highSplash = new createjs.Sample("./assets/audio/splash2.mp3");
+	let scratch = new createjs.Sample("./assets/audio/scratch.mp3");
+
+	catDiv.addEventListener("mousedown", (e) => meow.play());
+	mouseDiv.addEventListener("mousedown", (e) => { purr.play(); mouseScream.play({delay: 0.2});});
+	milkDiv.addEventListener("mousedown", (e) => {glassFall.play();  highSplash.play({delay:0.2});});
+	bookDiv.addEventListener("mousedown", (e) => lowPurr.play());
+	scratchDiv.addEventListener("mousedown", (e) => scratch.play());
+	fishDiv.addEventListener("mousedown", (e) => splash.play());
+
+</script>
+</body>
+</html>

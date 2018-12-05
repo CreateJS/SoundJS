@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Starbounce</title>
+</head>
+<body>
+<canvas id="demoCanvas" width = 800 height = 600 style='background-color: midnightblue'></canvas>
+
+<script src="../../node_modules/@createjs/easeljs/dist/easeljs.min.js"></script>
+<script src="../../dist/soundjs-NEXT.js"></script>
+<script>
+	let stage = new createjs.Stage("demoCanvas");
+	let gravity = 0.015;
+
+	let spriteSheetData = {
+		images: ["./assets/art/sjs2_examples_starbounce2_stars.png"],
+		frames: {width: 70, height: 70, count: 16},
+		animations: {gold: [0,3], blue: [5,8], goldSparkle: [10,12], blueSparkle: [13,15]}
+	};
+	let starSpriteSheet = new createjs.SpriteSheet(spriteSheetData);
+
+	let animationNames = ["gold", "blue", "goldSparkle", "blueSparkle"];
+	let starCollection = [];
+
+	stage.addEventListener("stagemousemove", handleStageMove);
+
+	let pitches = [1600, 1400, 1200, 900, 700, 400, 200, 0];
+	let bellSample = new createjs.Sample("./assets/audio/sjs2_examples_starbounce2_bell.mp3");
+
+	createjs.Ticker.on("tick", handleTick);
+	createjs.Ticker.timingMode = createjs.Ticker.RAF;
+
+	function handleTick(e){
+		starCollection.forEach( (s) => updateStar(s, e.delta) );
+		stage.update();
+	}
+
+	function updateStar(star, deltaT){
+		let bouncePoint = stage.canvas.height - 35; // 70 is our star height, and the reg point is in the middle
+
+		star.vy += gravity * deltaT;
+		if(star.sprite.y + star.vy > bouncePoint){
+			star.sprite.y = bouncePoint;
+			star.vy *= -1;
+			star.rotation *= 0.9;
+			star.remainingBounces -= 1;
+			bellSample.play({detune: pitches[(Math.random() * pitches.length) | 0]});
+			if(star.remainingBounces < 0){
+				removeStar(star);
+				return;
+			}
+		}
+
+		if(star.sprite.x + star.vx < 35){
+			star.sprite.x = 35;
+			star.vx *= -1;
+			if(star.rotation < 0){
+				star.rotation*= -1;
+			}
+			bellSample.play({detune: pitches[(Math.random() * pitches.length) | 0]});
+		}
+
+		if(star.sprite.x > stage.canvas.width -35){
+			star.sprite.x = stage.canvas.width -35;
+			star.vx *= -1;
+			if(star.rotation > 0){
+				star.rotation *= -1;
+			}
+			bellSample.play({detune: pitches[(Math.random() * pitches.length) | 0]});
+		}
+
+		star.vy += gravity;
+		star.vy *= 0.997;
+		star.sprite.y += star.vy;
+		star.sprite.x += star.vx;
+		star.sprite.rotation += star.rotation;
+
+	}
+
+	function handleStageMove(e){
+		stage.removeEventListener("stagemousemove", handleStageMove);
+		createStar(e.stageX, e.stageY);
+
+		window.setTimeout( (e) => 	stage.addEventListener("stagemousemove", handleStageMove), 100);
+	}
+
+	function createStar(x, y){
+		let starSprite = new createjs.Sprite(starSpriteSheet);
+		starSprite.x = x;
+		starSprite.y = y;
+		starSprite.regX = starSprite.regY = 35;
+		starSprite.gotoAndStop(animationNames[ (Math.random() * 4)| 0  ]);
+		starCollection.push(
+			{
+				sprite: starSprite,
+				vx: Math.random() * 10 - 5,
+				vy: Math.random()* 7 - 10,
+				rotation: Math.random() * 16-8,
+				remainingBounces: 4
+			});
+		stage.addChild(starSprite);
+	}
+
+	function removeStar(star){
+		let i = starCollection.indexOf(star);
+		if(i === -1){
+			return;
+		}
+		starCollection.splice(i,1);
+		stage.removeChild(star.sprite);
+	}
+
+
+</script>
+
+</body>
+</html>

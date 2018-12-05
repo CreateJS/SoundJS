@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Theremin</title>
+	<style>
+		canvas {
+			background-color: #0b93d5;
+		}
+	</style>
+</head>
+<body>
+
+	<canvas id="demoCanvas" width=800, height=600></canvas>
+
+	<script src="../../node_modules/@createjs/easeljs/dist/easeljs.min.js"></script>
+	<script src="../../dist/soundjs-NEXT.js"></script>
+<script>
+	let detuneRange = 4800;
+
+	let oscillator = createjs.Sound.context.createOscillator();
+	oscillator.start();
+	let oscillatorBus = new createjs.Group();
+	oscillator.connect(oscillatorBus.inputNode); // Web audio nodes can be connected into SoundJS 2!
+
+	oscillatorBus.volume = 0.1;
+
+	let stage = new createjs.Stage("demoCanvas");
+
+	stage.on("stagemousedown", (e) => oscillatorBus.unmute());
+	stage.on("stagemouseup", (e) => oscillatorBus.mute());
+	stage.on("stagemousemove", handleMouseMove);
+	stage.enableMouseOver();
+
+	function handleMouseMove(e){
+		oscillator.detune.value = detuneRange * (e.stageX/stage.canvas.width - 1/2);
+	}
+
+	// Visuals only beyond this point
+
+	createjs.Ticker.addEventListener("tick", handleTick);
+	createjs.Ticker.timingMode = createjs.Ticker.RAF;
+
+	function handleTick(e){
+		stage.update();
+	}
+
+	let background = new createjs.Shape();
+	background.graphics.beginFill("#FF00FF");
+	background.graphics.drawRect( 0, 0, stage.canvas.width, stage.canvas.height);
+	background.graphics.endFill();
+	stage.addChild(background);
+
+</script>
+</body>
+</html>
