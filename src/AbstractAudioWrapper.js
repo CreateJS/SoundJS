@@ -1,5 +1,6 @@
 import { EventDispatcher } from "@createjs/core";
 import Sound from "./Sound";
+import Declicker from "./utils/Declicker"
 
 
 export default class AbstractAudioWrapper extends EventDispatcher{
@@ -28,7 +29,7 @@ export default class AbstractAudioWrapper extends EventDispatcher{
 	}
 
 	get muted(){
-		return this._muted;
+		return this._muted || this._muting;
 	}
 
 	constructor(){
@@ -40,12 +41,19 @@ export default class AbstractAudioWrapper extends EventDispatcher{
 		this.panNode = this.postFxNode = ctx.createPanner();
 		this.panNode.connect(this.outputNode);
 
+		this.declickerNode = ctx.createGain();
+		this.declicker = new Declicker(this.declickerNode);
+		this.declicker.on("fadeOutComplete", this.handleDeclickFadeoutComplete, this);
+
 		this.muterNode = ctx.createGain();
-		this.muterNode.gain.value = 0;
 		this.muterNode.connect(this.outputNode);
+		this._muted = false;
+		this._muting = false;
 
 		this.fxBus = ctx.createGain();
-		this.fxBus.connect(this.panNode);
+		this.fxBus.connect(this.declickerNode);
+		this.declickerNode.connect(this.muterNode);
+		this.muterNode.connect(this.outputNode);
 
 		this._effects = [];
 		this.muted = false;
@@ -55,18 +63,37 @@ export default class AbstractAudioWrapper extends EventDispatcher{
 		if(this._muted){
 			return;
 		}
-		this.panNode.disconnect(this.outputNode);
-		this.panNode.connect(this.muterNode);
+		this.declicker.fadeOut();
+		this._muting = true;
+	}
+
+	_muteCore(){
 		this._muted = true;
+		this._muting = false;
+		this.muterNode.gain.value = 0;
 	}
 
 	unmute(){
-		if(!this._muted){
+		if(this._muting){
+			this.declicker.cancelFade();
+			this._muting = false;
+		}else if(!this._muted){
+			// Not muted or muting, do nothing.
 			return;
 		}
-		this.panNode.disconnect(this.muterNode);
-		this.panNode.connect(this.outputNode);
+
+		// TODO: If relevant, check to see if any other declick fades are happening. At time of writing, there are no
+		// other causes for a declick in the abstract audio wrapper, but subclasses that use the declicker might need to
+		// prevent an unmute from controlling the declicker depending on state.
 		this._muted = false;
+		this.muterNode.gain.value = 1;
+		this.declicker.fadeIn();
+	}
+
+	handleDeclickFadeoutComplete(e){
+		if(this._muting){
+			this._muteCore();
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
