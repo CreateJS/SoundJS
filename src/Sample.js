@@ -162,7 +162,9 @@ class Sample extends AbstractAudioWrapper {
 	}
 
 	_play(playProps) {
-		playProps = playProps || {loops: this.loops, playDuration: this.playDuration, offset: this.offset, delay: this.delay};
+		// TODO: Fix this so that partial play props can be given.
+		playProps = playProps || {loops: this.loops, playDuration: this.playDuration, offset: this.offset, delay: this.delay,
+				playbackRate: this.playbackRate, detune: this.detune};
 		let pb = new Playback(this.audioBuffer, playProps);
 
 		this.playbacks.push(pb);
