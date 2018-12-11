@@ -56,5 +56,6 @@ import Effect from "./effects/Effect"
 import LowPassFilter from "./effects/LowPassFilter"
 import HighPassFilter from "./effects/HighPassFilter"
 import BiquadFilter from "./effects/BiquadFilter"
-const FX = { Effect, LowPassFilter, HighPassFilter, BiquadFilter };
+import Reverb from "./effects/Reverb"
+const FX = { Effect, LowPassFilter, HighPassFilter, BiquadFilter, Reverb };
 export { FX };
