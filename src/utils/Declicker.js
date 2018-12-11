@@ -21,8 +21,9 @@ export default class Declicker extends EventDispatcher {
 		// The node we will use for fading to prevent clicks. Use provided node if exists, otherwise create one.
 		this.gainNode = this.inputNode = this.outputNode = gainNode || Sound.context.createGain();
 
-		this.fadeMaskDuration = 0.02; // Duration of the fade, in seconds.
+		this.fadeMaskDuration = 0.01; // Duration of the fade, in seconds.
 		this.fadeMaskTimeout = null;  // Reference to the timeout for calling an event, to allow cancelling
+		this.fadePromise = null;
 		this._fadingIn = null;
 	}
 
@@ -64,7 +65,7 @@ export default class Declicker extends EventDispatcher {
 		}
 
 		this.gainNode.gain.cancelScheduledValues(Sound.context.currentTime);
-		this.gainNode.gain.value = 1;
+		this.gainNode.gain.linearRampToValueAtTime(1, Sound.context.currentTime + 0.01);
 		window.clearTimeout(this.fadeMaskTimeout);
 		this.fadeMaskTimeout = null;
 		this._fadingIn = null;
