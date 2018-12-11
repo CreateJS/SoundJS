@@ -36,22 +36,22 @@ export default class AbstractAudioWrapper extends EventDispatcher{
 		super();
 		let ctx = Sound.context;
 
-		this.outputNode = this.volumeNode = ctx.createGain();
+		this.fxBus = ctx.createGain();
 
 		this.panNode = this.postFxNode = ctx.createPanner();
-		this.panNode.connect(this.outputNode);
 
 		this.declickerNode = ctx.createGain();
 		this.declicker = new Declicker(this.declickerNode);
 		this.declicker.on("fadeOutComplete", this.handleDeclickFadeoutComplete, this);
 
 		this.muterNode = ctx.createGain();
-		this.muterNode.connect(this.outputNode);
 		this._muted = false;
 		this._muting = false;
 
-		this.fxBus = ctx.createGain();
-		this.fxBus.connect(this.declickerNode);
+		this.outputNode = this.volumeNode = ctx.createGain();
+
+		this.fxBus.connect(this.postFxNode); // No effects to start
+		this.postFxNode.connect(this.declickerNode);
 		this.declickerNode.connect(this.muterNode);
 		this.muterNode.connect(this.outputNode);
 
