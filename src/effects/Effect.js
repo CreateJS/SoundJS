@@ -1,6 +1,23 @@
 import Sound from "../Sound"
 
 export default class Effect {
+
+	set dryGain(val) {
+		this.dryGainNode.gain.value = val;
+	}
+
+	get dryGain() {
+		return this.dryGainNode.gain.value;
+	}
+
+	set wetGain(val){
+		this.wetGainNode.gain.value = val;
+	}
+
+	get wetGain(){
+		return this.wetGainNode.gain.value;
+	}
+
 	constructor(){
 
 		// Set up the filter's internal audio graph here. At minimum, all filters need an input node and an output node
@@ -9,16 +26,16 @@ export default class Effect {
 		this.inputNode = Sound.context.createGain(); // The node external sources will connect to
 		this.effectBus = Sound.context.createGain(); // The node that connects up to the effects chain.
 		this.outputNode = Sound.context.createGain();// The node that will connect to external destinations
-		this.dryGain = Sound.context.createGain();		// The amount of dry signal included in the output
-		this.wetGain = Sound.context.createGain();   // The amount of wet signal included in the output
+		this.dryGainNode = Sound.context.createGain();		// The amount of dry signal included in the output
+		this.wetGainNode = Sound.context.createGain();   // The amount of wet signal included in the output
 
 		this.inputNode.connect(this.effectBus);
-		this.inputNode.connect(this.dryGain);
+		this.inputNode.connect(this.dryGainNode);
 
-		this.wetGain.connect(this.outputNode);
-		this.dryGain.connect(this.outputNode);
+		this.wetGainNode.connect(this.outputNode);
+		this.dryGainNode.connect(this.outputNode);
 
-		this.dryGain.gain.value = 0;
+		this.dryGainNode.gain.value = 0;
 
 		this._enabled = true;
 		this.owner = null; // The Sample, Playback or Group that owns this effect - used for checking when adding an effect to prevent being added to multiple locations
@@ -55,7 +72,7 @@ export default class Effect {
 		}
 
 		this.inputNode.disconnect(this.effectBus);
-		this.inputNode.disconnect(this.dryGain);
+		this.inputNode.disconnect(this.dryGainNode);
 		this.inputNode.connect(this.outputNode);
 		this._enabled = false;
 	}
@@ -67,7 +84,7 @@ export default class Effect {
 
 		this.inputNode.disconnect(this.outputNode);
 		this.inputNode.connect(this.effectBus);
-		this.inputNode.connect(this.dryGain);
+		this.inputNode.connect(this.dryGainNode);
 		this._enabled = true;
 	}
 }

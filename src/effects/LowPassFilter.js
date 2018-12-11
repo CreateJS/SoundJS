@@ -29,7 +29,7 @@ export default class LowPassFilter extends Effect {
 		this.Q = Q;
 
 		this.effectBus.connect(this.filterNode);
-		this.filterNode.connect(this.wetGain);
+		this.filterNode.connect(this.wetGainNode);
 	}
 
 

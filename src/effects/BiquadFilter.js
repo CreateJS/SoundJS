@@ -67,7 +67,7 @@ export default class BiquadFilter extends Effect {
 		this.detune = detune;
 
 		this.effectBus.connect(this.filterNode);
-		this.filterNode.connect(this.wetGain);
+		this.filterNode.connect(this.wetGainNode);
 	}
 }
 
