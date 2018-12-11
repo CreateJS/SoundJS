@@ -18,38 +18,96 @@
 <script>
 	let detuneRange = 4800;
 
-	let oscillator = createjs.Sound.context.createOscillator();
-	oscillator.start();
 	let oscillatorBus = new createjs.Group();
-	oscillator.connect(oscillatorBus.inputNode); // Web audio nodes can be connected into SoundJS 2!
-
+	oscillatorBus.volume = 0;
+	oscillatorBus.mute();
 	oscillatorBus.volume = 0.1;
+
+	let oscillator = createjs.Sound.context.createOscillator();
+	oscillator.connect(oscillatorBus.inputNode); // Web audio nodes can be connected into SoundJS 2!
 
 	let stage = new createjs.Stage("demoCanvas");
 
-	stage.on("stagemousedown", (e) => oscillatorBus.unmute());
+	let backgroundFilter = new createjs.Shape();
+
+	backgroundFilter.on("mousedown", (e) => oscillator.start(), window, true); // Start the oscillator on first click
+
+	stage.on("stageMouseDown", (e) => oscillatorBus.unmute());
+	backgroundFilter.on("mousedown", (e) => oscillatorBus.unmute());
 	stage.on("stagemouseup", (e) => oscillatorBus.mute());
 	stage.on("stagemousemove", handleMouseMove);
 	stage.enableMouseOver();
 
+	let fillColor = null, dotFillColor = null;
+
 	function handleMouseMove(e){
 		oscillator.detune.value = detuneRange * (e.stageX/stage.canvas.width - 1/2);
+
+		if(!oscillatorBus.muted){
+			fillColor = getCanvasColor(bgColorCanvas, e.stageX, e.stageY, 0.05);
+			dotFillColor = getCanvasColor(dotColorCanvas, e.stageX, e.stageY);
+			fillCmd.style = fillColor;
+			dotFillCmd.style = dotFillColor;
+			dot.visible = true;
+			dot.x = e.stageX;
+			dot.y = e.stageY;
+		}else{
+			dot.visible = false;
+		}
+
 	}
 
 	// Visuals only beyond this point
+	stage.autoClear = false;
 
 	createjs.Ticker.addEventListener("tick", handleTick);
 	createjs.Ticker.timingMode = createjs.Ticker.RAF;
 
 	function handleTick(e){
 		stage.update();
+		console.log(fillColor);
 	}
 
-	let background = new createjs.Shape();
-	background.graphics.beginFill("#FF00FF");
-	background.graphics.drawRect( 0, 0, stage.canvas.width, stage.canvas.height);
-	background.graphics.endFill();
-	stage.addChild(background);
+
+	let fillCmd = backgroundFilter.graphics.beginFill("#9999CC").command;
+	backgroundFilter.graphics.drawRect( 0, 0, stage.canvas.width, stage.canvas.height);
+	backgroundFilter.graphics.endFill();
+	stage.addChild(backgroundFilter);
+
+	fillCmd.style = "rgba(200,100,150,0.01)";
+
+	let dotColor = "#FF0000";
+	let dot = new createjs.Shape();
+	let dotFillCmd = dot.graphics.beginFill(dotColor).command;
+	dot.graphics.drawCircle(0,0,7);
+	dot.graphics.endFill();
+	stage.addChild(dot);
+
+
+	let bgColorImage = document.createElement("img");
+	let bgColorCanvas = document.createElement("canvas");
+	bgColorCanvas.width = 800;
+	bgColorCanvas.height = 600;
+	bgColorImage.onload = () => bgColorCanvas.getContext("2d").drawImage(bgColorImage, 0, 0); console.log('loaded');
+	bgColorImage.src = "./assets/art/sjs2_examples_theremin_gradient6.png";
+
+	let dotColorImage = document.createElement("img");
+	let dotColorCanvas = document.createElement("canvas");
+	dotColorCanvas.width = 800;
+	dotColorCanvas.height = 600;
+	dotColorImage.onload = () => dotColorCanvas.getContext("2d").drawImage(dotColorImage, 0, 0);
+	dotColorImage.src = "./assets/art/sjs2_examples_theremin_gradient5.png";
+
+	function getCanvasColor(canvas, x, y, alpha = 1){
+		let data = canvas.getContext("2d").getImageData(x, y, 1, 1).data;
+		if(data[3] > 0.001){
+			return `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${alpha})`
+		}else{
+			return "rgba(200,100,150,0.01)";
+		}
+
+	}
+
 
 </script>
 </body>
