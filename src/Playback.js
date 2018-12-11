@@ -75,6 +75,8 @@ class Playback extends AbstractAudioWrapper {
 		this.delay   = isNaN(Number(options.delay )) ? 0 : Number(options.delay);			// 0 default
 		this.offset  = isNaN(Number(options.offset)) ? 0 : Number(options.offset);		// 0 default
 		this.playDuration = options.playDuration;																	// No default needed, undefined and null are both valid values
+		this.playbackRate = isNaN(Number(options.playbackRate)) ? 1 : Number(options.playbackRate);
+		this.detune = isNaN(Number(options.detune)) ? 0 : Number(options.detune);
 
 		this._play(this.delay, this.offset, this.playDuration);
 	}
@@ -93,6 +95,8 @@ class Playback extends AbstractAudioWrapper {
 
 		this.fademaskerNode.gain.value = 0;
 		this._sourceNode || this._createSourceNode();
+		this._sourceNode.playbackRate.value = this.playbackRate;
+		this._sourceNode.detune.value = this.detune;
 		this._sourceNode.start(ctx.currentTime + delay, offset, duration);
 		this.declicker.fadeIn();
 

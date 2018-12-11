@@ -63,7 +63,9 @@ class Sample extends AbstractAudioWrapper {
 		this.loops   = isNaN(Number(options.loops )) ? 0 : Math.max(Number(options.loops) | 0, -1);		// 0 default, >= -1, integers only
 		this.delay   = isNaN(Number(options.delay )) ? 0 : Number(options.delay);			// 0 default
 		this.pan     = isNaN(Number(options.pan   )) ? 0 : Number(options.pan); 			// 0 default
-		this.offset  = isNaN(Number(options.offset)) ? 0 : Number(options.offset);		// 0 default
+		this.offset  	= isNaN(Number(options.offset)) ? 0 : Number(options.offset);		// 0 default
+		this.playbackRate = isNaN(Number(options.playbackRate)) ? 1 : Number(options.playbackRate);
+		this.detune = isNaN(Number(options.detune)) ? 0 : Number(options.detune);
 
 		this.playDuration = options.playDuration; 																		// No default needed, undefined means "play until end"
 
@@ -273,7 +275,9 @@ class Sample extends AbstractAudioWrapper {
 			pan:       this.pan,
 			offset:    this.offset,
 			interrupt: this.interrupt,
-			duration:  this.playDuration
+			duration:  this.playDuration,
+			playbackRate: this.playbackRate,
+			detune: this.detune
 		};
 	}
 
@@ -288,6 +292,9 @@ class Sample extends AbstractAudioWrapper {
 
 		this.interrupt = (  o.interrupt === undefined ? this.interrupt : o.interrupt);
 		this.playDuration = o.hasOwnProperty('playDuration') ? o.playDuration : this.playDuration;	// "undefined" is a valid value (means play to end). Null, in SJS2, also means play to end.
+
+		this.playbackRate = isNaN(Number(o.playbackRate)) ? this.playbackRate : Number(o.playbackRate);
+		this.detune = isNaN(Number(o.detune)) ? this.detune : Number(o.detune);
 	}
 
 }
