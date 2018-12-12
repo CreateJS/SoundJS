@@ -23,7 +23,6 @@ export default class Declicker extends EventDispatcher {
 
 		this.fadeMaskDuration = 0.01; // Duration of the fade, in seconds.
 		this.fadeMaskTimeout = null;  // Reference to the timeout for calling an event, to allow cancelling
-		this.fadePromise = null;
 		this._fadingIn = null;
 	}
 
