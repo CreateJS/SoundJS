@@ -17,7 +17,7 @@ export default class AbstractAudioWrapper extends EventDispatcher{
 	}
 
 	get pan() {
-		return this.panNode.pan.value;
+		return this.panNode.positionX;
 	}
 
 	set muted(val){
