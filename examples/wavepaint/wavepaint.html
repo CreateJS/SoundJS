@@ -16,19 +16,162 @@
 	<div class="badge click"></div>
 	<div class="badge click white"></div>
 </div>
-
+<script src="../../node_modules/@createjs/easeljs/dist/easeljs.min.js"></script>
+<script src="../../dist/soundjs-NEXT.js"></script>
 <script>
 	var canvas = document.getElementById("canvas"),
 		stage = new createjs.Stage(canvas);
 	createjs.Ticker.on("tick", tick);
 	createjs.Ticker.timingMode = createjs.Ticker.RAF;
 
+
+	let waveGraphArea = new createjs.Shape();
+	stage.addChild(waveGraphArea);
+	let paintedWave = new createjs.Shape();
+	stage.addChild(paintedWave);
+
+	let waveSamples = [];
+	let graphWidth = 720, graphHeight = 300;
+	let bufferLength = 720; // This length causes a frequency for middle C
+	//let sample = new createjs.Sample();
+
+	// Default wave:
+	for(let i = 0; i < bufferLength; i++){
+		waveSamples.push(Math.sin(i * Math.PI / 360));
+	}
+
+	let buffer = createjs.Sound.context.createBuffer(1,bufferLength*20,createjs.Sound.context.sampleRate);
+	let bufferData = buffer.getChannelData(0);
+
+	for(let i = 0; i < bufferData.length; i++){
+		bufferData[i] = waveSamples[i%waveSamples.length];
+	}
+
+	let effectsGroup = new createjs.Group();
+	let reverb = new createjs.FX.Reverb(1);
+	reverb.dryGain = 1;
+	effectsGroup.addEffect(reverb);
+
+	let wavePlayer = new createjs.Sample(buffer);
+	let wavePlayerNode = createjs.Sound.context.createBufferSource();
+	wavePlayerNode.buffer = buffer;
+	wavePlayerNode.connect(effectsGroup.inputNode);
+	wavePlayerNode.loop = true;
+	createjs.Sound.rootGroup.volume = 0.3;
+	wavePlayer.volume = 0.3;
+
 	// Init Code
 	handleResize();
+	updateWave();
+
 
 	// Tick Code
-	function tick(event) {
+	function tick(event){
+		stage.update();
 	}
+
+	let lastX = -1;
+	let lastY = -1;
+	window.addEventListener("mouseup", handleMouseUp);
+
+	function handleMouseUp(e){
+		lastX = lastY = -1;
+	}
+
+
+	window.addEventListener("mousedown", playWave);
+	window.addEventListener("mouseup", stopWave);
+
+	waveGraphArea.on("mousedown", handleMouseDown);
+
+	waveGraphArea.on("pressmove", handlePressMove);
+	waveGraphArea.x = 200;
+	waveGraphArea.y = 50 + graphHeight/2;
+
+	function handleMouseDown(e){
+		let local = waveGraphArea.globalToLocal(e.stageX, e.stageY);
+		lastX =  clamp(Math.round(local.x * waveSamples.length / graphWidth), 0, waveSamples.length-1);
+		lastY = clamp(local.y / (graphHeight/2), -1, 1);
+	}
+
+	function handlePressMove(e){
+		let local = waveGraphArea.globalToLocal(e.stageX, e.stageY);
+
+		let newX = clamp(Math.round(local.x * waveSamples.length / graphWidth), 0, waveSamples.length-1);
+		let newY = clamp(local.y / (graphHeight/2), -1, 1);
+		let xDist = newX - lastX;
+		let yDist = newY - lastY;
+
+		let leftBound, rightBound, leftY, rightY;
+
+		if(newX > lastX){
+			leftBound = lastX;
+			leftY = lastY;
+			rightBound = newX;
+			rightY = newY;
+		}else if(newX < lastX){
+			leftBound = newX;
+			leftY = newY;
+			rightBound = lastX;
+			rightY = lastY;
+		}
+
+		for(let i = leftBound; i <= rightBound; i++){
+			waveSamples[i] = leftY + yDist * (i-rightBound)/xDist;
+		}
+
+		lastX = newX;
+		lastY = newY;
+
+		updateWave();
+
+	}
+
+	function updateWave(){
+		drawWaveform();
+		updateBuffer();
+	}
+
+	function drawWaveform(){
+		// Redraw wave from samples:
+		paintedWave.graphics.clear();
+		paintedWave.graphics.setStrokeStyle(2);
+		paintedWave.graphics.beginStroke("black");
+		paintedWave.graphics.moveTo(0, waveSamples[0] * graphHeight/2);
+		for(let i = 1; i < waveSamples.length; i++){
+			paintedWave.graphics.lineTo(i/waveSamples.length * graphWidth, waveSamples[i] * graphHeight/2);
+		}
+		paintedWave.graphics.endStroke();
+	}
+
+	function updateBuffer(){
+		let buffer = wavePlayerNode.buffer;
+		let bufferData = buffer.getChannelData(0);
+
+		for(let i = 0; i < bufferData.length; i++){
+			bufferData[i] = waveSamples[i%waveSamples.length];
+		}
+
+		//wavePlayerNode.buffer = buffer;
+	}
+
+	function playWave(){
+		console.log("running play wave");
+		wavePlayerNode = createjs.Sound.context.createBufferSource();
+		wavePlayerNode.buffer = createjs.Sound.context.createBuffer(1,bufferLength,createjs.Sound.context.sampleRate);
+		updateBuffer();
+		wavePlayerNode.loop = true;
+		wavePlayerNode.connect(effectsGroup.inputNode);
+		wavePlayerNode.start();
+	}
+
+	function stopWave(){
+
+		wavePlayerNode.stop();
+	}
+
+	paintedWave.x = 200;
+	paintedWave.y = 50 + graphHeight/2;
 
 	// Resize Code
 	window.addEventListener("resize", handleResize, false);
@@ -38,17 +181,22 @@
 		canvas.width = w; canvas.height = h;
 		// Layout other assets
 
-		let waveGraphArea = new createjs.Shape();
-		let paintedWave = new createjs.Shape();
 		let g = null;
 
 		g = waveGraphArea.graphics;
 		g.beginFill("lightgrey");
-		g.drawRect(100,100,100,100);
+		// Drawing the square like this lines up the 0 point in the vertical with the middle of the graph, which lines up
+		// with our wave painting's -1 to 1 values
+		g.drawRect(0, -graphHeight/2,graphWidth,graphHeight);
 		g.endFill();
-		stage.addChild(waveGraphArea);
+
+
 
 		stage.update();
+	}
+
+	function clamp(input, min, max){
+		return Math.max(Math.min(input, max), min);
 	}
 
 
