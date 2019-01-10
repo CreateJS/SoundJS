@@ -87,4 +87,9 @@ export default class Effect {
 		this.inputNode.connect(this.dryGainNode);
 		this._enabled = true;
 	}
+
+	clone(){
+		console.warn("Warning: attempted to clone an effect without an implemented clone function.");
+		return null;
+	}
 }

@@ -32,5 +32,9 @@ export default class LowPassFilter extends Effect {
 		this.filterNode.connect(this.wetGainNode);
 	}
 
+	clone(){
+		return new LowPassFilter(this.frequency, this.Q);
+	}
+
 
 }

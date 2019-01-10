@@ -69,6 +69,10 @@ export default class BiquadFilter extends Effect {
 		this.effectBus.connect(this.filterNode);
 		this.filterNode.connect(this.wetGainNode);
 	}
+
+	clone(){
+		return new BiquadFilter(this.type, this.frequency, this.Q, this.gain, this.detune);
+	}
 }
 
 BiquadFilter._initialize();
