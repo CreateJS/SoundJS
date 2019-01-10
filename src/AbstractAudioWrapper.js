@@ -108,7 +108,12 @@ export default class AbstractAudioWrapper extends EventDispatcher{
 	}
 
 	cloneEffects(){
-		// TODO: implement.
+		let effects = this.getEffects();
+		let cloned = [];
+		for(let i = 0; i < effects.length; i++){
+			cloned.push(effects[i].clone());
+		}
+		return cloned;
 	}
 
 	set effects(effects){
@@ -127,6 +132,8 @@ export default class AbstractAudioWrapper extends EventDispatcher{
 					+ "  Effects can be cloned to be used in multiple places, or alternately, can be placed on Groups to apply to all Samples in the Group.")
 			}
 		}
+
+		// TODO: Check that the same effect doesn't appear in here twice (this will cause a feedback loop)
 
 		// Store the effects list and connect up the audio graph of the effect chain:
 
