@@ -4,11 +4,20 @@ import Effect from "./Effect"
 
 export default class Reverb extends Effect {
 
-	constructor(length = 1){
+	constructor(length = 1, buffer = null){
 		super();
 
+		this.length = length;
+
+
+		//TODO: Should there be a buffer getter?
 		this.reverbNode = Sound.context.createConvolver();
-		this.reverbNode.buffer = this.generateReverbSignal(length);
+		if(!buffer){
+			this._buffer = this.generateReverbSignal(this.length);
+		}else{
+			this.reverbNode.buffer = this._buffer = buffer;
+		}
+
 
 		this.effectBus.connect(this.reverbNode);
 		this.reverbNode.connect(this.wetGainNode);
@@ -24,9 +33,12 @@ export default class Reverb extends Effect {
 			bufferData[i] = (Math.random() * 2 - 1) * Math.pow((1 - (i/bufferData.length)),3);
 		}
 
-		this.buffer = buffer;
 		return buffer;
 
+	}
+
+	clone(){
+		return new Reverb(this.length, this._buffer);
 	}
 
 }
