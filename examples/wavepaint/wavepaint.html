@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wavepaint</title>
+</head>
+<body>
+
+<div>
+	<canvas id="canvas" width="550" height="500"></canvas>
+</div>
+<a href="https://createjs.com/" target="_blank"><div class="logo"></div></a>
+
+<!-- Badges -->
+<div id="badges">
+	<div class="badge click"></div>
+	<div class="badge click white"></div>
+</div>
+
+<script>
+	var canvas = document.getElementById("canvas"),
+		stage = new createjs.Stage(canvas);
+	createjs.Ticker.on("tick", tick);
+	createjs.Ticker.timingMode = createjs.Ticker.RAF;
+
+	// Init Code
+	handleResize();
+
+	// Tick Code
+	function tick(event) {
+	}
+
+	// Resize Code
+	window.addEventListener("resize", handleResize, false);
+	function handleResize(event) {
+		var w = window.innerWidth,
+			h = window.innerHeight;
+		canvas.width = w; canvas.height = h;
+		// Layout other assets
+
+		let waveGraphArea = new createjs.Shape();
+		let paintedWave = new createjs.Shape();
+		let g = null;
+
+		g = waveGraphArea.graphics;
+		g.beginFill("lightgrey");
+		g.drawRect(100,100,100,100);
+		g.endFill();
+		stage.addChild(waveGraphArea);
+
+		stage.update();
+	}
+
+
+</script>
+</body>
+</html>
