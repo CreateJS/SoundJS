@@ -53,8 +53,8 @@ this.createjs = this.createjs||{};
 	 * rely on an event object's state outside of the call stack it was received in.
 	 * @class Event
 	 * @param {String} type The event type.
-	 * @param {Boolean} bubbles Indicates whether the event will bubble through the display list.
-	 * @param {Boolean} cancelable Indicates whether the default behaviour of this event can be cancelled.
+	 * @param {Boolean} [bubbles=false] Indicates whether the event will bubble through the display list.
+	 * @param {Boolean} [cancelable=false] Indicates whether the default behaviour of this event can be cancelled.
 	 * @constructor
 	 **/
 	function Event(type, bubbles, cancelable) {
@@ -173,7 +173,7 @@ this.createjs = this.createjs||{};
 
 // public methods:
 	/**
-	 * Sets {{#crossLink "Event/defaultPrevented"}}{{/crossLink}} to true if the event is cancelable.
+	 * Sets {{#crossLink "Event/defaultPrevented:property"}}{{/crossLink}} to true if the event is cancelable.
 	 * Mirrors the DOM level 2 event standard. In general, cancelable events that have `preventDefault()` called will
 	 * cancel the default behaviour associated with the event.
 	 * @method preventDefault
@@ -183,7 +183,7 @@ this.createjs = this.createjs||{};
 	};
 
 	/**
-	 * Sets {{#crossLink "Event/propagationStopped"}}{{/crossLink}} to true.
+	 * Sets {{#crossLink "Event/propagationStopped:property"}}{{/crossLink}} to true.
 	 * Mirrors the DOM event standard.
 	 * @method stopPropagation
 	 **/
@@ -192,8 +192,8 @@ this.createjs = this.createjs||{};
 	};
 
 	/**
-	 * Sets {{#crossLink "Event/propagationStopped"}}{{/crossLink}} and
-	 * {{#crossLink "Event/immediatePropagationStopped"}}{{/crossLink}} to true.
+	 * Sets {{#crossLink "Event/propagationStopped:property"}}{{/crossLink}} and
+	 * {{#crossLink "Event/immediatePropagationStopped:property"}}{{/crossLink}} to true.
 	 * Mirrors the DOM event standard.
 	 * @method stopImmediatePropagation
 	 **/
