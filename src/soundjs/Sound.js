@@ -481,8 +481,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
+	 * Use the {{#crossLink "Sound/volume:property"}}{{/crossLink}} property instead.
 	 * @method getMasterVolume
-	 * @deprecated Use the {{#crossLink "Sound/volume:property"}}{{/crossLink}} property instead.
+	 * @deprecated
 	 */
 	// Sound.getMasterVolume is @deprecated. Remove for 1.1+
 	s.getVolume = createjs.deprecate(s._getMasterVolume, "Sound.getVolume");
@@ -505,8 +506,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
+	 * Use the {{#crossLink "Sound/volume:property"}}{{/crossLink}} property instead.
 	 * @method setVolume
-	 * @deprecated Use the {{#crossLink "Sound/volume:property"}}{{/crossLink}} property instead.
+	 * @deprecated
 	 */
 	// Sound.setVolume is @deprecated. Remove for 1.1+
 	s.setVolume = createjs.deprecate(s._setMasterVolume, "Sound.setVolume");
@@ -541,8 +543,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
+	 * Use the {{#crossLink "Sound/muted:property"}}{{/crossLink}} property instead.
 	 * @method getMute
-	 * @deprecated Use the {{#crossLink "Sound/muted:property"}}{{/crossLink}} property instead.
+	 * @deprecated
 	 */
 	// Sound.getMute is @deprecated. Remove for 1.1+
 	s.getMute = createjs.deprecate(s._getMute, "Sound.getMute");
@@ -566,8 +569,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
+	 * Use the {{#crossLink "Sound/muted:property"}}{{/crossLink}} property instead.
 	 * @method setMute
-	 * @deprecated Use the {{#crossLink "Sound/muted:property"}}{{/crossLink}} property instead.
+	 * @deprecated
 	 */
 	// Sound.setMute is @deprecated. Remove for 1.1+
 	s.setMute = createjs.deprecate(s._setMute, "Sound.setMute");
@@ -618,8 +622,9 @@ this.createjs = this.createjs || {};
 	};
 
 	/**
+	 * Use the {{#crossLink "Sound/capabilities:property"}}{{/crossLink}} property instead.
 	 * @method getCapabilities
-	 * @deprecated Use the {{#crossLink "Sound/capabilities:property"}}{{/crossLink}} property instead.
+	 * @deprecated
 	 */
 	// Sound.getCapabilities is @deprecated. Remove for 1.1+
 	s.getCapabilities = createjs.deprecate(s._getCapabilities, "Sound.getCapabilities");
