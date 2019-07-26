@@ -2,7 +2,7 @@ import Group from "./Group";
 import Sample from "./Sample";
 import { EventDispatcher } from "@createjs/core";
 
-class Sound {
+export default class Sound {
 
 	// Sets up all static class defaults. This function is immediately invoked below the Sound class definition to ensure it runs.
 	static _initialize() {
@@ -637,5 +637,3 @@ class Sound {
 }
 
 Sound._initialize();
-
-export default Sound;
