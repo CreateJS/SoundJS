@@ -167,12 +167,15 @@ class Sound {
 	 * @param id
 	 */
 	static removeSound(id) {
+		const hashId = (id instanceof Object && id.id) ? id.id : id;
+
 		// TODO: basepath?
-		let sample = Sound._idHash[id];
+
+		let sample = Sound._idHash[hashId];
 		if (sample) {
-			delete Sound._idHash[id];
+			delete Sound._idHash[hashId];
 			sample.destroy();
-		}else{
+		} else {
 			throw new Error("Could not remove sample - sample not found.")
 		}
 	}
@@ -311,7 +314,7 @@ class Sound {
 	 * @param sounds
 	 */
 	static registerSounds(sounds) {
-		sounds.forEach( s => Sound.registerSound(s) )
+		sounds.forEach( s => Sound.registerSound(s, s.id) );
 	}
 
 	/**
@@ -381,13 +384,17 @@ class Sound {
 				Sound._fetchByAudioBuffer(data, id, resolve, reject);
 				console.log("Fetching by audio buffer");
 
-			}else if (typeof data === "string"){
+			} else if (typeof data === "string") {
 				Sound._fetchByString(data, id, resolve, reject);
 				console.log("Fetching by string");
 
 			} else if (data instanceof Array) {
 				Sound._fetchByUrlArray(data, id, resolve, reject);
 				console.log("Fetching by url array");
+
+			} else if (data && data.src) {
+				Sound._fetchByString(data.src, id, resolve, reject);
+				console.log("Fetching by string");
 
 			} else if (typeof data === "object") {
 				Sound._fetchByUrlHash(data, id, resolve, reject);
@@ -416,11 +423,14 @@ class Sound {
 			data.soundJsId = data.soundJsId || "audioBuffer_" + Sound._audioBufferIdSuffix++;
 			return data.soundJsId;
 
-		}else if (typeof data === "string"){
+		} else if (typeof data === "string") {
 			return data;
 
 		} else if (data instanceof Array) {
 			return this._reserveIdFromUrlArray(data);
+
+		} else if (data && data.src) {
+			return data.src;
 
 		} else if (typeof data === "object") {
 			return this._reserveIdFromUrlHash(data);
@@ -532,22 +542,23 @@ class Sound {
 
 	static _fetchByUrlHash(hash, id, resolve, reject){
 		// Assume a source of the format: {<ext>:<url>} e.g. {mp3: path/to/file/sound.mp3, ogg: other/path/soundFileWithNoExtension}
-		for (let ext in data) {
-			if (!data.hasOwnProperty(ext) || !Sound.isExtensionSupported(ext, false) ) {
+		for (let ext in hash) {
+			if (!hash.hasOwnProperty(ext) || !Sound.isExtensionSupported(ext, false) ) {
 				continue;
 			}
 			//this.src = src[ext];
 			let ab = Sound._audioBuffers[id]; // TODO cleanup, move out of loop
 			if(ab instanceof AudioBuffer){
-				resolve({audioBuffer: ab, bufferId: data[ext]});
+				resolve({audioBuffer: ab, bufferId: hash[ext]});
 			}else{
-				Sound.loadAndDecodeAudio(data[ext]).then ( (audioBuffer) => {
+				Sound.loadAndDecodeAudio(hash[ext]).then ( (audioBuffer) => {
 					Sound._audioBuffers[id] = audioBuffer;
 					resolve({audioBuffer: audioBuffer, bufferId: id})
 				});
 			}
 			break; // We only need one valid url
 		}
+		reject("No supported files types found in URL hash");
 	}
 
 	static loadAndDecodeAudio(src){
