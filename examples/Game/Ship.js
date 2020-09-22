@@ -101,7 +101,7 @@
 	}
 
 	p.accelerate = function () {
-		//increase push ammount for acceleration
+		//increase push amount for acceleration
 		this.thrust += this.thrust + 0.6;
 		if (this.thrust >= Ship.MAX_THRUST) {
 			this.thrust = Ship.MAX_THRUST;
