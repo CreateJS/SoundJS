@@ -18,7 +18,7 @@
 	p.bounds;	//visual radial size
 	p.hit;		//average radial disparity
 	p.size;		//size value itself
-	p.spin;		//spin ammount
+	p.spin;		//spin amount
 	p.score;	//score value
 
 	p.vX;		//velocity X
