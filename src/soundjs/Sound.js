@@ -1017,13 +1017,13 @@ this.createjs = this.createjs || {};
 	s.registerSound = function (src, id, data, basePath, defaultPlayProps) {
 		var loadItem = {src: src, id: id, data:data, defaultPlayProps:defaultPlayProps};
 		if (src instanceof Object && src.src) {
-			basePath = id;
+			basePath = basePath;
 			loadItem = src;
 		}
 		loadItem = createjs.LoadItem.create(loadItem);
-		loadItem.path = basePath;
+		loadItem.path = basePath || '';
 
-		if (basePath != null && !(loadItem.src instanceof Object)) {loadItem.src = basePath + loadItem.src;}
+		if (basePath && !(loadItem.src instanceof Object)) {loadItem.src = basePath + loadItem.src;}
 
 		var loader = s._registerSound(loadItem);
 		if(!loader) {return false;}
