@@ -246,26 +246,37 @@ this.createjs = this.createjs || {};
 	 * @static
 	 */
 	s._isFileXHRSupported = function() {
-		// it's much easier to detect when something goes wrong, so let's start optimistically
-		var supported = true;
 
-		var xhr = new XMLHttpRequest();
-		try {
-			xhr.open("GET", "WebAudioPluginTest.fail", false); // loading non-existant file triggers 404 only if it could load (synchronous call)
-		} catch (error) {
-			// catch errors in cases where the onerror is passed by
-			supported = false;
-			return supported;
-		}
-		xhr.onerror = function() { supported = false; }; // cause irrelevant
-		// with security turned off, we can get empty success results, which is actually a failed read (status code 0?)
-		xhr.onload = function() { supported = this.status == 404 || (this.status == 200 || (this.status == 0 && this.response != "")); };
-		try {
-			xhr.send();
-		} catch (error) {
-			// catch errors in cases where the onerror is passed by
-			supported = false;
-		}
+		// CHANGE - Dan Zen 3/27/21
+		// The commented code was giving error locally finding test file
+		// XHR is supported as far as I can tell in all browsers now
+		// The line below will turn it off for local files as that is what the commented test seemed to do
+		// but not sure if this is needed
+		// maybe we can just set supported to true as that seems to work for sound - did not test, though
+
+		var supported = document.location.host;
+        
+		// // it's much easier to detect when something goes wrong, so let's start optimistically
+		// var supported = true;
+        
+		// var xhr = new XMLHttpRequest();
+       		// xhr.onerror = function() { supported = false; }; // cause irrelevant
+		// // with security turned off, we can get empty success results, which is actually a failed read (status code 0?)
+		// xhr.onload = function() { supported = this.status == 404 || (this.status == 200 || (this.status == 0 && this.response != "")); };
+    
+		// try {
+		// 	xhr.open("GET", "WebAudioPluginTest.fail", false); // loading non-existant file triggers 404 only if it could load (synchronous call)
+		// } catch (error) {
+		// 	// catch errors in cases where the onerror is passed by
+		// 	supported = false;
+		// 	return supported;
+		// }
+		// try {
+		// 	xhr.send();
+		// } catch (error) {
+		// 	// catch errors in cases where the onerror is passed by
+		// 	supported = true;
+		// }
 
 		return supported;
 	};
@@ -341,6 +352,7 @@ this.createjs = this.createjs || {};
 		var AudioCtor = (window.AudioContext || window.webkitAudioContext);
 		if (AudioCtor == null) { return null; }
 		var context = new AudioCtor();
+		console.warn("The AudioContext is ready"); // Dan Zen 3/27/21
 
 		// Check if hack is necessary. Only occurs in iOS6+ devices
 		// and only when you first boot the iPhone, or play a audio/video
