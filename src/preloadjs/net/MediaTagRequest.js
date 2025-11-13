@@ -72,6 +72,9 @@ this.createjs = this.createjs || {};
 		// This will tell us when audio is buffered enough to play through, but not when its loaded.
 		// The tag doesn't keep loading in Chrome once enough has buffered, and we have decided that behaviour is sufficient.
 		this._tag.addEventListener && this._tag.addEventListener("canplaythrough", this._loadedHandler, false); // canplaythrough callback doesn't work in Chrome, so we use an event.
+		
+		// iOS fallback: canplaythrough doesn't always fire on iPhone, so loadedmetadata ensures the handler is called
+		this._tag.addEventListener && this._tag.addEventListener("loadedmetadata", this._loadedHandler, false);
 
 		this.TagRequest_load();
 	};
@@ -110,6 +113,8 @@ this.createjs = this.createjs || {};
 	// protected methods
 	p._clean = function () {
 		this._tag.removeEventListener && this._tag.removeEventListener("canplaythrough", this._loadedHandler);
+		this._tag.removeEventListener && this._tag.removeEventListener("loadedmetadata", this._loadedHandler, false);
+
 		this._tag.removeEventListener("stalled", this._stalledCallback);
 		this._tag.removeEventListener("progress", this._progressCallback);
 

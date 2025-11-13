@@ -116,6 +116,8 @@ this.createjs = this.createjs || {};
 	 */
 	p._formatResult = function (loader) {
 		this._tag.removeEventListener && this._tag.removeEventListener("canplaythrough", this._loadedHandler);
+		this._tag.removeEventListener && this._tag.removeEventListener("loadedmetadata", this._loadedHandler);
+
 		this._tag.onstalled = null;
 		if (this._preferXHR) {
             var URL = window.URL || window.webkitURL;
